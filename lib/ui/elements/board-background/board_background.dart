@@ -1,0 +1,36 @@
+import 'package:flutter/material.dart';
+import 'package:ludo/ui/elements/board-background/cell_decoration.dart';
+import 'center_painter.dart';
+
+class BoardBackground extends StatelessWidget {
+  static const int size = 15;
+
+  const BoardBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Table(
+      // border: TableBorder.all(color: Colors.black12),
+      children: List.generate(size, (row) {
+        return TableRow(
+          children: List.generate(size, (col) => _cell(row, col)),
+        );
+      }),
+    );
+  }
+
+  Widget _cell(int row, int col) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: isCenterCell(row, col)
+          ? CustomPaint(painter: CenterPainter(row, col))
+          : Container(
+        padding:EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                border: Border.all(width: 1, color: Colors.black26),
+                gradient: getColor(row, col),
+              ),
+            ),
+    );
+  }
+}
