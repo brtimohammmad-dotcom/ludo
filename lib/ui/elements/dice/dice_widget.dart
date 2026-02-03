@@ -23,11 +23,11 @@ class DiceWidget extends StatelessWidget {
         return AnimatedPositioned(
           curve: Curves.easeOutQuad,
           duration: Duration(milliseconds: 500),
-          left: dicePath[controller.diceIndex].dy * cellSize,
-          top: dicePath[controller.diceIndex].dx * cellSize,
+          left: dicePath[controller.diceIndex-1].dy * cellSize,
+          top: dicePath[controller.diceIndex-1].dx * cellSize,
           child: GestureDetector(
             onTap: () {
-              diceController.rollDice();
+              diceController.rollDice(controller: diceController);
               if(controller.random==6){
                 isActiveController.activeToken();
               }

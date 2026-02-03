@@ -15,7 +15,7 @@ class Board extends StatelessWidget {
 
   Board({super.key}) {
     tokensController = TokensController();
-    diceController = DiceController(tokensController: tokensController);
+    diceController = DiceController();
     isActiveController = PlayerActivationController();
   }
 
@@ -43,17 +43,14 @@ class Board extends StatelessWidget {
                   ValueListenableBuilder(
                     valueListenable: tokensController.tokenNotifier,
                     builder: (context, tokens, _) {
-                      return RepaintBoundary(
-                        child: Stack(
-                          children: [
-                            ...createAnimatedTokens(
-                              cellSize,
-                              tokens,
-                              tokensController,
-                              isActiveController,
-                            ),
-                          ],
-                        ),
+                      return Stack(
+                        children: [
+                          ...createAnimatedTokens(
+                            cellSize,
+                            tokens,
+                            tokensController,
+                          ),
+                        ],
                       );
                     },
                   ),

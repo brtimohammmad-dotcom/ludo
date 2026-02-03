@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/player_activation_controller.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/game/logic/token-logic/token_logic.dart';
 import 'package:ludo/ui/elements/token/token_widget.dart';
@@ -9,13 +8,12 @@ List<AnimatedPositioned> createAnimatedTokens(
   double cellSize,
   List<Token> tokens,
   TokensController controller,
-  PlayerActivationController isActiveController,
 ) {
   return [
     ...tokens.map((token) {
       Offset cell;
       if (token.isInHome) {
-        cell = homePaths[token.player]![(3 - token.id % 4)];
+        cell = homePaths[token.player]![((token.id-1)%4)];
       } else {
         cell = movementPaths[token.player]![token.pathIndex];
       }
@@ -28,7 +26,6 @@ List<AnimatedPositioned> createAnimatedTokens(
           token: token,
           size: cellSize,
           controller: controller,
-          isActiveController: isActiveController,
         ),
       );
     }),

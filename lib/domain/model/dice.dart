@@ -1,25 +1,23 @@
 import 'dart:math';
 
-import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
-
 class Dice {
   final int random;
-  int newIndex = 0;
-  int diceIndex;
+
+  final int diceIndex;
 
   Dice({required this.random, required this.diceIndex});
 
-  Dice roll(TokensController tokensController) {
-    newIndex = Random().nextInt(6) + 1;
-    moveNext();
-    return Dice(random: newIndex, diceIndex: diceIndex);
+  Dice roll() {
+    int newDiceValue;
+    newDiceValue = Random().nextInt(6) + 1;
+   return dicePicker(newDiceValue);
   }
 
-  void moveNext() {
-    if (diceIndex == 3) {
-      diceIndex = 0;
+  Dice dicePicker(int newDiceValue) {
+    if (diceIndex == 4) {
+      return Dice(random: newDiceValue, diceIndex: 1);
     } else {
-      diceIndex++;
+      return Dice(random: newDiceValue, diceIndex: diceIndex + 1);
     }
   }
 }
