@@ -2,22 +2,23 @@ import 'dart:math';
 
 class Dice {
   final int random;
+  final int currentPlayerActiveNumber;
+  bool diceRolled;
 
-  final int diceIndex;
-
-  Dice({required this.random, required this.diceIndex});
+  Dice({
+    required this.random,
+    required this.currentPlayerActiveNumber,
+    required this.diceRolled,
+  });
 
   Dice roll() {
     int newDiceValue;
+    diceRolled = true;
     newDiceValue = Random().nextInt(6) + 1;
-   return dicePicker(newDiceValue);
-  }
-
-  Dice dicePicker(int newDiceValue) {
-    if (diceIndex == 4) {
-      return Dice(random: newDiceValue, diceIndex: 1);
-    } else {
-      return Dice(random: newDiceValue, diceIndex: diceIndex + 1);
-    }
+    return Dice(
+      random: newDiceValue,
+      currentPlayerActiveNumber: currentPlayerActiveNumber,
+      diceRolled: true,
+    );
   }
 }

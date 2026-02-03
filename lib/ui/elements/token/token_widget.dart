@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/controller/dice_controller.dart';
 import 'package:ludo/controller/tokens_controller/move_token_function.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/ui/mappers/token_ui_mapper.dart';
 
 class TokenWidget extends StatelessWidget {
   final Token token;
   final double size;
   final TokensController controller;
+  final DiceController diceController;
+  final GameLogic gameLogic;
+
   const TokenWidget({
     super.key,
     required this.token,
     required this.size,
     required this.controller,
+    required this.diceController,
+    required this.gameLogic,
   });
 
   @override
   Widget build(BuildContext context) {
+    bool diceRolled = diceController.diceValue.value.diceRolled;
     return GestureDetector(
       onTap: () {
-        moveTokenSafely(
-          tokenNotifier: controller,
-          token: token
-        );
+        if (diceRolled && token.player == gameLogic.currentPlayerActiveNumber) {
+          moveTokenSafely(tokenNotifier: controller, token: token);
+        }
       },
       child: SizedBox(
         width: size,
@@ -33,10 +40,7 @@ class TokenWidget extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: tokenGradient(token),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withAlpha(200),
-                width: 3,
-              ),
+              border: Border.all(color: Colors.white.withAlpha(200), width: 3),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black26,

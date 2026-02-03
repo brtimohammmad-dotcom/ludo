@@ -3,10 +3,12 @@ import 'package:ludo/domain/model/dice.dart';
 
 class DiceController {
   late final ValueNotifier<Dice> diceValue;
-  int currentDiceIndex=1;
+  int currentPlayerActiveNumber = 1;
 
   DiceController() {
-    diceValue = ValueNotifier(Dice(random: 1, diceIndex: currentDiceIndex));
+    diceValue = ValueNotifier(
+      Dice(random: 1, currentPlayerActiveNumber: currentPlayerActiveNumber,diceRolled: false),
+    );
   }
 
   bool isRolling = false;
