@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/dice_controller.dart';
-import 'package:ludo/controller/tokens_controller/token_activation_controller.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
+import 'package:ludo/domain/state/player_activation_state.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/ui/elements/board-background/board_background.dart';
 import 'package:ludo/ui/elements/board-background/token-home/home_container_list.dart';
@@ -15,8 +15,8 @@ class Board extends StatelessWidget {
   final TokensController tokensController = TokensController();
   final DiceController diceController = DiceController();
   final GameLogic gameLogic = GameLogic();
-  final TokenActivationController tokenActivationController =
-      TokenActivationController();
+  final PlayerActivationState playerActivationState =
+      PlayerActivationState();
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class Board extends StatelessWidget {
                     cellSize: cellSize,
                     diceController: diceController,
                     gameLogic: gameLogic,
-                    tokenActivationController: tokenActivationController,
+                    playerActivationState: playerActivationState,
                     tokensController: tokensController,
                   ),
                 ],
