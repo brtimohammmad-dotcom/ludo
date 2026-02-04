@@ -24,11 +24,31 @@ class TokenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool diceRolled = diceController.diceValue.value.diceRolled;
     return GestureDetector(
       onTap: () {
-        if (diceRolled && token.player == gameLogic.currentPlayerActiveNumber) {
-          moveTokenSafely(tokenNotifier: controller, token: token);
+        if (gameLogic.currentPlayerActiveNumber == token.player) {
+          if ((diceController.diceValue.value.diceRolled ||
+              diceController.diceValue.value.extraMove)) {
+            moveTokenSafely(
+              tokenNotifier: controller,
+              token: token,
+              diceController: diceController,
+              gameLogic: gameLogic,
+            );
+
+            if (diceController.diceValue.value.extraMove &&
+                diceController.diceValue.value.diceRolled) {
+              diceController.diceValue.value.extraMove = false;
+              diceController.diceValue.value.diceRolled = false;
+            } else if (!diceController.diceValue.value.extraMove &&
+                diceController.diceValue.value.diceRolled) {
+              diceController.diceValue.value.diceRolled = false;
+              gameLogic.currentPlayerChanger();
+              diceController.changeCurrentPlayerActiveNumber(
+                gameLogic.currentPlayerActiveNumber,
+              );
+            }
+          }
         }
       },
       child: SizedBox(

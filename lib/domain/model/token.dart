@@ -23,7 +23,7 @@ class Token {
 
   bool get isInHome => pathIndex == -1;
 
-  Token copyWith({bool? isActive, int? newPathIndex}) {
+  Token copyWith({ int? newPathIndex}) {
     return Token._(
       id: id,
       player: player,

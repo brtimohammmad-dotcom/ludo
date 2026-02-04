@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 class TokenActivationController {
   ValueNotifier<bool> isActiveNotifier = ValueNotifier(false);
 
-  void activeToken(TokenActivationController activationController) {
-      activationController.isActiveNotifier.value=true;
-      debugPrint('${activationController.isActiveNotifier.value}');
+  void activeToken() {
+isActiveNotifier.value = true;
+  }
+
+  void disActiveToken() {
+    isActiveNotifier.value = false;
   }
 }

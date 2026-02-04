@@ -1,20 +1,23 @@
+import 'package:ludo/controller/dice_controller.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/game/game_logic.dart';
 
 Future<void> moveTokenSafely({
+  required DiceController diceController,
   required TokensController tokenNotifier,
   required Token token,
+  required GameLogic gameLogic,
 }) async {
   bool isInHome = token.isInHome;
   int tokenId = token.id;
-  int steps = 3;
   if (!tokenNotifier.isMoving) {
     if (isInHome) {
-      _moveTokenToStartCell(tokenId, tokenNotifier);
+      _moveTokenToStartCell(tokenId, tokenNotifier, diceController,);
     } else {
       await _moveTokenStepByStep(
         tokenId: tokenId,
-        steps: steps,
+        steps: diceController.diceValue.value.random,
         tokenNotifier: tokenNotifier,
       );
     }
@@ -24,14 +27,14 @@ Future<void> moveTokenSafely({
 Future<void> _moveTokenToStartCell(
   int tokenId,
   TokensController tokenNotifier,
+  DiceController diceController,
 ) async {
-  if (!tokenNotifier.isMoving) {
+  if (!tokenNotifier.isMoving && diceController.diceValue.value.random == 6) {
     tokenNotifier.isMoving = true;
     List<Token> newTokenNotifier = List<Token>.from(
       tokenNotifier.tokenNotifier.value,
     );
     newTokenNotifier[tokenId - 1] = newTokenNotifier[tokenId - 1].copyWith(
-      isActive: false,
       newPathIndex: 0,
     );
     tokenNotifier.tokenNotifier.value = newTokenNotifier;

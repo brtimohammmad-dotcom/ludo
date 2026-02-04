@@ -11,15 +11,16 @@ import 'package:ludo/ui/elements/token/create_animated_tokens.dart';
 
 class Board extends StatelessWidget {
   late final TokensController tokensController;
-  late final TokenActivationController isActiveController;
   late final DiceController diceController;
   late final GameLogic gameLogic;
+  late final TokenActivationController tokenActivationController;
 
   Board({super.key}) {
     tokensController = TokensController();
+    gameLogic = GameLogic();
+
     diceController = DiceController();
-    isActiveController = TokenActivationController();
-    gameLogic=GameLogic();
+    tokenActivationController=TokenActivationController();
   }
 
   @override
@@ -52,7 +53,7 @@ class Board extends StatelessWidget {
                             cellSize,
                             tokensController,
                             diceController,
-                            gameLogic
+                            gameLogic,
                           ),
                         ],
                       );
@@ -61,7 +62,9 @@ class Board extends StatelessWidget {
                   DiceWidget(
                     cellSize: cellSize,
                     diceController: diceController,
-                    isActiveController: isActiveController,
+                    gameLogic: gameLogic,
+                    tokenActivationController: tokenActivationController,
+                    tokensController: tokensController,
                   ),
                 ],
               ),

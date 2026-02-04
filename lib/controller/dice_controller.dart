@@ -3,23 +3,31 @@ import 'package:ludo/domain/model/dice.dart';
 
 class DiceController {
   late final ValueNotifier<Dice> diceValue;
-  int currentPlayerActiveNumber = 1;
 
   DiceController() {
     diceValue = ValueNotifier(
-      Dice(random: 1, currentPlayerActiveNumber: currentPlayerActiveNumber,diceRolled: false),
+      Dice(currentPlayerActiveNumber: 1, random: 1, diceRolled: false,extraMove: false),
     );
   }
 
   bool isRolling = false;
 
-  Future<void> rollDice({required DiceController controller}) async {
+  void changeCurrentPlayerActiveNumber(int newCurrentPlayerActiveNumber) {
+    Dice newDice = diceValue.value;
+    Dice changedDice;
+    changedDice = newDice.changeCurrentPlayerActiveNumber(
+      newCurrentPlayerActiveNumber,
+    );
+    diceValue.value = changedDice;
+  }
+
+  Future<void> rollDice() async {
     if (!isRolling) {
-      Dice newDice = controller.diceValue.value;
+      Dice newDice = diceValue.value;
       Dice changedDice;
       isRolling = true;
       changedDice = newDice.roll();
-      controller.diceValue.value = changedDice;
+      diceValue.value = changedDice;
       await Future.delayed(Duration(milliseconds: 500));
       isRolling = false;
     }
