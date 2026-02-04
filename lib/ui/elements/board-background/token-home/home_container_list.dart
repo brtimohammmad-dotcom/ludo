@@ -11,7 +11,10 @@ List<Positioned> getHomeContainerList(double cellSize, double tokenHomeSize) {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             gradient: RadialGradient(
-              colors: [Color(0xffD5B195).withAlpha(50),Color(0xffD5B195).withAlpha(100),],
+              colors: [
+                const Color(0xffD5B195).withAlpha(50),
+                const Color(0xffD5B195).withAlpha(100),
+              ],
             ),
           ),
           width: tokenHomeSize,
@@ -22,16 +25,17 @@ List<Positioned> getHomeContainerList(double cellSize, double tokenHomeSize) {
   ];
 }
 
-List<Positioned> getColorizeHomeContainerList(double cellSize, double tokenHomeSize) {
+List<Positioned> getColorizeHomeContainerList(
+  double cellSize,
+  double tokenHomeSize,
+) {
   return [
     ...colorizeHomes.map((home) {
       return Positioned(
         left: home.startMapColumn * cellSize,
         top: home.startMapRow * cellSize,
         child: Container(
-          decoration: BoxDecoration(
-            gradient: home.gradient
-          ),
+          decoration: BoxDecoration(gradient: home.gradient),
           width: tokenHomeSize,
           height: tokenHomeSize,
         ),

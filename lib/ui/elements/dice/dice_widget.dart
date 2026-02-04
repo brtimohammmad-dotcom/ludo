@@ -27,36 +27,30 @@ class DiceWidget extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: diceController.diceValue,
       builder: (context, diceControllerValue, _) {
+        final activePlayerIndex =
+            diceControllerValue.currentPlayerActiveNumber - 1;
         return AnimatedPositioned(
           curve: Curves.easeOutCirc,
-          duration: Duration(milliseconds: 500),
-          left:
-              dicePath[diceControllerValue.currentPlayerActiveNumber - 1].dy *
-              cellSize,
-          top:
-              dicePath[diceControllerValue.currentPlayerActiveNumber - 1].dx *
-              cellSize,
+          duration: const Duration(milliseconds: 500),
+          left: dicePath[activePlayerIndex].dy * cellSize,
+          top: dicePath[activePlayerIndex].dx * cellSize,
           child: GestureDetector(
             onTap: () async {
               if (!diceControllerValue.diceRolled) {
                 tokenActivationController.disActiveToken();
                 diceController.rollDice();
-                for (Token token in tokensController.tokenNotifier.value) {
-                  if (diceController
-                          .diceValue
-                          .value
-                          .currentPlayerActiveNumber ==
-                      token.player) {
-                    if (token.isInHome &&
-                        diceController.diceValue.value.random == 6) {
-                      tokenActivationController.activeToken();
 
-                      break;
-                    }
-                    if (!token.isInHome) {
-                      tokenActivationController.activeToken();
-                      break;
-                    }
+                final diceValue = diceController.diceValue.value;
+                for (final token in tokensController.tokenNotifier.value) {
+                  if (diceValue.currentPlayerActiveNumber != token.player) {
+                    continue;
+                  }
+
+                  final canActivate =
+                      token.isInHome ? diceValue.random == 6 : true;
+                  if (canActivate) {
+                    tokenActivationController.activeToken();
+                    break;
                   }
                 }
 
@@ -71,7 +65,7 @@ class DiceWidget extends StatelessWidget {
                   diceController.diceValue.value.diceRolled = false;
                 }
               }
-              await Future.delayed(Duration(milliseconds: 500));
+              await Future.delayed(const Duration(milliseconds: 500));
             },
             child: Container(
               color: Colors.white,
@@ -80,7 +74,7 @@ class DiceWidget extends StatelessWidget {
               child: Center(
                 child: Text(
                   ('${diceControllerValue.random}'),
-                  style: TextStyle(color: Colors.black, fontSize: 50),
+                  style: const TextStyle(color: Colors.black, fontSize: 50),
                 ),
               ),
             ),

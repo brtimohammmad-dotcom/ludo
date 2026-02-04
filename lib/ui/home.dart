@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ludo/ui/elements/board.dart';
 
 class Home extends StatelessWidget {
-
-  const Home({super.key,});
+  const Home({super.key});
 
   @override
   Widget build(BuildContext context) {

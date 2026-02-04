@@ -4,11 +4,12 @@ import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/game/logic/token-logic/token_logic.dart';
 import 'package:ludo/ui/elements/token/token_widget.dart';
+
 List<AnimatedPositioned> createAnimatedTokens(
   double cellSize,
   TokensController controller,
   DiceController diceController,
-    GameLogic gameLogic
+  GameLogic gameLogic,
 ) {
   return [
     ...controller.tokenNotifier.value.map((token) {
@@ -19,7 +20,7 @@ List<AnimatedPositioned> createAnimatedTokens(
         cell = movementPaths[token.player]![token.pathIndex];
       }
       return AnimatedPositioned(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOutCubic,
         left: cell.dy * cellSize,
         top: cell.dx * cellSize,
