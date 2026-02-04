@@ -10,18 +10,13 @@ import 'package:ludo/ui/elements/dice/dice_widget.dart';
 import 'package:ludo/ui/elements/token/create_animated_tokens.dart';
 
 class Board extends StatelessWidget {
-  late final TokensController tokensController;
-  late final DiceController diceController;
-  late final GameLogic gameLogic;
-  late final TokenActivationController tokenActivationController;
+  Board({super.key});
 
-  Board({super.key}) {
-    tokensController = TokensController();
-    gameLogic = GameLogic();
-
-    diceController = DiceController();
-    tokenActivationController=TokenActivationController();
-  }
+  final TokensController tokensController = TokensController();
+  final DiceController diceController = DiceController();
+  final GameLogic gameLogic = GameLogic();
+  final TokenActivationController tokenActivationController =
+      TokenActivationController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +33,7 @@ class Board extends StatelessWidget {
               color: Colors.white,
               child: Stack(
                 children: [
-                  BoardBackground(),
+                  const BoardBackground(),
                   ...getColorizeHomeContainerList(
                     cellSize,
                     tokenColorizeHomeSize,

@@ -25,7 +25,7 @@ class BoardBackground extends StatelessWidget {
       child: isCenterCell(row, col)
           ? CustomPaint(painter: CenterPainter(row, col))
           : Container(
-        padding:EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               decoration: BoxDecoration(
                 border: Border.all(width: 1, color: Colors.black26),
                 gradient: getColor(row, col),
