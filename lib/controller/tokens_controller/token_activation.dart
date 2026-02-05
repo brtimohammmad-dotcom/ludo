@@ -1,7 +1,7 @@
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
+import 'package:ludo/domain/can-active-token/can_active_token.dart';
 import 'package:ludo/domain/model/dice.dart';
 import 'package:ludo/game/game_logic.dart';
-import 'package:ludo/ui/elements/dice/on-tap-dice/token_activation/can-active-token/can_active_token.dart';
 
 
 

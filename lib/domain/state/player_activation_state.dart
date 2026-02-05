@@ -1,6 +1,6 @@
 
 class PlayerActivationState {
-  bool isActiveState = false;
+  bool isActiveState = true;
 
   void activePlayer() {
     isActiveState = true;

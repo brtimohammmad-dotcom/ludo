@@ -35,6 +35,7 @@ class DiceWidget extends StatelessWidget {
           top: dicePath[activePlayerIndex].dx * cellSize,
           child: GestureDetector(
             onTap: onTapDice(
+              diceInTurnNextPlayer: false,
               diceController: diceController,
               playerActivationState: playerActivationState,
               tokensController: tokensController,

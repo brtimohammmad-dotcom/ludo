@@ -1,9 +1,9 @@
+import 'package:ludo/domain/can-active-token/greater_than_final_path.dart';
+import 'package:ludo/domain/can-active-token/has_token_on_safe_cell_target.dart';
+import 'package:ludo/domain/can-active-token/is_cell_occupied_by_same_player.dart';
 import 'package:ludo/domain/model/dice.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/game/game_logic.dart';
-import 'package:ludo/ui/elements/dice/on-tap-dice/token_activation/can-active-token/greater_than_final_path.dart';
-import 'package:ludo/ui/elements/dice/on-tap-dice/token_activation/can-active-token/has_token_on_safe_cell_target.dart';
-import 'package:ludo/ui/elements/dice/on-tap-dice/token_activation/can-active-token/is_cell_occupied_by_same_player.dart';
 
 bool canActivateToken({
   required Token token,
