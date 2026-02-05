@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/dice_controller.dart';
-import 'package:ludo/controller/tokens_controller/token_activation_controller.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
-import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/domain/state/player_activation_state.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/game/logic/dice-logic/dice_logic.dart';
+import 'package:ludo/ui/elements/dice/on_tap_dice/on_tap_dice.dart';
 
 class DiceWidget extends StatelessWidget {
   final DiceController diceController;
   final double cellSize;
   final GameLogic gameLogic;
-  final TokenActivationController tokenActivationController;
+  final PlayerActivationState playerActivationState;
   final TokensController tokensController;
-
   const DiceWidget({
     super.key,
     required this.cellSize,
     required this.diceController,
     required this.gameLogic,
-    required this.tokenActivationController,
+    required this.playerActivationState,
     required this.tokensController,
   });
 
@@ -35,38 +34,12 @@ class DiceWidget extends StatelessWidget {
           left: dicePath[activePlayerIndex].dy * cellSize,
           top: dicePath[activePlayerIndex].dx * cellSize,
           child: GestureDetector(
-            onTap: () async {
-              if (!diceControllerValue.diceRolled) {
-                tokenActivationController.disActiveToken();
-                diceController.rollDice();
-
-                final diceValue = diceController.diceValue.value;
-                for (final token in tokensController.tokenNotifier.value) {
-                  if (diceValue.currentPlayerActiveNumber != token.player) {
-                    continue;
-                  }
-
-                  final canActivate =
-                      token.isInHome ? diceValue.random == 6 : true;
-                  if (canActivate) {
-                    tokenActivationController.activeToken();
-                    break;
-                  }
-                }
-
-                if (!tokenActivationController.isActiveNotifier.value) {
-                  gameLogic.currentPlayerChanger();
-                  diceController.diceValue.value = diceController
-                      .diceValue
-                      .value
-                      .changeCurrentPlayerActiveNumber(
-                        gameLogic.currentPlayerActiveNumber,
-                      );
-                  diceController.diceValue.value.diceRolled = false;
-                }
-              }
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
+            onTap: onTapDice(
+              diceController: diceController,
+              playerActivationState: playerActivationState,
+              tokensController: tokensController,
+              gameLogic: gameLogic,
+            ),
             child: Container(
               color: Colors.white,
               width: cellSize * 2,
