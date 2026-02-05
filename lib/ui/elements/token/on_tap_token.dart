@@ -5,6 +5,7 @@ import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/ui/elements/change_game_turn.dart';
+import 'package:ludo/ui/elements/dice/on_tap_dice/token_activation.dart';
 
 GestureTapCallback? onTapToken({
   required Token token,
@@ -13,15 +14,27 @@ GestureTapCallback? onTapToken({
   required TokensController controller,
 }) {
   return () {
-    debugPrint('active player ${gameLogic.currentPlayerActiveNumber}');
-    debugPrint('player: ${token.player}');
-    debugPrint('${token.isActive}\t${token.id}');
-    if (gameLogic.currentPlayerActiveNumber == token.player&&token.isActive) {
+    final tokens = controller.tokenNotifier.value;
+    final liveToken = tokens.firstWhere(
+      (item) => item.id == token.id,
+      orElse: () => token,
+    );
+    final canTapToken = canActivateToken(
+      token: liveToken,
+      tokens: tokens,
+      dice: diceController.diceValue.value,
+      gameLogic: gameLogic,
+    );
+
+    debugPrint('player: ${liveToken.player}');
+    debugPrint('${liveToken.isActive}\t${liveToken.id}\t$canTapToken');
+    if (gameLogic.currentPlayerActiveNumber == liveToken.player &&
+        canTapToken) {
       if ((diceController.diceValue.value.diceRolled ||
           diceController.diceValue.value.extraMove)) {
         moveTokenSafely(
           tokenNotifier: controller,
-          token: token,
+          token: liveToken,
           diceController: diceController,
           gameLogic: gameLogic,
         );
