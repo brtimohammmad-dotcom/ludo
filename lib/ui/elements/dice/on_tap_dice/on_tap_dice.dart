@@ -13,10 +13,9 @@ GestureTapCallback? onTapDice({
   required TokensController tokensController,
   required GameLogic gameLogic,
 }) {
-  diceController.diceValue.value;
-
   return () async {
     if (!diceController.diceValue.value.diceRolled) {
+
       playerActivationState.disActivePlayer();
       diceController.rollDice();
       playerActivation(

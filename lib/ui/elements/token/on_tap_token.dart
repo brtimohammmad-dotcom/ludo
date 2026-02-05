@@ -13,6 +13,9 @@ GestureTapCallback? onTapToken({
   required TokensController controller,
 }) {
   return () {
+    debugPrint('active player ${gameLogic.currentPlayerActiveNumber}');
+    debugPrint('player: ${token.player}');
+    debugPrint('${token.isActive}\t${token.id}');
     if (gameLogic.currentPlayerActiveNumber == token.player&&token.isActive) {
       if ((diceController.diceValue.value.diceRolled ||
           diceController.diceValue.value.extraMove)) {
