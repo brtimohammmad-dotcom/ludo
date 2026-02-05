@@ -1,4 +1,3 @@
-
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/model/dice.dart';
 import 'package:ludo/domain/model/token.dart';
@@ -11,12 +10,13 @@ bool canActivateToken({
   required GameLogic gameLogic,
 }) {
   final targetPathIndex = token.pathIndex + dice.random;
+
   bool isCellOccupiedBySamePlayer = tokens.any((other) {
     return (other.id != token.id && other.player == token.player) &&
         ((other.pathIndex == 0 && token.isInHome && dice.random == 6) ||
             (other.pathIndex == targetPathIndex && !token.isInHome));
   });
-  // has problem
+
   bool hasTokenOnTargetSafeCell = tokens.any((other) {
     switch (token.player) {
       case 1:
@@ -87,7 +87,12 @@ bool canActivateToken({
         throw Exception('invalid Player');
     }
   });
-  final canNotMove = isCellOccupiedBySamePlayer && hasTokenOnTargetSafeCell;
+  bool greaterThanFinalPath = tokens.any((other) {
+    return other.id == token.id &&
+        token.player == other.player &&
+        targetPathIndex > 57;
+  });
+  final canNotMove = isCellOccupiedBySamePlayer || hasTokenOnTargetSafeCell||greaterThanFinalPath;
 
   return token.player == gameLogic.currentPlayerActiveNumber &&
       (!token.isInHome || dice.random == 6) &&

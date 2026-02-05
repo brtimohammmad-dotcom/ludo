@@ -18,19 +18,17 @@ GestureTapCallback? onTapDice({
 
       playerActivationState.disActivePlayer();
       diceController.rollDice();
+      updateTokenActivation(
+        tokensController: tokensController,
+        dice: diceController.diceValue.value,
+        gameLogic: gameLogic,
+      );
       playerActivation(
-        diceController: diceController,
         tokensController: tokensController,
         playerActivationState: playerActivationState,
       );
       if (!playerActivationState.isActiveState) {
         changeGameTurn(gameLogic: gameLogic, diceController: diceController);
-      } else {
-        updateTokenActivation(
-          tokensController: tokensController,
-          dice: diceController.diceValue.value,
-          gameLogic: gameLogic,
-        );
       }
     }
     await Future.delayed(const Duration(milliseconds: 500));
