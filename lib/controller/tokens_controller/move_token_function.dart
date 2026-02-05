@@ -2,6 +2,7 @@ import 'package:ludo/controller/dice_controller.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/game/game_logic.dart';
+import 'package:ludo/ui/elements/change_game_turn.dart';
 
 Future<void> moveTokenSafely({
   required DiceController diceController,
@@ -9,9 +10,18 @@ Future<void> moveTokenSafely({
   required Token token,
   required GameLogic gameLogic,
 }) async {
+
   bool isInHome = token.isInHome;
   int tokenId = token.id;
   if (!tokenNotifier.isMoving) {
+    if (diceController.diceValue.value.extraMove &&
+        diceController.diceValue.value.diceRolled) {
+      diceController.diceValue.value.extraMove = false;
+      diceController.diceValue.value.diceRolled = false;
+    } else if (!diceController.diceValue.value.extraMove &&
+        diceController.diceValue.value.diceRolled) {
+      changeGameTurn(gameLogic: gameLogic, diceController: diceController);
+    }
     if (isInHome) {
       _moveTokenToStartCell(tokenId, tokenNotifier, diceController,);
     } else {
@@ -20,6 +30,7 @@ Future<void> moveTokenSafely({
         steps: diceController.diceValue.value.random,
         tokenNotifier: tokenNotifier,
       );
+
     }
   }
 }
@@ -40,6 +51,7 @@ Future<void> _moveTokenToStartCell(
     tokenNotifier.tokenNotifier.value = newTokenNotifier;
     await Future.delayed(const Duration(milliseconds: 300));
     tokenNotifier.isMoving = false;
+
   }
 }
 
@@ -64,7 +76,9 @@ Future<void> _moveTokenStepByStep({
       tokenNotifier.tokenNotifier.value = List.from(current);
 
       await Future.delayed(const Duration(milliseconds: 300));
-      tokenNotifier.isMoving = false;
     }
+    tokenNotifier.isMoving = false;
+
+
   }
 }

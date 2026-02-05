@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+
 class Dice {
   final int random;
   int currentPlayerActiveNumber;
@@ -16,6 +18,7 @@ class Dice {
   Dice roll() {
     int newDiceValue;
     newDiceValue = Random().nextInt(6) + 1;
+    debugPrint('dice rolled');
     if(newDiceValue!=6){
       return Dice(
         random: newDiceValue,
