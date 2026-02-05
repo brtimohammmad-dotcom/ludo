@@ -4,8 +4,9 @@ import 'package:ludo/domain/state/player_activation_state.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/ui/elements/change_game_turn.dart';
-import 'package:ludo/ui/elements/dice/on_tap_dice/player_activation.dart';
-import 'package:ludo/ui/elements/dice/on_tap_dice/token_activation.dart';
+import 'package:ludo/ui/elements/dice/on-tap-dice/player_activation.dart';
+import 'package:ludo/ui/elements/dice/on-tap-dice/token_activation/token_activation.dart';
+
 
 GestureTapCallback? onTapDice({
   required DiceController diceController,

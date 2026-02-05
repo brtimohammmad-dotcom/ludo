@@ -4,7 +4,7 @@ import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/state/player_activation_state.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/game/logic/dice-logic/dice_logic.dart';
-import 'package:ludo/ui/elements/dice/on_tap_dice/on_tap_dice.dart';
+import 'package:ludo/ui/elements/dice/on-tap-dice/on_tap_dice.dart';
 
 class DiceWidget extends StatelessWidget {
   final DiceController diceController;

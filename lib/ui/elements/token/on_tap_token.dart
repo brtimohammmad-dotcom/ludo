@@ -5,7 +5,7 @@ import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/game/game_logic.dart';
 import 'package:ludo/ui/elements/change_game_turn.dart';
-import 'package:ludo/ui/elements/dice/on_tap_dice/token_activation.dart';
+import 'package:ludo/ui/elements/dice/on-tap-dice/token_activation/can-active-token/can_active_token.dart';
 
 GestureTapCallback? onTapToken({
   required Token token,
