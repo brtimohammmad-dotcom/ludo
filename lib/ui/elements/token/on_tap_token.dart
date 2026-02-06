@@ -3,7 +3,6 @@ import 'package:ludo/controller/dice_controller.dart';
 import 'package:ludo/controller/tokens_controller/move_token_function.dart';
 import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 import 'package:ludo/domain/can-active-token/can_active_token.dart';
-import 'package:ludo/domain/kill/kill.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/game/game_logic.dart';
 
@@ -31,13 +30,8 @@ GestureTapCallback? onTapToken({
         !controller.isMoving) {
       if ((diceController.diceValue.value.diceRolled ||
           diceController.diceValue.value.extraMove)) {
-        kill(
-          liveToken: liveToken,
-          tokens: tokens,
-          controller: controller,
-          diceController: diceController,
-        );
         moveTokenSafely(
+          liveToken: liveToken,
           tokenNotifier: controller,
           token: liveToken,
           diceController: diceController,
