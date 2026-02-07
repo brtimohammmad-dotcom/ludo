@@ -11,9 +11,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       title: 'Ludo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: const ColorScheme.dark()),
+      theme: ThemeData(colorScheme: const ColorScheme.dark(),fontFamily: 'Roboto'),
       home: const AppBody(),
     );
   }

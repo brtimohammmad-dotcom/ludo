@@ -16,7 +16,9 @@ Future<void> moveTokenSafely({
   int tokenId = token.id;
   if (!tokenNotifier.isMoving) {
     if (isInHome) {
-      _moveTokenToStartCell(tokenId, tokenNotifier, diceController, gameLogic);
+      _moveTokenToStartCell(
+          tokenId, tokenNotifier, diceController, gameLogic, tokenNotifier,
+          liveToken);
     } else {
       await _moveTokenStepByStep(
         liveToken: liveToken,
@@ -30,22 +32,26 @@ Future<void> moveTokenSafely({
   }
 }
 
-Future<void> _moveTokenToStartCell(
-  int tokenId,
-  TokensController tokenNotifier,
-  DiceController diceController,
-  GameLogic gameLogic,
-) async {
+Future<void> _moveTokenToStartCell(int tokenId,
+    TokensController tokenNotifier,
+    DiceController diceController,
+    GameLogic gameLogic,
+    TokensController controller,
+    Token liveToken) async {
   if (!tokenNotifier.isMoving && diceController.diceValue.value.random == 6) {
     tokenNotifier.isMoving = true;
     List<Token> newTokenNotifier = List<Token>.from(
       tokenNotifier.tokenNotifier.value,
     );
+
     newTokenNotifier[tokenId - 1] = newTokenNotifier[tokenId - 1].copyWith(
       newPathIndex: 0,
     );
     tokenNotifier.tokenNotifier.value = newTokenNotifier;
     await Future.delayed(const Duration(milliseconds: 300));
+    kill(liveToken: liveToken,
+        controller: controller,
+        diceController: diceController);
     tokenNotifier.isMoving = false;
   }
   diceController.diceValue.value.diceRolled = false;

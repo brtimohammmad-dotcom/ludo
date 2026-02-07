@@ -12,6 +12,7 @@ class DiceWidget extends StatelessWidget {
   final GameLogic gameLogic;
   final PlayerActivationState playerActivationState;
   final TokensController tokensController;
+
   const DiceWidget({
     super.key,
     required this.cellSize,
@@ -42,14 +43,12 @@ class DiceWidget extends StatelessWidget {
               gameLogic: gameLogic,
             ),
             child: Container(
-              color: Colors.white,
               width: cellSize * 2,
               height: cellSize * 2,
-              child: Center(
-                child: Text(
-                  ('${diceControllerValue.random}'),
-                  style: const TextStyle(color: Colors.black, fontSize: 50),
-                ),
+              decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black54.withAlpha(50),blurRadius: 20)]),
+              child: Image.asset(
+                'assets/images/${diceController.diceValue.value.random}.png',
+                fit: BoxFit.cover,
               ),
             ),
           ),

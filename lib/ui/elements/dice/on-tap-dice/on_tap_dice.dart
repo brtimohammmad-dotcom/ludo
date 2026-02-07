@@ -26,6 +26,7 @@ GestureTapCallback? onTapDice({
         gameLogic: gameLogic,
       );
       playerActivation(
+        diceController: diceController,
         tokensController: tokensController,
         playerActivationState: playerActivationState,
       );
