@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:ludo/controller/dice_controller.dart';
-import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
+import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 
 const Map<int, int> playerStartIndex = {
@@ -22,7 +21,6 @@ void kill({
   required DiceController diceController,
 }) {
   if (liveToken.pathIndex < 0) {
-    debugPrint('resid');
     final globalLiveTokenPath = globalPlayerIndex(
       pathIndex: 0,
       playerIndex: liveToken.player,
@@ -38,10 +36,7 @@ void kill({
         pathIndex: token.pathIndex,
         playerIndex: token.player,
       );
-      debugPrint('live token : $globalLiveTokenPath');
-      debugPrint('other token : $globalTokenPath');
       if (globalTokenPath == globalLiveTokenPath) {
-        debugPrint('resid2');
         return token.copyWith(newPathIndex:-1);
       }
       return token;
@@ -49,7 +44,7 @@ void kill({
     controller.tokenNotifier.value = newTokenList;
   } else {
     final targetPathIndex =
-        liveToken.pathIndex + diceController.diceValue.value.random;
+        liveToken.pathIndex + diceController.diceValue.value.value;
     if (targetPathIndex > _maxTrackPathIndex) {
       return;
     }

@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ludo/controller/dice_controller.dart';
-import 'package:ludo/controller/tokens_controller/move_token_function.dart';
-import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
-import 'package:ludo/domain/can-active-token/can_active_token.dart';
+import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/tokens-controller/move_token_function.dart';
+import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/game/game_logic.dart';
+import 'package:ludo/domain/rules/can-active-token/can_active_token.dart';
 
 GestureTapCallback? onTapToken({
   required Token token,
-  required GameLogic gameLogic,
   required DiceController diceController,
   required TokensController controller,
+  required GameController gameController
 }) {
   return () {
     final tokens = controller.tokenNotifier.value;
@@ -22,20 +22,20 @@ GestureTapCallback? onTapToken({
       token: liveToken,
       tokens: tokens,
       dice: diceController.diceValue.value,
-      gameLogic: gameLogic,
+      gameController: gameController,
     );
 
-    if (gameLogic.currentPlayerActiveNumber == liveToken.player &&
+    if (gameController.currentPlayer.value == liveToken.player &&
         canTapToken &&
         !controller.isMoving) {
-      if ((diceController.diceValue.value.diceRolled ||
-          diceController.diceValue.value.extraMove)) {
+      if ((diceController.diceRolled ||
+          diceController.extraMove)) {
         moveTokenSafely(
           liveToken: liveToken,
           tokenNotifier: controller,
           token: liveToken,
           diceController: diceController,
-          gameLogic: gameLogic,
+          gameController: gameController
         );
       }
     }

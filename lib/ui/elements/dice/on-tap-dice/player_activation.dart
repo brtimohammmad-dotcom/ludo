@@ -1,6 +1,6 @@
-import 'package:ludo/controller/dice_controller.dart';
+import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/state/player_activation_state.dart';
-import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
 
 void playerActivation({
   required TokensController tokensController,
@@ -11,7 +11,7 @@ void playerActivation({
     (token) =>
         token.isActive
   );
-  if (canTokenActive||diceController.diceValue.value.extraMove) {
+  if (canTokenActive||diceController.extraMove) {
     playerActivationState.activePlayer();
   }
 }

@@ -1,32 +1,31 @@
-import 'package:ludo/controller/dice_controller.dart';
-import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
-import 'package:ludo/domain/kill/kill.dart';
+import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/game/game_logic.dart';
-import 'package:ludo/ui/elements/change_game_turn.dart';
+import 'package:ludo/domain/rules/kill/kill.dart';
 
 Future<void> moveTokenSafely({
   required Token liveToken,
   required DiceController diceController,
   required TokensController tokenNotifier,
   required Token token,
-  required GameLogic gameLogic,
+  required GameController gameController
 }) async {
   bool isInHome = token.isInHome;
   int tokenId = token.id;
   if (!tokenNotifier.isMoving) {
     if (isInHome) {
       _moveTokenToStartCell(
-          tokenId, tokenNotifier, diceController, gameLogic, tokenNotifier,
+          tokenId, tokenNotifier, diceController, tokenNotifier,
           liveToken);
     } else {
       await _moveTokenStepByStep(
         liveToken: liveToken,
         tokenId: tokenId,
-        steps: diceController.diceValue.value.random,
+        steps: diceController.diceValue.value.value,
         tokenNotifier: tokenNotifier,
         diceController: diceController,
-        gameLogic: gameLogic,
+        gameController: gameController
       );
     }
   }
@@ -35,10 +34,9 @@ Future<void> moveTokenSafely({
 Future<void> _moveTokenToStartCell(int tokenId,
     TokensController tokenNotifier,
     DiceController diceController,
-    GameLogic gameLogic,
     TokensController controller,
     Token liveToken) async {
-  if (!tokenNotifier.isMoving && diceController.diceValue.value.random == 6) {
+  if (!tokenNotifier.isMoving && diceController.diceValue.value.value == 6) {
     tokenNotifier.isMoving = true;
     List<Token> newTokenNotifier = List<Token>.from(
       tokenNotifier.tokenNotifier.value,
@@ -54,7 +52,7 @@ Future<void> _moveTokenToStartCell(int tokenId,
         diceController: diceController);
     tokenNotifier.isMoving = false;
   }
-  diceController.diceValue.value.diceRolled = false;
+  diceController.diceRolled = false;
 }
 
 Future<void> _moveTokenStepByStep({
@@ -63,7 +61,7 @@ Future<void> _moveTokenStepByStep({
   required int steps,
   required TokensController tokenNotifier,
   required DiceController diceController,
-  required GameLogic gameLogic,
+  required GameController gameController
 }) async {
   if (!tokenNotifier.isMoving) {
     List<Token> current = List.from(tokenNotifier.tokenNotifier.value);
@@ -88,13 +86,13 @@ Future<void> _moveTokenStepByStep({
       diceController: diceController,
     );
     tokenNotifier.isMoving = false;
-    if (diceController.diceValue.value.extraMove &&
-        diceController.diceValue.value.diceRolled) {
-      diceController.diceValue.value.extraMove = false;
-      diceController.diceValue.value.diceRolled = false;
-    } else if (!diceController.diceValue.value.extraMove &&
-        diceController.diceValue.value.diceRolled) {
-      changeGameTurn(gameLogic: gameLogic, diceController: diceController);
-    }
+    if (diceController.extraMove &&
+        diceController.diceRolled) {
+      diceController.extraMove = false;
+      diceController.diceRolled = false;
+    } else if (!diceController.extraMove &&
+        diceController.diceRolled) {
+      gameController.nextPlayer();
+      diceController.resetForNextTurn();    }
   }
 }

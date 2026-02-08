@@ -1,29 +1,30 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ludo/controller/dice_controller.dart';
+import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/tokens-controller/token_activation.dart';
+import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/state/player_activation_state.dart';
-import 'package:ludo/controller/tokens_controller/tokens_controller.dart';
-import 'package:ludo/game/game_logic.dart';
-import 'package:ludo/ui/elements/change_game_turn.dart';
 import 'package:ludo/ui/elements/dice/on-tap-dice/player_activation.dart';
-import 'package:ludo/controller/tokens_controller/token_activation.dart';
 
 GestureTapCallback? onTapDice({
   required DiceController diceController,
   required PlayerActivationState playerActivationState,
   required TokensController tokensController,
-  required GameLogic gameLogic,
   required bool diceInTurnNextPlayer,
+  required GameController gameController
 }) {
   return () async {
-    if (!diceController.diceValue.value.diceRolled &&
+
+    if (!diceController.diceRolled &&
         !diceInTurnNextPlayer &&
         playerActivationState.isActiveState) {
+
       playerActivationState.disActivePlayer();
       diceController.rollDice();
       updateTokenActivation(
         tokensController: tokensController,
         dice: diceController.diceValue.value,
-        gameLogic: gameLogic,
+        gameController: gameController
       );
       playerActivation(
         diceController: diceController,
@@ -33,7 +34,8 @@ GestureTapCallback? onTapDice({
       if (!playerActivationState.isActiveState && !diceInTurnNextPlayer) {
         diceInTurnNextPlayer = true;
         await Future.delayed(Duration(seconds: 1));
-        changeGameTurn(gameLogic: gameLogic, diceController: diceController);
+        gameController.nextPlayer();
+        diceController.resetForNextTurn();
         await Future.delayed(Duration(milliseconds: 500));
         playerActivationState.activePlayer();
 
