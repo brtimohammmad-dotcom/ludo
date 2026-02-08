@@ -1,6 +1,7 @@
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/dice-controller/dice_tap_lock.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/tokens-controller/move-token/move_token_to_start_cell.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/domain/rules/kill/kill.dart';
@@ -17,18 +18,13 @@ Future<void> moveTokenSafely({
   if (tokenNotifier.isMoving) {
     return;
   }
-  DiceTapLock.tryLock();
-
   if (isInHome) {
-    await _moveTokenToStartCell(
-      tokenId,
-      tokenNotifier,
-      diceController,
-      tokenNotifier,
-      liveToken,
-    );
+    await moveTokenToStartCell(tokenId: tokenId,
+        tokenNotifier: tokenNotifier,
+        diceController: diceController,
+        liveToken: liveToken);
   } else {
-    await _moveTokenStepByStep(
+    await moveTokenStepByStep(
       liveToken: liveToken,
       tokenId: tokenId,
       steps: diceController.diceValue.value.value,
@@ -40,35 +36,8 @@ Future<void> moveTokenSafely({
   DiceTapLock.unlock();
 }
 
-Future<void> _moveTokenToStartCell(
-  int tokenId,
-  TokensController tokenNotifier,
-  DiceController diceController,
-  TokensController controller,
-  Token liveToken,
-) async {
-  if (!tokenNotifier.isMoving && diceController.diceValue.value.value == 6) {
-    tokenNotifier.isMoving = true;
-    List<Token> newTokenNotifier = List<Token>.from(
-      tokenNotifier.tokenNotifier.value,
-    );
 
-    newTokenNotifier[tokenId - 1] = newTokenNotifier[tokenId - 1].copyWith(
-      newPathIndex: 0,
-    );
-    tokenNotifier.tokenNotifier.value = newTokenNotifier;
-    await Future.delayed(const Duration(milliseconds: 300));
-    kill(
-      liveToken: liveToken,
-      controller: controller,
-      diceController: diceController,
-    );
-    tokenNotifier.isMoving = false;
-  }
-  diceController.diceRolled = false;
-}
-
-Future<void> _moveTokenStepByStep({
+Future<void> moveTokenStepByStep({
   required Token liveToken,
   required int tokenId,
   required int steps,
@@ -106,7 +75,6 @@ Future<void> _moveTokenStepByStep({
       gameController.nextPlayer();
       diceController.resetForNextTurn();
       await Future.delayed(const Duration(milliseconds: 500));
-
     }
   }
 }

@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
-import 'package:ludo/domain/state/player_activation_state.dart';
 import 'package:ludo/game/logic/dice-logic/dice_logic.dart';
 import 'package:ludo/controller/dice-controller/on_tap_dice.dart';
 
 class DiceWidget extends StatelessWidget {
   final DiceController diceController;
   final double cellSize;
-  final PlayerActivationState playerActivationState;
   final TokensController tokensController;
   final GameController gameController;
 
@@ -17,7 +15,6 @@ class DiceWidget extends StatelessWidget {
     super.key,
     required this.cellSize,
     required this.diceController,
-    required this.playerActivationState,
     required this.tokensController,
     required this.gameController,
   });
@@ -41,7 +38,6 @@ class DiceWidget extends StatelessWidget {
                 onTap: onTapDice(
                   gameController: gameController,
                   diceController: diceController,
-                  playerActivationState: playerActivationState,
                   tokensController: tokensController,
                 ),
                 child: Container(
