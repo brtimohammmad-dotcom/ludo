@@ -18,6 +18,7 @@ Future<void> moveTokenSafely({
     return;
   }
   DiceTapLock.tryLock();
+
   if (isInHome) {
     await _moveTokenToStartCell(
       tokenId,
@@ -26,7 +27,6 @@ Future<void> moveTokenSafely({
       tokenNotifier,
       liveToken,
     );
-    DiceTapLock.unlock();
   } else {
     await _moveTokenStepByStep(
       liveToken: liveToken,
@@ -36,8 +36,8 @@ Future<void> moveTokenSafely({
       diceController: diceController,
       gameController: gameController,
     );
-    DiceTapLock.unlock();
   }
+  DiceTapLock.unlock();
 }
 
 Future<void> _moveTokenToStartCell(
