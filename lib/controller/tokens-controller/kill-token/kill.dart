@@ -1,4 +1,6 @@
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/tokens-controller/kill-token/kill_token_at_home.dart';
+import 'package:ludo/controller/tokens-controller/kill-token/kill_token_at_path.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 
@@ -20,60 +22,24 @@ void kill({
   required TokensController controller,
   required DiceController diceController,
 }) {
-  if (liveToken.isInHome) {
-    final globalLiveTokenPath = globalPlayerIndex(
-      pathIndex: 0,
-      playerIndex: liveToken.player,
+  final List<Token> newTokenList = controller.tokenNotifier.value.map((
+      targetToken,) {
+    final globalTokenPath = globalPlayerIndex(
+      pathIndex: targetToken.pathIndex,
+      playerIndex: targetToken.player,
     );
-    final List<Token> newTokenList = controller.tokenNotifier.value.map((
-      targetToken,
-    ) {
-      final isOpponent = targetToken.player != liveToken.player;
-      if (!isOpponent || targetToken.isInHome) {
-        return targetToken;
-      }
-      final globalTokenPath = globalPlayerIndex(
-        pathIndex: targetToken.pathIndex,
-        playerIndex: targetToken.player,
-      );
-      if (globalTokenPath == globalLiveTokenPath) {
-        return targetToken.copyWith(newPathIndex:-1);
-      }
-      return targetToken;
-    }).toList();
-    controller.tokenNotifier.value = newTokenList;
-  } else {
-    final targetPathIndex =
-        liveToken.pathIndex + diceController.diceValue.value.value;
-    if (targetPathIndex > _maxTrackPathIndex) {
-      return;
+    if (liveToken.isInHome) {
+      return killTokenAtHome(liveToken: liveToken,
+          diceController: diceController,
+          targetToken: targetToken,
+          globalTokenPath: globalTokenPath);
+    } else {
+      return killTokenAtPath(liveToken: liveToken,
+          diceController: diceController,
+          maxTrackPathIndex: _maxTrackPathIndex,
+          targetToken: targetToken,
+          globalTokenPath: globalTokenPath);
     }
-    final globalLiveTokenPath = globalPlayerIndex(
-      pathIndex: targetPathIndex,
-      playerIndex: liveToken.player,
-    );
-    final List<Token> newTokenList = controller.tokenNotifier.value.map((
-      targetToken,
-    ) {
-      final isOpponent = targetToken.player != liveToken.player;
-      final isOnMainTrack =
-          targetToken.pathIndex >= 0 && targetToken.pathIndex <= _maxTrackPathIndex;
-
-      if (!isOpponent || !isOnMainTrack) {
-        return targetToken;
-      }
-
-      final globalTokenPath = globalPlayerIndex(
-        pathIndex: targetToken.pathIndex,
-        playerIndex: targetToken.player,
-      );
-
-      if (globalTokenPath == globalLiveTokenPath) {
-        return targetToken.copyWith(newPathIndex: -1);
-      }
-
-      return targetToken;
-    }).toList();
-    controller.tokenNotifier.value = newTokenList;
-  }
+  }).toList();
+  controller.tokenNotifier.value = newTokenList;
 }
