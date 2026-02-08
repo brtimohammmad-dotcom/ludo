@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/dice-controller/dice_tap_lock.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/move-token/move_token_function.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
@@ -12,7 +13,7 @@ GestureTapCallback? onTapToken({
   required TokensController controller,
   required GameController gameController,
 }) {
-  return () {
+  return () async {
     final tokens = controller.tokenNotifier.value;
     final liveToken = tokens.firstWhere(
       (item) => item.id == token.id,
@@ -28,12 +29,18 @@ GestureTapCallback? onTapToken({
     )) {
       return;
     }
-    moveTokenSafely(
+    await moveTokenSafely(
       liveToken: liveToken,
       tokenNotifier: controller,
-      token: liveToken,
       diceController: diceController,
       gameController: gameController,
     );
+    if (diceController.extraMove) {
+      diceController.extraMove = false;
+      DiceTapLock.unlock();
+      return;
+    }
+    gameController.nextPlayer();
+    diceController.resetForNextTurn();
   };
 }

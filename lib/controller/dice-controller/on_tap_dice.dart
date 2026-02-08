@@ -26,11 +26,13 @@ GestureTapCallback? onTapDice({
       )) {
         return;
       }
+      if(diceController.extraMove){
+        DiceTapLock.unlock();
+        return;
+      }
       await Future.delayed(Duration(seconds: 1));
       gameController.nextPlayer();
       diceController.resetForNextTurn();
-      await Future.delayed(Duration(milliseconds: 500));
-      DiceTapLock.unlock();
     }
   };
 }

@@ -20,26 +20,26 @@ void kill({
   required TokensController controller,
   required DiceController diceController,
 }) {
-  if (liveToken.pathIndex < 0) {
+  if (liveToken.isInHome) {
     final globalLiveTokenPath = globalPlayerIndex(
       pathIndex: 0,
       playerIndex: liveToken.player,
     );
     final List<Token> newTokenList = controller.tokenNotifier.value.map((
-      token,
+      targetToken,
     ) {
-      final isOpponent = token.player != liveToken.player;
-      if (!isOpponent || token.isInHome) {
-        return token;
+      final isOpponent = targetToken.player != liveToken.player;
+      if (!isOpponent || targetToken.isInHome) {
+        return targetToken;
       }
       final globalTokenPath = globalPlayerIndex(
-        pathIndex: token.pathIndex,
-        playerIndex: token.player,
+        pathIndex: targetToken.pathIndex,
+        playerIndex: targetToken.player,
       );
       if (globalTokenPath == globalLiveTokenPath) {
-        return token.copyWith(newPathIndex:-1);
+        return targetToken.copyWith(newPathIndex:-1);
       }
-      return token;
+      return targetToken;
     }).toList();
     controller.tokenNotifier.value = newTokenList;
   } else {
@@ -53,26 +53,26 @@ void kill({
       playerIndex: liveToken.player,
     );
     final List<Token> newTokenList = controller.tokenNotifier.value.map((
-      token,
+      targetToken,
     ) {
-      final isOpponent = token.player != liveToken.player;
+      final isOpponent = targetToken.player != liveToken.player;
       final isOnMainTrack =
-          token.pathIndex >= 0 && token.pathIndex <= _maxTrackPathIndex;
+          targetToken.pathIndex >= 0 && targetToken.pathIndex <= _maxTrackPathIndex;
 
       if (!isOpponent || !isOnMainTrack) {
-        return token;
+        return targetToken;
       }
 
       final globalTokenPath = globalPlayerIndex(
-        pathIndex: token.pathIndex,
-        playerIndex: token.player,
+        pathIndex: targetToken.pathIndex,
+        playerIndex: targetToken.player,
       );
 
       if (globalTokenPath == globalLiveTokenPath) {
-        return token.copyWith(newPathIndex: -1);
+        return targetToken.copyWith(newPathIndex: -1);
       }
 
-      return token;
+      return targetToken;
     }).toList();
     controller.tokenNotifier.value = newTokenList;
   }

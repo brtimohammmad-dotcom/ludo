@@ -9,6 +9,6 @@ bool canActivePlayer({
     (token) =>
         token.isActive
   );
-  return canTokenActive||diceController.extraMove;
+  return canTokenActive;
 
 }
