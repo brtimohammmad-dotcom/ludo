@@ -1,17 +1,18 @@
-import 'package:ludo/domain/can-active-token/greater_than_final_path.dart';
-import 'package:ludo/domain/can-active-token/has_token_on_safe_cell_target.dart';
-import 'package:ludo/domain/can-active-token/is_cell_occupied_by_same_player.dart';
+
+import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/dice.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/game/game_logic.dart';
+import 'package:ludo/domain/rules/can-active-token/greater_than_final_path.dart';
+import 'package:ludo/domain/rules/can-active-token/has_token_on_safe_cell_target.dart';
+import 'package:ludo/domain/rules/can-active-token/is_cell_occupied_by_same_player.dart';
 
 bool canActivateToken({
   required Token token,
   required List<Token> tokens,
   required Dice dice,
-  required GameLogic gameLogic,
+  required GameController gameController,
 }) {
-  final targetPathIndex = token.pathIndex + dice.random;
+  final targetPathIndex = token.pathIndex + dice.value;
 
   bool newIsCellOccupiedBySamePlayer = isCellOccupiedBySamePlayer(
     tokens: tokens,
@@ -35,7 +36,7 @@ bool canActivateToken({
       newHasTokenOnTargetSafeCell ||
       newGreaterThanFinalPath;
 
-  return token.player == gameLogic.currentPlayerActiveNumber &&
-      (!token.isInHome || dice.random == 6) &&
+  return token.player == gameController.currentPlayer.value &&
+      (!token.isInHome || dice.value == 6) &&
       !canNotMove;
 }
