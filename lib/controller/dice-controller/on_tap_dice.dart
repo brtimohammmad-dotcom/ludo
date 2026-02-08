@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/dice-controller/dice_tap_lock.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/token_activation.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
@@ -10,36 +11,33 @@ GestureTapCallback? onTapDice({
   required DiceController diceController,
   required PlayerActivationState playerActivationState,
   required TokensController tokensController,
-  required bool diceInTurnNextPlayer,
-  required GameController gameController
+  required GameController gameController,
 }) {
   return () async {
-
     if (!diceController.diceRolled &&
-        !diceInTurnNextPlayer &&
+        !DiceTapLock.isLocked &&
         playerActivationState.isActiveState) {
-
       playerActivationState.disActivePlayer();
       diceController.rollDice();
       updateTokenActivation(
         tokensController: tokensController,
         dice: diceController.diceValue.value,
-        gameController: gameController
+        gameController: gameController,
       );
       playerActivation(
         diceController: diceController,
         tokensController: tokensController,
         playerActivationState: playerActivationState,
       );
-      if (!playerActivationState.isActiveState && !diceInTurnNextPlayer) {
-        diceInTurnNextPlayer = true;
+      if (!playerActivationState.isActiveState) {
+        DiceTapLock.tryLock();
         await Future.delayed(Duration(seconds: 1));
         gameController.nextPlayer();
         diceController.resetForNextTurn();
         await Future.delayed(Duration(milliseconds: 500));
         playerActivationState.activePlayer();
 
-        diceInTurnNextPlayer = false;
+        DiceTapLock.unlock();
       }
     }
   };

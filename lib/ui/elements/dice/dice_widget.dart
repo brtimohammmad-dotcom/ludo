@@ -40,7 +40,6 @@ class DiceWidget extends StatelessWidget {
               child: GestureDetector(
                 onTap: onTapDice(
                   gameController: gameController,
-                  diceInTurnNextPlayer: false,
                   diceController: diceController,
                   playerActivationState: playerActivationState,
                   tokensController: tokensController,
