@@ -1,6 +1,5 @@
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
-import 'package:ludo/controller/tokens-controller/kill-token/kill_token_at_home.dart';
-import 'package:ludo/controller/tokens-controller/kill-token/kill_token_at_path.dart';
+
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 
@@ -22,24 +21,45 @@ void kill({
   required TokensController controller,
   required DiceController diceController,
 }) {
+  final targetPathIndex =
+      liveToken.pathIndex + diceController.diceValue.value.value;
+
+  if (targetPathIndex > _maxTrackPathIndex) {
+    return;
+  }
+
   final List<Token> newTokenList = controller.tokenNotifier.value.map((
-      targetToken,) {
+    targetToken,
+  ) {
+    final isOnMainTrack =
+        targetToken.pathIndex >= 0 &&
+        targetToken.pathIndex <= _maxTrackPathIndex;
+    final isOpponent = targetToken.player != liveToken.player;
+
+    if (!isOnMainTrack || !isOpponent) {
+      return targetToken;
+    }
+    final int globalLiveTokenPath;
     final globalTokenPath = globalPlayerIndex(
       pathIndex: targetToken.pathIndex,
       playerIndex: targetToken.player,
     );
     if (liveToken.isInHome) {
-      return killTokenAtHome(liveToken: liveToken,
-          diceController: diceController,
-          targetToken: targetToken,
-          globalTokenPath: globalTokenPath);
+      globalLiveTokenPath = globalPlayerIndex(
+        pathIndex: 0,
+        playerIndex: liveToken.player,
+      );
     } else {
-      return killTokenAtPath(liveToken: liveToken,
-          diceController: diceController,
-          maxTrackPathIndex: _maxTrackPathIndex,
-          targetToken: targetToken,
-          globalTokenPath: globalTokenPath);
+      globalLiveTokenPath = globalPlayerIndex(
+        pathIndex: targetPathIndex,
+        playerIndex: liveToken.player,
+      );
     }
+    if (globalTokenPath == globalLiveTokenPath) {
+      return targetToken.copyWith(newPathIndex: -1);
+    }
+
+    return targetToken;
   }).toList();
   controller.tokenNotifier.value = newTokenList;
 }
