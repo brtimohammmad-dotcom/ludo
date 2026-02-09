@@ -2,7 +2,6 @@ import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/controller/tokens-controller/kill-token/kill.dart';
 
 Future<void> moveTokenStepByStep({
   required Token liveToken,
@@ -25,11 +24,7 @@ Future<void> moveTokenStepByStep({
 
       await Future.delayed(const Duration(milliseconds: 300));
     }
-    kill(
-      liveToken: liveToken,
-      controller: tokenNotifier,
-      diceController: diceController,
-    );
+
     tokenNotifier.isMoving = false;
   }
 }

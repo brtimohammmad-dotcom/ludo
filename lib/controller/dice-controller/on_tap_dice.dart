@@ -24,6 +24,7 @@ GestureTapCallback? onTapDice({
         diceController: diceController,
         tokensController: tokensController,
       )) {
+        debugPrint('tapped');
         return;
       }
       if(diceController.extraMove){

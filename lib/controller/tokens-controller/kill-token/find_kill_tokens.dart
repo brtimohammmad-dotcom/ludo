@@ -2,6 +2,7 @@ import 'package:ludo/controller/dice-controller/dice_controller.dart';
 
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:collection/collection.dart';
 
 const Map<int, int> playerStartIndex = {
   1: 0, // قرمز
@@ -16,28 +17,27 @@ int globalPlayerIndex({required int pathIndex, required int playerIndex}) {
   return (playerStartIndex[playerIndex]! + pathIndex) % _mainTrackLength;
 }
 
-void kill({
+Token? findKillTarget({
   required Token liveToken,
   required TokensController controller,
   required DiceController diceController,
 }) {
+  final tokens = controller.tokenNotifier.value;
+
   final targetPathIndex =
       liveToken.pathIndex + diceController.diceValue.value.value;
 
   if (targetPathIndex > _maxTrackPathIndex) {
-    return;
+    [];
   }
 
-  final List<Token> newTokenList = controller.tokenNotifier.value.map((
-    targetToken,
-  ) {
+  final Token? killedToken = tokens.firstWhereOrNull((targetToken) {
     final isOnMainTrack =
         targetToken.pathIndex >= 0 &&
         targetToken.pathIndex <= _maxTrackPathIndex;
     final isOpponent = targetToken.player != liveToken.player;
-
     if (!isOnMainTrack || !isOpponent) {
-      return targetToken;
+     return false;
     }
     final int globalLiveTokenPath;
     final globalTokenPath = globalPlayerIndex(
@@ -56,10 +56,9 @@ void kill({
       );
     }
     if (globalTokenPath == globalLiveTokenPath) {
-      return targetToken.copyWith(newPathIndex: -1);
+      return true;
     }
-
-    return targetToken;
-  }).toList();
-  controller.tokenNotifier.value = newTokenList;
+    return false;
+  });
+  return killedToken;
 }
