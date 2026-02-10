@@ -13,7 +13,7 @@ class Board extends StatelessWidget {
 
   final TokensController tokensController = TokensController();
   final DiceController diceController = DiceController();
-  final GameController gameController=GameController();
+  final GameController gameController = GameController();
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +23,9 @@ class Board extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final boardSize = constraints.maxWidth;
-            final cellSize = boardSize / 15;
+            final cellSize = boardSize / 11;
             final tokenHomeSize = cellSize * 4;
-            final tokenColorizeHomeSize = cellSize * 6;
+            final tokenColorizeHomeSize = cellSize * 4;
             return Container(
               color: Colors.white,
               child: Stack(
@@ -43,9 +43,9 @@ class Board extends StatelessWidget {
                         children: [
                           ...createAnimatedTokens(
                             cellSize: cellSize,
-                          controller:  tokensController,
-                           diceController:  diceController,
-                           gameController:  gameController
+                            controller: tokensController,
+                            diceController: diceController,
+                            gameController: gameController,
                           ),
                         ],
                       );

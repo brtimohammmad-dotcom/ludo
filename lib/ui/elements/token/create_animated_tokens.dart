@@ -22,8 +22,12 @@ List<AnimatedPositioned> createAnimatedTokens({
       return AnimatedPositioned(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOutCubic,
-        left: cell.dy * cellSize,
-        top: cell.dx * cellSize,
+        left: token.isInHome
+            ? (cell.dy * cellSize) + (cellSize / 2)
+            : cell.dy * cellSize,
+        top: token.isInHome
+            ? (cell.dx * cellSize) + (cellSize / 2)
+            : cell.dx * cellSize,
         child: TokenWidget(
           token: token,
           gameController: gameController,

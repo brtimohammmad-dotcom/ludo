@@ -35,8 +35,8 @@ class DiceWidget extends StatelessWidget {
                 return AnimatedPositioned(
                   curve: Curves.easeOutCirc,
                   duration: const Duration(milliseconds: 500),
-                  left: dicePath[activePlayerIndex].dy * cellSize,
-                  top: dicePath[activePlayerIndex].dx * cellSize,
+                  left: dicePath[activePlayerIndex].dy * cellSize+(cellSize/4),
+                  top: dicePath[activePlayerIndex].dx * cellSize+(cellSize/4),
                   child: GestureDetector(
                     onTap: onTapDice(
                       gameController: gameController,
@@ -44,22 +44,28 @@ class DiceWidget extends StatelessWidget {
                       tokensController: tokensController,
                     ),
                     child: AnimatedContainer(
-                      padding: EdgeInsets.all(locked?8.0:0),
-                      duration:const Duration(milliseconds: 100),
+                      padding: EdgeInsets.all(locked ? 10 : 7),
+                      duration: const Duration(milliseconds: 100),
                       curve: Curves.easeOut,
-                      width: cellSize * 2,
-                      height: cellSize * 2,
+                      width: cellSize * (1.5),
+                      height: cellSize * (1.5),
                       decoration: BoxDecoration(
-                         boxShadow: locked?[
-                           BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-                             offset: Offset(-4, 6),
-                             spreadRadius: -8,
-                          ),
-                        ]:[
-                          BoxShadow(color: Colors.white,blurRadius: 20,spreadRadius: 5),
-                         ],
+                        boxShadow: locked
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(-4, 6),
+                                  spreadRadius: -8,
+                                ),
+                              ]
+                            : [
+                                BoxShadow(
+                                  color: Colors.white,
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                       ),
                       child: Image.asset(
                         'assets/images/${diceController.diceValue.value.value}.png',

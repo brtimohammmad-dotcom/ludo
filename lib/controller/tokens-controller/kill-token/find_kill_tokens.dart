@@ -6,12 +6,12 @@ import 'package:collection/collection.dart';
 
 const Map<int, int> playerStartIndex = {
   1: 0, // قرمز
-  2: 13, // آبی
-  3: 26, // زرد
-  4: 39, // سبز
+  2: 9, // آبی
+  3: 18, // زرد
+  4: 27, // سبز
 };
-const int _mainTrackLength = 52;
-const int _maxTrackPathIndex = 51;
+const int _mainTrackLength = 36;
+const int _maxTrackPathIndex = 35;
 
 int globalPlayerIndex({required int pathIndex, required int playerIndex}) {
   return (playerStartIndex[playerIndex]! + pathIndex) % _mainTrackLength;
@@ -28,7 +28,7 @@ Token? findKillTarget({
       liveToken.pathIndex + diceController.diceValue.value.value;
 
   if (targetPathIndex > _maxTrackPathIndex) {
-    [];
+    return null;
   }
 
   final Token? killedToken = tokens.firstWhereOrNull((targetToken) {

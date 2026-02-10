@@ -3,14 +3,13 @@ import 'package:ludo/ui/elements/board-background/cell_decoration.dart';
 import 'center_painter.dart';
 
 class BoardBackground extends StatelessWidget {
-  static const int size = 15;
+  static const int size = 11;
 
   const BoardBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Table(
-      // border: TableBorder.all(color: Colors.black12),
       children: List.generate(size, (row) {
         return TableRow(
           children: List.generate(size, (col) => _cell(row, col)),

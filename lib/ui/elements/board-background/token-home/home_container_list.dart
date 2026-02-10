@@ -7,18 +7,22 @@ List<Positioned> getHomeContainerList(double cellSize, double tokenHomeSize) {
       return Positioned(
         left: home.startMapColumn * cellSize,
         top: home.startMapRow * cellSize,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: RadialGradient(
-              colors: [
-                const Color(0xffD5B195).withAlpha(50),
-                const Color(0xffD5B195).withAlpha(100),
-              ],
-            ),
-          ),
+        child: SizedBox(
           width: tokenHomeSize,
           height: tokenHomeSize,
+          child: Container(
+            margin: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xffD5B195).withAlpha(50),
+                  const Color(0xffD5B195).withAlpha(100),
+                ],
+              ),
+            ),
+
+          ),
         ),
       );
     }),

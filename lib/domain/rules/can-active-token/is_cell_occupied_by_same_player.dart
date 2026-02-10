@@ -10,6 +10,6 @@ bool isCellOccupiedBySamePlayer({
   return tokens.any((other) {
     return (other.id != token.id && other.player == token.player) &&
         ((other.pathIndex == 0 && token.isInHome && dice.value == 6) ||
-            (other.pathIndex == targetPathIndex && !token.isInHome&&other.pathIndex!=57));
+            (other.pathIndex == targetPathIndex && !token.isInHome&&other.pathIndex!=39));
   });
 }

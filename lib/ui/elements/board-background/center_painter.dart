@@ -10,7 +10,7 @@ class CenterPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
     //yellow painter
-    if (row == 7 && col == 7) {
+    if (row == 5 && col == 5) {
       _drawTriangle(
         canvas,
         size,
@@ -18,108 +18,74 @@ class CenterPainter extends CustomPainter {
         Offset(0, 0),
         Offset(size.width, 0),
         center,
+      );
+    }
+    if (row == 4 && col == 4) {
+      _drawTriangle(
+        canvas,
+        size,
+        Colors.yellow,
+        Offset(0, 0),
+        Offset(size.width, 0),
+        Offset(size.width, size.height),
+      );
+    }
+    if (row == 4 && col == 6) {
+      _drawTriangle(
+        canvas,
+        size,
+        Colors.yellow,
+        Offset(0, 0),
+        Offset(0, size.height),
+        Offset(size.width, 0),
+      );
+    }
+    if (row == 4 && col ==5) {
+      _drawRect(canvas, Colors.yellow, size);
+    }
+    // green painter
+    if (row == 5 && col == 5) {
+      _drawTriangle(
+        canvas,
+        size,
+        Colors.green,
+        Offset(size.width, 0),
+        Offset(size.width, size.height),
+        center,
+      );
+    }
+    if (row == 4 && col == 6) {
+      _drawTriangle(
+        canvas,
+        size,
+        Colors.green,
+        Offset(size.width, 0),
+        Offset(size.width, size.height),
+        Offset(0, size.height),
       );
     }
     if (row == 6 && col == 6) {
       _drawTriangle(
         canvas,
         size,
-        Colors.yellow,
-        Offset(0, 0),
-        Offset(size.width, 0),
-        Offset(size.width, size.height),
-      );
-    }
-    if (row == 6 && col == 8) {
-      _drawTriangle(
-        canvas,
-        size,
-        Colors.yellow,
-        Offset(0, 0),
-        Offset(0, size.height),
-        Offset(size.width, 0),
-      );
-    }
-    if (row == 6 && col == 7) {
-      _drawRect(canvas, Colors.yellow, size);
-    }
-    // green painter
-    if (row == 7 && col == 7) {
-      _drawTriangle(
-        canvas,
-        size,
-        Colors.green,
-        Offset(size.width, 0),
-        Offset(size.width, size.height),
-        center,
-      );
-    }
-    if (row == 6 && col == 8) {
-      _drawTriangle(
-        canvas,
-        size,
-        Colors.green,
-        Offset(size.width, 0),
-        Offset(size.width, size.height),
-        Offset(0, size.height),
-      );
-    }
-    if (row == 8 && col == 8) {
-      _drawTriangle(
-        canvas,
-        size,
         Colors.green,
         Offset(0, 0),
         Offset(size.width, 0),
         Offset(size.width, size.height),
       );
     }
-    if (row == 7 && col == 8) {
+    if (row == 5 && col == 6) {
       _drawRect(canvas, Colors.green, size);
     }
     // red painter
 
-    if (row == 7 && col == 7) {
+    if (row == 5 && col == 5) {
       _drawTriangle(
         canvas,
         size,
         Colors.red,
         Offset(size.width, size.height),
         Offset(0, size.height),
-        center,
-      );
-    }
-    if (row == 8 && col == 8) {
-      _drawTriangle(
-        canvas,
-        size,
-        Colors.red,
-        Offset(size.width, size.height),
-        Offset(0, size.height),
-        Offset(0, 0),
-      );
-    }
-    if (row == 8 && col == 6) {
-      _drawTriangle(
-        canvas,
-        size,
-        Colors.red,
-        Offset(size.width, size.height),
-        Offset(0, size.height),
-        Offset(size.width, 0),
-      );
-    }
-    if (row == 8 && col == 7) {
-      _drawRect(canvas, Colors.red, size);
-    }
-    // blue painter
-    if (row == 7 && col == 7) {
-      _drawTriangle(
-        canvas,
-        size,
-        Colors.blue,
-        Offset(0, size.height),
-        Offset(0, 0),
         center,
       );
     }
@@ -127,13 +93,47 @@ class CenterPainter extends CustomPainter {
       _drawTriangle(
         canvas,
         size,
+        Colors.red,
+        Offset(size.width, size.height),
+        Offset(0, size.height),
+        Offset(0, 0),
+      );
+    }
+    if (row == 6 && col == 4) {
+      _drawTriangle(
+        canvas,
+        size,
+        Colors.red,
+        Offset(size.width, size.height),
+        Offset(0, size.height),
+        Offset(size.width, 0),
+      );
+    }
+    if (row == 6 && col == 5) {
+      _drawRect(canvas, Colors.red, size);
+    }
+    // blue painter
+    if (row == 5 && col == 5) {
+      _drawTriangle(
+        canvas,
+        size,
+        Colors.blue,
+        Offset(0, size.height),
+        Offset(0, 0),
+        center,
+      );
+    }
+    if (row == 4 && col == 4) {
+      _drawTriangle(
+        canvas,
+        size,
         Colors.blue,
         Offset(0, size.height),
         Offset(0, 0),
         Offset(size.width, size.height),
       );
     }
-    if (row == 8 && col == 6) {
+    if (row == 6 && col == 4) {
       _drawTriangle(
         canvas,
         size,
@@ -143,7 +143,7 @@ class CenterPainter extends CustomPainter {
         Offset(size.width, 0),
       );
     }
-    if (row == 7 && col == 6) {
+    if (row == 5 && col == 4) {
       _drawRect(canvas, Colors.blue, size);
     }
   }
