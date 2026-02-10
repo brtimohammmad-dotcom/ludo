@@ -4,22 +4,21 @@ import 'package:ludo/domain/model/dice.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/domain/rules/can-active-token/can_active_token.dart';
 
-
-
 void updateTokenActivation({
   required TokensController tokensController,
   required Dice dice,
-  required GameController gameController
+  required GameController gameController,
 }) {
-  List<Token> tokens=tokensController.tokenNotifier.value;
-  tokensController.tokenNotifier.value = tokens.map((token) {
+  final newTokenList = List<Token>.from(tokensController.tokenNotifier.value);
+  final updatedTokenList = newTokenList.map((token) {
     final canActivate = canActivateToken(
       token: token,
-      tokens: tokens,
+      tokens: newTokenList,
       dice: dice,
       gameController: gameController,
     );
 
     return token.copyWith(newIsActive: canActivate);
   }).toList();
+  tokensController.tokenNotifier.value = updatedTokenList;
 }

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/dice-controller/dice_tap_lock.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/controller/tokens-controller/token_activation.dart';
+import 'package:ludo/controller/tokens-controller/avtivation-token/token_activation.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/rules/can-active-player/can_active_player.dart';
 
@@ -12,7 +12,9 @@ GestureTapCallback? onTapDice({
   required GameController gameController,
 }) {
   return () async {
-    if (!DiceTapLock.isLocked) {
+    if (DiceTapLock.locked.value) {
+      return;
+    }
       DiceTapLock.tryLock();
       diceController.rollDice();
       updateTokenActivation(
@@ -24,16 +26,16 @@ GestureTapCallback? onTapDice({
         diceController: diceController,
         tokensController: tokensController,
       )) {
-        debugPrint('tapped');
         return;
       }
-      if(diceController.extraMove){
+      if (diceController.extraMove) {
         DiceTapLock.unlock();
         return;
       }
       await Future.delayed(Duration(seconds: 1));
       gameController.nextPlayer();
       diceController.resetForNextTurn();
-    }
+
+
   };
 }

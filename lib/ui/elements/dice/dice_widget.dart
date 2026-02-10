@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/dice-controller/dice_controller.dart';
+import 'package:ludo/controller/dice-controller/dice_tap_lock.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/game/logic/dice-logic/dice_logic.dart';
@@ -27,36 +28,47 @@ class DiceWidget extends StatelessWidget {
         return ValueListenableBuilder(
           valueListenable: diceController.diceValue,
           builder: (context, diceControllerValue, _) {
-            final activePlayerIndex =
-               currentPlayer  - 1;
-            return AnimatedPositioned(
-              curve: Curves.easeOutCirc,
-              duration: const Duration(milliseconds: 500),
-              left: dicePath[activePlayerIndex].dy * cellSize,
-              top: dicePath[activePlayerIndex].dx * cellSize,
-              child: GestureDetector(
-                onTap: onTapDice(
-                  gameController: gameController,
-                  diceController: diceController,
-                  tokensController: tokensController,
-                ),
-                child: Container(
-                  width: cellSize * 2,
-                  height: cellSize * 2,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black54.withAlpha(50),
-                        blurRadius: 20,
+            final activePlayerIndex = currentPlayer - 1;
+            return ValueListenableBuilder(
+              valueListenable: DiceTapLock.locked,
+              builder: (context, locked, _) {
+                return AnimatedPositioned(
+                  curve: Curves.easeOutCirc,
+                  duration: const Duration(milliseconds: 500),
+                  left: dicePath[activePlayerIndex].dy * cellSize,
+                  top: dicePath[activePlayerIndex].dx * cellSize,
+                  child: GestureDetector(
+                    onTap: onTapDice(
+                      gameController: gameController,
+                      diceController: diceController,
+                      tokensController: tokensController,
+                    ),
+                    child: AnimatedContainer(
+                      padding: EdgeInsets.all(locked?8.0:0),
+                      duration:const Duration(milliseconds: 100),
+                      curve: Curves.easeOut,
+                      width: cellSize * 2,
+                      height: cellSize * 2,
+                      decoration: BoxDecoration(
+                         boxShadow: locked?[
+                           BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                             offset: Offset(-4, 6),
+                             spreadRadius: -8,
+                          ),
+                        ]:[
+                          BoxShadow(color: Colors.white,blurRadius: 20,spreadRadius: 5),
+                         ],
                       ),
-                    ],
+                      child: Image.asset(
+                        'assets/images/${diceController.diceValue.value.value}.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-                  child: Image.asset(
-                    'assets/images/${diceController.diceValue.value.value}.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+                );
+              },
             );
           },
         );

@@ -1,15 +1,16 @@
+import 'package:flutter/cupertino.dart';
+
 class DiceTapLock {
-  static bool _locked = false;
+  static final ValueNotifier<bool> locked=ValueNotifier(false);
 
   static bool tryLock() {
-    if (_locked) return false;
-    _locked = true;
+    if (locked.value) return false;
+    locked.value = true;
     return true;
   }
 
   static void unlock() {
-    _locked = false;
+    locked.value = false;
   }
 
-   static bool get isLocked => _locked;
 }

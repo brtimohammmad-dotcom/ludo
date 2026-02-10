@@ -6,10 +6,10 @@ import 'package:ludo/game/logic/token-logic/token_logic.dart';
 import 'package:ludo/ui/elements/token/token_widget.dart';
 
 List<AnimatedPositioned> createAnimatedTokens({
- required double cellSize,
- required TokensController controller,
- required DiceController diceController,
- required GameController gameController,
+  required double cellSize,
+  required TokensController controller,
+  required DiceController diceController,
+  required GameController gameController,
 }) {
   return [
     ...controller.tokenNotifier.value.map((token) {

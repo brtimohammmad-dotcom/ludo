@@ -9,7 +9,6 @@ class DiceController {
   bool isRolling = false;
   bool extraMove = false;
 
-
   Future<void> rollDice() async {
     if (isRolling) return;
 
@@ -22,7 +21,8 @@ class DiceController {
     await Future.delayed(const Duration(milliseconds: 500));
     isRolling = false;
   }
-  void resetForNextTurn()async {
+
+  void resetForNextTurn() async {
     extraMove = false;
     await Future.delayed(Duration(milliseconds: 500));
     DiceTapLock.unlock();

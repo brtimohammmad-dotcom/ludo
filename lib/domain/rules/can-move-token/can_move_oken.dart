@@ -18,7 +18,7 @@ bool canMoveToken({
     dice: diceController.diceValue.value,
     gameController: gameController,
   );
-  return DiceTapLock.isLocked&&
+  return DiceTapLock.locked.value&&
       canTapToken &&
       !controller.isMoving;
 }

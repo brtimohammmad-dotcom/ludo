@@ -19,37 +19,43 @@ class TokenWidget extends StatelessWidget {
     required this.size,
     required this.controller,
     required this.diceController,
-    required this.gameController
+    required this.gameController,
   });
 
   @override
   Widget build(BuildContext context) {
+    bool isActiveToken = controller.tokenNotifier.value[token.id - 1].isActive;
     return GestureDetector(
-      onTap: onTapToken(token: token,
-          diceController: diceController,
-          controller: controller,
-      gameController: gameController),
+      onTap: onTapToken(
+        token: token,
+        diceController: diceController,
+        controller: controller,
+        gameController: gameController,
+      ),
       child: SizedBox(
-      width: size,
-      height: size,
-      child: Padding(
-        padding: const EdgeInsets.all(7.0),
-        child: Container(
+        width: size,
+        height: size,
+        child: AnimatedContainer(
+          curve: Curves.easeOut,
+          margin: EdgeInsets.all(isActiveToken ? 5.0 : 7.0),
+          duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             gradient: tokenGradient(token),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white.withAlpha(200), width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 2,
-                offset: Offset(0, 2),
-                spreadRadius: 1,
-              ),
-            ],
+            boxShadow: isActiveToken
+                ? activeTokenShadow(token)
+                : [
+                    BoxShadow(
+                      color: Colors.black38,
+                      blurRadius: 2,
+                      spreadRadius: 0,
+                      offset: Offset(-2, 3),
+                    ),
+                  ],
           ),
         ),
       ),
-    ),);
+    );
   }
 }
