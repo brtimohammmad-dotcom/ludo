@@ -5,15 +5,19 @@ import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/ui/elements/board-background/board_background.dart';
 import 'package:ludo/ui/elements/board-background/token-home/home_container_list.dart';
 import 'package:ludo/ui/elements/dice/dice_widget.dart';
-
 import 'package:ludo/ui/elements/token/create_animated_tokens.dart';
 
 class Board extends StatelessWidget {
-  Board({super.key});
-
   final TokensController tokensController = TokensController();
   final DiceController diceController = DiceController();
-  final GameController gameController=GameController();
+  late final GameController gameController;
+
+  Board({super.key}) {
+    gameController = GameController(
+      tokensController: tokensController,
+      diceController: diceController,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +27,9 @@ class Board extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final boardSize = constraints.maxWidth;
-            final cellSize = boardSize / 15;
+            final cellSize = boardSize / 11;
             final tokenHomeSize = cellSize * 4;
-            final tokenColorizeHomeSize = cellSize * 6;
+            final tokenColorizeHomeSize = cellSize * 4;
             return Container(
               color: Colors.white,
               child: Stack(
@@ -43,9 +47,8 @@ class Board extends StatelessWidget {
                         children: [
                           ...createAnimatedTokens(
                             cellSize: cellSize,
-                          controller:  tokensController,
-                           diceController:  diceController,
-                           gameController:  gameController
+                            controller: tokensController,
+                            gameController: gameController,
                           ),
                         ],
                       );
@@ -54,7 +57,6 @@ class Board extends StatelessWidget {
                   DiceWidget(
                     cellSize: cellSize,
                     diceController: diceController,
-                    tokensController: tokensController,
                     gameController: gameController,
                   ),
                 ],

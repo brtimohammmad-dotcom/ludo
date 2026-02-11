@@ -8,10 +8,10 @@ class TokenHomeMap {
 }
 
 List<TokenHomeMap> homes = [
-  TokenHomeMap(startMapRow: 1, startMapColumn: 1),
-  TokenHomeMap(startMapRow: 1, startMapColumn: 10),
-  TokenHomeMap(startMapRow: 10, startMapColumn: 1),
-  TokenHomeMap(startMapRow: 10, startMapColumn: 10),
+  TokenHomeMap(startMapRow: 0, startMapColumn: 0),
+  TokenHomeMap(startMapRow: 0, startMapColumn: 7),
+  TokenHomeMap(startMapRow: 7, startMapColumn: 0),
+  TokenHomeMap(startMapRow: 7, startMapColumn: 7),
 ];
 
 class TokenColorizeHomeMap {
@@ -30,27 +30,21 @@ List<TokenColorizeHomeMap> colorizeHomes = [
   TokenColorizeHomeMap(
     startMapRow: 0,
     startMapColumn: 0,
-    gradient: RadialGradient(
-      colors: [Colors.blueAccent, Colors.blue ],
-    ),
+    gradient: RadialGradient(colors: [Colors.blueAccent, Colors.blue]),
   ),
   TokenColorizeHomeMap(
-    startMapRow: 9,
+    startMapRow: 7,
     startMapColumn: 0,
-    gradient: RadialGradient(
-      colors: [Colors.redAccent, Colors.red],
-    ),
+    gradient: RadialGradient(colors: [Colors.redAccent, Colors.red]),
   ),
   TokenColorizeHomeMap(
     startMapRow: 0,
-    startMapColumn: 9,
-    gradient: RadialGradient(
-      colors: [Colors.yellowAccent, Colors.yellow],
-    ),
+    startMapColumn: 7,
+    gradient: RadialGradient(colors: [Colors.yellowAccent, Colors.yellow]),
   ),
   TokenColorizeHomeMap(
-    startMapRow: 9,
-    startMapColumn: 9,
+    startMapRow: 7,
+    startMapColumn: 7,
     gradient: RadialGradient(
       colors: [Colors.greenAccent.shade400, Colors.green],
     ),
