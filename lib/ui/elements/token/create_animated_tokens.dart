@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/game/logic/token-logic/token_logic.dart';
@@ -8,7 +7,6 @@ import 'package:ludo/ui/elements/token/token_widget.dart';
 List<AnimatedPositioned> createAnimatedTokens({
   required double cellSize,
   required TokensController controller,
-  required DiceController diceController,
   required GameController gameController,
 }) {
   return [
@@ -33,7 +31,6 @@ List<AnimatedPositioned> createAnimatedTokens({
           gameController: gameController,
           size: cellSize,
           controller: controller,
-          diceController: diceController,
         ),
       );
     }),

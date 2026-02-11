@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/controller/tokens-controller/on_tap_token.dart';
 import 'package:ludo/ui/mappers/token_ui_mapper.dart';
 
 class TokenWidget extends StatelessWidget {
   final Token token;
   final double size;
   final TokensController controller;
-  final DiceController diceController;
   final GameController gameController;
 
   const TokenWidget({
@@ -18,20 +15,19 @@ class TokenWidget extends StatelessWidget {
     required this.token,
     required this.size,
     required this.controller,
-    required this.diceController,
     required this.gameController,
   });
 
   @override
   Widget build(BuildContext context) {
-    bool isActiveToken = controller.tokenNotifier.value[token.id - 1].isActive;
+    Token newToken = controller.tokenNotifier.value.firstWhere((otherToken) {
+      return otherToken.id == token.id;
+    });
+    bool isActiveToken = newToken.isActive;
     return GestureDetector(
-      onTap: onTapToken(
-        token: token,
-        diceController: diceController,
-        controller: controller,
-        gameController: gameController,
-      ),
+      onTap: () {
+        gameController.onTapToken(token: newToken);
+      },
       child: SizedBox(
         width: size,
         height: size,
