@@ -6,16 +6,15 @@ import 'package:ludo/ui/elements/token/token_widget.dart';
 
 List<AnimatedPositioned> createAnimatedTokens({
   required double cellSize,
-  required TokensController controller,
   required GameController gameController,
 }) {
   return [
-    ...controller.tokenNotifier.value.map((token) {
+    ...gameController.gameState!.serverState.tokens.map((token) {
       Offset cell;
-      if (token.isInHome) {
-        cell = homePaths[token.player]![((token.id - 1) % 4)];
+      if (token.pathIndex == -1) {
+        cell = homePaths[token.playerColor.index]![((int.parse(token.id)) % 4)];
       } else {
-        cell = movementPaths[token.player]![token.pathIndex];
+        cell = movementPaths[token.playerColor.index]![token.pathIndex];
       }
       return AnimatedPositioned(
         duration: const Duration(milliseconds: 300),
@@ -30,7 +29,6 @@ List<AnimatedPositioned> createAnimatedTokens({
           token: token,
           gameController: gameController,
           size: cellSize,
-          controller: controller,
         ),
       );
     }),

@@ -9,12 +9,19 @@ class BoardBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Table(
-      children: List.generate(size, (row) {
-        return TableRow(
-          children: List.generate(size, (col) => _cell(row, col)),
-        );
-      }),
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(100), blurRadius: 20,),
+        ],
+      ),
+      child: Table(
+        children: List.generate(size, (row) {
+          return TableRow(
+            children: List.generate(size, (col) => _cell(row, col)),
+          );
+        }),
+      ),
     );
   }
 
@@ -28,6 +35,7 @@ class BoardBackground extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(width: 1, color: Colors.black26),
                 gradient: getColor(row, col),
+
               ),
             ),
     );

@@ -1,14 +1,14 @@
 import 'package:ludo/domain/model/state/client_game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 
-class CentralState {
+class GameState {
   final ClientState clientState;
   final ServerState serverState;
 
-  CentralState({required this.serverState, required this.clientState});
+  GameState({required this.serverState, required this.clientState});
 
-  CentralState copyWith({ClientState? clientState, ServerState? serverState}) {
-    return CentralState(
+  GameState copyWith({ClientState? clientState, ServerState? serverState}) {
+    return GameState(
       serverState: serverState ?? this.serverState,
       clientState: clientState ?? this.clientState,
     );

@@ -1,33 +1,48 @@
-class Token {
-  final int id;
-  final int player; // 1: red, 2: blue, 3: yellow, 4: green
-  final int pathIndex;
-  final bool isActive;
 
-  const Token._({
-    required this.isActive,
+enum PlayerColor { red, blue, yellow, green }
+
+extension PlayerColorExtension on PlayerColor {
+  PlayerColor get next {
+    final values = PlayerColor.values;
+    return values[(index + 1) % values.length];
+  }
+}
+
+class Token {
+  final String id;
+  final PlayerColor playerColor;
+  final int pathIndex;
+
+  const Token({
     required this.id,
-    required this.player,
-    required this.pathIndex,
+    required this.playerColor,
+    this.pathIndex = -1,
   });
 
-  factory Token.initial({
-    required int id,
-    required int player,
-    required int pathIndex,
-    required bool isActive,
-  }) {
-    return Token._(id: id, player: player, pathIndex: -1, isActive: isActive);
+
+  factory Token.fromJson(Map<String, dynamic> json) {
+    return Token(
+      id: json['id'],
+      playerColor: PlayerColor.values.firstWhere(
+        (e) => e.toString().split('.').last == json['color'],
+      ),
+      pathIndex: json['position'],
+    );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'playerColor': playerColor.toString().split('.').last,
+    'pathIndex': pathIndex,
+  };
 
   bool get isInHome => pathIndex == -1;
 
-  Token copyWith({int? newPathIndex, bool? newIsActive}) {
-    return Token._(
+  Token copyWith({int? pathIndex, bool? isActive}) {
+    return Token(
       id: id,
-      player: player,
-      pathIndex: newPathIndex ?? pathIndex,
-      isActive: newIsActive ?? isActive,
+      playerColor: playerColor,
+      pathIndex: pathIndex ?? this.pathIndex,
     );
   }
 }

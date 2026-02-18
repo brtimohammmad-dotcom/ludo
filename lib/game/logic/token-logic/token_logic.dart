@@ -6,14 +6,14 @@ import 'package:ludo/game/logic/token-logic/yellow_logic.dart';
 
 
 Map<int, List<Offset>> homePaths = {
-  1: redHomePath,
-  2: blueHomePath,
-  3: yellowHomePath,
-  4: greenHomePath,
+  0: redHomePath,
+  1: blueHomePath,
+  2: yellowHomePath,
+  3: greenHomePath,
 };
 Map<int, List<Offset>> movementPaths = {
-  1: redPath,
-  2: bluePath,
-  3: yellowPath,
-  4: greenPath,
+  0: redPath,
+  1: bluePath,
+  2: yellowPath,
+  3: greenPath,
 };

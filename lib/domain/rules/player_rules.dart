@@ -1,10 +1,10 @@
-import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
+import 'package:ludo/domain/model/token.dart';
 
-class PlayerRules {
-  bool canActivePlayer({required TokensController tokensController}) {
-    final canTokenActive = tokensController.tokenNotifier.value.any(
-      (token) => token.isActive,
-    );
-    return canTokenActive;
-  }
-}
+// class PlayerRules {
+//   bool canActivePlayer({required List<Token> tokens}) {
+//     final canTokenActive = tokens.any(
+//       (token) => token.isActive,
+//     );
+//     return canTokenActive;
+//   }
+// }
