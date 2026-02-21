@@ -11,9 +11,9 @@ List<Positioned> getHomeContainerList(double cellSize, double tokenHomeSize) {
           width: tokenHomeSize,
           height: tokenHomeSize,
           child: Container(
-            margin: EdgeInsets.all(20),
+            margin: EdgeInsets.all(cellSize/2.5),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(cellSize/2),
               gradient: RadialGradient(
                 colors: [
                   const Color(0xffD5B195).withAlpha(50),

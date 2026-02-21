@@ -33,11 +33,12 @@ class GameController extends ChangeNotifier {
     dataSource.connectToGame();
   }
 
+  void moveToken(Token liveToken){
+    dataSource.moveToken(liveToken);
+  }
+
   void rollDice() {
-
-
-      dataSource.rollDice();
-
+    dataSource.rollDice();
   }
   // void nextPlayer() {
   //   gameState.toggleTurn();

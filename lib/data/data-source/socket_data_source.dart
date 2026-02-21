@@ -5,6 +5,7 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/client_game_state.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/domain/model/token.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class SocketDataSource {
@@ -61,14 +62,16 @@ class SocketDataSource {
 
       onStateUpdated?.call(finalState);
     });
-    _socket!.on(('dice_rolled'), (data) {
 
-      final newServerState = ServerState.fromJson(data);
-      final newGameState = GameState(
-        serverState: newServerState,
-        clientState: clientState!,
-      );
-      onStateUpdated?.call(newGameState);
+    _socket!.on(('dice_rolled'), (data) {
+      updateGameState(data);
+    });
+
+    _socket!.on(('error'), (data) {
+      debugPrint(data);
+    });
+    _socket!.on(('token_moved'), (data) {
+      updateGameState(data);
     });
   }
 
@@ -76,5 +79,18 @@ class SocketDataSource {
     _socket!.emit(('roll_dice'));
   }
 
+  void moveToken(Token liveToken) {
+    _socket!.emit(('move_token'), (liveToken));
+  }
+
   void emitAction(String event, dynamic data) => _socket?.emit(event, data);
+
+  void updateGameState(dynamic data) {
+    final newServerState = ServerState.fromJson(data);
+    final newGameState = GameState(
+      serverState: newServerState,
+      clientState: clientState!,
+    );
+    onStateUpdated?.call(newGameState);
+  }
 }

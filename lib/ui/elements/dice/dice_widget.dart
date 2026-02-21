@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/game/logic/dice-logic/dice_logic.dart';
 
 class DiceWidget extends StatelessWidget {
@@ -34,7 +33,7 @@ class DiceWidget extends StatelessWidget {
           gameController.rollDice();
         },
         child: AnimatedContainer(
-          padding: EdgeInsets.all(isMyTurnToRoll ? 7 : 10),
+          padding: EdgeInsets.all(isMyTurnToRoll ? cellSize/8 : cellSize/6),
           duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
           width: cellSize * (1.5),
@@ -51,9 +50,9 @@ class DiceWidget extends StatelessWidget {
                 : [
                     BoxShadow(
                       color: Colors.black12,
-                      blurRadius: 8,
-                      offset: Offset(-4, 6),
-                      spreadRadius: -8,
+                      blurRadius: 4,
+                      offset: Offset(-2, 3),
+                      spreadRadius: -10,
                     ),
                   ],
           ),

@@ -20,7 +20,6 @@ class ServerState {
   });
 
   factory ServerState.fromJson(Map<String, dynamic> json) {
-    debugPrint(json['currentTurn']);
     return ServerState(
       tokens: (json['tokens'] as List).map((t) => Token.fromJson(t)).toList(),
       lastDiceValue: json['lastDiceValue'],

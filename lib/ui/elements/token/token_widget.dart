@@ -20,18 +20,20 @@ class TokenWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        gameController.moveToken(token);
+      },
       child: SizedBox(
         width: size,
         height: size,
         child: AnimatedContainer(
           curve: Curves.easeOut,
-          margin: EdgeInsets.all(7.0),
+          margin: EdgeInsets.all(size/5),
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             gradient: tokenGradient(token),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withAlpha(200), width: 3),
+            border: Border.all(color: Colors.white.withAlpha(200), width: size/15),
             boxShadow: [
               BoxShadow(
                 color: Colors.black38,
