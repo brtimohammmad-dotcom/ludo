@@ -32,8 +32,8 @@ class Token {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'playerColor': playerColor.toString().split('.').last,
-    'pathIndex': pathIndex,
+    'color': playerColor.toString().split('.').last,
+    'position': pathIndex,
   };
 
   bool get isInHome => pathIndex == -1;

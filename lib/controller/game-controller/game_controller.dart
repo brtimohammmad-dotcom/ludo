@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
+import 'package:ludo/data/repository/game_repository.dart';
 import 'package:ludo/domain/model/player.dart';
 
 import 'package:ludo/domain/model/state/client_game_state.dart';
@@ -19,26 +20,44 @@ extension GameStateX on GameState {
 
 class GameController extends ChangeNotifier {
   GameState? gameState;
-  late final SocketDataSource dataSource;
+  final GameRepository gameRepository = GameRepository();
+  ClientState? clientState;
 
   GameController() {
-    dataSource = SocketDataSource();
-    dataSource.onStateUpdated = (newState) {
-      gameState = newState;
-      notifyListeners();
+
+    // Set up callbacks to update game state when socket receives updates
+    gameRepository.dataSource.onStateUpdate = (ServerState state) {
+        gameState = GameState(
+          serverState: state,
+          clientState: clientState!,
+        );
+        notifyListeners();
+    };
+    
+    gameRepository.dataSource.onPlayerUpdate = (Player player) {
+      clientState = ClientState(
+        connectionStatus: ConnectionStatus.connected,
+        diceIsRolling: false,
+        tokenIsMoving: false,
+        isRequestInFlight: false,
+        livePlayer: player,
+      );
+
     };
   }
 
+
   void startGame() {
-    dataSource.connectToGame();
+    gameRepository.onConnect();
+    // State will be updated via callbacks when socket connects
   }
 
-  void moveToken(Token liveToken){
-    dataSource.moveToken(liveToken);
+  void moveToken(Token liveToken) {
+    gameRepository.moveToken(liveToken);
   }
 
   void rollDice() {
-    dataSource.rollDice();
+    gameRepository.rollDice();
   }
   // void nextPlayer() {
   //   gameState.toggleTurn();
@@ -133,4 +152,10 @@ class GameController extends ChangeNotifier {
   //   );
   //   return centralState.copyWith(serverState: newServerState);
   // }
+  
+  @override
+  void dispose() {
+    gameRepository.dispose();
+    super.dispose();
+  }
 }

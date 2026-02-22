@@ -1,6 +1,6 @@
 import 'package:ludo/domain/model/token.dart';
 
-enum PlayerStatus { waitingForRoll, waitingForMove, waitingForTurn,disconnected }
+enum PlayerStatus { waitingForRoll, waitingForMove, waitingForTurn,disconnected ,}
 
 class Player {
   final String userId;
