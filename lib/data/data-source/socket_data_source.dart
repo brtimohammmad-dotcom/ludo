@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
@@ -9,6 +8,7 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 
 typedef StateUpdateCallback = void Function(ServerState state);
 typedef PlayerUpdateCallback = void Function(Player player);
+typedef TokenMovedCallback = void Function(ServerState state);
 
 class SocketDataSource {
   io.Socket? _socket;
@@ -17,6 +17,7 @@ class SocketDataSource {
 
   StateUpdateCallback? onStateUpdate;
   PlayerUpdateCallback? onPlayerUpdate;
+  TokenMovedCallback? onTokenMoved;
 
   SocketDataSource();
 
@@ -61,48 +62,9 @@ class SocketDataSource {
     });
     _socket!.on(('token_moved'), (data) async {
       await playerInitialized.future;
-      if (serverState == null) return;
-
-      final json = data as Map<String, dynamic>;
-      final List<Token> newTokens = (json['tokens'] as List)
-          .map((t) => Token.fromJson(t as Map<String, dynamic>))
-          .toList();
-
-      // پیدا کردن توکنی که جابجا شده (همان id، pathIndex متفاوت)
-      int? movedTokenIndex;
-      int? targetPathIndex;
-      for (int i = 0; i < serverState!.tokens.length; i++) {
-        final oldToken = serverState!.tokens[i];
-        final newToken = newTokens.firstWhereOrNull((t) => t.id == oldToken.id);
-        if (newToken != null && newToken.pathIndex != oldToken.pathIndex) {
-          movedTokenIndex = i;
-          targetPathIndex = newToken.pathIndex;
-          break;
-        }
-      }
-
-      if (movedTokenIndex == null || targetPathIndex == null) {
-        serverState = ServerState.fromJson(json);
-        onStateUpdate?.call(serverState!);
-        return;
-      }
-
-      final oldPathIndex = serverState!.tokens[movedTokenIndex].pathIndex;
-
-      for (int step = oldPathIndex; step < targetPathIndex; step++) {
-        final currentToken = serverState!.tokens[movedTokenIndex];
-        final updatedToken = currentToken.copyWith(pathIndex: step + 1);
-        final updatedTokens = List<Token>.from(serverState!.tokens);
-        updatedTokens[movedTokenIndex] = updatedToken;
-        serverState = serverState!.copyWith(tokens: updatedTokens);
-        onStateUpdate?.call(serverState!);
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
-      if (serverState!.tokens != newTokens) {
-        serverState = ServerState.fromJson(json);
-        onStateUpdate?.call(serverState!);
-      }
-
+      final Map<String, dynamic> json = data as Map<String, dynamic>;
+      serverState = ServerState.fromJson(json);
+      onTokenMoved?.call(serverState!);
     });
   }
 

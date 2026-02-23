@@ -1,20 +1,31 @@
 import 'package:ludo/domain/model/token.dart';
 
-enum PlayerStatus { waitingForRoll, waitingForMove, waitingForTurn,disconnected ,}
+enum PlayerStatus {
+  waitingForRoll,
+  diceIsRolling,
+  waitingForMove,
+  tokenIsMoving,
+  waitingForTurn,
+  disconnected,
+}
+
+enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
 
 class Player {
   final String userId;
   final String username;
   final PlayerColor color;
   final List<Token> tokens;
-  final PlayerStatus status;
+  final PlayerStatus playerStatus;
+  final ConnectionStatus connectionStatus;
 
   Player({
     required this.userId,
     required this.username,
     required this.color,
     required this.tokens,
-    required this.status,
+    required this.playerStatus,
+    required this.connectionStatus
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
@@ -26,7 +37,8 @@ class Player {
       color: PlayerColor.values.byName(json['color']),
       tokens: tokenList,
       userId: json['userId'].toString(),
-      status: PlayerStatus.values.byName(json['status']),
+      playerStatus: PlayerStatus.values.byName(json['status']),
+      connectionStatus: ConnectionStatus.connected
     );
   }
 
@@ -35,14 +47,16 @@ class Player {
     String? username,
     PlayerColor? color,
     List<Token>? tokens,
-    PlayerStatus? status,
+    PlayerStatus? playerStatus,
+    ConnectionStatus? connectionStatus
   }) {
     return Player(
+      connectionStatus: connectionStatus??this.connectionStatus,
       userId: userId ?? this.userId,
       username: username ?? this.username,
       color: color ?? this.color,
       tokens: tokens ?? this.tokens,
-      status: status ?? this.status,
+      playerStatus: playerStatus ?? this.playerStatus,
     );
   }
 }

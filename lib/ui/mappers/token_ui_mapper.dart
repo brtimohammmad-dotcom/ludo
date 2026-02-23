@@ -19,33 +19,43 @@ Gradient tokenGradient(Token token) {
 }
 
 List<BoxShadow> activeTokenShadow(Token token) {
-  double colorBlurRadius=9;
-  switch (token.playerColor.index) {
-    case 0:
+  double colorBlurRadius = 9;
+  switch (token.playerColor) {
+    case PlayerColor.red:
       return [
         BoxShadow(color: Colors.white, blurRadius: 8, spreadRadius: 1),
-        BoxShadow(color: Colors.red, blurRadius: colorBlurRadius, spreadRadius: 2),
-
+        BoxShadow(
+          color: Colors.red,
+          blurRadius: colorBlurRadius,
+          spreadRadius: 2,
+        ),
       ];
-    case 1:
+    case PlayerColor.blue:
       return [
         BoxShadow(color: Colors.white, blurRadius: 8, spreadRadius: 1),
-        BoxShadow(color: Colors.blue, blurRadius: colorBlurRadius, spreadRadius: 2),
-
+        BoxShadow(
+          color: Colors.blue,
+          blurRadius: colorBlurRadius,
+          spreadRadius: 2,
+        ),
       ];
-    case 2:
+    case PlayerColor.yellow:
       return [
         BoxShadow(color: Colors.white, blurRadius: 8, spreadRadius: 1),
-        BoxShadow(color: Colors.yellow, blurRadius: colorBlurRadius, spreadRadius: 2),
-
+        BoxShadow(
+          color: Colors.yellow,
+          blurRadius: colorBlurRadius,
+          spreadRadius: 2,
+        ),
       ];
-    case 3:
+    case PlayerColor.green:
       return [
         BoxShadow(color: Colors.white, blurRadius: 8, spreadRadius: 4),
-        BoxShadow(color: Colors.green, blurRadius: colorBlurRadius, spreadRadius: 2),
-
+        BoxShadow(
+          color: Colors.green,
+          blurRadius: colorBlurRadius,
+          spreadRadius: 2,
+        ),
       ];
-    default:
-      throw Exception('invalid Player');
   }
 }

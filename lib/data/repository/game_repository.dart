@@ -1,6 +1,5 @@
 import 'package:ludo/data/data-source/socket_data_source.dart';
-import 'package:ludo/domain/model/player.dart';
-import 'package:ludo/domain/model/state/server_game_state.dart';
+
 import 'package:ludo/domain/model/token.dart';
 
 class GameRepository {

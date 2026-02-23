@@ -14,9 +14,6 @@ class DiceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMyTurnToRoll =
-        gameController.gameState!.serverState.currentTurn ==
-        gameController.gameState!.clientState.livePlayer.color;
     return AnimatedPositioned(
       curve: Curves.easeOutCirc,
       duration: const Duration(milliseconds: 500),
@@ -33,13 +30,15 @@ class DiceWidget extends StatelessWidget {
           gameController.rollDice();
         },
         child: AnimatedContainer(
-          padding: EdgeInsets.all(isMyTurnToRoll ? cellSize/8 : cellSize/6),
+          padding: EdgeInsets.all(
+            gameController.isMyTurnToRoll() ? cellSize / 8 : cellSize / 6,
+          ),
           duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
           width: cellSize * (1.5),
           height: cellSize * (1.5),
           decoration: BoxDecoration(
-            boxShadow: isMyTurnToRoll
+            boxShadow: gameController.isMyTurnToRoll()
                 ? [
                     BoxShadow(
                       color: Colors.white,

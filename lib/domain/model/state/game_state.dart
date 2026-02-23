@@ -1,16 +1,16 @@
-import 'package:ludo/domain/model/state/client_game_state.dart';
+import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 
 class GameState {
-  final ClientState clientState;
+  final Player livePlayer;
   final ServerState serverState;
 
-  GameState({required this.serverState, required this.clientState});
+  GameState({required this.serverState, required this.livePlayer});
 
-  GameState copyWith({ClientState? clientState, ServerState? serverState}) {
+  GameState copyWith({Player? livePlayer, ServerState? serverState}) {
     return GameState(
       serverState: serverState ?? this.serverState,
-      clientState: clientState ?? this.clientState,
+      livePlayer: livePlayer ?? this.livePlayer,
     );
   }
 }

@@ -1,9 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/dice-controller/dice_controller.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/controller/tokens-controller/tokens_controller.dart';
 import 'package:ludo/ui/elements/board-background/board_background.dart';
 import 'package:ludo/ui/elements/board-background/token-home/home_container_list.dart';
 import 'package:ludo/ui/elements/dice/dice_widget.dart';
