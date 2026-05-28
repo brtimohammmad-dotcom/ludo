@@ -29,7 +29,7 @@ class SocketDataSource {
 
   void connectToGame({required int gameMode}) async{
     socket = io.io(
-      'http://10.74.158.6:3000',
+      'https://ludo-tecb.onrender.com',
       io.OptionBuilder().setTransports(['websocket']).build(),
     );
 
