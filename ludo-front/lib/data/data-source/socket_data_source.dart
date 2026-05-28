@@ -27,10 +27,14 @@ class SocketDataSource {
 
   Completer<void> playerInitialized = Completer<void>();
 
-  void connectToGame({required int gameMode}) async{
+  void connectToGame({required int gameMode}) async {
     socket = io.io(
       'https://ludo-backend-8ihb.onrender.com',
-      io.OptionBuilder().setTransports(['websocket']).build(),
+      io.OptionBuilder()
+          .setTransports(['polling', 'websocket'])
+          .enableAutoConnect()
+          .setExtraHeaders({'Connection': 'upgrade', 'Upgrade': 'websocket'})
+          .build(),
     );
 
     socket!.onConnect((_) {
