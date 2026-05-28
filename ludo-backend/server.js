@@ -6,9 +6,9 @@ const { PORT: defaultPort, VERSION } = require("./src/constants/gameConfig");
 const REAL_PORT = process.env.PORT || defaultPort || 3000;
 
 const server = http.createServer();
-const io = require("socket.io")(server, { 
+const io = require("socket.io")(server, {
   cors: { origin: "*" },
-  transports: ['websocket', 'polling'] // حتماً این را هم اضافه کن تا وب‌سوکت فلاتر وب راحت‌تر وصل شود
+  transports: ["websocket", "polling"], // حتماً این را هم اضافه کن تا وب‌سوکت فلاتر وب راحت‌تر وصل شود
 });
 
 const registerGameHandlers = require("./src/sockets/gameHandler");
