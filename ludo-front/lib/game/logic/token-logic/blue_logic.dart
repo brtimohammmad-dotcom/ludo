@@ -1,0 +1,53 @@
+import 'package:flutter/material.dart';
+
+List<Offset> blueHomePath = [
+  const Offset(0, 0),
+  const Offset(0, 2),
+  const Offset(2, 0),
+  const Offset(2, 2),
+];
+List<Offset> bluePath = [
+  //blue
+
+  const Offset(4, 0),
+  const Offset(4, 1),
+  const Offset(4, 2),
+  const Offset(4, 3),
+  const Offset(3, 4),
+  const Offset(2, 4),
+  const Offset(1, 4),
+  const Offset(0, 4),
+  const Offset(0, 5),
+  const Offset(0, 6),
+  const Offset(1, 6),
+  const Offset(2, 6),
+  const Offset(3, 6),
+  const Offset(4, 7),
+  const Offset(4, 8),
+  const Offset(4, 9),
+  const Offset(4, 10),
+  const Offset(5, 10),
+  const Offset(6, 10),
+  const Offset(6, 9),
+  const Offset(6, 8),
+  const Offset(6, 7),
+  const Offset(7, 6),
+  const Offset(8, 6),
+  const Offset(9, 6),
+  const Offset(10, 6),
+  const Offset(10, 5),
+  const Offset(10, 4),
+  const Offset(9, 4),
+  const Offset(8, 4),
+  const Offset(7, 4),
+  const Offset(6, 3),
+  const Offset(6, 2),
+  const Offset(6, 1),
+  const Offset(6, 0),
+  const Offset(5, 0),
+  //end
+  const Offset(5, 1),
+  const Offset(5, 2),
+  const Offset(5, 3),
+  const Offset(5, 4),
+];

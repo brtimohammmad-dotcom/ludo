@@ -1,0 +1,9 @@
+# Node backend
+ludo-backend/node_modules/
+ludo-backend/.env
+
+# Flutter frontend
+ludo-front/.dart_tool/
+ludo-front/.flutter-plugins
+ludo-front/.flutter-plugins-dependencies
+ludo-front/build/

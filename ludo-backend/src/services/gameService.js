@@ -1,0 +1,286 @@
+const processingGames = new Set();
+const { updateGameState } = require("../database/games");
+const { canActivateToken, findKickToken } = require("../logic/canMove");
+const {
+  TOW_PLAYER_COLORS,
+  FOUR_PLAYER_COLORS,
+} = require("../constants/gameConfig");
+const initialState = require("../models/initialState"); // اضافه شود
+const { resetTimer, pauseTimer, stopTimer } = require("./turnTimerService");
+
+function handleRollDice(gameId, socket, io) {
+  // دریافت state از حافظه سراسری
+  const gameState = initialState.getGameState(gameId);
+
+  if (!gameState) {
+    return socket.emit("error", "Game not found!");
+  }
+
+  if (gameState.game_status !== "start") {
+    return socket.emit("error", "The game hasn't started yet!");
+  }
+
+  // پیدا کردن بازیکن بر اساس socket.id
+  const player = gameState.players.find((p) => p.socketId === socket.id);
+
+  if (!player) {
+    return socket.emit("error", "Player not found!");
+  }
+  if (processingGames.has(gameId)) {
+    return socket.emit("error", "در حال پردازش...");
+  }
+
+  processingGames.add(gameId);
+  try {
+    // بررسی نوبت بازیکن
+    let colorIdx =
+      gameState.game_mode === 4
+        ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
+        : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
+    if (
+      player.color !== gameState.current_turn ||
+      gameState.turn_status !== "waitingForRoll"
+    ) {
+      return socket.emit("error", "Not your turn!");
+    }
+    pauseTimer(gameId);
+    // انداختن تاس
+    const dice = Math.floor(Math.random() * 6) + 1;
+
+    // بررسی توکن‌های فعال
+    const isActivePlayer = gameState.tokens.some((t) =>
+      canActivateToken(t, gameState, dice),
+    );
+
+    // به‌روز رسانی وضعیت بازی بر اساس نتیجه تاس
+    let updates = { last_dice_value: dice };
+    let changePlayer = false;
+    if (isActivePlayer) {
+      updates.turn_status = "waitingForMove";
+    } else if (dice === 6) {
+      updates.turn_status = "waitingForRoll";
+    } else {
+      while (
+        gameState.players[(colorIdx + 1) % gameState.game_mode]
+          .player_status === "offline"
+      ) {
+        colorIdx = colorIdx + 1;
+      }
+      updates.current_turn =
+        gameState.game_mode === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode]
+          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode];
+      updates.turn_status = "waitingForRoll";
+      changePlayer = true;
+    }
+
+    // آپدیت در حافظه سراسری
+    initialState.updateGameState(gameId, {
+      ...updates,
+    });
+
+    const finalGameState = initialState.getGameState(gameId);
+
+    // پخش رویداد به همه بازیکنان این بازی
+    io.to(gameId).emit("dice_rolled", finalGameState);
+    if (changePlayer) {
+      initialState.updateGameState(gameId, {
+        turn_status: "waitingForAnimate",
+      });
+      setTimeout(() => {
+        initialState.updateGameState(gameId, {
+          turn_status: "waitingForRoll",
+        });
+
+        resetTimer(gameId, io);
+      }, 1000);
+    } else {
+      resetTimer(gameId, io);
+    }
+  } finally {
+    processingGames.delete(gameId);
+  }
+}
+function handleMoveToken(gameId, playerSocketId, token, io) {
+  // دریافت state از حافظه سراسری
+  const gameState = initialState.getGameState(gameId);
+
+  if (!gameState) {
+    return { error: "Game not found!" };
+  }
+
+  const player = gameState.players.find((p) => p.socketId === playerSocketId);
+
+  if (!player) return { error: "Player not found!" };
+
+  if (!token || !token.id) return { error: "Invalid token!" };
+
+  const tokenIndex = gameState.tokens.findIndex((t) => {
+    return Number(t.id) === Number(token.id);
+  });
+
+  if (tokenIndex === -1) return { error: "Token not found!" };
+  if (processingGames.has(gameId)) {
+    return socket.emit("error", "در حال پردازش...");
+  }
+  processingGames.add(gameId);
+  try {
+    const currentToken = gameState.tokens[tokenIndex];
+    let colorIdx =
+      gameState.game_mode === 4
+        ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
+        : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
+    const canMove =
+      gameState.turn_status === "waitingForMove" &&
+      canActivateToken(currentToken, gameState, gameState.last_dice_value) &&
+      player.color === currentToken.color &&
+      gameState.current_turn === player.color;
+
+    if (!canMove) return { error: "Invalid move!" };
+
+    // کپی از توکن‌ها برای تغییر
+    let updatedTokens = [...gameState.tokens];
+
+    const kickedToken = findKickToken(
+      currentToken,
+      gameState.last_dice_value,
+      gameState.tokens,
+    );
+
+    if (kickedToken) {
+      const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
+      updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };
+    }
+
+    // حرکت توکن
+    if (currentToken.position === -1) {
+      updatedTokens[tokenIndex] = {
+        ...currentToken,
+        position: 0,
+      };
+    } else {
+      updatedTokens[tokenIndex] = {
+        ...currentToken,
+        position: currentToken.position + gameState.last_dice_value,
+      };
+    }
+
+    const isSix = gameState.last_dice_value === 6;
+
+    let updates = {
+      tokens: updatedTokens,
+    };
+
+    if (isSix) {
+      updates.turn_status = "waitingForRoll";
+    } else {
+      while (
+        gameState.players[(colorIdx + 1) % gameState.game_mode]
+          .player_status === "offline"
+      ) {
+        colorIdx = colorIdx + 1;
+      }
+      updates.current_turn =
+        gameState.game_mode === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode]
+          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode];
+      updates.turn_status = "waitingForRoll";
+    }
+
+    // آپدیت در حافظه سراسری
+    initialState.updateGameState(gameId, {
+      tokens: updatedTokens,
+      turn_status: updates.turn_status,
+      current_turn: updates.current_turn || gameState.current_turn,
+    });
+    const animatingGameState = initialState.getGameState(gameId);
+
+    // پخش رویداد به همه بازیکنان این بازی
+    io.to(gameId).emit("token_moved", animatingGameState);
+    initialState.updateGameState(gameId, {
+      turn_status: "waitingForAnimate",
+    });
+    pauseTimer(gameId);
+
+    let time;
+    if (currentToken.position === -1) {
+      time = 300;
+    } else {
+      time = gameState.last_dice_value * 300;
+    }
+    setTimeout(async () => {
+      const playerTokens = initialState
+        .getGameState(gameId)
+        .tokens.filter((t) => t.color === player.color);
+      initialState.updateGameState(gameId, {
+        turn_status: "waitingForRoll",
+      });
+      const hasNotWon = playerTokens.some((t) => t.position !== 39);
+      if (hasNotWon) {
+        resetTimer(gameId, io);
+      } else {
+        console.log(`Game ${gameId} finished, winner: ${player.username}`);
+        initialState.updateGameState(gameId, {
+          game_status: "finished",
+          winner: player,
+        });
+        const winnerGameState = initialState.getGameState(gameId);
+        await updateGameState(gameId, {
+          game_status: "finished",
+          winner: JSON.stringify(player),
+          players: JSON.stringify(winnerGameState.players),
+          end_at: new Date(),
+        });
+        stopTimer(gameId);
+        io.to(gameId).emit("game_finished", winnerGameState);
+        initialState.deleteGameState(gameId);
+      }
+    }, time);
+  } finally {
+    processingGames.delete(gameId);
+  }
+}
+async function handleExitingGame(gameId, telegramId, io) {
+  let currentGame = initialState.getGameState(gameId);
+  const correctPlayers = currentGame.players.map((p) => {
+    if (p.telegram_id === telegramId) {
+      return { ...p, player_status: "offline" };
+    } else {
+      return p;
+    }
+  });
+  initialState.updateGameState(gameId, { players: correctPlayers });
+  currentGame = initialState.getGameState(gameId);
+  const numberOfOnlines = currentGame.players.filter(
+    (p) => p.player_status === "online",
+  ).length;
+  if (numberOfOnlines === 0 && currentGame.game_status === "waitingForPlayer") {
+    await updateGameState(gameId, {
+      game_status: "cancel",
+      players: JSON.stringify(currentGame.players),
+      end_at: new Date(),
+    });
+    initialState.deleteGameState(gameId);
+  }
+  if (numberOfOnlines === 1) {
+    const player = currentGame.players.find(
+      (p) => p.player_status === "online",
+    );
+    console.log(`Game ${gameId} finished, winner: ${player.username}`);
+    initialState.updateGameState(gameId, {
+      game_status: "finished",
+      winner: player,
+    });
+    const winnerGameState = initialState.getGameState(gameId);
+    await updateGameState(gameId, {
+      game_status: "finished",
+      winner: JSON.stringify(player),
+      players: JSON.stringify(winnerGameState.players),
+      end_at: new Date(),
+    });
+    stopTimer(gameId);
+    io.to(gameId).emit("game_finished", winnerGameState);
+    initialState.deleteGameState(gameId);
+  }
+}
+module.exports = { handleRollDice, handleMoveToken, handleExitingGame };
