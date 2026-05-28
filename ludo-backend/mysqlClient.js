@@ -16,4 +16,5 @@ const pool = mysql.createPool({
 // این همان چیزی است که شما در نهایت export خواهید کرد
 const db = pool.promise();
 
-modu
+module.exports = db;
+
