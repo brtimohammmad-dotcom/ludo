@@ -1,68 +1,64 @@
-const db = require("../../mysqlClient");
+// اتصال به کلاینت جدید دیتابیس
+const supabase = require("../../db");
 const initialState = require("../models/initialState");
 
-async function findWaitingGameInDatabase() {
-  try {
-    const [rows] = await db.query(
-      "SELECT * FROM game WHERE game_status = ? LIMIT 1",
-      ["waitingForPlayer"],
-    );
-
-    // اگر رکوردی وجود داشت، اولین رکورد را برگردان، در غیر این صورت null
-    return rows.length > 0 ? rows[0] : null;
-  } catch (error) {
-    console.error("خطا در پیدا کردن بازی در انتظار:", error);
-    throw error;
-  }
-}
-
+/**
+ * ایجاد یک بازی جدید در دیتابیس
+ */
 async function createNewGameInDatabase(gameMode) {
   try {
-    // درج رکورد جدید با مقادیر پیش‌فرض
-    const [result] = await db.query(
-      "INSERT INTO game (game_mode) VALUES (?)",
-      [gameMode], // مقدار پیش‌فرض برای وضعیت بازی
-    );
+    // درج رکورد جدید و دریافت آنی کل اطلاعات رکورد با استفاده از select()
+    const { data: newGame, error } = await supabase
+      .from("game")
+      .insert([{ game_mode: gameMode }])
+      .select()
+      .single();
 
-    // دریافت رکورد تازه ایجاد شده
-    const [rows] = await db.query("SELECT * FROM game WHERE game_id = ?", [
-      result.insertId,
-    ]);
+    if (error) throw error;
 
-    return rows[0];
+    return newGame; // شامل game_id تولید شده به همراه مقادیر پیش‌فرض (started_at و ...)
   } catch (error) {
     console.error("خطا در ایجاد بازی جدید:", error);
     throw error;
   }
 }
 
+/**
+ * به‌روزرسانی فیلدهای داینامیک بازی
+ */
 async function updateGameState(id, fields) {
-  const setClause = Object.keys(fields)
-    .map((key) => `${key} = ?`)
-    .join(", ");
-  const values = [...Object.values(fields), id];
+  try {
+    // در سوپابیس برای آپدیت داینامیک نیازی به ساختن دستی کلاز SET (مثل نقشه کردن Keys و Values) نیست؛
+    // خود پکیج آبجکت fields را می‌گیرد و فیلدهای تغییر یافته را اعمال می‌کند.
+    const { data: updatedGame, error } = await supabase
+      .from("game")
+      .update(fields)
+      .eq("game_id", id)
+      .select()
+      .single();
 
-  const [updateResult] = await db.query(
-    `UPDATE game SET ${setClause} WHERE game_id = ?`,
-    values,
-  );
+    if (error) throw error;
 
-  const [rows] = await db.query("SELECT * FROM game WHERE game_id = ?", [id]);
-  const players = initialState.getGameState(id).players;
-  return {
-    ...rows[0],
-    players: players.map((p) => ({
-      socketId: p.socket_id,
-      telegramId: p.telegram_id,
-      color: p.color,
-      username: p.username,
-      player_status: p.player_status,
-    })),
-  };
+    // دریافت لیست بازیکنان از استیت لوکال برنامه (طبق کد قبلی خودت)
+    const players = initialState.getGameState(id)?.players || [];
+
+    return {
+      ...updatedGame,
+      players: players.map((p) => ({
+        socketId: p.socket_id,
+        telegramId: p.telegram_id,
+        color: p.color,
+        username: p.username,
+        player_status: p.player_status,
+      })),
+    };
+  } catch (error) {
+    console.error("خطا در به‌روزرسانی وضعیت بازی:", error);
+    throw error;
+  }
 }
 
 module.exports = {
-  findWaitingGameInDatabase,
   createNewGameInDatabase,
   updateGameState,
 };

@@ -227,8 +227,8 @@ function handleMoveToken(gameId, playerSocketId, token, io) {
         const winnerGameState = initialState.getGameState(gameId);
         await updateGameState(gameId, {
           game_status: "finished",
-          winner: JSON.stringify(player),
-          players: JSON.stringify(winnerGameState.players),
+          winner: player,
+          players: winnerGameState.players,
           end_at: new Date(),
         });
         stopTimer(gameId);
@@ -257,7 +257,7 @@ async function handleExitingGame(gameId, telegramId, io) {
   if (numberOfOnlines === 0 && currentGame.game_status === "waitingForPlayer") {
     await updateGameState(gameId, {
       game_status: "cancel",
-      players: JSON.stringify(currentGame.players),
+      players: JcurrentGame.players,
       end_at: new Date(),
     });
     initialState.deleteGameState(gameId);
@@ -274,8 +274,8 @@ async function handleExitingGame(gameId, telegramId, io) {
     const winnerGameState = initialState.getGameState(gameId);
     await updateGameState(gameId, {
       game_status: "finished",
-      winner: JSON.stringify(player),
-      players: JSON.stringify(winnerGameState.players),
+      winner: player,
+      players: winnerGameState.players,
       end_at: new Date(),
     });
     stopTimer(gameId);

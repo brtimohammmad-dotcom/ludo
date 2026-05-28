@@ -87,9 +87,9 @@ function startTimer(gameId, io) {
           const winnerGameState = initialState.getGameState(gameId);
           await updateGameState(gameId, {
             game_status: "finished",
-            players: JSON.stringify(winnerGameState.players),
+            players: winnerGameState.players,
 
-            winner: JSON.stringify(onlinePlayer),
+            winner: onlinePlayer,
             end_at: new Date(),
           });
 
