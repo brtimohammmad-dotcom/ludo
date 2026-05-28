@@ -1,5 +1,5 @@
 // خروجی جدید دیتابیس را به فایلی که ساختی وصل می‌کنیم
-const supabase = require("../../db");
+const supabase = require("../../postgresql");
 const initialState = require("../models/initialState");
 
 async function addPlayerToGameOnDatabase(player, gameId, color) {

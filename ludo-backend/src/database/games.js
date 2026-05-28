@@ -1,5 +1,5 @@
 // اتصال به کلاینت جدید دیتابیس
-const supabase = require("../../db");
+const supabase = require("../../postgresql");
 const initialState = require("../models/initialState");
 
 /**
