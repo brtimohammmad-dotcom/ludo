@@ -22,7 +22,7 @@ class Token {
 
   factory Token.fromJson(Map<String, dynamic> json) {
     return Token(
-      id: json['id'],
+      id: json['id'].toString(),
       playerColor: PlayerColor.values.firstWhere(
         (e) => e.toString().split('.').last == json['color'],
       ),

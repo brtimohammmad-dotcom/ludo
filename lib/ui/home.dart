@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/ui/elements/board.dart';
+import 'package:ludo/ui/join_screen.dart';
 
 class Home extends StatelessWidget {
   final GameController gameController;
@@ -10,7 +10,9 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(children: [Expanded(child: Board(gameController: gameController,))]),
+      child: Column(
+        children: [Expanded(child: JoinScreen(gameController: gameController))],
+      ),
     );
   }
 }

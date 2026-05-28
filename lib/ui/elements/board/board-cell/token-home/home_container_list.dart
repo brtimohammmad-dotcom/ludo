@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/ui/elements/board-background/token-home/get_token_home.dart';
+import 'package:ludo/ui/elements/board/board-cell/token-home/get_token_home.dart';
 
 List<Positioned> getHomeContainerList(double cellSize, double tokenHomeSize) {
   return [

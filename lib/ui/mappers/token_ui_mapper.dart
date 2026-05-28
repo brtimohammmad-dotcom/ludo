@@ -19,7 +19,7 @@ Gradient tokenGradient(Token token) {
 }
 
 List<BoxShadow> activeTokenShadow(Token token) {
-  double colorBlurRadius = 9;
+  double colorBlurRadius = 12;
   switch (token.playerColor) {
     case PlayerColor.red:
       return [

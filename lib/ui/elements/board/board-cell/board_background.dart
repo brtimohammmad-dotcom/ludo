@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/ui/elements/board-background/cell_decoration.dart';
+import 'package:ludo/ui/elements/board/board-cell/cell_decoration.dart';
 import 'center_painter.dart';
 
 class BoardBackground extends StatelessWidget {

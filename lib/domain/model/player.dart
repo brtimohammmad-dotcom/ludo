@@ -1,62 +1,52 @@
 import 'package:ludo/domain/model/token.dart';
 
-enum PlayerStatus {
-  waitingForRoll,
-  diceIsRolling,
-  waitingForMove,
-  tokenIsMoving,
-  waitingForTurn,
-  disconnected,
-}
-
 enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
 
+enum PlayerStatus { online, offline }
+
 class Player {
-  final String userId;
+  final int userId;
   final String username;
   final PlayerColor color;
-  final List<Token> tokens;
-  final PlayerStatus playerStatus;
   final ConnectionStatus connectionStatus;
+  final PlayerStatus playerStatus;
+  final int numberOfAbsences;
 
   Player({
+    required this.numberOfAbsences,
     required this.userId,
     required this.username,
     required this.color,
-    required this.tokens,
+    required this.connectionStatus,
     required this.playerStatus,
-    required this.connectionStatus
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
-    List<Token> tokenList = (json['tokens'] as List).map((token) {
-      return Token.fromJson(token);
-    }).toList();
     return Player(
+      numberOfAbsences: json['numberOfAbsences'],
       username: json['username'],
       color: PlayerColor.values.byName(json['color']),
-      tokens: tokenList,
-      userId: json['userId'].toString(),
-      playerStatus: PlayerStatus.values.byName(json['status']),
-      connectionStatus: ConnectionStatus.connected
+      userId: json['telegram_id'],
+      playerStatus: PlayerStatus.values.byName(json['player_status']),
+      connectionStatus: ConnectionStatus.connected,
     );
   }
 
   Player copyWith({
-    String? userId,
+    int? userId,
     String? username,
     PlayerColor? color,
-    List<Token>? tokens,
+    ConnectionStatus? connectionStatus,
     PlayerStatus? playerStatus,
-    ConnectionStatus? connectionStatus
+    int? numberOfAbsences,
   }) {
     return Player(
-      connectionStatus: connectionStatus??this.connectionStatus,
+      numberOfAbsences: numberOfAbsences ?? this.numberOfAbsences,
+      playerStatus: playerStatus ?? this.playerStatus,
+      connectionStatus: connectionStatus ?? this.connectionStatus,
       userId: userId ?? this.userId,
       username: username ?? this.username,
       color: color ?? this.color,
-      tokens: tokens ?? this.tokens,
-      playerStatus: playerStatus ?? this.playerStatus,
     );
   }
 }
