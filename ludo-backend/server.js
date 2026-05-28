@@ -6,7 +6,12 @@ const { PORT, VERSION } = require("./src/constants/gameConfig");
 
 const server = http.createServer();
 const io = require("socket.io")(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: "*", // اجازه دادن به همه دامنه ها (از جمله کلاینت فلاتر و تلگرام)
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  transports: ["websocket", "polling"], // مطمئن شدن از پشتیبانی هر دو حالت
 });
 
 const registerGameHandlers = require("./src/sockets/gameHandler");
