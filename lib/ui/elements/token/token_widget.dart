@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
-import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/domain/rules/token_rules.dart';
 import 'package:ludo/ui/mappers/token_ui_mapper.dart';

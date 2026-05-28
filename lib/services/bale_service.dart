@@ -4,6 +4,8 @@ library;
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
+import 'package:flutter/cupertino.dart';
+
 @JS('window')
 external JSObject? get jsWindow;
 
@@ -26,7 +28,7 @@ class BaleUserService {
 
       return (initData as JSString).toDart;
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
       return '';
     }
   }
@@ -60,7 +62,7 @@ class BaleUserService {
         'languageCode': (userObj.getProperty('language_code'.toJS) as JSString?)?.toDart ?? 'fa',
       };
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
       return _getDefaultUser();
     }
   }

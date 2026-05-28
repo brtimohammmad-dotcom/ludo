@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/services/bale_service.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 typedef StateUpdateCallback = void Function(ServerState state);
