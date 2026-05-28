@@ -10,6 +10,9 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10, // حداکثر تعداد اتصالات همزمان
   queueLimit: 0,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // از نسخه promise برای استفاده با async/await راحت‌تر است
