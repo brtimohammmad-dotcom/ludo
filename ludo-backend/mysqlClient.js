@@ -4,12 +4,18 @@ const mysql = require("mysql2");
 // تنظیمات اتصال به دیتابیس MySQL محلی یا سرور
 // این مقادیر را بر اساس تنظیمات دیتابیس خودتان تغییر دهید
 const pool = mysql.createPool({
-  host: "127.0.0.1", // آدرس سرور دیتابیس شما (مثلاً localhost یا 127.0.0.1)
-  user: "root", // نام کاربری MySQL شما
-  database: "ludo", // نام دیتابیسی که قبلاً ساختهاید
+  // اگر متغیر محیطی بود از آن استفاده کند، در غیر این صورت از لوکال‌هاست (برای سیستم خودت)
+  host: process.env.DB_HOST || "127.0.0.1", 
+  user: process.env.DB_USER || "root", 
+  password: process.env.DB_PASSWORD || "", // رمز عبور سیستم خودت (اگر دارد)
+  database: process.env.DB_NAME || "ludo", 
+  port: process.env.DB_PORT || 3306, // پورت پیش‌فرض mysql در سیستم خودت
+  
   waitForConnections: true,
-  connectionLimit: 10, // حداکثر تعداد اتصالات همزمان
+  connectionLimit: 10,
   queueLimit: 0,
+  
+  // این بخش برای اتصال به سرور ابری آایون عالی و بدون نقص کار خواهد کرد
   ssl: {
     rejectUnauthorized: false
   }
