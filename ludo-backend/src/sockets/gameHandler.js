@@ -18,6 +18,7 @@ module.exports = (io) => {
         console.log(gameMode);
         socket.emit("error", "your game mode is incorrect");
       }
+      console.log(initData)
       const isValid=validate(initData, "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho");
       if (!isValid) {
         return socket.emit(
