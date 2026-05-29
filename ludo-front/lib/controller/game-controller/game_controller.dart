@@ -146,17 +146,17 @@ class GameController extends ChangeNotifier {
             // notifyListeners();
             //
             // await Future.delayed(const Duration(milliseconds: 150));
-            // ServerState changeLastDiceValueAndTurnStatusServerState = gameState!
-            //     .serverState
-            //     .copyWith(
-            //       lastDiceValue: newSocketServerState.lastDiceValue,
-            //       turnStatus: TurnStatus.waitingForAnimate,
-            //     );
-            // gameState = GameState(
-            //   serverState: changeLastDiceValueAndTurnStatusServerState,
-            //   livePlayer: newLivePlayer,
-            // );
-            // notifyListeners();
+            ServerState changeLastDiceValueAndTurnStatusServerState = gameState!
+                .serverState
+                .copyWith(
+                  lastDiceValue: newSocketServerState.lastDiceValue,
+                  turnStatus: TurnStatus.waitingForAnimate,
+                );
+            gameState = GameState(
+              serverState: changeLastDiceValueAndTurnStatusServerState,
+              livePlayer: newLivePlayer,
+            );
+            notifyListeners();
 
             await Future.delayed(const Duration(milliseconds: 750));
 
