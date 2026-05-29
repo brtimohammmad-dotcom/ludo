@@ -7,29 +7,36 @@ const {
 const initialState = require("../models/initialState");
 const { updateGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
-// const { validate, parse } = require("@tma.js/init-data-node");
+const { validate, parse } = require("@tma.js/init-data-node");
 const { BOT_TOKEN } = require("../constants/gameConfig");
 module.exports = (io) => {
-  let telegramIdCounter = 0;
   return (socket) => {
     let currentGameId = null;
 
-    socket.on("auth", async ({ telegramId, username, gameMode }) => {
-      console.log(telegramIdCounter, username);
-
-      telegramIdCounter++;
+    socket.on("auth", async ({ initData, gameMode }) => {
       if (gameMode !== 2 && gameMode !== 4) {
         console.log(gameMode);
         socket.emit("error", "your game mode is incorrect");
-        بر;
       }
-      // validate(initData, BOT_TOKEN);
-      // const user = parse(initData).user; // گرفتن اطلاعات معت
+      const isValid=validate(initData, "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho");
+      if (!isValid) {
+        return socket.emit(
+          "error",
+          "Authentication failed. Invalid Telegram data.",
+        );
+      }
+      const user = parse(initData).user; // گرفتن اطلاعات معت
+      if (!user || !user.id) {
+        return socket.emit(
+          "error",
+          "User data not found in Telegram initData.",
+        );
+      }
       try {
         let { game, player } = await handleAuth(
           socket.id,
-          telegramIdCounter,
-          username,
+          user.id,
+          user.first_name,
           gameMode,
         );
 

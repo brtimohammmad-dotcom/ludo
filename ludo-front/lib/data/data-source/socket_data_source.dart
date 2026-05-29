@@ -5,6 +5,7 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 typedef StateUpdateCallback = void Function(ServerState state);
 typedef PlayerUpdateCallback = void Function(Player player);
@@ -38,11 +39,13 @@ class SocketDataSource {
     );
 
     socket!.onConnect((_) {
-      // final initData = BaleUserService.getInitData();
-
+      if (TelegramWebApp.instance.isSupported) {
+        TelegramWebApp.instance.ready();
+        TelegramWebApp.instance.expand(); // مینی‌آپ را تمام‌صفحه می‌کند
+      }
+      final String initData = TelegramWebApp.instance.initData.raw;
       socket!.emit("auth", {
-        "telegramId": 1,
-        "username": "amir",
+        "initData": initData,
         "gameMode": gameMode,
       });
     });
