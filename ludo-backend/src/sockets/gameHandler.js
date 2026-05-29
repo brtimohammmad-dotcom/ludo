@@ -9,42 +9,52 @@ const { updateGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
 const { validate, parse } = require("@tma.js/init-data-node");
 const { BOT_TOKEN } = require("../constants/gameConfig");
+
 module.exports = (io) => {
   return (socket) => {
     let currentGameId = null;
 
     socket.on("auth", async ({ initData, gameMode }) => {
+      // ۱. بررسی معتبر بودن حالت بازی
       if (gameMode !== 2 && gameMode !== 4) {
-        console.log(gameMode);
-        socket.emit("error", "your game mode is incorrect");
+        console.log("Invalid gameMode:", gameMode);
+        return socket.emit("error", "your game mode is incorrect");
       }
-      console.log(initData)
-      const isValid=validate(initData, "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho");
-      if (!isValid) {
-        return socket.emit(
-          "error",
-          "Authentication failed. Invalid Telegram data.",
-        );
-      }
-      const user = parse(initData).user; // گرفتن اطلاعات معت
-      if (!user || !user.id) {
-        return socket.emit(
-          "error",
-          "User data not found in Telegram initData.",
-        );
-      }
+
+      console.log("Received initData:", initData);
+
       try {
+        // ۲. تایید اصالت دیتای تلگرام (حتماً باید داخل try باشد چون در صورت خطا throw می‌کند)
+        // بهتر است از ثابت BOT_TOKEN که اینپورت کردی استفاده کنی، اما توکن دستی شما را هم اینجا گذاشتم:
+        validate(initData, "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho");
+
+        // ۳. پارس کردن اطلاعات کاربر
+        const parsedData = parse(initData);
+        const user = parsedData.user;
+
+        if (!user || !user.id) {
+          return socket.emit(
+            "error",
+            "User data not found in Telegram initData.",
+          );
+        }
+
+        console.log(
+          `User authorized successfully: ${user.firstName} (${user.id})`,
+        );
+
+        // ۴. ورود کاربر به لاجیک بازی و دیتابیس
+        // توجه: به جای user.first_name از user.firstName استفاده شد
         let { game, player } = await handleAuth(
           socket.id,
           user.id,
-          user.first_name,
+          user.firstName,
           gameMode,
         );
 
         currentGameId = game.game_id;
 
         // بررسی وجود بازی در حافظه سراسری
-
         let currentGameState = initialState.getGameState(currentGameId);
         socket.join(currentGameId);
         socket.emit("initial_player", player);
@@ -65,8 +75,12 @@ module.exports = (io) => {
           startTimer(currentGameId, io);
         }
       } catch (err) {
-        console.error("Auth error:", err);
-        socket.emit("auth_error", { message: "Database error" });
+        // اگر تایید هویت تلگرام شکست بخورد یا خطای دیتابیس رخ دهد، کد به اینجا می‌رسد
+        console.error("Auth error:", err.message || err);
+        socket.emit(
+          "error",
+          "Authentication failed. Invalid Telegram data or Database error.",
+        );
       }
     });
 
@@ -84,6 +98,7 @@ module.exports = (io) => {
       }
       handleMoveToken(currentGameId, socket.id, token, io);
     });
+
     socket.on("exit_game", (telegramId) => {
       if (!currentGameId) {
         return socket.emit("error", "No game found!");
