@@ -7,11 +7,13 @@ const { PORT, VERSION } = require("./src/constants/gameConfig");
 const server = http.createServer();
 const io = require("socket.io")(server, {
   cors: {
-    origin: "*", // اجازه دادن به همه دامنه ها (از جمله کلاینت فلاتر و تلگرام)
+    origin: "https://ludo-tecb.onrender.com", // دامین دقیق فرانت‌اندمان را اینجا بگذارید
     methods: ["GET", "POST"],
-    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
   },
-  transports: ["websocket", "polling"], // مطمئن شدن از پشتیبانی هر دو حالت
+  allowEIO3: true,
+  transports: ["websocket", "polling"]
 });
 
 const registerGameHandlers = require("./src/sockets/gameHandler");

@@ -137,28 +137,28 @@ class GameController extends ChangeNotifier {
             animationController?.reset();
             notifyListeners();
           } else {
-            ServerState changeTurnStatusServerState = gameState!.serverState
-                .copyWith(turnStatus: TurnStatus.requestInFlight);
-            gameState = GameState(
-              serverState: changeTurnStatusServerState,
-              livePlayer: newLivePlayer,
-            );
-            notifyListeners();
+            // ServerState changeTurnStatusServerState = gameState!.serverState
+            //     .copyWith(turnStatus: TurnStatus.requestInFlight);
+            // gameState = GameState(
+            //   serverState: changeTurnStatusServerState,
+            //   livePlayer: newLivePlayer,
+            // );
+            // notifyListeners();
+            //
+            // await Future.delayed(const Duration(milliseconds: 150));
+            // ServerState changeLastDiceValueAndTurnStatusServerState = gameState!
+            //     .serverState
+            //     .copyWith(
+            //       lastDiceValue: newSocketServerState.lastDiceValue,
+            //       turnStatus: TurnStatus.waitingForAnimate,
+            //     );
+            // gameState = GameState(
+            //   serverState: changeLastDiceValueAndTurnStatusServerState,
+            //   livePlayer: newLivePlayer,
+            // );
+            // notifyListeners();
 
-            await Future.delayed(const Duration(milliseconds: 500));
-            ServerState changeLastDiceValueAndTurnStatusServerState = gameState!
-                .serverState
-                .copyWith(
-                  lastDiceValue: newSocketServerState.lastDiceValue,
-                  turnStatus: TurnStatus.waitingForAnimate,
-                );
-            gameState = GameState(
-              serverState: changeLastDiceValueAndTurnStatusServerState,
-              livePlayer: newLivePlayer,
-            );
-            notifyListeners();
-
-            await Future.delayed(const Duration(milliseconds: 500));
+            await Future.delayed(const Duration(milliseconds: 750));
 
             gameState = GameState(
               serverState: newSocketServerState,

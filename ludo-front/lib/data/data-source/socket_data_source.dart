@@ -31,9 +31,9 @@ class SocketDataSource {
     socket = io.io(
       'https://ludo-backend-8ihb.onrender.com',
       io.OptionBuilder()
-          .setTransports(['polling', 'websocket'])
+          .setTransports(['websocket', 'polling']) // ابتدا وب‌ساکت، اگر نشد پولینگ
           .enableAutoConnect()
-          .setExtraHeaders({'Connection': 'upgrade', 'Upgrade': 'websocket'})
+          .enableForceNew()
           .build(),
     );
 
