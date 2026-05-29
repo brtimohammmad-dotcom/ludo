@@ -40,7 +40,7 @@ module.exports = (io) => {
         }
 
         console.log(
-          `User authorized successfully: ${user.firstName} (${user.id})`,
+          `User authorized successfully: ${user.first_name} (${user.id})`,
         );
 
         // ۴. ورود کاربر به لاجیک بازی و دیتابیس
@@ -48,7 +48,7 @@ module.exports = (io) => {
         let { game, player } = await handleAuth(
           socket.id,
           user.id,
-          user.firstName,
+          user.first_name,
           gameMode,
         );
 
