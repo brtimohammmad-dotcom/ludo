@@ -16,7 +16,7 @@ const io = require("socket.io")(server, {
     // مدت زمان نگهداری اطلاعات (پیش‌فرض: 2 دقیقه)
     maxDisconnectionDuration: 2 * 60 * 1000,
     // آیا middlewareها در reconnect موفق رد شوند (پیش‌فرض: true)
-    skipMiddlewares: true,
+    skipMiddlewares: false,
   },
   transports: ["websocket", "polling"]
 });

@@ -32,9 +32,13 @@ class SocketDataSource {
     socket = io.io(
       'https://ludo-backend-8ihb.onrender.com',
       io.OptionBuilder()
-          .setTransports(['websocket', 'polling']) // ابتدا وب‌ساکت، اگر نشد پولینگ
+          .setTransports(['websocket', 'polling']) // فقط همین کافی است
           .enableAutoConnect()
-          .enableForceNew()
+          .enableReconnection()
+          .setReconnectionAttempts(5) // تعداد تلاش برای reconnect
+          .setReconnectionDelay(1000) // تأخیر بین تلاش‌ها (ms)
+          .setReconnectionDelayMax(5000) // حداکثر تأخیر
+          .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );
 
@@ -44,10 +48,7 @@ class SocketDataSource {
         TelegramWebApp.instance.expand(); // مینی‌آپ را تمام‌صفحه می‌کند
       }
       final String initData = TelegramWebApp.instance.initData.raw;
-      socket!.emit("auth", {
-        "initData": initData,
-        "gameMode": gameMode,
-      });
+      socket!.emit("auth", {"initData": initData, "gameMode": gameMode});
     });
     socket!.on(('initial_player'), (data) {
       final Map<String, dynamic> jsData = data as Map<String, dynamic>;
