@@ -12,7 +12,6 @@ const { BOT_TOKEN } = require("../constants/gameConfig");
 
 module.exports = (io) => {
   return (socket) => {
-    let socket.data.gameId = null;
 
     socket.on("auth", async ({ initData, gameMode }) => {
       // ۱. بررسی معتبر بودن حالت بازی
