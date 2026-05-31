@@ -12,7 +12,12 @@ const io = require("socket.io")(server, {
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
   },
-  allowEIO3: true,
+ connectionStateRecovery: {
+    // مدت زمان نگهداری اطلاعات (پیش‌فرض: 2 دقیقه)
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    // آیا middlewareها در reconnect موفق رد شوند (پیش‌فرض: true)
+    skipMiddlewares: true,
+  },
   transports: ["websocket", "polling"]
 });
 
