@@ -150,6 +150,13 @@ class SocketDataSource {
       debugPrint("reconnecting failed");
       onReconnectionFailedCallback?.call();
     });
+    socket!.onReconnectAttempt((data) {
+      debugPrint("reconnect attempt");
+    });
+
+    socket!.onReconnectError((data) {
+      debugPrint("reconnect error $data");
+    });
   }
 
   void rollDice() {
