@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
+import 'package:ludo/services/config_service.dart';
 import 'package:ludo/ui/alerts/alert_background.dart';
 import 'package:ludo/ui/alerts/reconnecting_alert.dart';
 
@@ -23,14 +24,21 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
+    Config.startSimpleInternetCheck((hasInternet) {
+      debugPrint("internetStatus $hasInternet");
+    });
     // ست کردن کالبک
     widget.gameController.onGameFinished = () {
       if (mounted &&
           widget.gameController.gameState!.serverState.winner != null) {
-        _showDialog(AlertBackground(alert: WinnerAlert(
-            winner: widget.gameController.gameState!.serverState.winner!,
-            gameController: widget.gameController)));
+        _showDialog(
+          AlertBackground(
+            alert: WinnerAlert(
+              winner: widget.gameController.gameState!.serverState.winner!,
+              gameController: widget.gameController,
+            ),
+          ),
+        );
       }
     };
 
@@ -79,13 +87,13 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         return widget.gameController.gameState == null
             ? Center(
           child: Lottie.asset(
-              "assets/lotties/Happy girl.json",
-              height: 200,
-              width: 200,
-              fit: BoxFit.cover,
-              frameRate: FrameRate(30),
+            "assets/lotties/Happy girl.json",
+            height: 200,
+            width: 200,
+            fit: BoxFit.cover,
+            frameRate: FrameRate(30),
 
-              renderCache: RenderCache.raster
+            renderCache: RenderCache.raster,
           ),
         )
             : Center(
