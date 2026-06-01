@@ -1,44 +1,45 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
+
+import 'package:http/http.dart' as http;
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 class Config {
-  static Timer? _pingTimer;
-  static bool _wasDisconnected = false; // برای اینکه دوبار پاپ‌آپ نشون نده
+  static Timer? _timer;
+  static bool? _isConnected;
 
-  static void startSimpleInternetCheck(Function(bool) onChanged) {
-    _pingTimer?.cancel();
-    _pingTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      final checker = InternetConnectionChecker.createInstance(
-        addresses: [
-          AddressCheckOption(
-            uri: Uri.parse('https://ludo-backend-8ihb.onrender.com'),
-          ),
-        ],
-      );
-      bool hasInternet = await checker.hasConnection;
-      // ✅ اگه اینترنت نداشت و قبلاً پاپ‌آپ نشون نداده بودیم
-      if (!hasInternet && !_wasDisconnected) {
-        _wasDisconnected = true;
+  static void startConnectionCheck(Function(bool connected) onChanged) {
+    _isConnected = true;
+    _timer?.cancel();
 
-        // نمایش پاپ‌آپ در تلگرام
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      try {
+        final response = await http.get(
+          Uri.parse('https://ludo-backend-8ihb.onrender.com/health'),
+        );
+
+        final connected = response.statusCode == 200;
+
+        if (connected != _isConnected) {
+          _isConnected = connected;
           if (TelegramWebApp.instance.isSupported) {
-            // ✅ showAlert خیلی ساده‌تر است
-            TelegramWebApp.instance.showAlert('در حال تلاش برای اتصال مجدد...' );
+            TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
           }
+          onChanged(connected);
+        }
+      } catch (_) {
+        if (_isConnected==true) {
+          _isConnected = false;
+          onChanged(false);
+        }
       }
-
-      onChanged(hasInternet);
     });
   }
-  static void stopInternetCheck() {
-    _pingTimer?.cancel();
-    _pingTimer = null;
-    _wasDisconnected = false;
-  }
 
+  static void stopConnectionCheck() {
+    _timer?.cancel();
+  }
 
   static String get serverUrl {
     // اگر روی وب نیست (موبایل یا دسکتاپ)

@@ -22,7 +22,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    Config.startSimpleInternetCheck((hasInternet) {
+    Config.startConnectionCheck((hasInternet) {
       debugPrint("internetStatus $hasInternet");
     });
     // ست کردن کالبک
@@ -65,7 +65,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   void dispose() {
     debugPrint("🧹 Board dispose called");
     widget.gameController.dispose(); // ✅ این خیلی مهم است
-    Config.stopInternetCheck();
+    Config.stopConnectionCheck();
     super.dispose();
   }
 
