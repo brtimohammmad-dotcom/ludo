@@ -10,7 +10,6 @@ class Config {
   static bool? _isConnected;
 
   static void startConnectionCheck(Function(bool connected) onChanged) {
-    _isConnected = true;
     _timer?.cancel();
 
     _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
@@ -19,14 +18,13 @@ class Config {
           Uri.parse('https://ludo-backend-8ihb.onrender.com/health'),
         );
 
-        final connected = response.statusCode == 200;
+        _isConnected = response.statusCode == 200;
 
-        if (connected != _isConnected) {
-          _isConnected = connected;
+        if (_isConnected == false) {
           if (TelegramWebApp.instance.isSupported) {
             TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
           }
-          onChanged(connected);
+          onChanged(_isConnected!);
         }
       } catch (e) {
         print("ERROR: $e");
@@ -36,9 +34,7 @@ class Config {
 
           _isConnected = false;
 
-          TelegramWebApp.instance.showAlert(
-            'اینترنت شما قطع است',
-          );
+          TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
 
           onChanged(false);
         }

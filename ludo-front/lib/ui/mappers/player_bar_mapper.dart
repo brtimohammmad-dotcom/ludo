@@ -119,7 +119,7 @@ class RollButton extends StatelessWidget {
 }
 
 class ExitIcon extends StatelessWidget {
-  ExitIcon({
+  const ExitIcon({
     super.key,
     required this.boardSize,
     required this.lastGameController,

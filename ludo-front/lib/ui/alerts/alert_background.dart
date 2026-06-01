@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/domain/model/player.dart';
-import 'package:ludo/ui/alerts/winner_alert.dart';
+
 
 class AlertBackground extends StatelessWidget {
   final GameController gameController = GameController();
