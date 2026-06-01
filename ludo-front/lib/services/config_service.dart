@@ -1,7 +1,37 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
-// ❌ حذف: import 'package:web/web.dart' as web;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 class Config {
+  static Timer? _pingTimer;
+  static bool _wasDisconnected = false; // برای اینکه دوبار پاپ‌آپ نشون نده
+
+  static void startSimpleInternetCheck(Function(bool) onChanged) {
+    _pingTimer?.cancel();
+    _pingTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      bool hasInternet = await InternetConnectionChecker.instance.hasConnection;
+      // ✅ اگه اینترنت نداشت و قبلاً پاپ‌آپ نشون نداده بودیم
+      if (!hasInternet && !_wasDisconnected) {
+        _wasDisconnected = true;
+
+        // نمایش پاپ‌آپ در تلگرام
+          if (TelegramWebApp.instance.isSupported) {
+            // ✅ showAlert خیلی ساده‌تر است
+            TelegramWebApp.instance.showAlert('در حال تلاش برای اتصال مجدد...' );
+          }
+      }
+
+      onChanged(hasInternet);
+    });
+  }
+
+  void stopInternetCheck() {
+    _pingTimer?.cancel();
+    _pingTimer = null;
+  }
+
   static String get serverUrl {
     // اگر روی وب نیست (موبایل یا دسکتاپ)
     if (!kIsWeb) {
@@ -29,7 +59,6 @@ class Config {
           currentHost.contains('127.0.0.1')) {
         return 'http://localhost:3000';
       }
-
     } catch (e) {
       print('Error detecting environment: $e');
     }

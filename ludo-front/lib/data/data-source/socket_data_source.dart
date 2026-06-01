@@ -14,7 +14,6 @@ typedef TokenMovedCallback = void Function(ServerState state);
 typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
 typedef GameFinishedCallback = void Function(ServerState state);
-typedef PlayerReconnectingAttemptCallback = void Function(int attemptNumber);
 
 class SocketDataSource {
   io.Socket? socket;
@@ -26,7 +25,6 @@ class SocketDataSource {
   DiceRolledCallback? onDiceRolled;
   TimesUpCallback? onTimesUp;
   GameFinishedCallback? onGameFinished;
-  PlayerReconnectingAttemptCallback? onPlayerReconnectingAttemptCallback;
 
   Completer<void> playerInitialized = Completer<void>();
 
@@ -54,7 +52,7 @@ class SocketDataSource {
           .setTransports(['websocket', 'polling']) // فقط همین کافی است
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(60 * 1000 / 5) // تعداد تلاش برای reconnect
+          .setReconnectionAttempts(20) // تعداد تلاش برای reconnect
           .setReconnectionDelay(5000) // تأخیر بین تلاش‌ها (ms)
           .setReconnectionDelayMax(1 * 60 * 1000) // حداکثر تأخیر
           .setTimeout(20000) // timeout اتصال (ms)
@@ -86,10 +84,7 @@ class SocketDataSource {
       }
     });
     // ✅ در حال تلاش برای reconnect
-    socket!.onReconnectAttempt((attemptNumber) {
-      print('🔄 Reconnecting... attempt $attemptNumber');
-      onPlayerReconnectingAttemptCallback?.call(attemptNumber);
-    });
+
 
     socket!.on(('initial_player'), (data) {
       livePlayer = Player.fromJson(convertToJSData(data));

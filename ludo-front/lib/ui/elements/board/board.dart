@@ -33,11 +33,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
             gameController: widget.gameController)));
       }
     };
-    widget.gameController.gameRepository.dataSource
-        .onPlayerReconnectingAttemptCallback =
-        (int attemptNumber) {
-      _showDialog(AlertBackground(alert: ReconnectingAlert()));
-    };
+
     widget.gameController.animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 10),

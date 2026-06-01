@@ -39,6 +39,8 @@ dependencies:
   lottie: ^3.3.2
   telegram_web_app: ^0.3.3
   http: ^1.6.0
+  internet_connection_checker: ^3.0.1
+
 
 
 dev_dependencies:
