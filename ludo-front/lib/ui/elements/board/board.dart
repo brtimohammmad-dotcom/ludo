@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/services/config_service.dart';
 import 'package:ludo/ui/alerts/alert_background.dart';
-import 'package:ludo/ui/alerts/reconnecting_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
@@ -67,6 +65,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   void dispose() {
     debugPrint("🧹 Board dispose called");
     widget.gameController.dispose(); // ✅ این خیلی مهم است
+    Config.stopInternetCheck();
     super.dispose();
   }
 

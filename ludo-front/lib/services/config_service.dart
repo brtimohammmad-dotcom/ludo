@@ -11,7 +11,14 @@ class Config {
   static void startSimpleInternetCheck(Function(bool) onChanged) {
     _pingTimer?.cancel();
     _pingTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      bool hasInternet = await InternetConnectionChecker.instance.hasConnection;
+      final checker = InternetConnectionChecker.createInstance(
+        addresses: [
+          AddressCheckOption(
+            uri: Uri.parse('https://ludo-backend-8ihb.onrender.com'),
+          ),
+        ],
+      );
+      bool hasInternet = await checker.hasConnection;
       // ✅ اگه اینترنت نداشت و قبلاً پاپ‌آپ نشون نداده بودیم
       if (!hasInternet && !_wasDisconnected) {
         _wasDisconnected = true;
@@ -26,11 +33,12 @@ class Config {
       onChanged(hasInternet);
     });
   }
-
-  void stopInternetCheck() {
+  static void stopInternetCheck() {
     _pingTimer?.cancel();
     _pingTimer = null;
+    _wasDisconnected = false;
   }
+
 
   static String get serverUrl {
     // اگر روی وب نیست (موبایل یا دسکتاپ)
