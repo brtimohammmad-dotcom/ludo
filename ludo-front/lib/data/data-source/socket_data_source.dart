@@ -14,18 +14,19 @@ typedef TokenMovedCallback = void Function(ServerState state);
 typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
 typedef GameFinishedCallback = void Function(ServerState state);
+typedef PlayerReconnectingAttemptCallback = void Function(int attemptNumber);
 
 class SocketDataSource {
   io.Socket? socket;
   Player? livePlayer;
   ServerState? serverState;
-
   StateUpdateCallback? onStateUpdate;
   PlayerUpdateCallback? onPlayerUpdate;
   TokenMovedCallback? onTokenMoved;
   DiceRolledCallback? onDiceRolled;
   TimesUpCallback? onTimesUp;
   GameFinishedCallback? onGameFinished;
+  PlayerReconnectingAttemptCallback? onPlayerReconnectingAttemptCallback;
 
   Completer<void> playerInitialized = Completer<void>();
 
@@ -53,9 +54,9 @@ class SocketDataSource {
           .setTransports(['websocket', 'polling']) // فقط همین کافی است
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(5) // تعداد تلاش برای reconnect
-          .setReconnectionDelay(10000) // تأخیر بین تلاش‌ها (ms)
-          .setReconnectionDelayMax(500000) // حداکثر تأخیر
+          .setReconnectionAttempts(60 * 1000 / 5) // تعداد تلاش برای reconnect
+          .setReconnectionDelay(5000) // تأخیر بین تلاش‌ها (ms)
+          .setReconnectionDelayMax(1 * 60 * 1000) // حداکثر تأخیر
           .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );
@@ -75,8 +76,21 @@ class SocketDataSource {
         initData = TelegramWebApp.instance.initData.raw;
       }
 
-      socket!.emit("auth", {"initData": initData, "gameMode": gameMode});
+      if (playerInitialized.isCompleted && livePlayer != null) {
+        print(
+          '🔄 Reconnect detected - re-authenticating player ${livePlayer!.userId}',
+        );
+      } else {
+        // اتصال اولیه
+        socket!.emit("auth", {"initData": initData, "gameMode": gameMode});
+      }
     });
+    // ✅ در حال تلاش برای reconnect
+    socket!.onReconnectAttempt((attemptNumber) {
+      print('🔄 Reconnecting... attempt $attemptNumber');
+      onPlayerReconnectingAttemptCallback?.call(attemptNumber);
+    });
+
     socket!.on(('initial_player'), (data) {
       livePlayer = Player.fromJson(convertToJSData(data));
       debugPrint(livePlayer!.userId.toString());
@@ -90,7 +104,6 @@ class SocketDataSource {
     socket!.on('game_state_update', (data) async {
       await playerInitialized.future;
 
-
       serverState = ServerState.fromJson(convertToJSData(data));
       onStateUpdate?.call(serverState!);
     });
@@ -99,19 +112,16 @@ class SocketDataSource {
     socket!.on('game_started', (data) async {
       await playerInitialized.future;
 
-
       debugPrint('game started');
       serverState = ServerState.fromJson(convertToJSData(data));
       livePlayer = serverState!.players.firstWhere((p) {
         return p.userId == livePlayer!.userId;
       });
-
       onStateUpdate?.call(serverState!);
     });
 
     socket!.on(('dice_rolled'), (data) async {
       await playerInitialized.future;
-
 
       serverState = ServerState.fromJson(convertToJSData(data));
       onDiceRolled?.call(serverState!);
@@ -119,7 +129,6 @@ class SocketDataSource {
 
     socket!.on(('times_up'), (data) async {
       await playerInitialized.future;
-
 
       serverState = ServerState.fromJson(convertToJSData(data));
       onTimesUp?.call(serverState!);

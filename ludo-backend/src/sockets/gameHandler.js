@@ -5,38 +5,41 @@ const {
   handleExitingGame,
 } = require("../services/gameService");
 const initialState = require("../models/initialState");
-const { updateGameState,getGameState } = require("../database/games");
+const { updateGameState, getGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
 const { validate, parse } = require("@tma.js/init-data-node");
 const { BOT_TOKEN } = require("../constants/gameConfig");
 const isLocal = process.env.RENDER !== "true";
-let idCounter=0
+let idCounter = 0;
 
 module.exports = (io) => {
-
-
   return async (socket) => {
-    
-  console.log("Recovered:", socket.recovered);
-  if(socket.recovered){
+    console.log("Recovered:", socket.recovered);
+    if (socket.recovered) {
       console.log("gameId:", socket.data.gameId);
       console.log("user id:", socket.data.telegramId);
-      const currentGame =initialState.getGameState(socket.data.gameId)
-      if(!socket.data.gameId){
-        console.log("no game id ")
-      }else if(!currentGame){
-       const currentGameInDataBase =await  getGameState(socket.data.gameId)
-       if(!currentGameInDataBase){
-                console.log("no game found ");
-
-       }else{
-        console.log("game ended")
-       }
-      }else{
-        socket.emit("game_state_update",currentGame)
+      const currentGame = initialState.getGameState(socket.data.gameId);
+      if (!socket.data.gameId) {
+        console.log("no game id ");
+      } else if (!currentGame) {
+        const currentGameInDataBase = await getGameState(socket.data.gameId);
+        if (!currentGameInDataBase) {
+          console.log("no game found ");
+        } else {
+          console.log("game ended");
+        }
+      } else {
+        currentGame.players.map((p) => {
+          if (p.telegram_id === socket.data.telegramId) {
+            return { ...p, telegram_id: socket.data.telegramId };
+          }else{p}
+        });
+        socket.emit("game_state_update", currentGame);
       }
-  }
+    }
+
     socket.on("auth", async ({ initData, gameMode }) => {
+      console.log("...authorize...")
       // ۱. بررسی معتبر بودن حالت بازی
       if (gameMode !== 2 && gameMode !== 4) {
         console.log("Invalid gameMode:", gameMode);
@@ -59,11 +62,11 @@ module.exports = (io) => {
               "User data not found in Telegram initData.",
             );
           }
-        }else{
+        } else {
           idCounter++;
-          user={
-            id:idCounter,
-            first_name:"amir"
+          user = {
+            id: idCounter,
+            first_name: "amir",
           };
         }
 

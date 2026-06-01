@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
+import 'package:ludo/ui/alerts/alert_background.dart';
+import 'package:ludo/ui/alerts/reconnecting_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
@@ -26,8 +28,15 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     widget.gameController.onGameFinished = () {
       if (mounted &&
           widget.gameController.gameState!.serverState.winner != null) {
-        _showWinnerDialog(widget.gameController.gameState!.serverState.winner!);
+        _showDialog(AlertBackground(alert: WinnerAlert(
+            winner: widget.gameController.gameState!.serverState.winner!,
+            gameController: widget.gameController)));
       }
+    };
+    widget.gameController.gameRepository.dataSource
+        .onPlayerReconnectingAttemptCallback =
+        (int attemptNumber) {
+      _showDialog(AlertBackground(alert: ReconnectingAlert()));
     };
     widget.gameController.animationController = AnimationController(
       vsync: this,
@@ -42,11 +51,11 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     });
   }
 
-  void _showWinnerDialog(Player winner) {
+  void _showDialog(Widget dialog) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WinnerAlert(winner: winner),
+      builder: (context) => dialog,
     );
   }
 
@@ -59,67 +68,73 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
         return widget.gameController.gameState == null
             ? Center(
-                child: Lottie.asset(
-                  "assets/lotties/Happy girl.json",
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
-                  frameRate: FrameRate(30),
+          child: Lottie.asset(
+              "assets/lotties/Happy girl.json",
+              height: 200,
+              width: 200,
+              fit: BoxFit.cover,
+              frameRate: FrameRate(30),
 
-                  renderCache: RenderCache.raster
-                ),
-              )
+              renderCache: RenderCache.raster
+          ),
+        )
             : Center(
-                // مرکزی کردن کل محتوا
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    int gameMode =
-                        widget.gameController.gameState!.serverState.gameMode;
+          // مرکزی کردن کل محتوا
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              int gameMode =
+                  widget.gameController.gameState!.serverState.gameMode;
 
-                    final maxAvailableWidth = screenWidth;
-                    final maxAvailableHeight = screenHeight;
+              final maxAvailableWidth = screenWidth;
+              final maxAvailableHeight = screenHeight;
 
-                    final boardSize = (maxAvailableWidth < maxAvailableHeight
-                        ? maxAvailableWidth
-                        : maxAvailableHeight * 0.86);
+              final boardSize = (maxAvailableWidth < maxAvailableHeight
+                  ? maxAvailableWidth
+                  : maxAvailableHeight * 0.86);
 
-                    final barHeight = boardSize * 0.08;
+              final barHeight = boardSize * 0.08;
 
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min, // جمع شدن دور محتوا
-                      children: [
-                        PlayerBar(
-                          boardSize: boardSize,
-                          barHeight: barHeight,
-                          gameController: widget.gameController,
-                          leftPlayerIndex: gameMode == 2 ? -1 : 1,
-                          rightPlayerIndex: gameMode == 2 ? 1 : 2,
-                        ),
-                        MainBoard(
-                          boardSize: boardSize,
-                          gameController: widget.gameController,
-                        ),
-                        PlayerBar(
-                          boardSize: boardSize,
-                          barHeight: barHeight,
-                          gameController: widget.gameController,
-                          leftPlayerIndex: 0,
-                          rightPlayerIndex: gameMode == 2 ? -1 : 3,
-                        ),
-                      ],
-                    );
-                  },
-                ),
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min, // جمع شدن دور محتوا
+                children: [
+                  PlayerBar(
+                    boardSize: boardSize,
+                    barHeight: barHeight,
+                    gameController: widget.gameController,
+                    leftPlayerIndex: gameMode == 2 ? -1 : 1,
+                    rightPlayerIndex: gameMode == 2 ? 1 : 2,
+                  ),
+                  MainBoard(
+                    boardSize: boardSize,
+                    gameController: widget.gameController,
+                  ),
+                  PlayerBar(
+                    boardSize: boardSize,
+                    barHeight: barHeight,
+                    gameController: widget.gameController,
+                    leftPlayerIndex: 0,
+                    rightPlayerIndex: gameMode == 2 ? -1 : 3,
+                  ),
+                ],
               );
+            },
+          ),
+        );
       }),
     );
   }

@@ -28,7 +28,7 @@ class Player {
       color: PlayerColor.values.byName(json['color']),
       userId: json['telegram_id'],
       playerStatus: PlayerStatus.values.byName(json['player_status']),
-      connectionStatus: ConnectionStatus.connected,
+      connectionStatus: ConnectionStatus.values.byName(json['connection_status']),
     );
   }
 

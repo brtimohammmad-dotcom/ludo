@@ -137,15 +137,6 @@ class GameController extends ChangeNotifier {
             animationController?.reset();
             notifyListeners();
           } else {
-            // ServerState changeTurnStatusServerState = gameState!.serverState
-            //     .copyWith(turnStatus: TurnStatus.requestInFlight);
-            // gameState = GameState(
-            //   serverState: changeTurnStatusServerState,
-            //   livePlayer: newLivePlayer,
-            // );
-            // notifyListeners();
-            //
-            // await Future.delayed(const Duration(milliseconds: 150));
             ServerState changeLastDiceValueAndTurnStatusServerState = gameState!
                 .serverState
                 .copyWith(
@@ -169,6 +160,7 @@ class GameController extends ChangeNotifier {
             notifyListeners();
           }
         };
+
   }
 
   void resetGameState() {

@@ -3,6 +3,7 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/ui/alerts/alert_background.dart';
 import 'package:ludo/ui/alerts/exit_alert.dart';
 
 class PlayerBar extends StatelessWidget {
@@ -143,10 +144,7 @@ class ExitIcon extends StatelessWidget {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return ExitAlert(
-                  boardSize: boardSize,
-                  lastGameController: lastGameController,
-                  gameController: GameController(),
+                return AlertBackground(alert: ExitButtonAlert( lastGameController: lastGameController),
                 );
               },
             );

@@ -61,6 +61,7 @@ async function handleAuth(socketId, telegramId, username, gameMode) {
       socketId: socketId,
       player_status: "online",
       numberOfAbsences: 0,
+      connection_status:"connected"
     };
     initialState.addPlayerToGameState(correctPlayer, game.game_id);
 
