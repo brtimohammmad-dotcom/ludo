@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/elements/board/board-cell/board_background.dart';
 import 'package:ludo/ui/elements/board/board-cell/token-home/home_container_list.dart';
@@ -10,7 +11,9 @@ class MainBoard extends StatelessWidget {
     super.key,
     required this.boardSize,
     required this.gameController,
+    required this.diceComposition
   });
+  final Future<LottieComposition> diceComposition;
 
   final double boardSize;
   final GameController gameController;
@@ -33,7 +36,7 @@ class MainBoard extends StatelessWidget {
               ),
             ],
           ),
-          DiceWidget(cellSize: boardSize / 11, gameController: gameController),
+          DiceWidget(cellSize: boardSize / 11, gameController: gameController,diceComposition:diceComposition),
         ],
       ),
     );

@@ -58,7 +58,7 @@ class SocketDataSource {
           .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );
-
+socket!.onReconnectFailed((handler){});
     socket!.onConnect((_) {
       dynamic initData;
       print('✅ Connected to $serverUrl');

@@ -7,11 +7,13 @@ import 'package:ludo/game/logic/dice-logic/dice_logic.dart';
 class DiceWidget extends StatelessWidget {
   final double cellSize;
   final GameController gameController;
+   final  Future<LottieComposition> diceComposition;
 
   const DiceWidget({
     super.key,
     required this.cellSize,
     required this.gameController,
+    required this.diceComposition
   });
 
   @override

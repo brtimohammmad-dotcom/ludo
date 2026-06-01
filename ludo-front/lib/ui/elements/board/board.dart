@@ -19,6 +19,8 @@ class Board extends StatefulWidget {
 }
 
 class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
+  late Future<LottieComposition> diceComposition;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +53,18 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         widget.gameController.animationController!.forward();
       }
     });
+    diceComposition = AssetLottie(
+      "assets/lotties/Dice Rolling.json",
+    ).load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    for (int i = 1; i <= 6; i++) {
+      precacheImage(AssetImage('assets/images/dice/$i.png'), context);
+    }
   }
 
   void _showDialog(Widget dialog) {
@@ -71,73 +85,68 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
         return widget.gameController.gameState == null
             ? Center(
-          child: Lottie.asset(
-            "assets/lotties/Happy girl.json",
-            height: 200,
-            width: 200,
-            fit: BoxFit.cover,
-            frameRate: FrameRate(30),
+                child: Lottie.asset(
+                  "assets/lotties/Happy girl.json",
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.cover,
+                  frameRate: FrameRate(30),
 
-            renderCache: RenderCache.raster,
-          ),
-        )
+                  renderCache: RenderCache.raster,
+                ),
+              )
             : Center(
-          // مرکزی کردن کل محتوا
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              int gameMode =
-                  widget.gameController.gameState!.serverState.gameMode;
+                // مرکزی کردن کل محتوا
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    int gameMode =
+                        widget.gameController.gameState!.serverState.gameMode;
 
-              final maxAvailableWidth = screenWidth;
-              final maxAvailableHeight = screenHeight;
+                    final maxAvailableWidth = screenWidth;
+                    final maxAvailableHeight = screenHeight;
 
-              final boardSize = (maxAvailableWidth < maxAvailableHeight
-                  ? maxAvailableWidth
-                  : maxAvailableHeight * 0.86);
+                    final boardSize = (maxAvailableWidth < maxAvailableHeight
+                        ? maxAvailableWidth
+                        : maxAvailableHeight * 0.86);
 
-              final barHeight = boardSize * 0.08;
+                    final barHeight = boardSize * 0.08;
 
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, // جمع شدن دور محتوا
-                children: [
-                  PlayerBar(
-                    boardSize: boardSize,
-                    barHeight: barHeight,
-                    gameController: widget.gameController,
-                    leftPlayerIndex: gameMode == 2 ? -1 : 1,
-                    rightPlayerIndex: gameMode == 2 ? 1 : 2,
-                  ),
-                  MainBoard(
-                    boardSize: boardSize,
-                    gameController: widget.gameController,
-                  ),
-                  PlayerBar(
-                    boardSize: boardSize,
-                    barHeight: barHeight,
-                    gameController: widget.gameController,
-                    leftPlayerIndex: 0,
-                    rightPlayerIndex: gameMode == 2 ? -1 : 3,
-                  ),
-                ],
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min, // جمع شدن دور محتوا
+                      children: [
+                        PlayerBar(
+                          boardSize: boardSize,
+                          barHeight: barHeight,
+                          gameController: widget.gameController,
+                          leftPlayerIndex: gameMode == 2 ? -1 : 1,
+                          rightPlayerIndex: gameMode == 2 ? 1 : 2,
+                        ),
+                        MainBoard(
+                          diceComposition: diceComposition,
+                          boardSize: boardSize,
+                          gameController: widget.gameController,
+                        ),
+                        PlayerBar(
+                          boardSize: boardSize,
+                          barHeight: barHeight,
+                          gameController: widget.gameController,
+                          leftPlayerIndex: 0,
+                          rightPlayerIndex: gameMode == 2 ? -1 : 3,
+                        ),
+                      ],
+                    );
+                  },
+                ),
               );
-            },
-          ),
-        );
       }),
     );
   }
