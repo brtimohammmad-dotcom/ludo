@@ -78,7 +78,10 @@ class RollButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: myTurnToRoll
               ? LinearGradient(
-                  colors: [Colors.lightGreenAccent, Colors.lightGreenAccent.shade400],
+                  colors: [
+                    Colors.lightGreenAccent,
+                    Colors.lightGreenAccent.shade400,
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -102,8 +105,11 @@ class RollButton extends StatelessWidget {
             gameController.rollDice();
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: boardSize *0.03, vertical: boardSize *0.01),
-            child: Text('roll', style: TextStyle(fontSize: boardSize*0.03)),
+            padding: EdgeInsets.symmetric(
+              horizontal: boardSize * 0.03,
+              vertical: boardSize * 0.01,
+            ),
+            child: Text('roll', style: TextStyle(fontSize: boardSize * 0.03)),
           ),
         ),
       ),
@@ -119,30 +125,39 @@ class ExitIcon extends StatelessWidget {
   });
 
   final GameController lastGameController;
-  final GameController gameController = GameController();
 
   final double boardSize;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return ExitAlert(
-              boardSize: boardSize,
-              lastGameController: lastGameController,
-              gameController: gameController,
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            lastGameController.gameRepository.demoDisconnectAndConnect();
+          },
+          child: Text("conn-dis"),
+        ),
+        GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ExitAlert(
+                  boardSize: boardSize,
+                  lastGameController: lastGameController,
+                  gameController: GameController(),
+                );
+              },
             );
           },
-        );
-      },
-      child: Icon(
-        Icons.exit_to_app_rounded,
-        color: Colors.black38,
-        size: boardSize * 0.06,
-      ),
+          child: Icon(
+            Icons.exit_to_app_rounded,
+            color: Colors.black38,
+            size: boardSize * 0.06,
+          ),
+        ),
+      ],
     );
   }
 }

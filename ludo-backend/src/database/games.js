@@ -57,8 +57,25 @@ async function updateGameState(id, fields) {
     throw error;
   }
 }
+async function getGameState(gameId) {
+  // روش 3: بدون single() - همیشه یک آرایه برمی‌گردد
+  const { data: games, error } = await supabase
+    .from("game")
+    .select("*")
+    .eq("game_id", gameId);
 
+  if (error) {
+    console.error("خطا:", error);
+  } else if (games.length === 0) {
+    console.log("بازی پیدا نشد");
+  } else {
+    const game = games[0]; // اولین (و تنها) رکورد
+    console.log("بازی:", game);
+    return game;
+  }
+}
 module.exports = {
   createNewGameInDatabase,
   updateGameState,
+  getGameState
 };

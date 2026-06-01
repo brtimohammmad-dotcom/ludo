@@ -21,6 +21,9 @@ class GameRepository {
   void exitGame(int telegramId) {
     dataSource.exitGame(telegramId);
   }
+  void demoDisconnectAndConnect(){
+    dataSource.demoDisconnectAndConnect();
+  }
 
   Future<void> dispose() async {
     debugPrint("🧹 GameRepository dispose called");

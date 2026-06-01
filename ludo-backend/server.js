@@ -5,20 +5,23 @@ const { PORT, VERSION } = require("./src/constants/gameConfig");
 // این خط طلایی مشکل رندر را حل می‌کند:
 
 const server = http.createServer();
+const isLocal = process.env.RENDER !== "true";
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://ludo-tecb.onrender.com", // دامین دقیق فرانت‌اندمان را اینجا بگذارید
+    origin: isLocal
+      ? "http://localhost:3000"
+      : "https://ludo-tecb.onrender.com", // دامین دقیق فرانت‌اندمان را اینجا بگذارید
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+    credentials: true,
   },
-//  connectionStateRecovery: {
-//     // مدت زمان نگهداری اطلاعات (پیش‌فرض: 2 دقیقه)
-//     maxDisconnectionDuration: 2 * 60 * 1000,
-//     // آیا middlewareها در reconnect موفق رد شوند (پیش‌فرض: true)
-//     skipMiddlewares: false,
-//   },
-  transports: ["websocket", "polling"]
+   connectionStateRecovery: {
+      // مدت زمان نگهداری اطلاعات (پیش‌فرض: 2 دقیقه)
+      maxDisconnectionDuration: 2 * 60 * 1000,
+      // آیا middlewareها در reconnect موفق رد شوند (پیش‌فرض: true)
+      skipMiddlewares: false,
+    },
+  transports: ["websocket", "polling"],
 });
 
 const registerGameHandlers = require("./src/sockets/gameHandler");

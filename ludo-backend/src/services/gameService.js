@@ -257,7 +257,7 @@ async function handleExitingGame(gameId, telegramId, io) {
   if (numberOfOnlines === 0 && currentGame.game_status === "waitingForPlayer") {
     await updateGameState(gameId, {
       game_status: "cancel",
-      players: JcurrentGame.players,
+      players: currentGame.players,
       end_at: new Date(),
     });
     initialState.deleteGameState(gameId);
