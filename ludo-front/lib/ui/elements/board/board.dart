@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/services/config_service.dart';
 import 'package:ludo/ui/alerts/alert_background.dart';
+import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
@@ -41,7 +42,15 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         );
       }
     };
-
+    widget.gameController.onReconnectionFailed = () {
+      if (mounted){
+        _showDialog(
+          AlertBackground(
+            alert: ReconnectingFailedAlertAlert()
+          ),
+        );
+      }
+    };
     widget.gameController.animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 10),
@@ -53,9 +62,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         widget.gameController.animationController!.forward();
       }
     });
-    diceComposition = AssetLottie(
-      "assets/lotties/Dice Rolling.json",
-    ).load();
+    diceComposition = AssetLottie("assets/lotties/Dice Rolling.json").load();
   }
 
   @override

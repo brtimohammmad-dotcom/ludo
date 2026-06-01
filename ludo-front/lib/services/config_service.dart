@@ -22,7 +22,7 @@ class Config {
 
         if (_isConnected == false) {
           if (TelegramWebApp.instance.isSupported) {
-            TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
+            TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
           }
           onChanged(_isConnected!);
         }
@@ -34,7 +34,7 @@ class Config {
 
           _isConnected = false;
 
-          TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
+          TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
 
           onChanged(false);
         }

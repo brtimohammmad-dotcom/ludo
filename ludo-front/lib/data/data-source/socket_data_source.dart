@@ -14,6 +14,7 @@ typedef TokenMovedCallback = void Function(ServerState state);
 typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
 typedef GameFinishedCallback = void Function(ServerState state);
+typedef ReconnectionFailedCallback = void Function();
 
 class SocketDataSource {
   io.Socket? socket;
@@ -25,6 +26,7 @@ class SocketDataSource {
   DiceRolledCallback? onDiceRolled;
   TimesUpCallback? onTimesUp;
   GameFinishedCallback? onGameFinished;
+  ReconnectionFailedCallback? onReconnectionFailedCallback;
 
   Completer<void> playerInitialized = Completer<void>();
 
@@ -52,13 +54,12 @@ class SocketDataSource {
           .setTransports(['websocket', 'polling']) // فقط همین کافی است
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(20) // تعداد تلاش برای reconnect
+          .setReconnectionAttempts(2) // تعداد تلاش برای reconnect
           .setReconnectionDelay(5000) // تأخیر بین تلاش‌ها (ms)
-          .setReconnectionDelayMax(1 * 60 * 1000) // حداکثر تأخیر
+          .setReconnectionDelayMax(1 * 10 * 1000) // حداکثر تأخیر
           .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );
-socket!.onReconnectFailed((handler){});
     socket!.onConnect((_) {
       dynamic initData;
       print('✅ Connected to $serverUrl');
@@ -84,7 +85,6 @@ socket!.onReconnectFailed((handler){});
       }
     });
     // ✅ در حال تلاش برای reconnect
-
 
     socket!.on(('initial_player'), (data) {
       livePlayer = Player.fromJson(convertToJSData(data));
@@ -145,6 +145,10 @@ socket!.onReconnectFailed((handler){});
 
       serverState = ServerState.fromJson(convertToJSData(data));
       onTokenMoved?.call(serverState!);
+    });
+    socket!.onReconnectFailed((data) {
+      debugPrint("reconnecting failed");
+      onReconnectionFailedCallback?.call();
     });
   }
 

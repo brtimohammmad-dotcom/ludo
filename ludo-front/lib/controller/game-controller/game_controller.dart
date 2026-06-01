@@ -19,6 +19,7 @@ extension GameStateX on GameState {
 
 class GameController extends ChangeNotifier {
   VoidCallback? onGameFinished; // کالبک برای صفحه
+  VoidCallback? onReconnectionFailed; // کالبک برای صفحه
   GameState? gameState;
   final GameRepository gameRepository = GameRepository();
   Player? livePlayer;
@@ -71,7 +72,11 @@ class GameController extends ChangeNotifier {
         onGameFinished!();
       }
     };
-
+    gameRepository.dataSource.onReconnectionFailedCallback = () {
+      if (_isDisposed) return;
+      animationController?.stop();
+      onReconnectionFailed!();
+    };
     gameRepository.dataSource.onPlayerUpdate = (Player player) {
       if (_isDisposed) return;
       livePlayer = player;
@@ -160,7 +165,6 @@ class GameController extends ChangeNotifier {
             notifyListeners();
           }
         };
-
   }
 
   void resetGameState() {
