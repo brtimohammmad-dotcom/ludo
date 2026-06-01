@@ -72491,8 +72491,8 @@ A.fk("ERROR: "+A.j(m))
 if($.Uh===!0){A.fk("DISCONNECTED")
 $.uS=$.uS+1
 $.Uh=!1
-l=$.ke;(l==null?$.ke=new A.oy():l).EF("\u062f\u0631 \u062d\u0627\u0644 \u0627\u062a\u0635\u0627\u0644 \u0628\u0647 \u0627\u06cc\u0646\u062a\u0631\u0646\u062a")
-o.a.$2(!1,$.uS)}s=5
+l=$.ke;(l==null?$.ke=new A.oy():l).EF("\u062f\u0631 \u062d\u0627\u0644 \u0627\u062a\u0635\u0627\u0644 \u0628\u0647 \u0627\u06cc\u0646\u062a\u0631\u0646\u062a")}o.a.$2(!1,$.uS)
+s=5
 break
 case 2:s=1
 break
@@ -72654,7 +72654,7 @@ L(a){var s=null,r=t.w,q=A.bn(a,s,r).w
 return new A.hW(new A.abA(this,A.bn(a,s,r).w.a.a,q.a.b),s,this.a.c,s)}}
 A.abD.prototype={
 $2(a,b){var s
-A.eg().$1("internetStatus "+a)
+A.eg().$1("internetStatus "+a+" , numberOfReconnects : "+b)
 if(b===12){s=this.a.c
 s.toString
 A.a2i(s,A.Ha(new A.abB(),null,t.z),new A.abC())}},

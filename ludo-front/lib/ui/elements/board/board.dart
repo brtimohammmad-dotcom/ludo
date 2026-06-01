@@ -27,7 +27,9 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     Config.startConnectionCheck((hasInternet, numberOfReconnects) {
-      debugPrint("internetStatus $hasInternet");
+      debugPrint(
+        "internetStatus $hasInternet , numberOfReconnects : $numberOfReconnects",
+      );
       if (numberOfReconnects == 12) {
         Navigator.pushAndRemoveUntil(
           context,

@@ -42,8 +42,8 @@ class Config {
 
           TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
 
-          onChanged(false, reConnectCounter);
         }
+        onChanged(false, reConnectCounter);
       }
     });
   }
