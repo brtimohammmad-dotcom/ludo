@@ -28,12 +28,18 @@ class Config {
           }
           onChanged(connected);
         }
-      } catch (_) {
-        if (_isConnected==true) {
+      } catch (e) {
+        print("ERROR: $e");
+
+        if (_isConnected == true) {
+          print("DISCONNECTED");
+
           _isConnected = false;
-          if (TelegramWebApp.instance.isSupported) {
-            TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
-          }
+
+          TelegramWebApp.instance.showAlert(
+            'اینترنت شما قطع است',
+          );
+
           onChanged(false);
         }
       }
