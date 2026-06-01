@@ -54,9 +54,9 @@ class SocketDataSource {
           .setTransports(['websocket', 'polling']) // فقط همین کافی است
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(2) // تعداد تلاش برای reconnect
+          .setReconnectionAttempts(12) // تعداد تلاش برای reconnect
           .setReconnectionDelay(5000) // تأخیر بین تلاش‌ها (ms)
-          .setReconnectionDelayMax(1 * 10 * 1000) // حداکثر تأخیر
+          .setReconnectionDelayMax(60 * 1000) // حداکثر تأخیر
           .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );

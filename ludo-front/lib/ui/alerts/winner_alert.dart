@@ -59,12 +59,11 @@ class WinnerAlert extends StatelessWidget {
         SizedBox(height: boardSize * 0.016),
         ElevatedButton(
           onPressed: () {
-            gameController.resetGameState();
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    JoinScreen(gameController: gameController),
+                    JoinScreen(gameController: GameController()),
               ),
               (route) => false, // حذف همه صفحات قبلی
             );

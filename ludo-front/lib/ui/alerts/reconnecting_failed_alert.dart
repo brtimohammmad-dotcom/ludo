@@ -18,6 +18,8 @@ class ReconnectingFailedAlertAlert extends StatelessWidget {
           Icons.signal_wifi_connected_no_internet_4_outlined,
           weight: boardSize * 0.3,
         ),
+        Text("زمان اتصال به پایان رسید"),
+        ElevatedButton(onPressed: (){}, child: Icon(Icons.home))
       ],
     );
   }

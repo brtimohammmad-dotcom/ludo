@@ -167,10 +167,7 @@ class GameController extends ChangeNotifier {
         };
   }
 
-  void resetGameState() {
-    if (_isDisposed) return;
-    gameState = null;
-  }
+
 
   void startGame({required int gameMode}) {
     if (_isDisposed) return;

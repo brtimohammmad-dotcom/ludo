@@ -8,8 +8,11 @@ import 'package:telegram_web_app/telegram_web_app.dart';
 class Config {
   static Timer? _timer;
   static bool? _isConnected;
+  static int reConnectCounter = 0;
 
-  static void startConnectionCheck(Function(bool connected) onChanged) {
+  static void startConnectionCheck(
+    Function(bool connected, int numberOfReconnecting) onChanged,
+  ) {
     _timer?.cancel();
 
     _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
@@ -24,19 +27,22 @@ class Config {
           if (TelegramWebApp.instance.isSupported) {
             TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
           }
-          onChanged(_isConnected!);
+          reConnectCounter++;
+          onChanged(_isConnected!, reConnectCounter);
+        } else {
+          reConnectCounter = 0;
         }
       } catch (e) {
         print("ERROR: $e");
 
         if (_isConnected == true) {
           print("DISCONNECTED");
-
+          reConnectCounter++;
           _isConnected = false;
 
           TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
 
-          onChanged(false);
+          onChanged(false, reConnectCounter);
         }
       }
     });
