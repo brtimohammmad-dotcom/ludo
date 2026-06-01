@@ -31,18 +31,19 @@ class Config {
           onChanged(_isConnected!, reConnectCounter);
         } else {
           reConnectCounter = 0;
+          onChanged(true, reConnectCounter);
         }
       } catch (e) {
         print("ERROR: $e");
 
         if (_isConnected == true) {
           print("DISCONNECTED");
-          reConnectCounter++;
           _isConnected = false;
 
           TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
 
         }
+        reConnectCounter++;
         onChanged(false, reConnectCounter);
       }
     });
