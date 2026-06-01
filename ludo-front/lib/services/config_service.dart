@@ -31,6 +31,9 @@ class Config {
       } catch (_) {
         if (_isConnected==true) {
           _isConnected = false;
+          if (TelegramWebApp.instance.isSupported) {
+            TelegramWebApp.instance.showAlert('اینترنت شما قطع است');
+          }
           onChanged(false);
         }
       }
