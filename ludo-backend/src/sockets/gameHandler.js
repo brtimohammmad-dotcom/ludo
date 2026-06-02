@@ -88,8 +88,6 @@ module.exports = (io) => {
 
         socket.data.gameId = game.game_id;
         socket.data.telegramId = player.telegram_id;
-        socket.data.firstName = player.first_name;
-        socket.dat.gameMode = player.gameMode;
 
         // بررسی وجود بازی در حافظه سراسری
         let currentGameState = initialState.getGameState(socket.data.gameId);
