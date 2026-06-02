@@ -18,7 +18,7 @@ module.exports = (io) => {
     if (socket.recovered) {
       console.log("gameId:", socket.data.gameId);
       console.log("user id:", socket.data.telegramId);
-      const currentGame = initialState.getGameState(socket.data.gameId);
+      let currentGame = initialState.getGameState(socket.data.gameId);
       if (!socket.data.gameId) {
         console.log("no game id ");
       } else if (!currentGame) {
@@ -26,20 +26,26 @@ module.exports = (io) => {
         if (!currentGameInDataBase) {
           console.log("no game found ");
         } else {
-          console.log("game ended");
+          socket.emit("game_finished", currentGameInDataBase.winner);
         }
       } else {
-        currentGame.players.map((p) => {
+        const updatedPlayers = currentGame.players.map((p) => {
           if (p.telegram_id === socket.data.telegramId) {
             return { ...p, telegram_id: socket.data.telegramId };
-          }else{p}
+          } else {
+            return p;
+          }
         });
+        initialState.updateGameState(currentGame.game_id, {
+          players: updatedPlayers,
+        });
+        currentGame = initialState.getGameState(currentGame.game_id);
         socket.emit("game_state_update", currentGame);
       }
     }
 
     socket.on("auth", async ({ initData, gameMode }) => {
-      console.log("...authorize...")
+      console.log("...authorize...");
       // ۱. بررسی معتبر بودن حالت بازی
       if (gameMode !== 2 && gameMode !== 4) {
         console.log("Invalid gameMode:", gameMode);
@@ -82,6 +88,8 @@ module.exports = (io) => {
 
         socket.data.gameId = game.game_id;
         socket.data.telegramId = player.telegram_id;
+        socket.data.firstName = player.first_name;
+        socket.dat.gameMode = player.gameMode;
 
         // بررسی وجود بازی در حافظه سراسری
         let currentGameState = initialState.getGameState(socket.data.gameId);

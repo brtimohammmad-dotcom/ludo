@@ -232,7 +232,7 @@ function handleMoveToken(gameId, playerSocketId, token, io) {
           end_at: new Date(),
         });
         stopTimer(gameId);
-        io.to(gameId).emit("game_finished", winnerGameState);
+        io.to(gameId).emit("game_finished", winnerGameState.winner);
         initialState.deleteGameState(gameId);
       }
     }, time);
@@ -279,7 +279,7 @@ async function handleExitingGame(gameId, telegramId, io) {
       end_at: new Date(),
     });
     stopTimer(gameId);
-    io.to(gameId).emit("game_finished", winnerGameState);
+    io.to(gameId).emit("game_finished", winnerGameState.winner);
     initialState.deleteGameState(gameId);
   }
 }

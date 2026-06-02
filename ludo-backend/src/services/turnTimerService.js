@@ -97,7 +97,7 @@ function startTimer(gameId, io) {
 
           stopTimer(gameId);
           // فرستادن به کلاینت
-          io.to(gameId).emit("game_finished", game);
+          io.to(gameId).emit("game_finished", winnerGameState.winner);
           initialState.deleteGameState(gameId);
         }
         return; // مهم: خارج شدن از تابع
