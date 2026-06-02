@@ -3,7 +3,12 @@ import 'package:ludo/domain/model/token.dart';
 
 enum GameStatus { start, finished, waitingForPlayer }
 
-enum TurnStatus { waitingForRoll, waitingForMove, waitingForAnimate ,requestInFlight}
+enum TurnStatus {
+  waitingForRoll,
+  waitingForMove,
+  waitingForAnimate,
+  requestInFlight,
+}
 
 class ServerState {
   final int gameMode;
@@ -54,8 +59,10 @@ class ServerState {
     List<Player>? players,
     TurnStatus? turnStatus,
     int? gameMode,
+    Player? winner,
   }) {
     return ServerState(
+      winner: winner ?? this.winner,
       gameMode: gameMode ?? this.gameMode,
       turnStatus: turnStatus ?? this.turnStatus,
       tokens: tokens ?? this.tokens,

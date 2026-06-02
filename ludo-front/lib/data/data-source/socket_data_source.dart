@@ -13,12 +13,13 @@ typedef PlayerUpdateCallback = void Function(Player player);
 typedef TokenMovedCallback = void Function(ServerState state);
 typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
-typedef GameFinishedCallback = void Function(ServerState state);
+typedef GameFinishedCallback = void Function(Player player);
 typedef ReconnectionFailedCallback = void Function();
 
 class SocketDataSource {
   io.Socket? socket;
   Player? livePlayer;
+  Player? winner;
   ServerState? serverState;
   StateUpdateCallback? onStateUpdate;
   PlayerUpdateCallback? onPlayerUpdate;
@@ -131,10 +132,10 @@ class SocketDataSource {
     socket!.on(('game_finished'), (data) async {
       await playerInitialized.future;
 
-      serverState = ServerState.fromJson(convertToJSData(data));
+      winner = Player.fromJson(convertToJSData(data));
       socket!.disconnect();
       socket!.close();
-      onGameFinished?.call(serverState!);
+      onGameFinished?.call(winner!);
     });
 
     socket!.on(('error'), (data) {

@@ -10,11 +10,9 @@ class WinnerAlert extends StatelessWidget {
   const WinnerAlert({
     super.key,
     required this.winner,
-    required this.gameController,
   });
 
   final Player winner;
-  final GameController gameController;
 
   @override
   Widget build(BuildContext context) {

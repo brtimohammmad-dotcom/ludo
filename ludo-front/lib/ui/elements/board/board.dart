@@ -48,7 +48,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
           AlertBackground(
             alert: WinnerAlert(
               winner: widget.gameController.gameState!.serverState.winner!,
-              gameController: widget.gameController,
             ),
           ),
         );

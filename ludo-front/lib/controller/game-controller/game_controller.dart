@@ -55,19 +55,18 @@ class GameController extends ChangeNotifier {
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
     };
 
-    gameRepository.dataSource.onGameFinished = (ServerState state) {
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.color == livePlayer!.color,
-      );
+    gameRepository.dataSource.onGameFinished = (Player winner) {
       if (_isDisposed) return;
       animationController?.stop();
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      final newGameState = gameState!.copyWith(
+        livePlayer: livePlayer,
+        serverState: gameState!.serverState.copyWith(winner: winner),
+      );
+      gameState = newGameState;
       notifyListeners();
 
       // ✅ جلوگیری از چندبار صدا زدن
-      if (state.winner != null &&
-          onGameFinished != null &&
-          !_isGameFinishedHandled) {
+      if (onGameFinished != null && !_isGameFinishedHandled) {
         _isGameFinishedHandled = true;
         onGameFinished!();
       }
@@ -166,8 +165,6 @@ class GameController extends ChangeNotifier {
           }
         };
   }
-
-
 
   void startGame({required int gameMode}) {
     if (_isDisposed) return;
