@@ -37,7 +37,7 @@ class GameController extends ChangeNotifier {
   void _setupCallbacks() {
     gameRepository.dataSource.onStateUpdate = (ServerState state) {
       final newLivePlayer = state.players.firstWhere(
-        (p) => p.color == livePlayer!.color,
+        (p) => p.userId == livePlayer!.userId,
       );
       if (_isDisposed) return;
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
@@ -46,7 +46,7 @@ class GameController extends ChangeNotifier {
 
     gameRepository.dataSource.onTimesUp = (ServerState state) {
       final newLivePlayer = state.players.firstWhere(
-        (p) => p.color == livePlayer!.color,
+        (p) => p.userId == livePlayer!.userId,
       );
       if (_isDisposed) return;
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
@@ -79,6 +79,7 @@ class GameController extends ChangeNotifier {
     gameRepository.dataSource.onPlayerUpdate = (Player player) {
       if (_isDisposed) return;
       livePlayer = player;
+      notifyListeners();
     };
 
     gameRepository.dataSource.onTokenMoved =
@@ -91,7 +92,7 @@ class GameController extends ChangeNotifier {
             await _moveTokenStepByStep(newSocketServerState);
 
             final newLivePlayer = newSocketServerState.players.firstWhere(
-              (p) => p.color == livePlayer!.color,
+              (p) => p.userId == livePlayer!.userId,
             );
             livePlayer = newLivePlayer;
 
@@ -112,7 +113,7 @@ class GameController extends ChangeNotifier {
         (ServerState newSocketServerState) async {
           if (_isDisposed) return;
           final newLivePlayer = newSocketServerState.players.firstWhere(
-            (p) => p.color == livePlayer!.color,
+            (p) => p.userId == livePlayer!.userId,
           );
 
           animationController?.stop();
@@ -168,7 +169,11 @@ class GameController extends ChangeNotifier {
 
   void startGame({required int gameMode}) {
     if (_isDisposed) return;
-    gameRepository.onConnect(gameMode: gameMode);
+    gameRepository.startGame(gameMode);
+  }
+
+  void connectToGame() {
+    gameRepository.onConnect();
   }
 
   void moveToken(Token liveToken) {
@@ -207,7 +212,7 @@ class GameController extends ChangeNotifier {
   Future<void> _moveTokenStepByStep(ServerState newSocketServerState) async {
     if (_isDisposed) return;
     final newLivePlayer = newSocketServerState.players.firstWhere(
-      (p) => p.color == livePlayer!.color,
+      (p) => p.userId == livePlayer!.userId,
     );
     final newTokens = newSocketServerState.tokens;
     int? movedTokenIndex;
@@ -262,33 +267,22 @@ class GameController extends ChangeNotifier {
     if (_isDisposed) return;
 
     debugPrint("🎮 Exiting game...");
-    gameRepository.exitGame(livePlayer!.userId);
-    dispose();
+    gameRepository.exitGame();
   }
 
-  // ✅ متد dispose بهبود یافته
-  @override
-  void dispose() {
-    if (_isDisposed) return;
+  void resetGame() {
+    gameState = null;
+    livePlayer?.color!=null?null:livePlayer?.color;
+    livePlayer?.numberOfAbsences!=null?null:livePlayer?.numberOfAbsences;
+    livePlayer?.playerStatus!=null?null:livePlayer?.playerStatus;
+    livePlayer?.connectionStatus!=null?null:livePlayer?.connectionStatus;
 
-    debugPrint("🧹 GameController dispose called");
-
-    // توقف انیمیشن
     animationController?.stop();
-    animationController?.dispose();
     animationController = null;
 
-    // پاک کردن کال‌بک‌ها
     onGameFinished = null;
 
-    // بستن repository (که شامل Socket می‌شود)
-    gameRepository.dispose();
-
-    _isDisposed = true;
-
-    super.dispose();
-
-    debugPrint("✅ GameController disposed successfully");
+    notifyListeners();
   }
 
   // ✅ بررسی اینکه آیا controller هنوز فعال است

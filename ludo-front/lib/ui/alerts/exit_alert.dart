@@ -64,7 +64,7 @@ class ExitButtonAlert extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        JoinScreen(gameController: GameController()),
+                        JoinScreen(gameController: lastGameController),
                   ),
                   (route) => false, // حذف همه صفحات قبلی
                 );

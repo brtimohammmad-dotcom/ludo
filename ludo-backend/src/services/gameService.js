@@ -240,47 +240,50 @@ function handleMoveToken(gameId, playerSocketId, token, io) {
     processingGames.delete(gameId);
   }
 }
-async function handleExitingGame(gameId, telegramId, io) {
-  let currentGame = initialState.getGameState(gameId);
+async function handleExitingGame(socket, io) {
+  let currentGame = initialState.getGameState(socket.data.gameId);
   const correctPlayers = currentGame.players.map((p) => {
-    if (p.telegram_id === telegramId) {
+    if (p.telegram_id === socket.data.telegramId) {
       return { ...p, player_status: "offline" };
     } else {
       return p;
     }
   });
-  initialState.updateGameState(gameId, { players: correctPlayers });
-  currentGame = initialState.getGameState(gameId);
+  initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
+  currentGame = initialState.getGameState(socket.data.gameId);
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",
   ).length;
   if (numberOfOnlines === 0 && currentGame.game_status === "waitingForPlayer") {
-    await updateGameState(gameId, {
+    await updateGameState(socket.data.gameId, {
       game_status: "cancel",
       players: currentGame.players,
       end_at: new Date(),
     });
-    initialState.deleteGameState(gameId);
+    initialState.deleteGameState(socket.data.gameId);
   }
   if (numberOfOnlines === 1) {
     const player = currentGame.players.find(
       (p) => p.player_status === "online",
     );
-    console.log(`Game ${gameId} finished, winner: ${player.username}`);
-    initialState.updateGameState(gameId, {
+    console.log(
+      `Game ${socket.data.gameId} finished, winner: ${player.username}`,
+    );
+    initialState.updateGameState(socket.data.gameId, {
       game_status: "finished",
       winner: player,
     });
-    const winnerGameState = initialState.getGameState(gameId);
-    await updateGameState(gameId, {
+    const winnerGameState = initialState.getGameState(socket.data.gameId);
+    await updateGameState(socket.data.gameId, {
       game_status: "finished",
       winner: player,
       players: winnerGameState.players,
       end_at: new Date(),
     });
-    stopTimer(gameId);
-    io.to(gameId).emit("game_finished", winnerGameState.winner);
-    initialState.deleteGameState(gameId);
+    stopTimer(socket.data.gameId);
+    io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
+    initialState.deleteGameState(socket.data.gameId);
   }
+  socket.data.gameId = null;
 }
 module.exports = { handleRollDice, handleMoveToken, handleExitingGame };

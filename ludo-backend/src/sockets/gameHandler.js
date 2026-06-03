@@ -1,4 +1,5 @@
-const { handleAuth } = require("../services/authService");
+const { handleAuth, hasExistGame } = require("../services/authService");
+const { handleJoinGame } = require("../services/joinGameService");
 const {
   handleRollDice,
   handleMoveToken,
@@ -44,13 +45,8 @@ module.exports = (io) => {
       }
     }
 
-    socket.on("auth", async ({ initData, gameMode }) => {
+    socket.on("auth", async ({ initData }) => {
       console.log("...authorize...");
-      // ۱. بررسی معتبر بودن حالت بازی
-      if (gameMode !== 2 && gameMode !== 4) {
-        console.log("Invalid gameMode:", gameMode);
-        return socket.emit("error", "your game mode is incorrect");
-      }
 
       console.log("Received initData:", initData);
 
@@ -79,37 +75,22 @@ module.exports = (io) => {
         console.log(
           `User authorized successfully: ${user.first_name} (${user.id})`,
         );
-        let { game, player } = await handleAuth(
-          socket.id,
-          user.id,
-          user.first_name,
-          gameMode,
-        );
-
-        socket.data.gameId = game.game_id;
+        let { player } = await handleAuth(user.id, user.first_name);
+        let { game, newPlayer } = await hasExistGame(player, socket.id);
         socket.data.telegramId = player.telegram_id;
+        socket.data.firstName = player.username;
 
-        // بررسی وجود بازی در حافظه سراسری
-        let currentGameState = initialState.getGameState(socket.data.gameId);
-        socket.join(socket.data.gameId);
-        socket.emit("initial_player", player);
-        io.to(socket.data.gameId).emit("game_state_update", currentGameState);
+        if (game) {
+          socket.emit("initial_player", newPlayer);
 
-        // بررسی شروع بازی
-        if (
-          currentGameState.players.length === gameMode &&
-          currentGameState.game_status === "waitingForPlayer"
-        ) {
-          currentGameState.game_status = "start";
-          await updateGameState(socket.data.gameId, { game_status: "start" });
-          initialState.updateGameState(socket.data.gameId, {
-            game_status: "start",
-          });
-          io.to(socket.data.gameId).emit(
-            "game_started",
-            initialState.getGameState(socket.data.gameId),
-          );
-          startTimer(socket.data.gameId, io);
+          socket.data.gameId = game.game_id;
+          let currentGameState = initialState.getGameState(socket.data.gameId);
+          socket.join(socket.data.gameId);
+
+          io.to(socket.data.gameId).emit("game_state_update", currentGameState);
+        } else {
+          console.log(player);
+          socket.emit("initial_player", player);
         }
       } catch (err) {
         // اگر تایید هویت تلگرام شکست بخورد یا خطای دیتابیس رخ دهد، کد به اینجا می‌رسد
@@ -120,8 +101,38 @@ module.exports = (io) => {
         );
       }
     });
-
     // رویدادهای هم سطح
+    socket.on("join_game", async ({ gameMode }) => {
+      // ۱. بررسی معتبر بودن حالت بازی
+      if (gameMode !== 2 && gameMode !== 4) {
+        console.log("Invalid gameMode:", gameMode);
+        return socket.emit("error", "your game mode is incorrect");
+      }
+      const { game } = await handleJoinGame(gameMode, socket);
+
+      socket.data.gameId = game.game_id;
+      let currentGameState = initialState.getGameState(socket.data.gameId);
+      socket.join(socket.data.gameId);
+
+      io.to(socket.data.gameId).emit("game_state_update", currentGameState);
+
+      // بررسی شروع بازی
+      if (
+        currentGameState.players.length === gameMode &&
+        currentGameState.game_status === "waitingForPlayer"
+      ) {
+        currentGameState.game_status = "start";
+        await updateGameState(socket.data.gameId, { game_status: "start" });
+        initialState.updateGameState(socket.data.gameId, {
+          game_status: "start",
+        });
+        io.to(socket.data.gameId).emit(
+          "game_started",
+          initialState.getGameState(socket.data.gameId),
+        );
+        startTimer(socket.data.gameId, io);
+      }
+    });
     socket.on("roll_dice", () => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
@@ -136,11 +147,11 @@ module.exports = (io) => {
       handleMoveToken(socket.data.gameId, socket.id, token, io);
     });
 
-    socket.on("exit_game", (telegramId) => {
+    socket.on("exit_game", () => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
-      handleExitingGame(socket.data.gameId, telegramId, io);
+      handleExitingGame(socket, io);
     });
 
     // رویداد disconnect

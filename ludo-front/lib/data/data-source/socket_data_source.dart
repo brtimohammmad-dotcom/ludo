@@ -44,7 +44,7 @@ class SocketDataSource {
     }
   }
 
-  void connectToGame({required int gameMode}) async {
+  void connectToGame() async {
     Config.printEnvironmentInfo();
 
     final serverUrl = Config.serverUrl;
@@ -82,10 +82,9 @@ class SocketDataSource {
         );
       } else {
         // اتصال اولیه
-        socket!.emit("auth", {"initData": initData, "gameMode": gameMode});
+        socket!.emit("auth", {"initData": initData});
       }
     });
-    // ✅ در حال تلاش برای reconnect
 
     socket!.on(('initial_player'), (data) {
       livePlayer = Player.fromJson(convertToJSData(data));
@@ -96,10 +95,11 @@ class SocketDataSource {
         playerInitialized.complete();
       }
     });
-
+    socket!.onDisconnect((_) {
+      print("CLIENT DISCONNECTED");
+    });
     socket!.on('game_state_update', (data) async {
       await playerInitialized.future;
-
       serverState = ServerState.fromJson(convertToJSData(data));
       onStateUpdate?.call(serverState!);
     });
@@ -158,6 +158,15 @@ class SocketDataSource {
     socket!.onReconnectError((data) {
       debugPrint("reconnect error $data");
     });
+
+  }
+
+  void joinGame(int gameMode) {
+    if (socket == null || !socket!.connected) {
+      debugPrint('Cannot join game: socket not connected');
+      return;
+    }
+    socket!.emit('join_game', {'gameMode': gameMode});
   }
 
   void rollDice() {
@@ -168,12 +177,12 @@ class SocketDataSource {
     socket!.emit('roll_dice');
   }
 
-  void exitGame(int telegramId) {
+  void exitGame() {
     if (socket == null || !socket!.connected) {
       debugPrint('Cannot exit game: socket not connected');
       return;
     }
-    socket!.emit("exit_game", telegramId);
+    socket!.emit("exit_game");
   }
 
   void moveToken(Token liveToken) {

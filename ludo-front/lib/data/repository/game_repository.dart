@@ -1,13 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
+import 'package:ludo/domain/model/player.dart';
 
 import 'package:ludo/domain/model/token.dart';
 
 class GameRepository {
   final SocketDataSource dataSource = SocketDataSource();
 
-  void onConnect({required int gameMode}) {
-    dataSource.connectToGame(gameMode: gameMode);
+  void onConnect() {
+    dataSource.connectToGame();
+  }
+
+  void startGame(int gameMode) {
+    dataSource.joinGame(gameMode);
   }
 
   void rollDice() {
@@ -18,10 +23,11 @@ class GameRepository {
     dataSource.moveToken(liveToken);
   }
 
-  void exitGame(int telegramId) {
-    dataSource.exitGame(telegramId);
+  void exitGame() {
+    dataSource.exitGame();
   }
-  void demoDisconnectAndConnect(){
+
+  void demoDisconnectAndConnect() {
     dataSource.demoDisconnectAndConnect();
   }
 

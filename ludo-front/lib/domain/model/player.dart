@@ -7,10 +7,10 @@ enum PlayerStatus { online, offline }
 class Player {
   final int userId;
   final String username;
-  final PlayerColor color;
-  final ConnectionStatus connectionStatus;
-  final PlayerStatus playerStatus;
-  final int numberOfAbsences;
+  final PlayerColor? color;
+  final ConnectionStatus? connectionStatus;
+  final PlayerStatus? playerStatus;
+  final int? numberOfAbsences;
 
   Player({
     required this.numberOfAbsences,
@@ -25,12 +25,23 @@ class Player {
     return Player(
       numberOfAbsences: json['numberOfAbsences'],
       username: json['username'],
-      color: PlayerColor.values.byName(json['color']),
+      color: json['color'] == null
+          ? null
+          : PlayerColor.values.byName(json['color']),
       userId: json['telegram_id'],
-      playerStatus: PlayerStatus.values.byName(json['player_status']),
-      connectionStatus: ConnectionStatus.values.byName(json['connection_status']),
+      playerStatus: json['player_status'] == null
+          ? null
+          : PlayerStatus.values.byName(json['player_status']),
+      connectionStatus: json['connection_status'] == null
+          ? null
+          : ConnectionStatus.values.byName(json['connection_status']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'username': username,
+    'telegram_id': userId,
+  };
 
   Player copyWith({
     int? userId,

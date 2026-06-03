@@ -50,7 +50,7 @@ class WinnerAlert extends StatelessWidget {
             style: TextStyle(
               fontSize: boardSize * 0.06,
               fontWeight: FontWeight.bold,
-              color: winner.color.toColor(),
+              color: winner.color!.toColor(),
             ),
           ),
         ),
