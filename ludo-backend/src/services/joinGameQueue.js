@@ -1,6 +1,6 @@
 const locks = new Map();
 
-async function authQueue(gameMode, callback) {
+async function joinGameQueue(gameMode, callback) {
   const currentLock = locks.get(gameMode) || Promise.resolve();
 
   let release;
@@ -28,5 +28,5 @@ async function authQueue(gameMode, callback) {
 }
 
 module.exports = {
-  authQueue,
+   joinGameQueue,
 };

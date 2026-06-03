@@ -28,7 +28,7 @@ class DiceWidget extends StatelessWidget {
         onTap: () {
           gameController.rollDice();
         },
-        child:state.turnStatus==TurnStatus.requestInFlight? Lottie.asset(
+        child:state.turnStatus==TurnStatus.rollDiceRequestInFlight? Lottie.asset(
           "assets/lotties/Dice Rolling.json",
           width: cellSize *1.5,
           height: cellSize * 1.5,

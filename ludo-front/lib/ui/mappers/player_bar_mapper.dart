@@ -133,12 +133,12 @@ class ExitIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ElevatedButton(
-          onPressed: () {
-            lastGameController.gameRepository.demoDisconnectAndConnect();
-          },
-          child: Text("conn-dis"),
-        ),
+        // ElevatedButton(
+        //   onPressed: () {
+        //     lastGameController.gameRepository.demoDisconnectAndConnect();
+        //   },
+        //   child: Text("conn-dis"),
+        // ),
         GestureDetector(
           onTap: () {
             showDialog(

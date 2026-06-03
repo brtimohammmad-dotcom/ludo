@@ -48,7 +48,7 @@ class SocketDataSource {
     Config.printEnvironmentInfo();
 
     final serverUrl = Config.serverUrl;
-    print('🟢 Connecting to: $serverUrl');
+    debugPrint('🟢 Connecting to: $serverUrl');
     socket = io.io(
       serverUrl,
       io.OptionBuilder()
@@ -63,7 +63,7 @@ class SocketDataSource {
     );
     socket!.onConnect((_) {
       dynamic initData;
-      print('✅ Connected to $serverUrl');
+      debugPrint('✅ Connected to $serverUrl');
       final isLocal =
           Uri.base.host == 'localhost' || Uri.base.host == '127.0.0.1';
       if (isLocal) {
@@ -77,7 +77,7 @@ class SocketDataSource {
       }
 
       if (playerInitialized.isCompleted && livePlayer != null) {
-        print(
+        debugPrint(
           '🔄 Reconnect detected - re-authenticating player ${livePlayer!.userId}',
         );
       } else {
@@ -194,7 +194,7 @@ class SocketDataSource {
     final engine = socket?.io.engine;
     if (engine != null) {
       engine.close(); // بستن low-level connection بدون پاک کردن session
-      print('Engine closed - simulating internet cut');
+      debugPrint('Engine closed - simulating internet cut');
       // Socket.IO به صورت خودکار reconnect می‌کند
     }
   }

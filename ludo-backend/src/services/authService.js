@@ -7,9 +7,9 @@ const {
 } = require("../constants/gameConfig");
 const initialState = require("../models/initialState");
 const { Socket } = require("socket.io");
-const { authQueue } = require("./authQueue.js");
+const { joinGameQueue } = require("./joinGameQueue.js");
 async function handleAuth(socketId, telegramId, username, gameMode) {
-  return authQueue(gameMode , async()=>{
+  return joinGameQueue(gameMode , async()=>{
       let player = await getOrCreatePlayer(telegramId, username);
 
       const existingGame = initialState.findPlayerGame(player.telegram_id);

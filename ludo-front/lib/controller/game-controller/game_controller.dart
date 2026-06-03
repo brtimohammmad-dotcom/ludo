@@ -117,7 +117,7 @@ class GameController extends ChangeNotifier {
 
           animationController?.stop();
           ServerState changeTurnStatusServerState = gameState!.serverState
-              .copyWith(turnStatus: TurnStatus.requestInFlight);
+              .copyWith(turnStatus: TurnStatus.rollDiceRequestInFlight);
           gameState = GameState(
             serverState: changeTurnStatusServerState,
             livePlayer: newLivePlayer,
@@ -175,6 +175,12 @@ class GameController extends ChangeNotifier {
     if (_isDisposed) return;
     if (gameState != null &&
         gameState!.serverState.turnStatus == TurnStatus.waitingForMove) {
+      gameState = gameState!.copyWith(
+        serverState: gameState!.serverState.copyWith(
+          turnStatus: TurnStatus.moveTokenRequestInFlight,
+        ),
+      );
+      notifyListeners();
       gameRepository.moveToken(liveToken);
     }
   }
@@ -183,7 +189,7 @@ class GameController extends ChangeNotifier {
     if (_isDisposed) return;
     if (gameState != null && isMyTurnToRoll()) {
       final newServerState = gameState!.serverState.copyWith(
-        turnStatus: TurnStatus.requestInFlight,
+        turnStatus: TurnStatus.rollDiceRequestInFlight,
       );
       gameState = gameState!.copyWith(serverState: newServerState);
       notifyListeners();

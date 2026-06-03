@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:http/http.dart' as http;
@@ -34,10 +35,10 @@ class Config {
           onChanged(true, reConnectCounter);
         }
       } catch (e) {
-        print("ERROR: $e");
+        debugPrint("ERROR: $e");
 
         if (_isConnected == true) {
-          print("DISCONNECTED");
+          debugPrint("DISCONNECTED");
           _isConnected = false;
 
           TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
@@ -64,8 +65,8 @@ class Config {
       final currentOrigin = Uri.base.origin;
       final currentHost = Uri.base.host;
 
-      print('🌍 Current origin: $currentOrigin');
-      print('🌍 Current host: $currentHost');
+      debugPrint('🌍 Current origin: $currentOrigin');
+      debugPrint('🌍 Current host: $currentHost');
 
       // اگر روی رندر اجرا می‌شود
       if (currentOrigin.contains('onrender.com') ||
@@ -81,7 +82,7 @@ class Config {
         return 'http://localhost:3000';
       }
     } catch (e) {
-      print('Error detecting environment: $e');
+      debugPrint('Error detecting environment: $e');
     }
 
     // پیش‌فرض
@@ -91,14 +92,14 @@ class Config {
   // متد کمکی برای دیباگ
   static void printEnvironmentInfo() {
     if (kIsWeb) {
-      print('📱 Platform: Web');
-      print('📍 Origin: ${Uri.base.origin}');
-      print('📍 Host: ${Uri.base.host}');
-      print('📍 Protocol: ${Uri.base.scheme}');
-      print('🔌 Server URL: $serverUrl');
+      debugPrint('📱 Platform: Web');
+      debugPrint('📍 Origin: ${Uri.base.origin}');
+      debugPrint('📍 Host: ${Uri.base.host}');
+      debugPrint('📍 Protocol: ${Uri.base.scheme}');
+      debugPrint('🔌 Server URL: $serverUrl');
     } else {
-      print('📱 Platform: Mobile/Desktop');
-      print('🔌 Server URL: $serverUrl');
+      debugPrint('📱 Platform: Mobile/Desktop');
+      debugPrint('🔌 Server URL: $serverUrl');
     }
   }
 }

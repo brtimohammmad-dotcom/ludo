@@ -7,7 +7,6 @@ import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
-import 'package:ludo/ui/join_screen.dart';
 
 import 'package:ludo/ui/mappers/player_bar_mapper.dart';
 
@@ -26,20 +25,20 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    Config.startConnectionCheck((hasInternet, numberOfReconnects) {
-      debugPrint(
-        "internetStatus $hasInternet , numberOfReconnects : $numberOfReconnects",
-      );
-      if (numberOfReconnects == 12) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => JoinScreen(gameController: GameController()),
-          ),
-          (route) => false, // حذف همه صفحات قبلی
-        );
-      }
-    });
+    // Config.startConnectionCheck((hasInternet, numberOfReconnects) {
+    //   debugPrint(
+    //     "internetStatus $hasInternet , numberOfReconnects : $numberOfReconnects",
+    //   );
+    //   if (numberOfReconnects == 12) {
+    //     Navigator.pushAndRemoveUntil(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (context) => JoinScreen(gameController: GameController()),
+    //       ),
+    //       (route) => false, // حذف همه صفحات قبلی
+    //     );
+    //   }
+    // });
     // ست کردن کالبک
     widget.gameController.onGameFinished = () {
       if (mounted &&

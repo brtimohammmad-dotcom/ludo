@@ -7,7 +7,8 @@ enum TurnStatus {
   waitingForRoll,
   waitingForMove,
   waitingForAnimate,
-  requestInFlight,
+  moveTokenRequestInFlight,
+  rollDiceRequestInFlight,
 }
 
 class ServerState {
