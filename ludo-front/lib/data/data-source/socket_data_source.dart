@@ -64,7 +64,6 @@ class SocketDataSource {
           .build(),
     );
     socket!.onConnect((_) {
-      Config.stopConnectionCheck();
       dynamic initData;
       debugPrint('✅ Connected to $serverUrl');
       final isLocal =

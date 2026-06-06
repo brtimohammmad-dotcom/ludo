@@ -1,62 +1,13 @@
-import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'package:http/http.dart' as http;
-import 'package:telegram_web_app/telegram_web_app.dart';
+
 
 class Config {
-  static Timer? _timer;
-  static bool? _isConnected;
+
   static int reConnectCounter = 0;
 
-  static void startConnectionCheck(
-    Function(bool connected, int numberOfReconnecting) onChanged,
-  ) {
-    _timer?.cancel();
-
-    _timer = Timer.periodic(const Duration(seconds: 15), (_) async {
-      try {
-        final response = await http.get(
-          Uri.parse('https://ludo-backend-8ihb.onrender.com/health'),
-        );
-
-        _isConnected = response.statusCode == 200;
-
-        if (_isConnected == false) {
-          if (TelegramWebApp.instance.isSupported) {
-            TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
-          }
-          reConnectCounter++;
-          onChanged(_isConnected!, reConnectCounter);
-        } else {
-          reConnectCounter = 0;
-          onChanged(true, reConnectCounter);
-        }
-      } catch (e) {
-        debugPrint("ERROR: $e");
-
-        if (_isConnected == true) {
-          debugPrint("DISCONNECTED");
-          _isConnected = false;
-
-          TelegramWebApp.instance.showAlert('در حال اتصال به اینترنت');
-
-        }
-        reConnectCounter++;
-        onChanged(false, reConnectCounter);
-      }
-    });
-  }
-
-  static void stopConnectionCheck() {
-    _timer?.cancel();
-    _timer = null;
-    reConnectCounter = 0;
-    _isConnected = null;
-    debugPrint("⏱️ Connection check timer stopped.");
-  }
 
   static String get serverUrl {
     // اگر روی وب نیست (موبایل یا دسکتاپ)

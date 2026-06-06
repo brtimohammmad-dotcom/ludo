@@ -21,7 +21,9 @@ class _HomeState extends State<Home> {
     // TODO: implement initState
     super.initState();
     widget.gameController.connectToGame();
-    widget.gameController.gameRepository.dataSource.socket!.onDisconnect((_) {
+    widget.gameController.gameRepository.dataSource.socket!.onDisconnect((
+      _,
+    ) async {
       debugPrint("🔴 Socket Disconnected! Starting health check...");
 
       // نمایش پاپ‌آپ یا لودینگ در تلگرام (فقط یک‌بار در لحظه قطعی)
@@ -31,35 +33,19 @@ class _HomeState extends State<Home> {
         );
       }
 
-      // شروع پینگ زدن برای سنجش وضعیت اینترنت کاربر و سرور
-      Config.startConnectionCheck((hasInternet, numberOfReconnects) async {
-        debugPrint("Retry #$numberOfReconnects - Internet: $hasInternet");
+      // اگر بعد از ۱۲ بار تلاش (حدود ۱ دقیقه) سوکت وصل نشد
+      await widget.gameController.dispose();
 
-        // اگر بعد از ۱۲ بار تلاش (حدود ۱ دقیقه) سوکت وصل نشد
-        if (numberOfReconnects >= 4) {
-          Config.stopConnectionCheck();
-          await widget.gameController.dispose();
+      if (!mounted) return;
 
-          if (!mounted) return;
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  JoinScreen(gameController: GameController()),
-            ),
-            (route) => false,
-          );
-        }
-      });
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JoinScreen(gameController: GameController()),
+        ),
+        (route) => false,
+      );
     });
-  }
-
-  @override
-  void dispose() {
-    // اگر کاربر خودش هم دستی صفحه را بست، تایمر حتماً متوقف شود
-    Config.stopConnectionCheck();
-    super.dispose();
   }
 
   @override

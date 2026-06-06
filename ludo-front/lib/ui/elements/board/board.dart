@@ -79,7 +79,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   void dispose() {
     debugPrint("🧹 Board dispose called");
     widget.gameController.resetGame(); // ✅ این خیلی مهم است
-    Config.stopConnectionCheck();
     super.dispose();
   }
 
