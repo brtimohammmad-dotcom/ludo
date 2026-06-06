@@ -55,13 +55,14 @@ class SocketDataSource {
           .setTransports(['websocket', 'polling']) // فقط همین کافی است
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(12) // تعداد تلاش برای reconnect
-          .setReconnectionDelay(5000) // تأخیر بین تلاش‌ها (ms)
+          .setReconnectionAttempts(24) // تعداد تلاش برای reconnect
+          .setReconnectionDelay(2500) // تأخیر بین تلاش‌ها (ms)
           .setReconnectionDelayMax(60 * 1000) // حداکثر تأخیر
           .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );
     socket!.onConnect((_) {
+      Config.stopConnectionCheck();
       dynamic initData;
       debugPrint('✅ Connected to $serverUrl');
       final isLocal =
@@ -85,7 +86,6 @@ class SocketDataSource {
         socket!.emit("auth", {"initData": initData});
       }
     });
-
     socket!.on(('initial_player'), (data) {
       livePlayer = Player.fromJson(convertToJSData(data));
       debugPrint(livePlayer!.userId.toString());
@@ -94,9 +94,6 @@ class SocketDataSource {
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
-    });
-    socket!.onDisconnect((_) {
-      print("CLIENT DISCONNECTED");
     });
     socket!.on('game_state_update', (data) async {
       await playerInitialized.future;
@@ -146,17 +143,6 @@ class SocketDataSource {
 
       serverState = ServerState.fromJson(convertToJSData(data));
       onTokenMoved?.call(serverState!);
-    });
-    socket!.onReconnectFailed((data) {
-      debugPrint("reconnecting failed");
-      onReconnectionFailedCallback?.call();
-    });
-    socket!.onReconnectAttempt((data) {
-      debugPrint("reconnect attempt");
-    });
-
-    socket!.onReconnectError((data) {
-      debugPrint("reconnect error $data");
     });
 
   }

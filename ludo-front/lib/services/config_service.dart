@@ -16,7 +16,7 @@ class Config {
   ) {
     _timer?.cancel();
 
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+    _timer = Timer.periodic(const Duration(seconds: 15), (_) async {
       try {
         final response = await http.get(
           Uri.parse('https://ludo-backend-8ihb.onrender.com/health'),
@@ -52,6 +52,10 @@ class Config {
 
   static void stopConnectionCheck() {
     _timer?.cancel();
+    _timer = null;
+    reConnectCounter = 0;
+    _isConnected = null;
+    debugPrint("⏱️ Connection check timer stopped.");
   }
 
   static String get serverUrl {

@@ -25,20 +25,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    // Config.startConnectionCheck((hasInternet, numberOfReconnects) {
-    //   debugPrint(
-    //     "internetStatus $hasInternet , numberOfReconnects : $numberOfReconnects",
-    //   );
-    //   if (numberOfReconnects == 12) {
-    //     Navigator.pushAndRemoveUntil(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => JoinScreen(gameController: GameController()),
-    //       ),
-    //       (route) => false, // حذف همه صفحات قبلی
-    //     );
-    //   }
-    // });
+
     // ست کردن کالبک
     widget.gameController.onGameFinished = () {
       if (mounted &&

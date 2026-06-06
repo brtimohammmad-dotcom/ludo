@@ -26,7 +26,7 @@ class GameController extends ChangeNotifier {
   AnimationController? animationController;
 
   // ✅ اضافه شده برای مدیریت وضعیت
-  bool _isDisposed = false;
+  final bool _isDisposed = false;
   bool _isGameFinishedHandled = false;
   bool _isMovingToken = false;
 
@@ -272,10 +272,10 @@ class GameController extends ChangeNotifier {
 
   void resetGame() {
     gameState = null;
-    livePlayer?.color!=null?null:livePlayer?.color;
-    livePlayer?.numberOfAbsences!=null?null:livePlayer?.numberOfAbsences;
-    livePlayer?.playerStatus!=null?null:livePlayer?.playerStatus;
-    livePlayer?.connectionStatus!=null?null:livePlayer?.connectionStatus;
+    livePlayer?.color != null ? null : livePlayer?.color;
+    livePlayer?.numberOfAbsences != null ? null : livePlayer?.numberOfAbsences;
+    livePlayer?.playerStatus != null ? null : livePlayer?.playerStatus;
+    livePlayer?.connectionStatus != null ? null : livePlayer?.connectionStatus;
 
     animationController?.stop();
     animationController = null;
@@ -287,4 +287,16 @@ class GameController extends ChangeNotifier {
 
   // ✅ بررسی اینکه آیا controller هنوز فعال است
   bool get isDisposed => _isDisposed;
+
+  @override
+  Future<void> dispose() async {
+    // TODO: implement dispose
+    super.dispose();
+    gameState = null;
+    livePlayer = null;
+    animationController?.stop();
+    animationController = null;
+    await gameRepository.dispose();
+    onGameFinished = null;
+  }
 }
