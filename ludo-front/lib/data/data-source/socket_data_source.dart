@@ -58,6 +58,8 @@ class SocketDataSource {
           .setReconnectionAttempts(24) // تعداد تلاش برای reconnect
           .setReconnectionDelay(2500) // تأخیر بین تلاش‌ها (ms)
           .setReconnectionDelayMax(60 * 1000) // حداکثر تأخیر
+          .setQuery({'timeout': '5000'}) // تایم‌اوت اتصال اولیه
+          .setExtraHeaders({'Connection': 'upgrade'})
           .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );

@@ -45,6 +45,8 @@ const io = require("socket.io")(server, {
     maxDisconnectionDuration: 60 * 1000,
     skipMiddlewares: false,
   },
+  pingInterval: 5000, // هر ۵ ثانیه سرور به کلاینت پینگ می‌فرستد
+  pingTimeout: 3000, // اگر کلاینت تا ۳ ثانیه بعد جواب نداد، سرور فرض می‌کند قطع شده است
   transports: ["websocket", "polling"],
 });
 
