@@ -18,7 +18,7 @@ class DiceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ServerState state = gameController.gameState!.serverState;
+    ServerState state = gameController.gameState!.serverState!;
     return AnimatedPositioned(
       curve: Curves.easeOutCirc,
       duration: const Duration(milliseconds: 500),
@@ -60,7 +60,7 @@ class DiceWidget extends StatelessWidget {
                   ],
           ),
           child:Image.asset(
-                  'assets/images/dice/${gameController.gameState!.serverState.lastDiceValue}.png',
+                  'assets/images/dice/${gameController.gameState!.serverState!.lastDiceValue}.png',
                   fit: BoxFit.cover,
                 ),
         ),

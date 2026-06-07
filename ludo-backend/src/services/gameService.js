@@ -250,6 +250,7 @@ async function handleExitingGame(socket, io) {
     }
   });
   initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
+  socket.emit("player_exit")
   currentGame = initialState.getGameState(socket.data.gameId);
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",

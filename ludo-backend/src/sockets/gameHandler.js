@@ -109,9 +109,9 @@ module.exports = (io) => {
         return socket.emit("error", "your game mode is incorrect");
       }
       const { game } = await handleJoinGame(gameMode, socket);
-
       socket.data.gameId = game.game_id;
       let currentGameState = initialState.getGameState(socket.data.gameId);
+
       socket.join(socket.data.gameId);
 
       io.to(socket.data.gameId).emit("game_state_update", currentGameState);

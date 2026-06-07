@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/services/config_service.dart';
 import 'package:ludo/ui/alerts/alert_background.dart';
 import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
+import 'package:ludo/ui/join_screen.dart';
 
 import 'package:ludo/ui/mappers/player_bar_mapper.dart';
 
@@ -29,15 +29,23 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     // ست کردن کالبک
     widget.gameController.onGameFinished = () {
       if (mounted &&
-          widget.gameController.gameState!.serverState.winner != null) {
+          widget.gameController.gameState!.serverState!.winner != null) {
         _showDialog(
           AlertBackground(
             alert: WinnerAlert(
-              winner: widget.gameController.gameState!.serverState.winner!,
+              winner: widget.gameController.gameState!.serverState!.winner!,
             ),
           ),
         );
       }
+    };
+    widget.gameController.onPlayerExit = () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JoinScreen(gameController: widget.gameController),
+        ),
+      );
     };
     widget.gameController.onReconnectionFailed = () {
       if (mounted) {
@@ -90,7 +98,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
-        return widget.gameController.gameState == null
+        return widget.gameController.gameState!.serverState == null
             ? Center(
                 child: Lottie.asset(
                   "assets/lotties/Happy girl.json",
@@ -107,7 +115,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     int gameMode =
-                        widget.gameController.gameState!.serverState.gameMode;
+                        widget.gameController.gameState!.serverState!.gameMode;
 
                     final maxAvailableWidth = screenWidth;
                     final maxAvailableHeight = screenHeight;

@@ -144,7 +144,10 @@ class ExitIcon extends StatelessWidget {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return AlertBackground(alert: ExitButtonAlert( lastGameController: lastGameController),
+                return AlertBackground(
+                  alert: ExitButtonAlert(
+                    lastGameController: lastGameController,
+                  ),
                 );
               },
             );
@@ -176,7 +179,7 @@ class PlayerBarUsernameContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ServerState state = gameController.gameState!.serverState;
+    ServerState state = gameController.gameState!.serverState!;
     PlayerColor playerColor = recognitionPlayerColor(
       playerIndex,
       state.gameMode,
@@ -340,7 +343,8 @@ Color playerUserNameBoxColor(
     gameMode,
   );
 
-  if (currentPlayerColor == gameController.gameState!.serverState.currentTurn) {
+  if (currentPlayerColor ==
+      gameController.gameState!.serverState!.currentTurn) {
     switch (playerIndex) {
       case (0):
         return Colors.red.shade900;

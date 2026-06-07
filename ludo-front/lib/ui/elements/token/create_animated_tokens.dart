@@ -8,7 +8,7 @@ List<AnimatedPositioned> createAnimatedTokens({
   required GameController gameController,
 }) {
   return [
-    ...gameController.gameState!.serverState.tokens.map((token) {
+    ...gameController.gameState!.serverState!.tokens.map((token) {
       Offset cell;
       if (token.pathIndex == -1) {
         cell = homePaths[token.playerColor.index]![((int.parse(token.id)) % 4)];

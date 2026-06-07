@@ -8,11 +8,18 @@ const {
 const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
 
 async function handleJoinGame(gameMode, socket) {
+  console.log("player id: ", socket.data.telegramId, " joined");
+  console.log("player name: ", socket.data.firstName, "joined");
+  console.log("game mode is: ", gameMode);
+  if (!(gameMode === 2 || gameMode === 4)) {
+    socket.emit("error", "game mode incorrect");
+    return;
+  }
   return await joinGameQueue(gameMode, async () => {
-    const player ={
-        username:socket.data.firstName,
-        telegram_id:socket.data.telegramId
-    }
+    const player = {
+      username: socket.data.firstName,
+      telegram_id: socket.data.telegramId,
+    };
     let game = initialState
       .getAllGames()
       .find(
@@ -34,7 +41,7 @@ async function handleJoinGame(gameMode, socket) {
       game.game_id,
       color,
     );
-    
+
     const correctPlayer = {
       ...playerInDataBase,
       color: color,

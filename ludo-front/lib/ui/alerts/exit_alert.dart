@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/ui/join_screen.dart';
 
 class ExitButtonAlert extends StatelessWidget {
   const ExitButtonAlert({super.key, required this.lastGameController});
@@ -60,14 +59,7 @@ class ExitButtonAlert extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 lastGameController.exitGame();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        JoinScreen(gameController: lastGameController),
-                  ),
-                  (route) => false, // حذف همه صفحات قبلی
-                );
+
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,

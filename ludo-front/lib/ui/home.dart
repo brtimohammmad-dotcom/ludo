@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/services/config_service.dart';
 import 'package:ludo/ui/join_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
@@ -33,18 +32,16 @@ class _HomeState extends State<Home> {
         );
       }
 
-      // اگر بعد از ۱۲ بار تلاش (حدود ۱ دقیقه) سوکت وصل نشد
-      await widget.gameController.dispose();
-
       if (!mounted) return;
+      widget.gameController.connectToGame();
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JoinScreen(gameController: GameController()),
-        ),
-        (route) => false,
-      );
+      // Navigator.pushAndRemoveUntil(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => Home(gameController: GameController()),
+      //   ),
+      //   (route) => false,
+      // );
     });
   }
 
@@ -53,7 +50,7 @@ class _HomeState extends State<Home> {
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
-        return widget.gameController.livePlayer == null
+        return widget.gameController.gameState?.livePlayer == null
             ? Center(
                 child: Lottie.asset(
                   "assets/lotties/Happy girl.json",

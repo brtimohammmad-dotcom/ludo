@@ -15,6 +15,7 @@ typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
 typedef GameFinishedCallback = void Function(Player player);
 typedef ReconnectionFailedCallback = void Function();
+typedef PlayerExitCallback = void Function();
 
 class SocketDataSource {
   io.Socket? socket;
@@ -28,6 +29,7 @@ class SocketDataSource {
   TimesUpCallback? onTimesUp;
   GameFinishedCallback? onGameFinished;
   ReconnectionFailedCallback? onReconnectionFailedCallback;
+  PlayerExitCallback? onPlayerExit;
 
   Completer<void> playerInitialized = Completer<void>();
 
@@ -131,9 +133,12 @@ class SocketDataSource {
       await playerInitialized.future;
 
       winner = Player.fromJson(convertToJSData(data));
-      socket!.disconnect();
-      socket!.close();
       onGameFinished?.call(winner!);
+    });
+    socket!.on(('player_exit'), (data) async {
+      await playerInitialized.future;
+
+      onPlayerExit?.call();
     });
 
     socket!.on(('error'), (data) {
@@ -145,7 +150,6 @@ class SocketDataSource {
       serverState = ServerState.fromJson(convertToJSData(data));
       onTokenMoved?.call(serverState!);
     });
-
   }
 
   void joinGame(int gameMode) {

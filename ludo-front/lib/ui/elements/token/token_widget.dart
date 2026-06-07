@@ -22,7 +22,7 @@ class TokenWidget extends StatelessWidget {
     GameState gameState = gameController.gameState!;
     bool tokenIsActive = TokenRules.canActiveToken(token, gameState);
     bool currentTurnAndTokenIsActive() =>
-        gameState.serverState.currentTurn == gameState.livePlayer.color &&
+        gameState.serverState!.currentTurn == gameState.livePlayer!.color &&
         tokenIsActive;
 
     return GestureDetector(

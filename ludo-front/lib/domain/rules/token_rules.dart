@@ -19,15 +19,15 @@ class TokenRules {
   }
 
   static bool canActiveToken(Token liveToken, GameState? gameState) {
-    if (gameState!.serverState.turnStatus != TurnStatus.waitingForMove) {
+    if (gameState!.serverState!.turnStatus != TurnStatus.waitingForMove) {
       return false;
     }
     final targetPathIndex =
-        liveToken.pathIndex + gameState.serverState.lastDiceValue.toInt();
+        liveToken.pathIndex + gameState.serverState!.lastDiceValue.toInt();
     bool canNotActiveToken = false;
-    gameState.serverState.tokens.any((otherToken) {
+    gameState.serverState!.tokens.any((otherToken) {
       return canNotActiveToken =
-          gameState.serverState.currentTurn != liveToken.playerColor ||
+          gameState.serverState!.currentTurn != liveToken.playerColor ||
               _isCellOccupiedBySamePlayer(
                 gameState: gameState,
                 liveToken: liveToken,
@@ -38,11 +38,11 @@ class TokenRules {
                 liveToken: liveToken,
                 otherToken: otherToken,
               ) ||
-              targetPathIndex > 39 ||gameState.serverState.turnStatus == TurnStatus.waitingForRoll;
+              targetPathIndex > 39 ||gameState.serverState!.turnStatus == TurnStatus.waitingForRoll;
     });
     return (!canNotActiveToken && liveToken.pathIndex!=-1)||
         (liveToken.pathIndex == -1 &&
-            gameState.serverState.lastDiceValue == 6&&!canNotActiveToken);
+            gameState.serverState!.lastDiceValue == 6&&!canNotActiveToken);
   }
 
   static bool _isCellOccupiedBySamePlayer({
@@ -51,14 +51,14 @@ class TokenRules {
     required GameState? gameState,
   }) {
     final targetPathIndex =
-        liveToken.pathIndex + gameState!.serverState.lastDiceValue.toInt();
+        liveToken.pathIndex + gameState!.serverState!.lastDiceValue.toInt();
     bool isSameToken =
         otherToken.id != liveToken.id &&
             otherToken.playerColor == liveToken.playerColor;
     return (isSameToken) &&
         ((otherToken.pathIndex == 0 &&
             liveToken.pathIndex == -1 &&
-            gameState.serverState.lastDiceValue == 6) ||
+            gameState.serverState!.lastDiceValue == 6) ||
             (otherToken.pathIndex == targetPathIndex &&
                 liveToken.pathIndex != -1 &&
                 otherToken.pathIndex != 39));
@@ -76,7 +76,7 @@ class TokenRules {
       pathIndex: liveToken.pathIndex,
       playerColor: liveToken.playerColor,
     );
-    return globalLiveTokenPathIndex + gameState!.serverState.lastDiceValue ==
+    return globalLiveTokenPathIndex + gameState!.serverState!.lastDiceValue ==
         _playerStartIndex[otherToken.playerColor] &&
         otherToken.pathIndex == 0;
   }
