@@ -59,11 +59,8 @@ class WinnerAlert extends StatelessWidget {
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    JoinScreen(gameController: GameController()),
-              ),
-              (route) => false, // حذف همه صفحات قبلی
+              MaterialPageRoute(builder: (context) => const JoinScreen()),
+                  (route) => false, // کل صفحات قبلی را از حافظه حذف کن
             );
           },
           style: ElevatedButton.styleFrom(

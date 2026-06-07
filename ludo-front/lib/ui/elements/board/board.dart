@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
@@ -6,6 +7,7 @@ import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
+import 'package:ludo/ui/join_screen.dart';
 
 import 'package:ludo/ui/mappers/player_bar_mapper.dart';
 
@@ -51,15 +53,24 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         _showDialog(
           AlertBackground(
             alert: ReconnectingFailedAlert(
-              onHomePressed: () {
-                // ۱. ابتدا دیالوگ خطا را ببند
+              onHomePressed: () async {
+                // ۱. بستن دیالوگ
                 Navigator.of(context).pop();
 
-                // ۲. کنترلر را ریست کن
-                widget.gameController.resetGame();
+                // ۲. نابود کردن کنترلر فعلی (که باعث اجرای dispose دیتاسورس و بسته شدن سوکت می‌شود)
+                widget.gameController.deleteGameState();
 
-                // ۳. به صفحه اصلی و لابی (JoinScreen) برگرد
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                await Future.delayed(const Duration(milliseconds: 100));
+
+                // ۳. 🌟 شاه‌کلید: پاک کردن کل صفحات قبلی و ساخت یک JoinScreen کاملاً نو
+                // این متد مطمئن می‌شود که استک ناوبری کاملاً خالی شده و اکانت دوقلو ساخته نمی‌شود
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const JoinScreen()),
+                        (route) => false, // کل صفحات قبلی را از حافظه حذف کن
+                  );
+                }
               },
             ),
           ),
@@ -108,10 +119,14 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
+    if (widget.gameController.gameState == null ||
+        widget.gameController.gameState!.serverState == null) {
+      // اگر دیتا پاک شده، یک لودینگ ساده یا باکس خالی نشان بده تا صفحه راحت بسته شود
+      return const Center(child: CupertinoActivityIndicator());
+    }
         return widget.gameController.gameState!.serverState == null
             ? Center(
                 child: Lottie.asset(

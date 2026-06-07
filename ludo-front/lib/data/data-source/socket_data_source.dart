@@ -15,12 +15,11 @@ typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
 typedef GameFinishedCallback = void Function(Player player);
 typedef ReconnectionFailedCallback = void Function();
+typedef OnDisconnectCallback = void Function();
 typedef PlayerExitCallback = void Function();
 
 class SocketDataSource {
   io.Socket? socket;
-  Player? livePlayer;
-  Player? winner;
   ServerState? serverState;
   StateUpdateCallback? onStateUpdate;
   PlayerUpdateCallback? onPlayerUpdate;
@@ -29,16 +28,15 @@ class SocketDataSource {
   TimesUpCallback? onTimesUp;
   GameFinishedCallback? onGameFinished;
   ReconnectionFailedCallback? onReconnectionFailedCallback;
+  OnDisconnectCallback? onDisconnectCallback;
   PlayerExitCallback? onPlayerExit;
 
   Completer<void> playerInitialized = Completer<void>();
 
   Map<String, dynamic> convertToJSData(dynamic data) {
     if (data is List && data.isNotEmpty && data[0] is Map) {
-      // آیتم اول لیست را که Map است بردار
       return Map<String, dynamic>.from(data[0] as Map);
     } else if (data is Map<String, dynamic>) {
-      // اگر مستقیم Map بود (حالت عادی)
       return data;
     } else {
       debugPrint('فرمت داده نامعتبر: ${data.runtimeType}');
@@ -55,26 +53,30 @@ class SocketDataSource {
         debugPrint('⚠️ Socket is already connected. Skipping initialization.');
         return;
       }
-      debugPrint('🔄 Socket exists but disconnected. Reconnecting using existing socket...');
-      socket!.connect(); // فقط اتصال مجدد بدون ساخت نمونه جدید
-      return;
+
+      // 🚨 اصلاح شد: اگر سوکت وجود دارد اما دیسکانکت است،
+      // به جای زدن متد socket!.connect() که تلاش‌های ریکانکت قبلی را دوبرابر می‌کند،
+      // کل سوکت قبلی را نابود کن و بگذار یک سوکت کاملاً جدید از خط پایینی ساخته شود.
+      debugPrint('🔄 Ghost socket detected. Disposing before creating a fresh instance...');
+      await dispose();
     }
 
     debugPrint('🟢 Connecting to: $serverUrl');
     socket = io.io(
       serverUrl,
       io.OptionBuilder()
-          .setTransports(['websocket', 'polling']) // فقط همین کافی است
+          .setTransports(['websocket', 'polling'])
           .enableAutoConnect()
           .enableReconnection()
-          .setReconnectionAttempts(24) // تعداد تلاش برای reconnect
-          .setReconnectionDelay(2500) // تأخیر بین تلاش‌ها (ms)
-          .setReconnectionDelayMax(60 * 1000) // حداکثر تأخیر
-          .setQuery({'timeout': '5000'}) // تایم‌اوت اتصال اولیه
+          .setReconnectionAttempts(6)
+          .setReconnectionDelay(2000)
+          .setReconnectionDelayMax(5000)
+          .setTimeout(3500)
+          .setQuery({'timeout': '3500'})
           .setExtraHeaders({'Connection': 'upgrade'})
-          .setTimeout(20000) // timeout اتصال (ms)
           .build(),
     );
+
     socket!.onConnect((_) {
       dynamic initData;
       debugPrint('✅ Connected to $serverUrl');
@@ -85,81 +87,140 @@ class SocketDataSource {
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
-          TelegramWebApp.instance.expand(); // مینی‌آپ را تمام‌صفحه می‌کند
+          TelegramWebApp.instance.expand();
         }
         initData = TelegramWebApp.instance.initData.raw;
       }
 
-      if (playerInitialized.isCompleted && livePlayer != null) {
-        debugPrint(
-          '🔄 Reconnect detected - re-authenticating player ${livePlayer!.userId}',
-        );
-      } else {
-        // اتصال اولیه
-        socket!.emit("auth", {"initData": initData});
-      }
+      // 🚨 اصلاح شد: هر زمان که اتصال برقرار می‌شود (چه بار اول، چه ریکانکت بومی سوکت)،
+      // باید دیتای auth فرستاده شود تا سرور کلاینت قدیمی و جدید را جابجا کند و دوقلو ایجاد نشود.
+      debugPrint('📤 Sending auth event to server...');
+      socket!.emit("auth", {"initData": initData});
     });
-    socket!.on(('initial_player'), (data) {
-      livePlayer = Player.fromJson(convertToJSData(data));
-      debugPrint(livePlayer!.userId.toString());
-      debugPrint(livePlayer!.username.toString());
-      onPlayerUpdate?.call(livePlayer!);
+
+    socket!.on('initial_player', (data) {
+      Player livePlayer = Player.fromJson(convertToJSData(data));
+      debugPrint('👤 Initial Player received: ${livePlayer.username}');
+      onPlayerUpdate?.call(livePlayer);
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
     });
+
     socket!.on('game_state_update', (data) async {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onStateUpdate?.call(serverState!);
     });
 
-    // وقتی بازی شروع می‌شود
     socket!.on('game_started', (data) async {
       await playerInitialized.future;
-
       debugPrint('game started');
       serverState = ServerState.fromJson(convertToJSData(data));
-      livePlayer = serverState!.players.firstWhere((p) {
-        return p.userId == livePlayer!.userId;
-      });
       onStateUpdate?.call(serverState!);
     });
 
-    socket!.on(('dice_rolled'), (data) async {
+    socket!.on('dice_rolled', (data) async {
       await playerInitialized.future;
-
       serverState = ServerState.fromJson(convertToJSData(data));
       onDiceRolled?.call(serverState!);
     });
 
-    socket!.on(('times_up'), (data) async {
+    socket!.on('times_up', (data) async {
       await playerInitialized.future;
-
       serverState = ServerState.fromJson(convertToJSData(data));
       onTimesUp?.call(serverState!);
     });
-    socket!.on(('game_finished'), (data) async {
-      await playerInitialized.future;
 
-      winner = Player.fromJson(convertToJSData(data));
-      onGameFinished?.call(winner!);
-    });
-    socket!.on(('player_exit'), (data) async {
+    socket!.on('game_finished', (data) async {
       await playerInitialized.future;
+      Player winner = Player.fromJson(convertToJSData(data));
+      onGameFinished?.call(winner);
+    });
+
+    socket!.on('player_exit', (data) async {
+      await playerInitialized.future;
+      socket!.clearListeners(); // پاک کردن تمام لیسنرهای رویدادها (.on)
 
       onPlayerExit?.call();
     });
 
-    socket!.on(('error'), (data) {
+    socket!.on('error', (data) {
       debugPrint('Socket error: $data');
     });
-    socket!.on(('token_moved'), (data) async {
-      await playerInitialized.future;
 
+    socket!.on('token_moved', (data) async {
+      await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onTokenMoved?.call(serverState!);
     });
+
+    socket!.onDisconnect((_) {
+      debugPrint('🔌 Socket disconnected.');
+      // 🚨 اصلاح شد: وقتی دیسکانکت می‌شود، وضعیت کامپلیتر را ریست کنید تا برای کانکت بعدی منتظر توکن بماند
+      if (playerInitialized.isCompleted) {
+        playerInitialized = Completer<void>();
+      }
+      onDisconnectCallback?.call();
+    });
+
+    socket!.onReconnectAttempt((attempt) {
+      debugPrint('🔄 Socket reconnect attempt #$attempt');
+    });
+
+    socket!.onReconnectError((error) {
+      debugPrint('⚠️ Reconnect error: $error');
+    });
+
+    socket!.onReconnectFailed((_) async {
+      debugPrint('❌ [FATAL] Reconnection failed after all attempts.');
+      onReconnectionFailedCallback?.call();
+    });
+  }
+
+  Future<void> dispose() async {
+    debugPrint("🧹 Fully disposing SocketDataSource and clearing memory...");
+
+    // ۱. مدیریت و قطع اتصال سوکت به صورت امن
+    if (socket != null) {
+      try {
+        if (socket!.connected) {
+          socket!.disconnect(); // قطع اتصال از سرور
+        }
+        socket!.clearListeners(); // پاک کردن تمام لیسنرهای رویدادها (.on)
+        socket!.close(); // بستن کامل منبع سوکت
+      } catch (e) {
+        debugPrint("⚠️ Error while closing socket: $e");
+      } finally {
+        socket = null; // آزاد کردن متغیر سوکت برای گاربج کالکتور
+      }
+    }
+
+    // ۲. پاکسازی و ریست کردن کالبک‌ها (تغییر ارجاعات به null)
+    // این کار باعث می‌شود کنترلر سینگلتون دیگر به توابع قدیمی ارجاع نداشته باشد
+    onStateUpdate = null;
+    onPlayerUpdate = null;
+    onTokenMoved = null;
+    onDiceRolled = null;
+    onTimesUp = null;
+    onGameFinished = null;
+    onReconnectionFailedCallback = null;
+    onDisconnectCallback = null;
+    onPlayerExit = null;
+
+    // ۳. پاکسازی وضعیت بازی (State) ذخیره شده
+    serverState = null;
+
+    // ۴. بازنشانی کامل Completer برای اتصالات بعدی
+    // اگر کامپلیتر قبلاً تکمیل شده باشد، یک نمونه جدید و خام جایگزین می‌کنیم
+    if (playerInitialized.isCompleted) {
+      playerInitialized = Completer<void>();
+    } else {
+      // اگر تکمیل نشده بود هم برای اطمینان مجدد ساختار خام می‌دهیم
+      playerInitialized = Completer<void>();
+    }
+
+    debugPrint("✅ SocketDataSource is now completely clean.");
   }
 
   void joinGame(int gameMode) {
@@ -194,18 +255,11 @@ class SocketDataSource {
     socket!.emit('move_token', liveToken.toJson());
   }
 
-  void disconnect() {
-    socket?.disconnect();
-    socket?.dispose();
-    socket = null;
-  }
-
   void demoDisconnectAndConnect() {
     final engine = socket?.io.engine;
     if (engine != null) {
-      engine.close(); // بستن low-level connection بدون پاک کردن session
+      engine.close();
       debugPrint('Engine closed - simulating internet cut');
-      // Socket.IO به صورت خودکار reconnect می‌کند
     }
   }
 }

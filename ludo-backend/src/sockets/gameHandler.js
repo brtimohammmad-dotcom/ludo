@@ -130,27 +130,28 @@ module.exports = (io) => {
           "game_started",
           initialState.getGameState(socket.data.gameId),
         );
-        startTimer(socket.data.gameId, io);
+        startTimer(socket, io);
       }
     });
     socket.on("roll_dice", () => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
-      handleRollDice(socket.data.gameId, socket, io);
+      handleRollDice( socket, io);
     });
 
     socket.on("move_token", (token) => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
-      handleMoveToken(socket.data.gameId, socket.id, token, io);
+      handleMoveToken(socket, token, io);
     });
 
     socket.on("exit_game", () => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
+      socket.leave();
       handleExitingGame(socket, io);
     });
 

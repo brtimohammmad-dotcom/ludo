@@ -8,29 +8,31 @@ const {
 const time = 10;
 const activeTimers = new Map();
 
-function startTimer(gameId, io) {
-  console.log("timer started for game:", gameId);
+function startTimer(socket, io) {
+  console.log("timer started for game:", socket.data.gameId);
 
   // اگر تایمر قبلی وجود داره، اول پاکش کن
-  if (activeTimers.has(gameId)) {
-    const oldTimer = activeTimers.get(gameId);
+  if (activeTimers.has(socket.data.gameId)) {
+    const oldTimer = activeTimers.get(socket.data.gameId);
     if (oldTimer && typeof oldTimer.clear === "function") {
       oldTimer.clear();
     }
-    activeTimers.delete(gameId);
+    activeTimers.delete(socket.data.gameId);
   }
 
   const timer = createInterval(async () => {
-    let game = initialState.getGameState(gameId);
+    let game = initialState.getGameState(socket.data.gameId);
 
     // ⭐ بررسی کن بازی تموم شده یا نه
     if (game.game_status === "finished") {
-      console.log(`Game ${gameId} already finished, stopping timer`);
-      const activeTimer = activeTimers.get(gameId);
+      console.log(
+        `Game ${socket.data.gameId} already finished, stopping timer`,
+      );
+      const activeTimer = activeTimers.get(socket.data.gameId);
       if (activeTimer && typeof activeTimer.clear === "function") {
         activeTimer.clear();
       }
-      activeTimers.delete(gameId);
+      activeTimers.delete(socket.data.gameId);
       return;
     }
 
@@ -46,8 +48,10 @@ function startTimer(gameId, io) {
       }
       return p;
     });
-    initialState.updateGameState(gameId, { players: updatedPlayers });
-    game = initialState.getGameState(gameId);
+    initialState.updateGameState(socket.data.gameId, {
+      players: updatedPlayers,
+    });
+    game = initialState.getGameState(socket.data.gameId);
     // ⭐ اصلاح: تعداد缺席 باید === 2 باشه (چون یک بار缺席 شده، الان دفعۀ دوم)
     if (delayedPlayer && delayedPlayer.numberOfAbsences === 3) {
       console.log(
@@ -60,8 +64,10 @@ function startTimer(gameId, io) {
         }
         return p;
       });
-      initialState.updateGameState(gameId, { players: updatedPlayers });
-      game = initialState.getGameState(gameId);
+      initialState.updateGameState(socket.data.gameId, {
+        players: updatedPlayers,
+      });
+      game = initialState.getGameState(socket.data.gameId);
       // شمارش تعداد بازیکنان آفلاین
       const offlineCount = updatedPlayers.filter(
         (p) => p.player_status === "offline",
@@ -75,17 +81,17 @@ function startTimer(gameId, io) {
 
         if (onlinePlayer) {
           console.log(
-            `Game ${gameId} finished, winner: ${onlinePlayer.username}`,
+            `Game ${socket.data.gameId} finished, winner: ${onlinePlayer.username}`,
           );
 
           // اتمام بازی
-          initialState.updateGameState(gameId, {
+          initialState.updateGameState(socket.data.gameId, {
             game_status: "finished",
             winner: onlinePlayer,
             players: updatedPlayers,
           });
-          const winnerGameState = initialState.getGameState(gameId);
-          await updateGameState(gameId, {
+          const winnerGameState = initialState.getGameState(socket.data.gameId);
+          await updateGameState(socket.data.gameId, {
             game_status: "finished",
             players: winnerGameState.players,
 
@@ -95,16 +101,19 @@ function startTimer(gameId, io) {
 
           // ⭐ پاک کردن تایمر
 
-          stopTimer(gameId);
+          stopTimer(socket.data.gameId);
           // فرستادن به کلاینت
-          io.to(gameId).emit("game_finished", winnerGameState.winner);
-          initialState.deleteGameState(gameId);
+          io.to(socket.data.gameId).emit(
+            "game_finished",
+            winnerGameState.winner,
+          );
+          initialState.deleteGameState(socket.data.gameId);
         }
         return; // مهم: خارج شدن از تابع
       }
 
       // به‌روزرسانی بازی بعد از آفلاین کردن
-      game = initialState.getGameState(gameId);
+      game = initialState.getGameState(socket.data.gameId);
     }
 
     // پیدا کردن نفر بعدی (که آفلاین نباشد)
@@ -121,25 +130,27 @@ function startTimer(gameId, io) {
 
       // اگر همه آفلاین شدند (ایمنی)
       if (game.game_mode) {
-        console.log(`All players offline for game ${gameId}`);
+        console.log(`All players offline for game ${socket.data.gameId}`);
 
         // همه آفلاین هستند، بازی را تمام کن
-        const activeTimer = activeTimers.get(gameId);
+        const activeTimer = activeTimers.get(socket.data.gameId);
         if (activeTimer && typeof activeTimer.clear === "function") {
           activeTimer.clear();
         }
-        stopTimer(gameId);
-        initialState.updateGameState(gameId, {
+        stopTimer(socket.data.gameId);
+        initialState.updateGameState(ocket.data.gameId, {
           game_status: "finished",
         });
 
-        io.to(gameId).emit("game_aborted", { reason: "all_offline" });
+        io.to(socket.data.gameId).emit("game_aborted", {
+          reason: "all_offline",
+        });
         return;
       }
     }
 
     // به‌روزرسانی نوبت
-    initialState.updateGameState(gameId, {
+    initialState.updateGameState(socket.data.gameId, {
       current_turn:
         game.game_mode === 4
           ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.game_mode]
@@ -148,27 +159,27 @@ function startTimer(gameId, io) {
       players: updatedPlayers,
     });
 
-    game = initialState.getGameState(gameId);
-    io.to(gameId).emit("times_up", game);
+    game = initialState.getGameState(socket.data.gameId);
+    io.to(socket.data.gameId).emit("times_up", game);
     console.log(
       `Turn changed to ${
         game.game_mode === 4
           ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.game_mode]
           : TOW_PLAYER_COLORS[(colorIdx + 1) % game.game_mode]
-      } for game ${gameId}`,
+      } for game ${socket.data.gameId}`,
     );
   }, time * 1000);
 
-  activeTimers.set(gameId, timer);
+  activeTimers.set(socket.data.gameId, timer);
   console.log(
-    `Timer set for game ${gameId}, active timers: ${activeTimers.size}`,
+    `Timer set for game ${socket.data.gameId}, active timers: ${activeTimers.size}`,
   );
 }
 
-function resetTimer(gameId, io) {
-  console.log(`Resetting timer for game ${gameId}`);
+function resetTimer(socket, io) {
+  console.log(`Resetting timer for game ${socket.data.gameId}`);
 
-  const timer = activeTimers.get(gameId);
+  const timer = activeTimers.get(socket.data.gameId);
   if (timer) {
     if (typeof timer.clear === "function") {
       timer.clear(); // پاک کردن تایمر قدیمی
@@ -177,8 +188,8 @@ function resetTimer(gameId, io) {
       clearInterval(timer);
     }
   }
-  activeTimers.delete(gameId);
-  startTimer(gameId, io);
+  activeTimers.delete(socket.data.gameId);
+  startTimer(socket, io);
 }
 
 function pauseTimer(gameId) {

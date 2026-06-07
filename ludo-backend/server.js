@@ -42,7 +42,7 @@ const io = require("socket.io")(server, {
     credentials: true,
   },
   connectionStateRecovery: {
-    maxDisconnectionDuration: 60 * 1000,
+    maxDisconnectionDuration: 20 * 1000,
     skipMiddlewares: false,
   },
   pingInterval: 5000, // هر ۵ ثانیه سرور به کلاینت پینگ می‌فرستد

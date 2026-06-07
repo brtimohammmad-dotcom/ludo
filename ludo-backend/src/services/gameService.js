@@ -8,9 +8,9 @@ const {
 const initialState = require("../models/initialState"); // اضافه شود
 const { resetTimer, pauseTimer, stopTimer } = require("./turnTimerService");
 
-function handleRollDice(gameId, socket, io) {
+function handleRollDice(socket, io) {
   // دریافت state از حافظه سراسری
-  const gameState = initialState.getGameState(gameId);
+  const gameState = initialState.getGameState(socket.data.gameId);
 
   if (!gameState) {
     return socket.emit("error", "Game not found!");
@@ -21,16 +21,17 @@ function handleRollDice(gameId, socket, io) {
   }
 
   // پیدا کردن بازیکن بر اساس socket.id
-  const player = gameState.players.find((p) => p.socketId === socket.id);
+  const player = gameState.players.find((p) => p.telegram_id === socket.data.telegramId);
 
   if (!player) {
     return socket.emit("error", "Player not found!");
   }
-  if (processingGames.has(gameId)) {
+  if (processingGames.has(socket.data.gameId)) {
     return socket.emit("error", "در حال پردازش...");
   }
 
-  processingGames.add(gameId);
+  processingGames.add(socket.data.gameId);
+
   try {
     // بررسی نوبت بازیکن
     let colorIdx =
@@ -43,7 +44,8 @@ function handleRollDice(gameId, socket, io) {
     ) {
       return socket.emit("error", "Not your turn!");
     }
-    pauseTimer(gameId);
+
+    pauseTimer(socket.data.gameId);
     // انداختن تاس
     const dice = Math.floor(Math.random() * 6) + 1;
 
@@ -75,41 +77,41 @@ function handleRollDice(gameId, socket, io) {
     }
 
     // آپدیت در حافظه سراسری
-    initialState.updateGameState(gameId, {
+    initialState.updateGameState(socket.data.gameId, {
       ...updates,
     });
 
-    const finalGameState = initialState.getGameState(gameId);
+    const finalGameState = initialState.getGameState(socket.data.gameId);
 
     // پخش رویداد به همه بازیکنان این بازی
-    io.to(gameId).emit("dice_rolled", finalGameState);
+    io.to(socket.data.gameId).emit("dice_rolled", finalGameState);
     if (changePlayer) {
-      initialState.updateGameState(gameId, {
+      initialState.updateGameState(socket.data.gameId, {
         turn_status: "waitingForAnimate",
       });
       setTimeout(() => {
-        initialState.updateGameState(gameId, {
+        initialState.updateGameState(socket.data.gameId, {
           turn_status: "waitingForRoll",
         });
 
-        resetTimer(gameId, io);
+        resetTimer(socket, io);
       }, 1000);
     } else {
-      resetTimer(gameId, io);
+      resetTimer(socket, io);
     }
   } finally {
-    processingGames.delete(gameId);
+    processingGames.delete(socket.data.gameId);
   }
 }
-function handleMoveToken(gameId, playerSocketId, token, io) {
+function handleMoveToken( socket, token, io) {
   // دریافت state از حافظه سراسری
-  const gameState = initialState.getGameState(gameId);
+  const gameState = initialState.getGameState(socket.data.gameId);
 
   if (!gameState) {
     return { error: "Game not found!" };
   }
 
-  const player = gameState.players.find((p) => p.socketId === playerSocketId);
+  const player = gameState.players.find((p) => p.telegramId === socket.data.telegram_id);
 
   if (!player) return { error: "Player not found!" };
 
@@ -120,10 +122,10 @@ function handleMoveToken(gameId, playerSocketId, token, io) {
   });
 
   if (tokenIndex === -1) return { error: "Token not found!" };
-  if (processingGames.has(gameId)) {
+  if (processingGames.has(socket.data.gameId)) {
     return socket.emit("error", "در حال پردازش...");
   }
-  processingGames.add(gameId);
+  processingGames.add(socket.data.gameId);
   try {
     const currentToken = gameState.tokens[tokenIndex];
     let colorIdx =
@@ -188,19 +190,19 @@ function handleMoveToken(gameId, playerSocketId, token, io) {
     }
 
     // آپدیت در حافظه سراسری
-    initialState.updateGameState(gameId, {
+    initialState.updateGameState(socket.data.gameId, {
       tokens: updatedTokens,
       turn_status: updates.turn_status,
       current_turn: updates.current_turn || gameState.current_turn,
     });
-    const animatingGameState = initialState.getGameState(gameId);
+    const animatingGameState = initialState.getGameState(socket.data.gameId);
 
     // پخش رویداد به همه بازیکنان این بازی
-    io.to(gameId).emit("token_moved", animatingGameState);
-    initialState.updateGameState(gameId, {
+    io.to(socket.data.gameId).emit("token_moved", animatingGameState);
+    initialState.updateGameState(socket.data.gameId, {
       turn_status: "waitingForAnimate",
     });
-    pauseTimer(gameId);
+    pauseTimer(socket.data.gameId);
 
     let time;
     if (currentToken.position === -1) {
@@ -210,34 +212,37 @@ function handleMoveToken(gameId, playerSocketId, token, io) {
     }
     setTimeout(async () => {
       const playerTokens = initialState
-        .getGameState(gameId)
+        .getGameState(socket.data.gameId)
         .tokens.filter((t) => t.color === player.color);
-      initialState.updateGameState(gameId, {
+      initialState.updateGameState(socket.data.gameId, {
         turn_status: "waitingForRoll",
       });
       const hasNotWon = playerTokens.some((t) => t.position !== 39);
       if (hasNotWon) {
-        resetTimer(gameId, io);
+        resetTimer(socket, io);
       } else {
-        console.log(`Game ${gameId} finished, winner: ${player.username}`);
-        initialState.updateGameState(gameId, {
+        console.log(
+          `Game ${socket.data.gameId} finished, winner: ${player.username}`,
+        );
+        initialState.updateGameState(socket.data.gameId, {
           game_status: "finished",
           winner: player,
         });
-        const winnerGameState = initialState.getGameState(gameId);
-        await updateGameState(gameId, {
+        const winnerGameState = initialState.getGameState(socket.data.gameId);
+        await updateGameState(socket.data.gameId, {
           game_status: "finished",
           winner: player,
           players: winnerGameState.players,
           end_at: new Date(),
         });
-        stopTimer(gameId);
-        io.to(gameId).emit("game_finished", winnerGameState.winner);
-        initialState.deleteGameState(gameId);
+        stopTimer(socket.data.gameId);
+        io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
+        initialState.deleteGameState(socket.data.gameId);
+        socket.leave();
       }
     }, time);
   } finally {
-    processingGames.delete(gameId);
+    processingGames.delete(socket.data.gameId);
   }
 }
 async function handleExitingGame(socket, io) {
@@ -250,7 +255,8 @@ async function handleExitingGame(socket, io) {
     }
   });
   initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
-  socket.emit("player_exit")
+  socket.emit("player_exit");
+  socket.leave();
   currentGame = initialState.getGameState(socket.data.gameId);
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",

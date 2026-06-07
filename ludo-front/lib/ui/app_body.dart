@@ -5,7 +5,6 @@ import 'package:ludo/ui/home.dart';
 class AppBody extends StatelessWidget {
   AppBody({super.key});
 
-  final GameController gameController = GameController();
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +13,7 @@ class AppBody extends StatelessWidget {
         title: const Center(child: Text('Ludo')),
         backgroundColor: Colors.white12,
       ),
-      body: Home(gameController: gameController),
+      body: Home(),
     );
   }
 }

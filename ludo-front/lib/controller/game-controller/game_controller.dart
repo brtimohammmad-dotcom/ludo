@@ -23,7 +23,7 @@ class GameController extends ChangeNotifier {
   VoidCallback? onReconnectionFailed; // کالبک برای صفحه
   VoidCallback? onPlayerExit; // کالبک برای صفحه
   GameState? gameState;
-  final GameRepository gameRepository = GameRepository();
+  GameRepository gameRepository = GameRepository();
   AnimationController? animationController;
 
   // ✅ اضافه شده برای مدیریت وضعیت
@@ -31,9 +31,7 @@ class GameController extends ChangeNotifier {
   bool _isGameFinishedHandled = false;
   bool _isMovingToken = false;
 
-  static final GameController _instance = GameController._internal();
-  factory GameController() => _instance;
-  GameController._internal() {
+  GameController() {
     _setupCallbacks();
   }
 
@@ -263,8 +261,9 @@ class GameController extends ChangeNotifier {
         gameState!.serverState!.tokens[movedTokenIndex].pathIndex;
 
     for (int step = oldPathIndex; step < targetPathIndex!; step++) {
-      if (_isDisposed) return;
-
+      if (_isDisposed || gameState == null || gameState!.serverState == null) {
+        return;
+      }
       final currentToken = gameState!.serverState!.tokens[movedTokenIndex];
       final updatedToken = currentToken.copyWith(pathIndex: step + 1);
       final updatedTokens = List<Token>.from(gameState!.serverState!.tokens);
@@ -292,19 +291,68 @@ class GameController extends ChangeNotifier {
     gameRepository.exitGame();
   }
 
-  void resetGame() {
-    gameState!.serverState = null;
-    gameState!.livePlayer!.color != null ? null : gameState!.livePlayer!.color;
-    gameState!.livePlayer!.numberOfAbsences != null
-        ? null
-        : gameState!.livePlayer!.numberOfAbsences;
-    gameState!.livePlayer!.playerStatus != null
-        ? null
-        : gameState!.livePlayer!.playerStatus;
-    gameState!.livePlayer!.connectionStatus != null
-        ? null
-        : gameState!.livePlayer!.connectionStatus;
+  void deleteGameState() {
+    debugPrint("🧹 Clearing and Disposing GameController data...");
 
+    // ۱. قطع اتصال قطعی سوکت و پاکسازی لیسنرهای قبلی
+    try {
+      gameRepository.dataSource.dispose();
+    } catch (e) {
+      debugPrint("⚠️ Error disposing dataSource: $e");
+    }
+
+    // 🚨 شاه‌کلید حل باگ: ساخت یک ریپازیتوری و دیتاسورس کاملاً جدید و تازه برای بازی بعدی
+    gameRepository = GameRepository();
+
+    // ۲. متوقف کردن انیمیشن
+    if (animationController != null) {
+      try {
+        animationController!.stop();
+        animationController!.dispose();
+      } catch (e) {
+        debugPrint("⚠️ Error disposing animationController: $e");
+      } finally {
+        animationController = null;
+      }
+    }
+
+    // ۳. پاکسازی وضعیت بازی
+    gameState = null;
+
+    // ۴. آزاد کردن کالبک‌ها
+    onGameFinished = null;
+    onReconnectionFailed = null;
+    onPlayerExit = null;
+
+    _isGameFinishedHandled = false;
+    _isMovingToken = false;
+
+    notifyListeners();
+    debugPrint("✅ GameController and Repository are completely renewed.");
+  }
+
+  void resetGame() {
+    if (gameState != null && gameState!.livePlayer != null) {
+      // 🟢 به جای copyWith، مستقیم یک پلیر جدید با استفاده از سازنده اصلی می‌سازیم
+      // اینطوری مقادیر نال دقیقاً و بدون تداخل ?? اعمال می‌شوند.
+      final clearedPlayer = Player(
+        userId: gameState!.livePlayer!.userId,
+        // آیدی حفظ می‌شود
+        username: gameState!.livePlayer!.username,
+        // یوزرنیم حفظ می‌شود
+        color: null,
+        // ریست به نال
+        connectionStatus: null,
+        // ریست به نال
+        playerStatus: null,
+        // ریست به نال
+        numberOfAbsences: 0, // ریست به صفر
+      );
+
+      gameState = GameState(serverState: null, livePlayer: clearedPlayer);
+    } else {
+      gameState = null;
+    }
     animationController?.stop();
     animationController = null;
     onGameFinished = null;
