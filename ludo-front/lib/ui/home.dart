@@ -32,16 +32,12 @@ class _HomeState extends State<Home> {
         );
       }
 
-      if (!mounted) return;
-      widget.gameController.connectToGame();
-
       // Navigator.pushAndRemoveUntil(
       //   context,
       //   MaterialPageRoute(
       //     builder: (context) => Home(gameController: GameController()),
       //   ),
       //   (route) => false,
-      // );
     });
   }
 
@@ -50,6 +46,7 @@ class _HomeState extends State<Home> {
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
+        debugPrint(widget.gameController.gameState?.livePlayer?.username);
         return widget.gameController.gameState?.livePlayer == null
             ? Center(
                 child: Lottie.asset(

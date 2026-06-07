@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 
 class ExitButtonAlert extends StatelessWidget {
-  const ExitButtonAlert({super.key, required this.lastGameController});
+  const ExitButtonAlert({super.key, required this.gameController});
 
-  final GameController lastGameController;
+  final GameController gameController;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +58,7 @@ class ExitButtonAlert extends StatelessWidget {
             SizedBox(width: boardSize * 0.01),
             ElevatedButton(
               onPressed: () {
-                lastGameController.exitGame();
-
+                gameController.exitGame();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,

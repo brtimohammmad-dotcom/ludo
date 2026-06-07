@@ -41,7 +41,7 @@ class PlayerBar extends StatelessWidget {
             ),
             if (leftPlayerIndex == 1 || leftPlayerIndex == -1)
               ExitIcon(
-                lastGameController: gameController,
+                gameController: gameController,
                 boardSize: boardSize,
               ),
             if (leftPlayerIndex == 0)
@@ -122,10 +122,10 @@ class ExitIcon extends StatelessWidget {
   const ExitIcon({
     super.key,
     required this.boardSize,
-    required this.lastGameController,
+    required this.gameController,
   });
 
-  final GameController lastGameController;
+  final GameController gameController;
 
   final double boardSize;
 
@@ -146,7 +146,7 @@ class ExitIcon extends StatelessWidget {
               builder: (BuildContext context) {
                 return AlertBackground(
                   alert: ExitButtonAlert(
-                    lastGameController: lastGameController,
+                    gameController: gameController,
                   ),
                 );
               },

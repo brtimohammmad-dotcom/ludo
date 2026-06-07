@@ -48,8 +48,18 @@ class SocketDataSource {
 
   void connectToGame() async {
     Config.printEnvironmentInfo();
-
     final serverUrl = Config.serverUrl;
+
+    if (socket != null) {
+      if (socket!.connected) {
+        debugPrint('⚠️ Socket is already connected. Skipping initialization.');
+        return;
+      }
+      debugPrint('🔄 Socket exists but disconnected. Reconnecting using existing socket...');
+      socket!.connect(); // فقط اتصال مجدد بدون ساخت نمونه جدید
+      return;
+    }
+
     debugPrint('🟢 Connecting to: $serverUrl');
     socket = io.io(
       serverUrl,

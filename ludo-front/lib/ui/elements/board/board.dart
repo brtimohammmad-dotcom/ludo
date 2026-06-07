@@ -6,7 +6,6 @@ import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
 
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
-import 'package:ludo/ui/join_screen.dart';
 
 import 'package:ludo/ui/mappers/player_bar_mapper.dart';
 
@@ -40,16 +39,31 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
       }
     };
     widget.gameController.onPlayerExit = () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JoinScreen(gameController: widget.gameController),
-        ),
-      );
+      debugPrint('...player exited...');
+
+      if (mounted) {
+        // 🛡️ اگر دیالوگی (مثل پاپ‌آپ برنده یا اتصال مجدد) باز است، اول آن را ببند
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     };
     widget.gameController.onReconnectionFailed = () {
       if (mounted) {
-        _showDialog(AlertBackground(alert: ReconnectingFailedAlertAlert()));
+        _showDialog(
+          AlertBackground(
+            alert: ReconnectingFailedAlert(
+              onHomePressed: () {
+                // ۱. ابتدا دیالوگ خطا را ببند
+                Navigator.of(context).pop();
+
+                // ۲. کنترلر را ریست کن
+                widget.gameController.resetGame();
+
+                // ۳. به صفحه اصلی و لابی (JoinScreen) برگرد
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
+          ),
+        );
       }
     };
     widget.gameController.animationController = AnimationController(

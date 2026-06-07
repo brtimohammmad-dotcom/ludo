@@ -70,12 +70,11 @@ class StartGameButton extends StatelessWidget {
       ),
       onPressed: () {
         gameController.startGame(gameMode: gameMode);
-        Navigator.pushAndRemoveUntil(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => Board(gameController: gameController),
           ),
-          (route) => false, // حذف همه صفحات قبلی
         );
       },
       child: Text(

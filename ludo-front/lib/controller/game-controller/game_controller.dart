@@ -31,7 +31,9 @@ class GameController extends ChangeNotifier {
   bool _isGameFinishedHandled = false;
   bool _isMovingToken = false;
 
-  GameController() {
+  static final GameController _instance = GameController._internal();
+  factory GameController() => _instance;
+  GameController._internal() {
     _setupCallbacks();
   }
 
@@ -85,12 +87,12 @@ class GameController extends ChangeNotifier {
     // player initialized
     gameRepository.dataSource.onPlayerUpdate = (Player player) {
       if (_isDisposed) return;
+      debugPrint("🎯 HIT! onPlayerUpdate Called. Player: ${player.username}");
       gameState = GameState(
         serverState: gameState?.serverState,
         livePlayer: player,
       );
       notifyListeners();
-      debugPrint("player initialized");
     };
     //  player exit
     gameRepository.dataSource.onPlayerExit = () {
