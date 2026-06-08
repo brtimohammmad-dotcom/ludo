@@ -35,39 +35,60 @@ class SocketDataSource {
   Completer<void> playerInitialized = Completer<void>();
 
   Map<String, dynamic> convertToJSData(dynamic data) {
-    if (data == null) return {};
-
-    try {
-      // ۱. اگر داده خودش مپ معمولی دارت باشد و کلیدهایش String باشد
-      if (data is Map<String, dynamic>) {
-        return data;
-      }
-
-      // ۲. حل مشکل ریکانکت وب: تبدیل امن به JSON و پارس مجدد به مپ دارت
-      // این کار تمام رفتارهای عجیب اشیاء جاوااسکریپتی (JSObject / LegacyJS) را خنثی می‌کند
-      final jsonString = jsonEncode(data);
-      final decoded = jsonDecode(jsonString);
-
-      if (decoded is List && decoded.isNotEmpty) {
-        final first = decoded.first;
-        if (first is Map) {
-          return Map<String, dynamic>.from(first);
-        }
-      } else if (decoded is Map) {
-        return Map<String, dynamic>.from(decoded);
-      }
-    } catch (e) {
-      debugPrint('🚨 خطا در تبدیل داده سوکت: $e');
-
-      // راهکار اضطراری: تلاش برای تبدیل مستقیم در صورت شکست روش اول
-      try {
-        if (data is Map) {
-          return data.map((key, value) => MapEntry(key.toString(), value));
-        }
-      } catch (_) {}
+    if (data == null) {
+      debugPrint('⚠️ داده ورودی null است.');
+      return {};
     }
 
-    debugPrint('⚠️ فرمت داده نامعتبر است یا تبدیل با شکست مواجه شد.');
+    // لایه ۱: اگر داده خودش مستقیم یک مپ استاندارد دارت باشد
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+
+    try {
+      // لایه ۲: بررسی اینکه آیا داده یک لیست یا امتداد قابل پیمایش است (مانند JSArray)
+      if (data is Iterable && data.isNotEmpty) {
+        final firstElement = data.first;
+        if (firstElement is Map) {
+          return Map<String, dynamic>.from(firstElement);
+        }
+        // اگر عنصر اول لیست، خودش یک ساختار دیگر بود، آن را دوباره بررسی کن
+        return convertToJSData(firstElement);
+      }
+
+      // لایه ۳: اگر داده یک مپ با انواع دیگر کلیدها است (مثلاً Map<dynamic, dynamic>)
+      if (data is Map) {
+        return data.map((key, value) => MapEntry(key.toString(), value));
+      }
+
+      // لایه ۴: بررسی اینکه آیا داده به صورت یک رشته JSON خام (String) فرستاده شده است
+      if (data is String) {
+        final decoded = jsonDecode(data);
+        if (decoded is Map) {
+          return Map<String, dynamic>.from(decoded);
+        } else if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+          return Map<String, dynamic>.from(decoded.first);
+        }
+      }
+
+      // لایه ۵: برخورد امن با اشیاء خاص جاوااسکریپت (مخصوص وب)
+      // برای مواقعی که پکیج سوکت شیء بومی مروگر را بدون تبدیل کلاینتی تحویل می‌دهد
+      final fallbackMap = <String, dynamic>{};
+      if (data.toString() == '[object Object]' || data.toString().startsWith('{')) {
+        try {
+          // تلاش برای استخراج کلیدها به روش تبدیل دستی به مپ دارت
+          final converted = Map<dynamic, dynamic>.from(data as dynamic);
+          return converted.map((key, value) => MapEntry(key.toString(), value));
+        } catch (_) {}
+      }
+
+    } catch (e) {
+      debugPrint('🚨 خطا در حین کالبدشکافی داده سوکت: $e');
+    }
+
+    // لایه آخر: اگر به هر دلیلی کدهای بالا نتوانستند ساختار را تشخیص دهند، برای اینکه خروجی کرش نکند،
+    // تلاش می‌کنیم نوع داده دریافتی را دقیقاً پرینت کنیم تا بفهمیم سرور چه چیزی فرستاده است.
+    debugPrint('❌ ساختار ناشناخته سوکت کلاینت. نوع داده: ${data.runtimeType} | مقدار: $data');
     return {};
   }
 
@@ -126,6 +147,7 @@ class SocketDataSource {
     });
 
     socket!.on('initial_player', (data) {
+      debugPrint('📥 RAW DATA RECEIVED: Type: ${data.runtimeType} | Value: $data');
       Player livePlayer = Player.fromJson(convertToJSData(data));
       debugPrint('👤 Initial Player received: ${livePlayer.username}');
       onPlayerUpdate?.call(livePlayer);
