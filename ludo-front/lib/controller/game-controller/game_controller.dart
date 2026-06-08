@@ -23,6 +23,8 @@ class GameController extends ChangeNotifier {
   VoidCallback? onGameFinished;
   VoidCallback? onReconnectionFailed;
   VoidCallback? onPlayerExit;
+  VoidCallback? onFastPingGets;
+  VoidCallback? onGameReady;
 
   GameState? gameState;
   late GameRepository gameRepository;
@@ -43,17 +45,20 @@ class GameController extends ChangeNotifier {
   // -------------------------------------------------
   void _setupCallbacks() {
     final ds = gameRepository.dataSource;
-
+    ds.onFastPingGets = () {
+      if (onFastPingGets != null) onFastPingGets!();
+    };
     // state updated
     ds.onStateUpdate = (ServerState state) {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
       final newLivePlayer = state.players.firstWhere(
-            (p) => p.userId == gameState!.livePlayer!.userId,
+        (p) => p.userId == gameState!.livePlayer!.userId,
         orElse: () => gameState!.livePlayer!,
       );
 
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      if (onGameReady != null) onGameReady!();
       notifyListeners();
     };
 
@@ -62,7 +67,7 @@ class GameController extends ChangeNotifier {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
       final newLivePlayer = state.players.firstWhere(
-            (p) => p.userId == gameState!.livePlayer!.userId,
+        (p) => p.userId == gameState!.livePlayer!.userId,
         orElse: () => gameState!.livePlayer!,
       );
 
@@ -117,7 +122,8 @@ class GameController extends ChangeNotifier {
 
     // token moved
     ds.onTokenMoved = (ServerState newState) async {
-      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null) return;
+      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null)
+        return;
 
       _isMovingToken = true;
       try {
@@ -125,7 +131,7 @@ class GameController extends ChangeNotifier {
         await _moveTokenStepByStep(newState);
 
         final newLivePlayer = newState.players.firstWhere(
-              (p) => p.userId == gameState!.livePlayer!.userId,
+          (p) => p.userId == gameState!.livePlayer!.userId,
           orElse: () => gameState!.livePlayer!,
         );
 
@@ -144,7 +150,7 @@ class GameController extends ChangeNotifier {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
       final newLivePlayer = newState.players.firstWhere(
-            (p) => p.userId == gameState!.livePlayer!.userId,
+        (p) => p.userId == gameState!.livePlayer!.userId,
         orElse: () => gameState!.livePlayer!,
       );
 
@@ -202,6 +208,13 @@ class GameController extends ChangeNotifier {
     gameRepository.startGame(gameMode);
   }
 
+  void getFastPing() {
+    if (_isDisposed) {
+      return;
+    }
+    gameRepository.getFastPing();
+  }
+
   void connectToGame() {
     if (_isDisposed) return;
     gameRepository.connect();
@@ -255,7 +268,7 @@ class GameController extends ChangeNotifier {
     }
 
     final newLivePlayer = newState.players.firstWhere(
-          (p) => p.userId == gameState!.livePlayer!.userId,
+      (p) => p.userId == gameState!.livePlayer!.userId,
       orElse: () => gameState!.livePlayer!,
     );
 

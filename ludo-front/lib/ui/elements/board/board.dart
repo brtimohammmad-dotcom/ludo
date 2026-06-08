@@ -31,9 +31,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
       final winner = widget.gameController.gameState?.serverState?.winner;
       if (winner != null) {
-        _showDialog(
-          AlertBackground(alert: WinnerAlert(winner: winner)),
-        );
+        _showDialog(AlertBackground(alert: WinnerAlert(winner: winner)));
       }
     };
 
@@ -53,7 +51,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const JoinScreen()),
-              (route) => false,
+          (route) => false,
         );
       }
     };
@@ -78,7 +76,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const JoinScreen()),
-                      (route) => false,
+                  (route) => false,
                 );
               }
             },
@@ -89,15 +87,14 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     };
 
     // --- ANIMATION CONTROLLER ---
-    widget.gameController.animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        widget.gameController.animationController!.reset();
-        widget.gameController.animationController!.forward();
-      }
-    });
+    widget.gameController.animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 10))
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              widget.gameController.animationController!.reset();
+              widget.gameController.animationController!.forward();
+            }
+          });
 
     diceComposition = AssetLottie("assets/lotties/Dice Rolling.json").load();
   }
@@ -137,9 +134,22 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: (context, child) {
+        final state = widget.gameController.gameState?.serverState;
 
+        if (state == null) {
+         return Center(
+            child: Lottie.asset(
+              "assets/lotties/Happy girl.json",
+              height: 200,
+              width: 200,
+              fit: BoxFit.cover,
+              frameRate: const FrameRate(30),
+              renderCache: RenderCache.raster,
+            ),
+          );
+        }
 
-        final gameMode = widget.gameController.gameState?.serverState?.gameMode;
+        final gameMode = state?.gameMode;
 
         final boardSize = (screenWidth < screenHeight
             ? screenWidth

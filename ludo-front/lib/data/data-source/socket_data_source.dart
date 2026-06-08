@@ -18,7 +18,7 @@ typedef GameFinishedCallback = void Function(Player player);
 typedef ReconnectionFailedCallback = void Function();
 typedef OnDisconnectCallback = void Function();
 typedef PlayerExitCallback = void Function();
-
+typedef OnFastPingGetsCallback=void Function();
 class SocketDataSource {
   io.Socket? _socket;
 
@@ -36,6 +36,7 @@ class SocketDataSource {
   ReconnectionFailedCallback? onReconnectionFailedCallback;
   OnDisconnectCallback? onDisconnectCallback;
   PlayerExitCallback? onPlayerExit;
+  OnFastPingGetsCallback? onFastPingGets;
 
   // --- State ---
   ServerState? serverState;
@@ -159,7 +160,12 @@ class SocketDataSource {
         playerInitialized.complete();
       }
     });
-
+    // -------------------------------------------------------
+    // ON GET PING
+    // -------------------------------------------------------
+    _socket!.on("fast_ping_gets",(data){
+      onFastPingGets?.call();
+    });
     // -------------------------------------------------------
     // GAME EVENTS
     // -------------------------------------------------------
@@ -259,6 +265,7 @@ class SocketDataSource {
     onReconnectionFailedCallback = null;
     onDisconnectCallback = null;
     onPlayerExit = null;
+    onFastPingGets=null;
 
     serverState = null;
 
@@ -284,7 +291,9 @@ class SocketDataSource {
       _socket!.emit("roll_dice");
     }
   }
-
+  void getFastPing(){
+    if (onFastPingGets != null) onFastPingGets!();
+  }
   void moveToken(Token t) {
     if (_socket?.connected ?? false) {
       _socket!.emit("move_token", t.toJson());

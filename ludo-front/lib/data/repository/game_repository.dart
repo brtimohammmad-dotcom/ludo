@@ -25,4 +25,7 @@ class GameRepository {
   void exitGame() {
     dataSource.exitGame();
   }
+  void getFastPing(){
+    dataSource.getFastPing();
+  }
 }

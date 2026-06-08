@@ -161,38 +161,49 @@ class StartGameButton extends StatelessWidget {
   final int gameMode;
   final GameController gameController;
 
-  bool get isSocketConnected {
-    return gameController.gameRepository.dataSource.isConnected;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final connected = isSocketConnected;
-
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         fixedSize: const Size(120, 50),
         elevation: 3,
-        backgroundColor: connected ? Colors.green : Colors.grey,
+        backgroundColor: Colors.green,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
-      onPressed: connected
-          ? () {
-        gameController.startGame(gameMode: gameMode);
+      onPressed: () {
+        // اینجا callback را ست می‌کنیم تا مقدار gameMode درست باشد
+        gameController.onFastPingGets = () async {
+          gameController.startGame(gameMode: gameMode);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Board(gameController: gameController),
-          ),
-        );
-      }
-          : () {
-        if (TelegramWebApp.instance.isSupported) {
-          TelegramWebApp.instance.showAlert(
-            "اتصال به سرور برقرار نیست. لطفاً چند لحظه صبر کنید...",
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => Center(
+              child: Lottie.asset(
+                "assets/lotties/Happy girl.json",
+                height: 200,
+                width: 200,
+                fit: BoxFit.cover,
+                frameRate: const FrameRate(30),
+                renderCache: RenderCache.raster,
+              ),
+            ),
           );
-        }
+        };
+
+        gameController.onGameReady = () {
+          if (Navigator.canPop(context)) Navigator.pop(context);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Board(gameController: gameController),
+            ),
+          );
+        };
+
+        // اول تست اتصال
+        gameController.getFastPing();
       },
       child: Text(
         gameMode == 2 ? "2 players" : "4 players",
@@ -202,4 +213,3 @@ class StartGameButton extends StatelessWidget {
     );
   }
 }
-
