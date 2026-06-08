@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/domain/model/player.dart';
@@ -34,27 +35,39 @@ class SocketDataSource {
   Completer<void> playerInitialized = Completer<void>();
 
   Map<String, dynamic> convertToJSData(dynamic data) {
-    // ۱. بررسی اینکه آیا داده تهی (null) است یا نه
     if (data == null) return {};
 
     try {
-      // ۲. بررسی امن برای لیست بودن (سازگار با لیست‌های معمولی و JSArray)
-      if (data is Iterable && data.isNotEmpty) {
-        final firstElement = data.first;
-        if (firstElement is Map) {
-          return Map<String, dynamic>.from(firstElement);
-        }
+      // ۱. اگر داده خودش مپ معمولی دارت باشد و کلیدهایش String باشد
+      if (data is Map<String, dynamic>) {
+        return data;
       }
-      // ۳. بررسی امن برای مپ بودن
-      else if (data is Map) {
-        return Map<String, dynamic>.from(data);
+
+      // ۲. حل مشکل ریکانکت وب: تبدیل امن به JSON و پارس مجدد به مپ دارت
+      // این کار تمام رفتارهای عجیب اشیاء جاوااسکریپتی (JSObject / LegacyJS) را خنثی می‌کند
+      final jsonString = jsonEncode(data);
+      final decoded = jsonDecode(jsonString);
+
+      if (decoded is List && decoded.isNotEmpty) {
+        final first = decoded.first;
+        if (first is Map) {
+          return Map<String, dynamic>.from(first);
+        }
+      } else if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
       }
     } catch (e) {
-      debugPrint('خطا در تبدیل داده: $e');
+      debugPrint('🚨 خطا در تبدیل داده سوکت: $e');
+
+      // راهکار اضطراری: تلاش برای تبدیل مستقیم در صورت شکست روش اول
+      try {
+        if (data is Map) {
+          return data.map((key, value) => MapEntry(key.toString(), value));
+        }
+      } catch (_) {}
     }
 
-    // اگر فرمت هیچ‌کدام نبود یا خطا داد
-    debugPrint('فرمت داده نامعتبر است.');
+    debugPrint('⚠️ فرمت داده نامعتبر است یا تبدیل با شکست مواجه شد.');
     return {};
   }
 
