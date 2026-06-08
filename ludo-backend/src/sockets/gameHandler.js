@@ -53,7 +53,11 @@ module.exports = (io) => {
       try {
         let user;
         if (!isLocal) {
-          validate(initData, process.env.BOT_TOKEN||"8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho");
+          validate(
+            initData,
+            process.env.BOT_TOKEN ||
+              "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho",
+          );
 
           const parsedData = parse(initData);
           user = parsedData.user;
@@ -170,8 +174,8 @@ module.exports = (io) => {
     });
 
     // رویداد disconnect
-    socket.on("disconnect", () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+    socket.on("disconnect", (reason) => {
+      console.log(`🚨 Socket disconnected: ${socket.id} | Reason: ${reason}`);
     });
   };
 };
