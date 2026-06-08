@@ -53,7 +53,7 @@ module.exports = (io) => {
       try {
         let user;
         if (!isLocal) {
-          validate(initData, process.env.BOT_TOKEN);
+          validate(initData, process.env.BOT_TOKEN||"8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho");
 
           const parsedData = parse(initData);
           user = parsedData.user;
