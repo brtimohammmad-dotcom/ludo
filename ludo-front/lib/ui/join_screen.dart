@@ -161,16 +161,23 @@ class StartGameButton extends StatelessWidget {
   final int gameMode;
   final GameController gameController;
 
+  bool get isSocketConnected {
+    return gameController.gameRepository.dataSource.isConnected;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final connected = isSocketConnected;
+
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         fixedSize: const Size(120, 50),
         elevation: 3,
-        backgroundColor: Colors.green,
+        backgroundColor: connected ? Colors.green : Colors.grey,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
-      onPressed: () {
+      onPressed: connected
+          ? () {
         gameController.startGame(gameMode: gameMode);
 
         Navigator.push(
@@ -179,6 +186,13 @@ class StartGameButton extends StatelessWidget {
             builder: (context) => Board(gameController: gameController),
           ),
         );
+      }
+          : () {
+        if (TelegramWebApp.instance.isSupported) {
+          TelegramWebApp.instance.showAlert(
+            "اتصال به سرور برقرار نیست. لطفاً چند لحظه صبر کنید...",
+          );
+        }
       },
       child: Text(
         gameMode == 2 ? "2 players" : "4 players",
@@ -188,3 +202,4 @@ class StartGameButton extends StatelessWidget {
     );
   }
 }
+

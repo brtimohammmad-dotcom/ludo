@@ -272,12 +272,13 @@ class SocketDataSource {
   // -------------------------------------------------------
   // GAME ACTIONS
   // -------------------------------------------------------
+  bool get isConnected => _socket?.connected ?? false;
+
   void joinGame(int mode) {
     if (_socket?.connected ?? false) {
       _socket!.emit("join_game", {"gameMode": mode});
     }
   }
-
   void rollDice() {
     if (_socket?.connected ?? false) {
       _socket!.emit("roll_dice");

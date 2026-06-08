@@ -137,13 +137,9 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: (context, child) {
-        final state = widget.gameController.gameState?.serverState;
 
-        if (state == null) {
-          return const Center(child: CupertinoActivityIndicator());
-        }
 
-        final gameMode = state.gameMode;
+        final gameMode = widget.gameController.gameState?.serverState?.gameMode;
 
         final boardSize = (screenWidth < screenHeight
             ? screenWidth
