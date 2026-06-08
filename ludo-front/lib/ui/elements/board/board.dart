@@ -82,6 +82,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                 );
               }
             },
+            textButton: "بازگشت به منو",
           ),
         ),
       );

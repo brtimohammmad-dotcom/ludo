@@ -106,12 +106,13 @@ function handleRollDice(socket, io) {
 function handleMoveToken( socket, token, io) {
   // دریافت state از حافظه سراسری
   const gameState = initialState.getGameState(socket.data.gameId);
-
+  
   if (!gameState) {
     return { error: "Game not found!" };
   }
+  
+  const player = gameState.players.find((p) => p.telegram_id === socket.data.telegramId);
 
-  const player = gameState.players.find((p) => p.telegramId === socket.data.telegramId);
 
   if (!player) return { error: "Player not found!" };
 
@@ -132,6 +133,7 @@ function handleMoveToken( socket, token, io) {
       gameState.game_mode === 4
         ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
         : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
+
     const canMove =
       gameState.turn_status === "waitingForMove" &&
       canActivateToken(currentToken, gameState, gameState.last_dice_value) &&
@@ -148,7 +150,7 @@ function handleMoveToken( socket, token, io) {
       gameState.last_dice_value,
       gameState.tokens,
     );
-
+          console.log("8");
     if (kickedToken) {
       const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
       updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };

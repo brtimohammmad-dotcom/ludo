@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/ui/alerts/alert_background.dart';
+import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/elements/board/board.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
@@ -37,6 +39,39 @@ class _JoinScreenState extends State<JoinScreen> {
         );
       }
     };
+    // --- RECONNECTION FAILED ---
+    gameController.onReconnectionFailed = () {
+      if (!mounted) return;
+
+      _showDialog(
+        AlertBackground(
+          alert: ReconnectingFailedAlert(
+            onHomePressed: () async {
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+              }
+
+              gameController.deleteGameState();
+
+              await Future.delayed(const Duration(milliseconds: 50));
+
+              if (mounted) {
+                gameController.connectToGame();
+              }
+            },
+            textButton: "اتصال مجدد",
+          ),
+        ),
+      );
+    };
+  }
+
+  void _showDialog(Widget dialog) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => dialog,
+    );
   }
 
   @override
@@ -56,60 +91,60 @@ class _JoinScreenState extends State<JoinScreen> {
         return Scaffold(
           body: player == null
               ? Center(
-            child: Lottie.asset(
-              "assets/lotties/Happy girl.json",
-              height: 200,
-              width: 200,
-              fit: BoxFit.cover,
-              frameRate: FrameRate(30),
-              renderCache: RenderCache.raster,
-            ),
-          )
-              : Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blueGrey.shade500,
-                  Colors.blueGrey,
-                  Colors.blueGrey,
-                  Colors.blueGrey.shade600,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                stops: const [0.0, 0.3, 0.7, 1.0],
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Lottie.asset(
-                    "assets/lotties/Happy Dice.json",
-                    width: 200,
+                  child: Lottie.asset(
+                    "assets/lotties/Happy girl.json",
                     height: 200,
+                    width: 200,
                     fit: BoxFit.cover,
+                    frameRate: FrameRate(30),
+                    renderCache: RenderCache.raster,
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      StartGameButton(
-                        gameController: gameController,
-                        gameMode: 2,
-                      ),
-                      const SizedBox(width: 20),
-                      StartGameButton(
-                        gameController: gameController,
-                        gameMode: 4,
-                      ),
-                    ],
+                )
+              : Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blueGrey.shade500,
+                        Colors.blueGrey,
+                        Colors.blueGrey,
+                        Colors.blueGrey.shade600,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      stops: const [0.0, 0.3, 0.7, 1.0],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          "assets/lotties/Happy Dice.json",
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            StartGameButton(
+                              gameController: gameController,
+                              gameMode: 2,
+                            ),
+                            const SizedBox(width: 20),
+                            StartGameButton(
+                              gameController: gameController,
+                              gameMode: 4,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         );
       },
     );

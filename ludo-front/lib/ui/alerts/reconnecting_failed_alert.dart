@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class ReconnectingFailedAlert extends StatelessWidget {
   final VoidCallback onHomePressed;
-
-  const ReconnectingFailedAlert({super.key, required this.onHomePressed});
+  final String textButton;
+  const ReconnectingFailedAlert({super.key, required this.onHomePressed,required this.textButton});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class ReconnectingFailedAlert extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black38,
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -79,8 +79,8 @@ class ReconnectingFailedAlert extends StatelessWidget {
               ),
               onPressed: onHomePressed,
               icon: const Icon(Icons.home_rounded, size: 20),
-              label: const Text(
-                "بازگشت به منو",
+              label:  Text(
+                textButton,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             )
