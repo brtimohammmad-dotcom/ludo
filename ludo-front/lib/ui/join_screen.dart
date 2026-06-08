@@ -18,7 +18,7 @@ class _JoinScreenState extends State<JoinScreen> {
   void initState() {
     super.initState();
 
-    // ۱. ساخت کنترلر فقط و فقط برای یک‌بار
+    // ساخت کنترلر فقط یک‌بار
     gameController = GameController();
 
     if (TelegramWebApp.instance.isSupported) {
@@ -26,10 +26,10 @@ class _JoinScreenState extends State<JoinScreen> {
       TelegramWebApp.instance.expand();
     }
 
-    // ۲. استارت اتصال اولیه سوکت
+    // اتصال سوکت فقط یک‌بار
     gameController.connectToGame();
 
-    // ۳. لیسنر دیسکانکت تلگرام
+    // هندل قطع اتصال
     gameController.gameRepository.dataSource.onDisconnectCallback = () {
       if (mounted && TelegramWebApp.instance.isSupported) {
         TelegramWebApp.instance.showAlert(
@@ -39,10 +39,10 @@ class _JoinScreenState extends State<JoinScreen> {
     };
   }
 
-  // 🚨 اصلاح اول: حتماً متد dispose را اضافه کن تا در صورت نابودی صفحه، سوکت باز نماند
   @override
   void dispose() {
-    gameController.deleteGameState(); // پاکسازی کامل وضعیت و بستن سوکت قدیمی
+    // پاکسازی کامل سوکت و وضعیت
+    gameController.deleteGameState();
     super.dispose();
   }
 
@@ -51,9 +51,11 @@ class _JoinScreenState extends State<JoinScreen> {
     return ListenableBuilder(
       listenable: gameController,
       builder: (context, child) {
-        return gameController.gameState?.livePlayer == null
-            ? Scaffold( // اضافه کردن Scaffold برای رندر درست لودینگ در صفحات مختلف
-          body: Center(
+        final player = gameController.gameState?.livePlayer;
+
+        return Scaffold(
+          body: player == null
+              ? Center(
             child: Lottie.asset(
               "assets/lotties/Happy girl.json",
               height: 200,
@@ -62,12 +64,10 @@ class _JoinScreenState extends State<JoinScreen> {
               frameRate: FrameRate(30),
               renderCache: RenderCache.raster,
             ),
-          ),
-        )
-            : Scaffold(
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
+          )
+              : Container(
+            width: double.infinity,
+            height: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -138,8 +138,6 @@ class StartGameButton extends StatelessWidget {
       onPressed: () {
         gameController.startGame(gameMode: gameMode);
 
-        // 🚨 نکته معماری: چون JoinScreen در پس‌زمینه زنده می‌ماند،
-        // در کالبک دکمه خروج (onHomePressed) باید کل استک را پاک کنیم که جلوتر توضیح داده‌ام.
         Navigator.push(
           context,
           MaterialPageRoute(

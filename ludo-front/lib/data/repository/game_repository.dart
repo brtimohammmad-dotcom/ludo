@@ -2,9 +2,11 @@ import 'package:ludo/data/data-source/socket_data_source.dart';
 import 'package:ludo/domain/model/token.dart';
 
 class GameRepository {
-  final SocketDataSource dataSource = SocketDataSource();
+  final SocketDataSource dataSource;
 
-  void onConnect() {
+  GameRepository(this.dataSource);
+
+  void connect() {
     dataSource.connectToGame();
   }
 
@@ -23,10 +25,4 @@ class GameRepository {
   void exitGame() {
     dataSource.exitGame();
   }
-
-  void demoDisconnectAndConnect() {
-    dataSource.demoDisconnectAndConnect();
-  }
-
-
 }

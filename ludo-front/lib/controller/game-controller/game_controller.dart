@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ludo/data/data-source/socket_data_source.dart';
 import 'package:ludo/data/repository/game_repository.dart';
 import 'package:ludo/domain/model/player.dart';
-
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
@@ -19,185 +19,198 @@ extension GameStateX on GameState {
 }
 
 class GameController extends ChangeNotifier {
-  VoidCallback? onGameFinished; // کالبک برای صفحه
-  VoidCallback? onReconnectionFailed; // کالبک برای صفحه
-  VoidCallback? onPlayerExit; // کالبک برای صفحه
+  /// UI Callbacks
+  VoidCallback? onGameFinished;
+  VoidCallback? onReconnectionFailed;
+  VoidCallback? onPlayerExit;
+
   GameState? gameState;
-  GameRepository gameRepository = GameRepository();
+  late GameRepository gameRepository;
   AnimationController? animationController;
 
-  // ✅ اضافه شده برای مدیریت وضعیت
-  final bool _isDisposed = false;
+  bool _isDisposed = false;
   bool _isGameFinishedHandled = false;
   bool _isMovingToken = false;
 
   GameController() {
+    final ds = SocketDataSource();
+    gameRepository = GameRepository(ds);
     _setupCallbacks();
   }
 
+  // -------------------------------------------------
+  // SETUP CALLBACKS
+  // -------------------------------------------------
   void _setupCallbacks() {
+    final ds = gameRepository.dataSource;
+
     // state updated
-    gameRepository.dataSource.onStateUpdate = (ServerState state) {
+    ds.onStateUpdate = (ServerState state) {
+      if (_isDisposed || gameState?.livePlayer == null) return;
+
       final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
+            (p) => p.userId == gameState!.livePlayer!.userId,
+        orElse: () => gameState!.livePlayer!,
       );
-      if (_isDisposed) return;
+
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      debugPrint("state updated");
       notifyListeners();
     };
+
     // times up
-    gameRepository.dataSource.onTimesUp = (ServerState state) {
+    ds.onTimesUp = (ServerState state) {
+      if (_isDisposed || gameState?.livePlayer == null) return;
+
       final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
+            (p) => p.userId == gameState!.livePlayer!.userId,
+        orElse: () => gameState!.livePlayer!,
       );
-      if (_isDisposed) return;
+
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
       animationController?.reset();
       notifyListeners();
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      debugPrint("times up");
     };
+
     // game finished
-    gameRepository.dataSource.onGameFinished = (Player winner) {
-      if (_isDisposed) return;
+    ds.onGameFinished = (Player winner) {
+      if (_isDisposed || gameState == null) return;
+
       animationController?.stop();
-      final newGameState = gameState!.copyWith(
-        livePlayer: gameState!.livePlayer,
+
+      gameState = gameState!.copyWith(
         serverState: gameState!.serverState!.copyWith(winner: winner),
       );
-      gameState = newGameState;
+
       notifyListeners();
 
-      if (onGameFinished != null && !_isGameFinishedHandled) {
+      if (!_isGameFinishedHandled && onGameFinished != null) {
         _isGameFinishedHandled = true;
         onGameFinished!();
       }
-      debugPrint("game finished");
     };
-    // connection failed
-    gameRepository.dataSource.onReconnectionFailedCallback = () {
+
+    // reconnection failed
+    ds.onReconnectionFailedCallback = () {
       if (_isDisposed) return;
       animationController?.stop();
-      onReconnectionFailed!();
-      debugPrint("reconnection failed");
+      onReconnectionFailed?.call();
     };
+
     // player initialized
-    gameRepository.dataSource.onPlayerUpdate = (Player player) {
+    ds.onPlayerUpdate = (Player player) {
       if (_isDisposed) return;
-      debugPrint("🎯 HIT! onPlayerUpdate Called. Player: ${player.username}");
+
       gameState = GameState(
         serverState: gameState?.serverState,
         livePlayer: player,
       );
+
       notifyListeners();
     };
-    //  player exit
-    gameRepository.dataSource.onPlayerExit = () {
-      onPlayerExit!();
+
+    // player exit
+    ds.onPlayerExit = () {
+      if (_isDisposed) return;
+      onPlayerExit?.call();
       notifyListeners();
     };
-    //  token moved
-    gameRepository.dataSource.onTokenMoved =
-        (ServerState newSocketServerState) async {
-          if (_isDisposed || _isMovingToken) return;
 
-          _isMovingToken = true;
-          try {
-            animationController?.stop();
-            await _moveTokenStepByStep(newSocketServerState);
+    // token moved
+    ds.onTokenMoved = (ServerState newState) async {
+      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null) return;
 
-            final newLivePlayer = newSocketServerState.players.firstWhere(
+      _isMovingToken = true;
+      try {
+        animationController?.stop();
+        await _moveTokenStepByStep(newState);
+
+        final newLivePlayer = newState.players.firstWhere(
               (p) => p.userId == gameState!.livePlayer!.userId,
-            );
-            gameState!.copyWith(livePlayer: newLivePlayer);
+          orElse: () => gameState!.livePlayer!,
+        );
 
-            gameState = GameState(
-              serverState: newSocketServerState,
-              livePlayer: newLivePlayer,
-            );
+        gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
 
-            animationController?.reset();
-            animationController?.forward();
-            notifyListeners();
-            debugPrint("token moved");
-          } finally {
-            _isMovingToken = false;
-          }
-        };
+        animationController?.reset();
+        animationController?.forward();
+        notifyListeners();
+      } finally {
+        _isMovingToken = false;
+      }
+    };
+
     // dice rolled
-    gameRepository.dataSource.onDiceRolled =
-        (ServerState newSocketServerState) async {
-          if (_isDisposed) return;
-          final newLivePlayer = newSocketServerState.players.firstWhere(
+    ds.onDiceRolled = (ServerState newState) async {
+      if (_isDisposed || gameState?.livePlayer == null) return;
+
+      final newLivePlayer = newState.players.firstWhere(
             (p) => p.userId == gameState!.livePlayer!.userId,
-          );
+        orElse: () => gameState!.livePlayer!,
+      );
 
-          animationController?.stop();
-          ServerState changeTurnStatusServerState = gameState!.serverState!
-              .copyWith(turnStatus: TurnStatus.rollDiceRequestInFlight);
-          gameState = GameState(
-            serverState: changeTurnStatusServerState,
-            livePlayer: newLivePlayer,
-          );
-          notifyListeners();
+      animationController?.stop();
 
-          await Future.delayed(const Duration(milliseconds: 250));
-          bool tokenIsActive = newSocketServerState.tokens.any((token) {
-            GameState newGameState = GameState(
-              serverState: newSocketServerState,
-              livePlayer: gameState!.livePlayer,
-            );
-            return TokenRules.canActiveToken(token, newGameState);
-          });
+      gameState = GameState(
+        serverState: gameState!.serverState!.copyWith(
+          turnStatus: TurnStatus.rollDiceRequestInFlight,
+        ),
+        livePlayer: newLivePlayer,
+      );
 
-          if (tokenIsActive) {
-            gameState = GameState(
-              serverState: newSocketServerState,
-              livePlayer: newLivePlayer,
-            );
-            animationController?.reset();
-            notifyListeners();
-          } else {
-            ServerState changeLastDiceValueAndTurnStatusServerState = gameState!
-                .serverState!
-                .copyWith(
-                  lastDiceValue: newSocketServerState.lastDiceValue,
-                  turnStatus: TurnStatus.waitingForAnimate,
-                );
-            gameState = GameState(
-              serverState: changeLastDiceValueAndTurnStatusServerState,
-              livePlayer: newLivePlayer,
-            );
-            notifyListeners();
+      notifyListeners();
 
-            await Future.delayed(const Duration(milliseconds: 750));
+      await Future.delayed(const Duration(milliseconds: 250));
 
-            gameState = GameState(
-              serverState: newSocketServerState,
-              livePlayer: newLivePlayer,
-            );
-            animationController?.reset();
-            animationController?.forward();
-            notifyListeners();
-          }
-          debugPrint("dice rolled");
-        };
+      final tokenIsActive = newState.tokens.any((token) {
+        final newGameState = GameState(
+          serverState: newState,
+          livePlayer: gameState!.livePlayer,
+        );
+        return TokenRules.canActiveToken(token, newGameState);
+      });
+
+      if (tokenIsActive) {
+        gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
+        animationController?.reset();
+        notifyListeners();
+      } else {
+        gameState = GameState(
+          serverState: gameState!.serverState!.copyWith(
+            lastDiceValue: newState.lastDiceValue,
+            turnStatus: TurnStatus.waitingForAnimate,
+          ),
+          livePlayer: newLivePlayer,
+        );
+
+        notifyListeners();
+
+        await Future.delayed(const Duration(milliseconds: 750));
+
+        gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
+        animationController?.reset();
+        animationController?.forward();
+        notifyListeners();
+      }
+    };
   }
 
+  // -------------------------------------------------
+  // PUBLIC API
+  // -------------------------------------------------
   void startGame({required int gameMode}) {
     if (_isDisposed) return;
     gameRepository.startGame(gameMode);
   }
 
   void connectToGame() {
-    gameRepository.onConnect();
+    if (_isDisposed) return;
+    gameRepository.connect();
   }
 
   void moveToken(Token liveToken) {
-    if (_isDisposed) return;
-    if (gameState != null &&
-        gameState!.serverState!.turnStatus == TurnStatus.waitingForMove) {
+    if (_isDisposed || gameState == null) return;
+
+    if (gameState!.serverState!.turnStatus == TurnStatus.waitingForMove) {
       gameState = gameState!.copyWith(
         serverState: gameState!.serverState!.copyWith(
           turnStatus: TurnStatus.moveTokenRequestInFlight,
@@ -209,37 +222,51 @@ class GameController extends ChangeNotifier {
   }
 
   void rollDice() {
-    if (_isDisposed) return;
-    if (gameState != null && isMyTurnToRoll()) {
-      final newServerState = gameState!.serverState!.copyWith(
-        turnStatus: TurnStatus.rollDiceRequestInFlight,
+    if (_isDisposed || gameState == null) return;
+
+    if (isMyTurnToRoll()) {
+      gameState = gameState!.copyWith(
+        serverState: gameState!.serverState!.copyWith(
+          turnStatus: TurnStatus.rollDiceRequestInFlight,
+        ),
       );
-      gameState = gameState!.copyWith(serverState: newServerState);
       notifyListeners();
       gameRepository.rollDice();
     }
   }
 
   bool isMyTurnToRoll() {
-    if (_isDisposed || gameState == null) return false;
-    return gameState!.serverState!.currentTurn ==
-            gameState!.livePlayer!.color &&
-        gameState!.serverState!.turnStatus == TurnStatus.waitingForRoll &&
-        gameState!.serverState!.gameStatus == GameStatus.start;
+    if (_isDisposed || gameState == null || gameState!.livePlayer == null) {
+      return false;
+    }
+
+    final s = gameState!.serverState!;
+    return s.currentTurn == gameState!.livePlayer!.color &&
+        s.turnStatus == TurnStatus.waitingForRoll &&
+        s.gameStatus == GameStatus.start;
   }
 
-  Future<void> _moveTokenStepByStep(ServerState newSocketServerState) async {
-    if (_isDisposed) return;
-    final newLivePlayer = newSocketServerState.players.firstWhere(
-      (p) => p.userId == gameState!.livePlayer!.userId,
+  // -------------------------------------------------
+  // TOKEN ANIMATION
+  // -------------------------------------------------
+  Future<void> _moveTokenStepByStep(ServerState newState) async {
+    if (_isDisposed || gameState == null || gameState!.serverState == null) {
+      return;
+    }
+
+    final newLivePlayer = newState.players.firstWhere(
+          (p) => p.userId == gameState!.livePlayer!.userId,
+      orElse: () => gameState!.livePlayer!,
     );
-    final newTokens = newSocketServerState.tokens;
+
+    final newTokens = newState.tokens;
     int? movedTokenIndex;
     int? targetPathIndex;
 
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < gameState!.serverState!.tokens.length; i++) {
       final oldToken = gameState!.serverState!.tokens[i];
       final newToken = newTokens.firstWhere((t) => t.id == oldToken.id);
+
       if (newToken.pathIndex != oldToken.pathIndex &&
           newToken.playerColor == gameState!.serverState!.currentTurn) {
         movedTokenIndex = i;
@@ -248,21 +275,19 @@ class GameController extends ChangeNotifier {
       }
     }
 
-    if (movedTokenIndex == null) {
-      gameState = GameState(
-        serverState: newSocketServerState,
-        livePlayer: newLivePlayer,
-      );
+    if (movedTokenIndex == null || targetPathIndex == null) {
+      gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
       return;
     }
 
     final oldPathIndex =
         gameState!.serverState!.tokens[movedTokenIndex].pathIndex;
 
-    for (int step = oldPathIndex; step < targetPathIndex!; step++) {
+    for (int step = oldPathIndex; step < targetPathIndex; step++) {
       if (_isDisposed || gameState == null || gameState!.serverState == null) {
         return;
       }
+
       final currentToken = gameState!.serverState!.tokens[movedTokenIndex];
       final updatedToken = currentToken.copyWith(pathIndex: step + 1);
       final updatedTokens = List<Token>.from(gameState!.serverState!.tokens);
@@ -277,48 +302,33 @@ class GameController extends ChangeNotifier {
         serverState: newServerState,
         livePlayer: newLivePlayer,
       );
+
       notifyListeners();
       await Future.delayed(const Duration(milliseconds: 300));
     }
   }
 
-  // ✅ متد جدید برای خروج کامل از بازی
-  void exitGame() async {
+  // -------------------------------------------------
+  // EXIT / RESET / DISPOSE
+  // -------------------------------------------------
+  void exitGame() {
     if (_isDisposed) return;
-
-    debugPrint("🎮 Exiting game...");
     gameRepository.exitGame();
   }
 
   void deleteGameState() {
-    debugPrint("🧹 Clearing and Disposing GameController data...");
-
-    // ۱. قطع اتصال قطعی سوکت و پاکسازی لیسنرهای قبلی
     try {
       gameRepository.dataSource.dispose();
-    } catch (e) {
-      debugPrint("⚠️ Error disposing dataSource: $e");
-    }
+    } catch (_) {}
 
-    // 🚨 شاه‌کلید حل باگ: ساخت یک ریپازیتوری و دیتاسورس کاملاً جدید و تازه برای بازی بعدی
-    gameRepository = GameRepository();
+    final newDS = SocketDataSource();
+    gameRepository = GameRepository(newDS);
+    _setupCallbacks();
 
-    // ۲. متوقف کردن انیمیشن
-    if (animationController != null) {
-      try {
-        animationController!.stop();
-        animationController!.dispose();
-      } catch (e) {
-        debugPrint("⚠️ Error disposing animationController: $e");
-      } finally {
-        animationController = null;
-      }
-    }
+    animationController?.dispose();
+    animationController = null;
 
-    // ۳. پاکسازی وضعیت بازی
     gameState = null;
-
-    // ۴. آزاد کردن کالبک‌ها
     onGameFinished = null;
     onReconnectionFailed = null;
     onPlayerExit = null;
@@ -327,38 +337,49 @@ class GameController extends ChangeNotifier {
     _isMovingToken = false;
 
     notifyListeners();
-    debugPrint("✅ GameController and Repository are completely renewed.");
   }
 
   void resetGame() {
-    if (gameState != null && gameState!.livePlayer != null) {
-      // 🟢 به جای copyWith، مستقیم یک پلیر جدید با استفاده از سازنده اصلی می‌سازیم
-      // اینطوری مقادیر نال دقیقاً و بدون تداخل ?? اعمال می‌شوند.
+    if (gameState?.livePlayer != null) {
       final clearedPlayer = Player(
         userId: gameState!.livePlayer!.userId,
-        // آیدی حفظ می‌شود
         username: gameState!.livePlayer!.username,
-        // یوزرنیم حفظ می‌شود
         color: null,
-        // ریست به نال
         connectionStatus: null,
-        // ریست به نال
         playerStatus: null,
-        // ریست به نال
-        numberOfAbsences: 0, // ریست به صفر
+        numberOfAbsences: 0,
       );
 
       gameState = GameState(serverState: null, livePlayer: clearedPlayer);
     } else {
       gameState = null;
     }
-    animationController?.stop();
+
+    animationController?.dispose();
     animationController = null;
+
     onGameFinished = null;
     onReconnectionFailed = null;
     onPlayerExit = null;
+
+    _isGameFinishedHandled = false;
+    _isMovingToken = false;
+
+    notifyListeners();
   }
 
-  // ✅ بررسی اینکه آیا controller هنوز فعال است
+  @override
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    try {
+      gameRepository.dataSource.dispose();
+    } catch (_) {}
+
+    animationController?.dispose();
+    super.dispose();
+  }
+
   bool get isDisposed => _isDisposed;
 }

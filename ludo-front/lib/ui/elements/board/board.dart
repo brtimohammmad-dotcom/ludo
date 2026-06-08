@@ -4,11 +4,9 @@ import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/alerts/alert_background.dart';
 import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
-
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/alerts/winner_alert.dart';
 import 'package:ludo/ui/join_screen.dart';
-
 import 'package:ludo/ui/mappers/player_bar_mapper.dart';
 
 class Board extends StatefulWidget {
@@ -27,86 +25,84 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    // ست کردن کالبک
+    // --- GAME FINISHED ---
     widget.gameController.onGameFinished = () {
-      if (mounted &&
-          widget.gameController.gameState!.serverState!.winner != null) {
+      if (!mounted) return;
+
+      final winner = widget.gameController.gameState?.serverState?.winner;
+      if (winner != null) {
         _showDialog(
-          AlertBackground(
-            alert: WinnerAlert(
-              winner: widget.gameController.gameState!.serverState!.winner!,
-            ),
-          ),
+          AlertBackground(alert: WinnerAlert(winner: winner)),
         );
       }
     };
-    widget.gameController.onPlayerExit = ()async {
+
+    // --- PLAYER EXIT ---
+    widget.gameController.onPlayerExit = () async {
       debugPrint('...player exited...');
 
-      // ۱. بستن دیالوگ
-      Navigator.of(context).pop();
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
 
-      // ۲. نابود کردن کنترلر فعلی (که باعث اجرای dispose دیتاسورس و بسته شدن سوکت می‌شود)
       widget.gameController.deleteGameState();
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 50));
 
-      // ۳. 🌟 شاه‌کلید: پاک کردن کل صفحات قبلی و ساخت یک JoinScreen کاملاً نو
-      // این متد مطمئن می‌شود که استک ناوبری کاملاً خالی شده و اکانت دوقلو ساخته نمی‌شود
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const JoinScreen()),
-          (route) => false, // کل صفحات قبلی را از حافظه حذف کن
+          MaterialPageRoute(builder: (_) => const JoinScreen()),
+              (route) => false,
         );
       }
     };
+
+    // --- RECONNECTION FAILED ---
     widget.gameController.onReconnectionFailed = () {
-      if (mounted) {
-        _showDialog(
-          AlertBackground(
-            alert: ReconnectingFailedAlert(
-              onHomePressed: () async {
-                // ۱. بستن دیالوگ
+      if (!mounted) return;
+
+      _showDialog(
+        AlertBackground(
+          alert: ReconnectingFailedAlert(
+            onHomePressed: () async {
+              if (Navigator.canPop(context)) {
                 Navigator.of(context).pop();
+              }
 
-                // ۲. نابود کردن کنترلر فعلی (که باعث اجرای dispose دیتاسورس و بسته شدن سوکت می‌شود)
-                widget.gameController.deleteGameState();
+              widget.gameController.deleteGameState();
 
-                await Future.delayed(const Duration(milliseconds: 100));
+              await Future.delayed(const Duration(milliseconds: 50));
 
-                // ۳. 🌟 شاه‌کلید: پاک کردن کل صفحات قبلی و ساخت یک JoinScreen کاملاً نو
-                // این متد مطمئن می‌شود که استک ناوبری کاملاً خالی شده و اکانت دوقلو ساخته نمی‌شود
-                if (mounted) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const JoinScreen()),
-                    (route) => false, // کل صفحات قبلی را از حافظه حذف کن
-                  );
-                }
-              },
-            ),
+              if (mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const JoinScreen()),
+                      (route) => false,
+                );
+              }
+            },
           ),
-        );
-      }
+        ),
+      );
     };
+
+    // --- ANIMATION CONTROLLER ---
     widget.gameController.animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 10),
-    );
-    widget.gameController.animationController!.addStatusListener((status) {
+      duration: const Duration(seconds: 10),
+    )..addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        // وقتی به صفر رسید، دوباره شروع کن
         widget.gameController.animationController!.reset();
         widget.gameController.animationController!.forward();
       }
     });
+
     diceComposition = AssetLottie("assets/lotties/Dice Rolling.json").load();
   }
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     for (int i = 1; i <= 6; i++) {
       precacheImage(AssetImage('assets/images/dice/$i.png'), context);
@@ -117,14 +113,18 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => dialog,
+      builder: (_) => dialog,
     );
   }
 
   @override
   void dispose() {
     debugPrint("🧹 Board dispose called");
-    widget.gameController.resetGame(); // ✅ این خیلی مهم است
+
+    if (!widget.gameController.isDisposed) {
+      widget.gameController.resetGame();
+    }
+
     super.dispose();
   }
 
@@ -132,71 +132,51 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+
     return ListenableBuilder(
       listenable: widget.gameController,
-      builder: ((context, child) {
-        if (widget.gameController.gameState == null ||
-            widget.gameController.gameState!.serverState == null) {
-          // اگر دیتا پاک شده، یک لودینگ ساده یا باکس خالی نشان بده تا صفحه راحت بسته شود
+      builder: (context, child) {
+        final state = widget.gameController.gameState?.serverState;
+
+        if (state == null) {
           return const Center(child: CupertinoActivityIndicator());
         }
-        return widget.gameController.gameState!.serverState == null
-            ? Center(
-                child: Lottie.asset(
-                  "assets/lotties/Happy girl.json",
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
-                  frameRate: FrameRate(30),
 
-                  renderCache: RenderCache.raster,
-                ),
-              )
-            : Center(
-                // مرکزی کردن کل محتوا
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    int gameMode =
-                        widget.gameController.gameState!.serverState!.gameMode;
+        final gameMode = state.gameMode;
 
-                    final maxAvailableWidth = screenWidth;
-                    final maxAvailableHeight = screenHeight;
+        final boardSize = (screenWidth < screenHeight
+            ? screenWidth
+            : screenHeight * 0.86);
 
-                    final boardSize = (maxAvailableWidth < maxAvailableHeight
-                        ? maxAvailableWidth
-                        : maxAvailableHeight * 0.86);
+        final barHeight = boardSize * 0.08;
 
-                    final barHeight = boardSize * 0.08;
-
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min, // جمع شدن دور محتوا
-                      children: [
-                        PlayerBar(
-                          boardSize: boardSize,
-                          barHeight: barHeight,
-                          gameController: widget.gameController,
-                          leftPlayerIndex: gameMode == 2 ? -1 : 1,
-                          rightPlayerIndex: gameMode == 2 ? 1 : 2,
-                        ),
-                        MainBoard(
-                          diceComposition: diceComposition,
-                          boardSize: boardSize,
-                          gameController: widget.gameController,
-                        ),
-                        PlayerBar(
-                          boardSize: boardSize,
-                          barHeight: barHeight,
-                          gameController: widget.gameController,
-                          leftPlayerIndex: 0,
-                          rightPlayerIndex: gameMode == 2 ? -1 : 3,
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              );
-      }),
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PlayerBar(
+                boardSize: boardSize,
+                barHeight: barHeight,
+                gameController: widget.gameController,
+                leftPlayerIndex: gameMode == 2 ? -1 : 1,
+                rightPlayerIndex: gameMode == 2 ? 1 : 2,
+              ),
+              MainBoard(
+                diceComposition: diceComposition,
+                boardSize: boardSize,
+                gameController: widget.gameController,
+              ),
+              PlayerBar(
+                boardSize: boardSize,
+                barHeight: barHeight,
+                gameController: widget.gameController,
+                leftPlayerIndex: 0,
+                rightPlayerIndex: gameMode == 2 ? -1 : 3,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
