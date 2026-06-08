@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/join_screen.dart';

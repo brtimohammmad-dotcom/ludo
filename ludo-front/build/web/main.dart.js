@@ -1086,8 +1086,8 @@ s.toString
 d.addEventListener(a,r,s)}return new A.GH(a,d,r)},
 rN(a){var s=B.c.bo(a)
 return A.cy(B.c.bo((a-s)*1000),s,0)},
-asv(a,a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=a0.gds(),c=d.a,b=$.bm
-if((b==null?$.bm=A.d4():b).b&&J.d(a.offsetX,0)&&J.d(a.offsetY,0))return A.aFn(a,c)
+asv(a,a0,a1){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=a0.gds(),c=d.a,b=$.bn
+if((b==null?$.bn=A.d4():b).b&&J.d(a.offsetX,0)&&J.d(a.offsetY,0))return A.aFn(a,c)
 if(a1==null){b=a.target
 b.toString
 a1=b}if(d.e.contains(a1)){d=$.mw().gfk()
@@ -4493,7 +4493,7 @@ if(p===0)return t.Rp
 s=A.BX(v.typeUniverse,A.alm(q[0]),"@<0>")
 for(r=1;r<p;++r)s=A.arj(v.typeUniverse,s,A.alm(q[r]))
 return A.BX(v.typeUniverse,s,a)},
-bl(a){return A.bz(A.age(v.typeUniverse,a,!1))},
+bm(a){return A.bz(A.age(v.typeUniverse,a,!1))},
 aFV(a){var s=this
 s.b=A.aGy(s)
 return s.b(a)},
@@ -25158,11 +25158,11 @@ A.bQ(j)},
 anq(){var s,r,q,p,o="onrender.com",n="localhost",m="127.0.0.1",l="http://localhost:3000"
 try{s=A.lZ().go2()
 r=A.lZ().ghO()
-A.bn().$1("\ud83c\udf0d Current origin: "+A.j(s))
-A.bn().$1("\ud83c\udf0d Current host: "+A.j(r))
+A.bl().$1("\ud83c\udf0d Current origin: "+A.j(s))
+A.bl().$1("\ud83c\udf0d Current host: "+A.j(r))
 if(J.kG(s,o)||J.kG(r,o))return"https://ludo-backend-8ihb.onrender.com"
 if(J.kG(s,n)||J.kG(s,m)||J.kG(r,n)||J.kG(r,m))return l}catch(p){q=A.a4(p)
-A.bn().$1("Error detecting environment: "+A.j(q))}return l},
+A.bl().$1("Error detecting environment: "+A.j(q))}return l},
 aHV(a,b){var s,r,q=null,p=4292194709
 if(!(a>6&&b===5))s=a===10&&b===4
 else s=!0
@@ -27787,8 +27787,8 @@ s=$.HW
 if(s!=null)s.Ni(a)},
 $S:1}
 A.YP.prototype={
-$1(a){var s=$.bm
-if((s==null?$.bm=A.d4():s).D3(a))this.a.$1(a)},
+$1(a){var s=$.bn
+if((s==null?$.bn=A.d4():s).D3(a))this.a.$1(a)},
 $S:1}
 A.YQ.prototype={
 $1(a){this.a.a=a},
@@ -28690,8 +28690,8 @@ if(r!=null)r.addEventListener("keyup",l.gHz())
 r=l.a.d
 l.e=new A.cz(r,A.l(r).i("cz<1>")).jI(l.ga_6())
 s=s.document.body
-if(s!=null){l=$.bm
-s.prepend((l==null?$.bm=A.d4():l).d.a.gKV())}l=m.gc0().e
+if(s!=null){l=$.bn
+s.prepend((l==null?$.bn=A.d4():l).d.a.gKV())}l=m.gc0().e
 m.a=new A.cz(l,A.l(l).i("cz<1>")).jI(new A.VP(m))
 m.V3()},
 m(){var s=this,r=$.amD(),q=r.a,p=A.l(q).i("b7<1>"),o=A.U(new A.b7(q,p),p.i("p.E"))
@@ -28717,7 +28717,7 @@ q=q.document.body
 if(q!=null)q.removeEventListener("keyup",r.gHz())
 r=r.e
 if(r!=null)r.bj()
-r=$.bm;(r==null?$.bm=A.d4():r).d.a.gKV().remove()
+r=$.bn;(r==null?$.bn=A.d4():r).d.a.gKV().remove()
 r=s.a
 r===$&&A.a()
 r.bj()
@@ -28831,8 +28831,8 @@ q=$.auK()
 a3.toString
 q.a7L(g.a,m,a3)
 return
-case"flutter/accessibility":e=$.bm
-if(e==null)e=$.bm=A.d4()
+case"flutter/accessibility":e=$.bn
+if(e==null)e=$.bn=A.d4()
 if(e.b){q=t.f
 d=q.a(q.a(B.b7.eb(a2)).h(0,"data"))
 c=A.cu(d.h(0,"message"))
@@ -29581,8 +29581,8 @@ p.b.removeEventListener(p.a,p.c)}B.b.J(s)},
 a3Q(a,b,c){this.b.push(A.aoT(b,new A.ab_(c),null,a))},
 mQ(a,b){return this.gVC().$2(a,b)}}
 A.ab_.prototype={
-$1(a){var s=$.bm
-if((s==null?$.bm=A.d4():s).D3(a))this.a.$1(a)},
+$1(a){var s=$.bn
+if((s==null?$.bn=A.d4():s).D3(a))this.a.$1(a)},
 $S:1}
 A.agt.prototype={
 ga_s(){return this.a.b.c instanceof A.FJ},
@@ -29678,8 +29678,8 @@ e.toString
 o.a54(j,J.a1(e),B.bZ,r,s,new A.agu(b),h*c,i.b*g,1,1,q,p,B.Ku,k,m)}b.c=a0
 b.d=s===B.c_
 return j},
-a_a(a){var s=this,r=$.bm
-if(!(r==null?$.bm=A.d4():r).D3(a))return
+a_a(a){var s=this,r=$.bn
+if(!(r==null?$.bn=A.d4():r).D3(a))return
 s.f=s.e=!1
 s.mQ(a,s.Wd(a))
 if(A.asU()&&s.ga_s()){if(!(s.e&&!s.f))a.preventDefault()}else if(!s.e)a.preventDefault()}}
@@ -30363,7 +30363,7 @@ p.addEventListener("change",A.aB(new A.a5M(q,a)))
 s=new A.a5N(q)
 q.z!==$&&A.br()
 q.z=s
-r=$.bm;(r==null?$.bm=A.d4():r).w.push(s)
+r=$.bn;(r==null?$.bn=A.d4():r).w.push(s)
 q.x.Ob(a.p2,p)},
 gtR(){var s=this.c.k4
 A:{break A}return B.jW!==s},
@@ -30372,8 +30372,8 @@ return!0},
 Ds(){A.aki(this.w,this.c.k3)},
 c9(){var s,r=this
 r.eq()
-s=$.bm
-switch((s==null?$.bm=A.d4():s).f.a){case 1:r.X8()
+s=$.bn
+switch((s==null?$.bn=A.d4():s).f.a){case 1:r.X8()
 r.a33()
 break
 case 0:r.Gy()
@@ -30416,8 +30416,8 @@ s.disabled=!0},
 m(){var s,r,q=this
 q.oJ()
 q.x.wW()
-s=$.bm
-if(s==null)s=$.bm=A.d4()
+s=$.bn
+if(s==null)s=$.bn=A.d4()
 r=q.z
 r===$&&A.a()
 B.b.B(s.w,r)
@@ -30625,8 +30625,8 @@ if(!(r.ch&&!r.ax))return
 r=this.d
 s=s.z
 if(r!=s){this.d=s
-if(s!=null&&s.length!==0){r=$.bm
-r=(r==null?$.bm=A.d4():r).a
+if(s!=null&&s.length!==0){r=$.bn
+r=(r==null?$.bn=A.d4():r).a
 r.L7(s,B.hS)}}}}
 A.J2.prototype={
 c9(){this.eq()
@@ -30845,8 +30845,8 @@ if(s!=null)s.M9(r)}},
 $S:0}
 A.a65.prototype={
 a1v(){var s,r,q,p,o,n=this
-if(n.grV()!==n.z){s=$.bm
-if(!(s==null?$.bm=A.d4():s).QZ("scroll"))return
+if(n.grV()!==n.z){s=$.bn
+if(!(s==null?$.bn=A.d4():s).QZ("scroll"))return
 n.z=n.grV()
 n.Kw()
 s=n.c
@@ -30892,7 +30892,7 @@ s===$&&A.a()
 A.I(s.style,"touch-action","none")
 r=new A.a67(p)
 p.w=r
-q=$.bm;(q==null?$.bm=A.d4():q).w.push(r)
+q=$.bn;(q==null?$.bn=A.d4():q).w.push(r)
 r=A.aB(new A.a68(p))
 p.y=r
 s.addEventListener("scroll",r)}},
@@ -30937,8 +30937,8 @@ q===$&&A.a()
 q.scrollLeft=0
 q.scrollTop=0
 j.aq=j.y2=0}}},
-Kh(){var s,r=this,q="overflow",p=$.bm
-switch((p==null?$.bm=A.d4():p).f.a){case 1:p=r.c.b
+Kh(){var s,r=this,q="overflow",p=$.bn
+switch((p==null?$.bn=A.d4():p).f.a){case 1:p=r.c.b
 p.toString
 if((p&32)!==0||(p&16)!==0){p=r.a
 p===$&&A.a()
@@ -30967,8 +30967,8 @@ s.removeProperty("touch-action")
 r=q.y
 if(r!=null){p.removeEventListener("scroll",r)
 q.y=null}p=q.w
-if(p!=null){r=$.bm
-B.b.B((r==null?$.bm=A.d4():r).w,p)
+if(p!=null){r=$.bn
+B.b.B((r==null?$.bn=A.d4():r).w,p)
 q.w=null}},
 af(){var s=this.e
 if(s==null)s=null
@@ -31716,9 +31716,9 @@ try{j=k.x
 r=j.length
 if(r!==0){for(p=0;p<j.length;j.length===r||(0,A.t)(j),++p){s=j[p]
 s.$0()}k.x=A.b([],t.u)}}finally{}k.y=!1},
-PE(a){var s,r,q,p,o,n,m,l,k,j,i=this,h=$.bm;(h==null?$.bm=A.d4():h).a6n()
-h=$.bm
-if(!(h==null?$.bm=A.d4():h).b)return
+PE(a){var s,r,q,p,o,n,m,l,k,j,i=this,h=$.bn;(h==null?$.bn=A.d4():h).a6n()
+h=$.bn
+if(!(h==null?$.bn=A.d4():h).b)return
 s=a.a
 for(h=s.length,r=t.N,q=i.e,p=0;o=s.length,p<o;s.length===h||(0,A.t)(s),++p){n=s[p]
 o=n.a
@@ -31865,11 +31865,11 @@ A.Uv.prototype={
 gO1(){return this.b!=null},
 wi(a){var s
 if(this.b==null)return!0
-s=$.bm
-if((s==null?$.bm=A.d4():s).b)return!0
+s=$.bn
+if((s==null?$.bn=A.d4():s).b)return!0
 if(!B.Lr.v(0,a.type))return!0
 if(!J.d(a.target,this.b))return!0
-s=$.bm;(s==null?$.bm=A.d4():s).swN(!0)
+s=$.bn;(s==null?$.bn=A.d4():s).swN(!0)
 this.m()
 return!1},
 Ip(){var s,r,q=this.b=A.bA(v.G.document,"flt-semantics-placeholder")
@@ -31904,8 +31904,8 @@ gO1(){return this.c!=null},
 wi(a){var s,r,q,p,o,n,m,l,k,j,i=this
 if(i.c==null)return!0
 if(i.e){if($.aX().gdh()!==B.aZ||J.d(a.type,"touchend")||J.d(a.type,"pointerup")||J.d(a.type,"click"))i.m()
-return!0}s=$.bm
-if((s==null?$.bm=A.d4():s).b)return!0
+return!0}s=$.bn
+if((s==null?$.bn=A.d4():s).b)return!0
 if(++i.d>=20)return i.e=!0
 if(!B.Lw.v(0,a.type))return!0
 if(i.b!=null)return!1
@@ -31949,7 +31949,7 @@ if(s!=null)s.remove()
 this.b=this.c=null}}
 A.a1h.prototype={
 $0(){this.a.m()
-var s=$.bm;(s==null?$.bm=A.d4():s).swN(!0)},
+var s=$.bn;(s==null?$.bn=A.d4():s).swN(!0)},
 $S:0}
 A.a1g.prototype={
 $1(a){this.a.wi(a)},
@@ -33295,8 +33295,8 @@ new A.cz(s,A.l(s).i("cz<1>")).jI(this.gUY())}},
 gnp(){var s=this.a
 return s===$?this.a=new A.a8B(this):s},
 gfk(){var s,r,q,p=this,o=null,n=p.f
-if(n===$){s=$.bm
-if((s==null?$.bm=A.d4():s).b){s=A.aCF(p)
+if(n===$){s=$.bn
+if((s==null?$.bn=A.d4():s).b){s=A.aCF(p)
 r=s}else{if($.aX().gcj()===B.al)q=new A.nu(p,A.r(t.N,t.i),A.b([],t.Up),$,$,$,o,o)
 else if($.aX().gcj()===B.dK)q=new A.Sg(p,A.r(t.N,t.i),A.b([],t.Up),$,$,$,o,o)
 else if($.aX().gdh()===B.aZ)q=new A.ok(p,A.r(t.N,t.i),A.b([],t.Up),$,$,$,o,o)
@@ -70843,7 +70843,7 @@ q=r.a
 r=r.b
 r=A.app(q.a,q.b,r.a,r.b)
 return r}catch(p){s=A.a4(p)
-A.bn().$1("DEBUG: Path interpolator error "+A.j(s))
+A.bl().$1("DEBUG: Path interpolator error "+A.j(s))
 if(B.d.v(A.j(s),"The Path cannot loop back on itself.")){r=this.a
 q=r.a
 o=Math.min(q.a,1)
@@ -71648,25 +71648,25 @@ case 4:case 1:return A.M(q,r)}})
 return A.N($async$tt,r)},
 q9(){var s=0,r=A.O(t.H),q=this
 var $async$q9=A.P(function(a,b){if(a===1)return A.L(b,r)
-for(;;)switch(s){case 0:A.bn().$1("\ud83c\udfae Exiting game...")
+for(;;)switch(s){case 0:A.bl().$1("\ud83c\udfae Exiting game...")
 q.e.a.q9()
 return A.M(null,r)}})
 return A.N($async$q9,r)},
 M7(){var s,r,q,p,o=this
-A.bn().$1("\ud83e\uddf9 Clearing and Disposing GameController data...")
+A.bl().$1("\ud83e\uddf9 Clearing and Disposing GameController data...")
 try{o.e.a.m()}catch(q){s=A.a4(q)
-A.bn().$1("\u26a0\ufe0f Error disposing dataSource: "+A.j(s))}o.e=new A.FM(new A.Ju(new A.aT(new A.a7($.a6,t.D),t.h)))
+A.bl().$1("\u26a0\ufe0f Error disposing dataSource: "+A.j(s))}o.e=new A.FM(new A.Ju(new A.aT(new A.a7($.a6,t.D),t.h)))
 p=o.f
 if(p!=null)try{p.e4()
 o.f.m()}catch(q){r=A.a4(q)
-A.bn().$1("\u26a0\ufe0f Error disposing animationController: "+A.j(r))}finally{o.f=null}o.c=o.b=o.a=o.d=null
+A.bl().$1("\u26a0\ufe0f Error disposing animationController: "+A.j(r))}finally{o.f=null}o.c=o.b=o.a=o.d=null
 o.x=o.w=!1
 o.au()
-A.bn().$1("\u2705 GameController and Repository are completely renewed.")}}
+A.bl().$1("\u2705 GameController and Repository are completely renewed.")}}
 A.X8.prototype={
 $1(a){var s=this.a,r=B.b.iG(a.r,new A.X7(s))
 s.d=new A.ek(r,a)
-A.bn().$1("state updated")
+A.bl().$1("state updated")
 s.au()},
 $S:156}
 A.X7.prototype={
@@ -71679,7 +71679,7 @@ s=r.f
 if(s!=null)s.sn(s.a)
 r.au()
 r.d=new A.ek(q,a)
-A.bn().$1("times up")},
+A.bl().$1("times up")},
 $S:156}
 A.X6.prototype={
 $1(a){return a.a===this.a.d.a.a},
@@ -71692,17 +71692,17 @@ s.d=r.AG(r.a,r.b.a5E(a))
 s.au()
 r=s.a
 if(r!=null&&!s.w){s.w=!0
-r.$0()}A.bn().$1("game finished")},
+r.$0()}A.bl().$1("game finished")},
 $S:158}
 A.Xb.prototype={
 $0(){var s=this.a,r=s.f
 if(r!=null)r.e4()
 s.b.$0()
-A.bn().$1("reconnection failed")},
+A.bl().$1("reconnection failed")},
 $S:0}
 A.Xc.prototype={
 $1(a){var s,r
-A.bn().$1("\ud83c\udfaf HIT! onPlayerUpdate Called. Player: "+a.b)
+A.bl().$1("\ud83c\udfaf HIT! onPlayerUpdate Called. Player: "+a.b)
 s=this.a
 r=s.d
 s.d=new A.ek(a,r==null?null:r.b)
@@ -71712,7 +71712,7 @@ A.Xd.prototype={
 $0(){var s=this.a
 s.c.$0()
 s.au()
-A.bn().$1("player exited")},
+A.bl().$1("player exited")},
 $S:0}
 A.Xe.prototype={
 $1(a){return this.PQ(a)},
@@ -71735,7 +71735,7 @@ if(j!=null)j.sn(j.a)
 j=k.f
 if(j!=null)j.f8()
 k.au()
-A.bn().$1("token moved")
+A.bl().$1("token moved")
 n.push(5)
 s=4
 break
@@ -71782,7 +71782,7 @@ if(n!=null)n.sn(n.a)
 n=p.f
 if(n!=null)n.f8()
 p.au()
-case 4:A.bn().$1("dice rolled")
+case 4:A.bl().$1("dice rolled")
 return A.M(null,r)}})
 return A.N($async$$1,r)},
 $S:159}
@@ -71800,29 +71800,30 @@ $1(a){return a.a===this.a.a},
 $S:72}
 A.Ju.prototype={
 lz(a){var s
+A.bl().$1(a)
 if(t.j.b(a)){s=J.aP(a)
 s=s.gaH(a)&&t.f.b(s.h(a,0))}else s=!1
 if(s)return A.ajN(t.f.a(J.e_(a,0)),t.N,t.z)
 else if(t.a.b(a))return a
-else{A.bn().$1("\u0641\u0631\u0645\u062a \u062f\u0627\u062f\u0647 \u0646\u0627\u0645\u0639\u062a\u0628\u0631: "+J.R(a).j(0))
+else{A.bl().$1("\u0641\u0631\u0645\u062a \u062f\u0627\u062f\u0647 \u0646\u0627\u0645\u0639\u062a\u0628\u0631: "+J.R(a).j(0))
 return A.r(t.N,t.z)}},
 ug(){var s=0,r=A.O(t.H),q,p=this,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a
 var $async$ug=A.P(function(a0,a1){if(a0===1)return A.L(a1,r)
-for(;;)switch(s){case 0:A.bn().$1("\ud83d\udcf1 Platform: Web")
-A.bn().$1("\ud83d\udccd Origin: "+A.lZ().go2())
-A.bn().$1("\ud83d\udccd Host: "+A.lZ().ghO())
-A.bn().$1("\ud83d\udccd Protocol: "+A.lZ().ghr())
-A.bn().$1("\ud83d\udd0c Server URL: "+A.anq())
+for(;;)switch(s){case 0:A.bl().$1("\ud83d\udcf1 Platform: Web")
+A.bl().$1("\ud83d\udccd Origin: "+A.lZ().go2())
+A.bl().$1("\ud83d\udccd Host: "+A.lZ().ghO())
+A.bl().$1("\ud83d\udccd Protocol: "+A.lZ().ghr())
+A.bl().$1("\ud83d\udd0c Server URL: "+A.anq())
 o=A.anq()
 n=p.a
 s=n!=null?3:4
 break
-case 3:if(n.w){A.bn().$1("\u26a0\ufe0f Socket is already connected. Skipping initialization.")
+case 3:if(n.w){A.bl().$1("\u26a0\ufe0f Socket is already connected. Skipping initialization.")
 s=1
-break}A.bn().$1("\ud83d\udd04 Ghost socket detected. Disposing before creating a fresh instance...")
+break}A.bl().$1("\ud83d\udd04 Ghost socket detected. Disposing before creating a fresh instance...")
 s=5
 return A.Q(p.m(),$async$ug)
-case 5:case 4:A.bn().$1("\ud83d\udfe2 Connecting to: "+o)
+case 5:case 4:A.bl().$1("\ud83d\udfe2 Connecting to: "+o)
 n=t.N
 m=t.z
 l=A.r(n,m)
@@ -71878,36 +71879,36 @@ case 1:return A.M(q,r)}})
 return A.N($async$ug,r)},
 m(){var s=0,r=A.O(t.H),q=[],p=this,o,n,m,l,k,j
 var $async$m=A.P(function(a,b){if(a===1)return A.L(b,r)
-for(;;)switch(s){case 0:A.bn().$1("\ud83e\uddf9 Fully disposing SocketDataSource and clearing memory...")
+for(;;)switch(s){case 0:A.bl().$1("\ud83e\uddf9 Fully disposing SocketDataSource and clearing memory...")
 n=p.a
 if(n!=null)try{if(n.w)n.Mn()
 p.a.u9()
 p.a.Mn()}catch(i){o=A.a4(i)
-A.bn().$1("\u26a0\ufe0f Error while closing socket: "+A.j(o))}finally{p.a=null}p.b=p.z=p.y=p.x=p.w=p.r=p.f=p.e=p.d=p.c=null
+A.bl().$1("\u26a0\ufe0f Error while closing socket: "+A.j(o))}finally{p.a=null}p.b=p.z=p.y=p.x=p.w=p.r=p.f=p.e=p.d=p.c=null
 n=p.Q.a.a
 l=$.a6
 k=t.D
 j=t.h
 if((n&30)!==0)p.Q=new A.aT(new A.a7(l,k),j)
 else p.Q=new A.aT(new A.a7(l,k),j)
-A.bn().$1("\u2705 SocketDataSource is now completely clean.")
+A.bl().$1("\u2705 SocketDataSource is now completely clean.")
 return A.M(null,r)}})
 return A.N($async$m,r)},
 a9u(a){var s=this.a
-if(s==null||!s.w){A.bn().$1("Cannot join game: socket not connected")
+if(s==null||!s.w){A.bl().$1("Cannot join game: socket not connected")
 return}s.q3("join_game",A.a8(["gameMode",a],t.N,t.S))},
 w3(){var s=this.a
-if(s==null||!s.w){A.bn().$1("Cannot roll dice: socket not connected")
+if(s==null||!s.w){A.bl().$1("Cannot roll dice: socket not connected")
 return}s.q3("roll_dice",null)},
 q9(){var s=this.a
-if(s==null||!s.w){A.bn().$1("Cannot exit game: socket not connected")
+if(s==null||!s.w){A.bl().$1("Cannot exit game: socket not connected")
 return}s.q3("exit_game",null)},
 Ck(a){var s=this.a
-if(s==null||!s.w){A.bn().$1("Cannot move token: socket not connected")
+if(s==null||!s.w){A.bl().$1("Cannot move token: socket not connected")
 return}s.q3("move_token",a.mn())}}
 A.a7a.prototype={
 $1(a){var s,r,q,p,o=null,n="last_name",m="chat_instance"
-A.bn().$1("\u2705 Connected to "+this.b)
+A.bl().$1("\u2705 Connected to "+this.b)
 if(A.lZ().ghO()==="localhost"||A.lZ().ghO()==="127.0.0.1")s=A.a8(["first_name","amir","id",0],t.N,t.K)
 else{if($.fN==null)$.fN=new A.kd()
 r=v.G
@@ -71935,14 +71936,14 @@ q.h(0,"query_id")
 r=q.h(0,"auth_date")
 r.toString
 A.dH(r,o)
-q.h(0,"hash").toString}A.bn().$1("\ud83d\udce4 Sending auth event to server...")
+q.h(0,"hash").toString}A.bl().$1("\ud83d\udce4 Sending auth event to server...")
 r=this.a.a
 r.toString
 r.q3("auth",A.a8(["initData",s],t.N,t.z))},
 $S:5}
 A.a7b.prototype={
 $1(a){var s,r=this.a,q=A.a38(r.lz(a))
-A.bn().$1("\ud83d\udc64 Initial Player received: "+q.b)
+A.bl().$1("\ud83d\udc64 Initial Player received: "+q.b)
 s=r.d
 if(s!=null)s.$1(q)
 r=r.Q
@@ -71967,7 +71968,7 @@ var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
 return A.Q(o.Q.a,$async$$1)
-case 2:A.bn().$1("game started")
+case 2:A.bl().$1("game started")
 p=A.Je(o.lz(a))
 o.b=p
 o=o.c
@@ -72026,7 +72027,7 @@ return A.M(null,r)}})
 return A.N($async$$1,r)},
 $S:20}
 A.a7l.prototype={
-$1(a){A.bn().$1("Socket error: "+A.j(a))},
+$1(a){A.bl().$1("Socket error: "+A.j(a))},
 $S:5}
 A.a7m.prototype={
 $1(a){var s=0,r=A.O(t.P),q=this,p,o
@@ -72043,22 +72044,22 @@ return A.N($async$$1,r)},
 $S:20}
 A.a7n.prototype={
 $1(a){var s
-A.bn().$1("\ud83d\udd0c Socket disconnected.")
+A.bl().$1("\ud83d\udd0c Socket disconnected.")
 s=this.a
 if((s.Q.a.a&30)!==0)s.Q=new A.aT(new A.a7($.a6,t.D),t.h)
 s=s.y
 if(s!=null)s.$0()},
 $S:5}
 A.a7d.prototype={
-$1(a){A.bn().$1("\ud83d\udd04 Socket reconnect attempt #"+A.j(a))},
+$1(a){A.bl().$1("\ud83d\udd04 Socket reconnect attempt #"+A.j(a))},
 $S:5}
 A.a7e.prototype={
-$1(a){A.bn().$1("\u26a0\ufe0f Reconnect error: "+A.j(a))},
+$1(a){A.bl().$1("\u26a0\ufe0f Reconnect error: "+A.j(a))},
 $S:5}
 A.a7f.prototype={
 $1(a){var s=0,r=A.O(t.P),q=this,p
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
-for(;;)switch(s){case 0:A.bn().$1("\u274c [FATAL] Reconnection failed after all attempts.")
+for(;;)switch(s){case 0:A.bl().$1("\u274c [FATAL] Reconnection failed after all attempts.")
 p=q.a.x
 if(p!=null)p.$0()
 return A.M(null,r)}})
@@ -72259,7 +72260,7 @@ Jv(a){var s=this.c
 s.toString
 A.atn(!1,new A.ab6(a),s,t.z)},
 m(){var s,r
-A.bn().$1("\ud83e\uddf9 Board dispose called")
+A.bl().$1("\ud83e\uddf9 Board dispose called")
 s=this.a.c
 r=s.d
 if(r!=null){r=r.a
@@ -72277,7 +72278,7 @@ s.toString
 r.Jv(A.aiM(new A.Kl(s,null)))}},
 $S:0}
 A.abe.prototype={
-$0(){A.bn().$1("...player exited...")
+$0(){A.bl().$1("...player exited...")
 var s=this.a.c
 if(s!=null)A.iW(s,!1).aaQ(new A.abc())},
 $S:0}
@@ -75656,7 +75657,7 @@ r(A,"aGJ","ayB",492)
 m(j=A.eT.prototype,"gtX","a3",44)
 m(j,"gP6","P",44)
 o(j,"gjM","au",0)
-q(A,"bn",1,function(){return{wrapWidth:null}},["$2$wrapWidth","$1"],["asC",function(a){return A.asC(a,null)}],493,0)
+q(A,"bl",1,function(){return{wrapWidth:null}},["$2$wrapWidth","$1"],["asC",function(a){return A.asC(a,null)}],493,0)
 p(A,"aID","arN",0)
 r(A,"aIS","aD2",494)
 m(j=A.vW.prototype,"gZr","Zs",330)
@@ -79591,51 +79592,51 @@ B.R0=new A.rA(2,"parentScope")
 B.xU=new A.rA(3,"stop")
 B.Y=new A.zv(1,"isTrue")
 B.e5=new A.zv(2,"isFalse")
-B.R1=A.bl("ayL")
-B.R2=A.bl("pi")
-B.R3=A.bl("ps")
-B.R4=A.bl("iC")
-B.R5=A.bl("ck")
-B.R6=A.bl("cL")
-B.R7=A.bl("jA")
-B.R8=A.bl("anG")
-B.xW=A.bl("kV")
-B.R9=A.bl("ayM")
-B.Ra=A.bl("hP")
-B.Rb=A.bl("Wi")
-B.Rc=A.bl("Wj")
-B.Rd=A.bl("Ys")
-B.Re=A.bl("Yt")
-B.Rf=A.bl("Yu")
-B.Rg=A.bl("at")
-B.Rh=A.bl("bZ<an<ab>>")
-B.Ri=A.bl("wB")
-B.xX=A.bl("hZ")
-B.Rj=A.bl("qw")
-B.bz=A.bl("nO")
-B.Rk=A.bl("qK")
-B.Rl=A.bl("A")
-B.Rm=A.bl("qN")
-B.ko=A.bl("i3")
-B.Rn=A.bl("qV")
-B.Ro=A.bl("lz")
-B.Rp=A.bl("apO")
-B.xY=A.bl("fK")
-B.Rq=A.bl("os")
-B.Rr=A.bl("ov")
-B.xZ=A.bl("v")
-B.y_=A.bl("ig")
-B.Rs=A.bl("kf")
-B.Rt=A.bl("a9w")
-B.Ru=A.bl("rD")
-B.Rv=A.bl("a9x")
-B.Rw=A.bl("oH")
-B.Rx=A.bl("aqz")
-B.Ry=A.bl("zG")
-B.Rz=A.bl("rL")
-B.RA=A.bl("jf<@>")
-B.y0=A.bl("hV")
-B.RB=A.bl("aqu")
+B.R1=A.bm("ayL")
+B.R2=A.bm("pi")
+B.R3=A.bm("ps")
+B.R4=A.bm("iC")
+B.R5=A.bm("ck")
+B.R6=A.bm("cL")
+B.R7=A.bm("jA")
+B.R8=A.bm("anG")
+B.xW=A.bm("kV")
+B.R9=A.bm("ayM")
+B.Ra=A.bm("hP")
+B.Rb=A.bm("Wi")
+B.Rc=A.bm("Wj")
+B.Rd=A.bm("Ys")
+B.Re=A.bm("Yt")
+B.Rf=A.bm("Yu")
+B.Rg=A.bm("at")
+B.Rh=A.bm("bZ<an<ab>>")
+B.Ri=A.bm("wB")
+B.xX=A.bm("hZ")
+B.Rj=A.bm("qw")
+B.bz=A.bm("nO")
+B.Rk=A.bm("qK")
+B.Rl=A.bm("A")
+B.Rm=A.bm("qN")
+B.ko=A.bm("i3")
+B.Rn=A.bm("qV")
+B.Ro=A.bm("lz")
+B.Rp=A.bm("apO")
+B.xY=A.bm("fK")
+B.Rq=A.bm("os")
+B.Rr=A.bm("ov")
+B.xZ=A.bm("v")
+B.y_=A.bm("ig")
+B.Rs=A.bm("kf")
+B.Rt=A.bm("a9w")
+B.Ru=A.bm("rD")
+B.Rv=A.bm("a9x")
+B.Rw=A.bm("oH")
+B.Rx=A.bm("aqz")
+B.Ry=A.bm("zG")
+B.Rz=A.bm("rL")
+B.RA=A.bm("jf<@>")
+B.y0=A.bm("hV")
+B.RB=A.bm("aqu")
 B.RC=new A.K0(0,"scope")
 B.kp=new A.K0(1,"previouslyFocusedChild")
 B.RD=new A.K6(!1)
@@ -79822,7 +79823,7 @@ $.ar8=0
 $.HW=null
 $.Jn=null
 $.aoI=null
-$.bm=null
+$.bn=null
 $.Jb=null
 $.pa=A.r(t.N,A.a5("pT"))
 $.ahB=null

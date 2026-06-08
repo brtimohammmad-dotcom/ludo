@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/home.dart';
 
 class AppBody extends StatelessWidget {
-  AppBody({super.key});
+  const AppBody({super.key});
 
 
   @override

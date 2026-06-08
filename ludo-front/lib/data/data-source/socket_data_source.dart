@@ -34,6 +34,7 @@ class SocketDataSource {
   Completer<void> playerInitialized = Completer<void>();
 
   Map<String, dynamic> convertToJSData(dynamic data) {
+    debugPrint(data);
     if (data is List && data.isNotEmpty && data[0] is Map) {
       return Map<String, dynamic>.from(data[0] as Map);
     } else if (data is Map<String, dynamic>) {
