@@ -34,15 +34,28 @@ class SocketDataSource {
   Completer<void> playerInitialized = Completer<void>();
 
   Map<String, dynamic> convertToJSData(dynamic data) {
-    debugPrint(data);
-    if (data is List && data.isNotEmpty && data[0] is Map) {
-      return Map<String, dynamic>.from(data[0] as Map);
-    } else if (data is Map<String, dynamic>) {
-      return data;
-    } else {
-      debugPrint('فرمت داده نامعتبر: ${data.runtimeType}');
-      return {};
+    // ۱. بررسی اینکه آیا داده تهی (null) است یا نه
+    if (data == null) return {};
+
+    try {
+      // ۲. بررسی امن برای لیست بودن (سازگار با لیست‌های معمولی و JSArray)
+      if (data is Iterable && data.isNotEmpty) {
+        final firstElement = data.first;
+        if (firstElement is Map) {
+          return Map<String, dynamic>.from(firstElement);
+        }
+      }
+      // ۳. بررسی امن برای مپ بودن
+      else if (data is Map) {
+        return Map<String, dynamic>.from(data);
+      }
+    } catch (e) {
+      debugPrint('خطا در تبدیل داده: $e');
     }
+
+    // اگر فرمت هیچ‌کدام نبود یا خطا داد
+    debugPrint('فرمت داده نامعتبر است.');
+    return {};
   }
 
   void connectToGame() async {
