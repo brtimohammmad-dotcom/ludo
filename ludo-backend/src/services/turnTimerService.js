@@ -138,7 +138,7 @@ function startTimer(socket, io) {
           activeTimer.clear();
         }
         stopTimer(socket.data.gameId);
-        initialState.updateGameState(ocket.data.gameId, {
+        initialState.updateGameState(socket.data.gameId, {
           game_status: "finished",
         });
 
