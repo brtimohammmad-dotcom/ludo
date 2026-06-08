@@ -111,7 +111,7 @@ function handleMoveToken( socket, token, io) {
     return { error: "Game not found!" };
   }
 
-  const player = gameState.players.find((p) => p.telegramId === socket.data.telegram_id);
+  const player = gameState.players.find((p) => p.telegramId === socket.data.telegramId);
 
   if (!player) return { error: "Player not found!" };
 
