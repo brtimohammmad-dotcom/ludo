@@ -90,11 +90,11 @@ module.exports = (io) => {
           }
           socket.emit("initial_player", newPlayer);
 
-          socket.data.gameId = game.game_id;
-          let currentGameState = initialState.getGameState(socket.data.gameId);
-          socket.join(socket.data.gameId);
+          // socket.data.gameId = game.game_id;
+          // let currentGameState = initialState.getGameState(socket.data.gameId);
+          // socket.join(socket.data.gameId);
 
-          io.to(socket.data.gameId).emit("game_state_update", currentGameState);
+          // io.to(socket.data.gameId).emit("game_state_update", currentGameState);
         } else {
           if (!player) {
             console.log("Player not found or database lag!");
