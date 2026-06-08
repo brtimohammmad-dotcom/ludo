@@ -66,29 +66,32 @@ class SocketDataSource {
         final decoded = jsonDecode(data);
         if (decoded is Map) {
           return Map<String, dynamic>.from(decoded);
-        } else if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+        } else if (decoded is List &&
+            decoded.isNotEmpty &&
+            decoded.first is Map) {
           return Map<String, dynamic>.from(decoded.first);
         }
       }
 
       // لایه ۵: برخورد امن با اشیاء خاص جاوااسکریپت (مخصوص وب)
       // برای مواقعی که پکیج سوکت شیء بومی مروگر را بدون تبدیل کلاینتی تحویل می‌دهد
-      final fallbackMap = <String, dynamic>{};
-      if (data.toString() == '[object Object]' || data.toString().startsWith('{')) {
+      if (data.toString() == '[object Object]' ||
+          data.toString().startsWith('{')) {
         try {
           // تلاش برای استخراج کلیدها به روش تبدیل دستی به مپ دارت
           final converted = Map<dynamic, dynamic>.from(data as dynamic);
           return converted.map((key, value) => MapEntry(key.toString(), value));
         } catch (_) {}
       }
-
     } catch (e) {
       debugPrint('🚨 خطا در حین کالبدشکافی داده سوکت: $e');
     }
 
     // لایه آخر: اگر به هر دلیلی کدهای بالا نتوانستند ساختار را تشخیص دهند، برای اینکه خروجی کرش نکند،
     // تلاش می‌کنیم نوع داده دریافتی را دقیقاً پرینت کنیم تا بفهمیم سرور چه چیزی فرستاده است.
-    debugPrint('❌ ساختار ناشناخته سوکت کلاینت. نوع داده: ${data.runtimeType} | مقدار: $data');
+    debugPrint(
+      '❌ ساختار ناشناخته سوکت کلاینت. نوع داده: ${data.runtimeType} | مقدار: $data',
+    );
     return {};
   }
 
@@ -105,7 +108,9 @@ class SocketDataSource {
       // 🚨 اصلاح شد: اگر سوکت وجود دارد اما دیسکانکت است،
       // به جای زدن متد socket!.connect() که تلاش‌های ریکانکت قبلی را دوبرابر می‌کند،
       // کل سوکت قبلی را نابود کن و بگذار یک سوکت کاملاً جدید از خط پایینی ساخته شود.
-      debugPrint('🔄 Ghost socket detected. Disposing before creating a fresh instance...');
+      debugPrint(
+        '🔄 Ghost socket detected. Disposing before creating a fresh instance...',
+      );
       await dispose();
     }
 
@@ -128,6 +133,9 @@ class SocketDataSource {
     socket!.onConnect((_) {
       dynamic initData;
       debugPrint('✅ Connected to $serverUrl');
+      Future.delayed(const Duration(milliseconds: 300), () {
+        debugPrint('📤 Sending auth event to server...');
+      });
       final isLocal =
           Uri.base.host == 'localhost' || Uri.base.host == '127.0.0.1';
       if (isLocal) {
@@ -147,7 +155,35 @@ class SocketDataSource {
     });
 
     socket!.on('initial_player', (data) {
-      debugPrint('📥 RAW DATA RECEIVED: Type: ${data.runtimeType} | Value: $data');
+      if (data == null) {
+        dynamic initData;
+
+        debugPrint(
+          '⚠️ سرور دیتای خالی فرستاد. درخواست مجدد احراز هویت بعد از ۱ ثانیه...',
+        );
+        Future.delayed(const Duration(seconds: 1), () {
+          final isLocal =
+              Uri.base.host == 'localhost' || Uri.base.host == '127.0.0.1';
+          if (isLocal) {
+            initData = {"first_name": "amir", "id": 0};
+          } else {
+            if (TelegramWebApp.instance.isSupported) {
+              TelegramWebApp.instance.ready();
+              TelegramWebApp.instance.expand();
+            }
+            initData = TelegramWebApp.instance.initData.raw;
+          }
+
+          // 🚨 اصلاح شد: هر زمان که اتصال برقرار می‌شود (چه بار اول، چه ریکانکت بومی سوکت)،
+          // باید دیتای auth فرستاده شود تا سرور کلاینت قدیمی و جدید را جابجا کند و دوقلو ایجاد نشود.
+          debugPrint('📤 Sending auth event to server...');
+          socket!.emit("auth", {"initData": initData});
+        });
+        return; // بقیه کد را اجرا نکن و منتظر پاسخ بعدی بمان
+      }
+      debugPrint(
+        '📥 RAW DATA RECEIVED: Type: ${data.runtimeType} | Value: $data',
+      );
       Player livePlayer = Player.fromJson(convertToJSData(data));
       debugPrint('👤 Initial Player received: ${livePlayer.username}');
       onPlayerUpdate?.call(livePlayer);

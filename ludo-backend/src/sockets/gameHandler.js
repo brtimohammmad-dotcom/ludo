@@ -81,6 +81,13 @@ module.exports = (io) => {
         socket.data.firstName = player.username;
 
         if (game) {
+          if (!newPlayer) {
+            console.log("Player not found or database lag!");
+            // حتماً یک خطای مشخص بفرست یا به جای null، یک وضعیت خطا برگردان
+            return socket.emit("initial_player", {
+              error: "Player initialization failed",
+            });
+          }
           socket.emit("initial_player", newPlayer);
 
           socket.data.gameId = game.game_id;
@@ -89,6 +96,13 @@ module.exports = (io) => {
 
           io.to(socket.data.gameId).emit("game_state_update", currentGameState);
         } else {
+          if (!player) {
+            console.log("Player not found or database lag!");
+            // حتماً یک خطای مشخص بفرست یا به جای null، یک وضعیت خطا برگردان
+            return socket.emit("initial_player", {
+              error: "Player initialization failed",
+            });
+          }
           console.log(player);
           socket.emit("initial_player", player);
         }
@@ -137,7 +151,7 @@ module.exports = (io) => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
-      handleRollDice( socket, io);
+      handleRollDice(socket, io);
     });
 
     socket.on("move_token", (token) => {
