@@ -96,7 +96,6 @@ class GameController extends ChangeNotifier {
     gameRepository.dataSource.onPlayerExit = () {
       onPlayerExit!();
       notifyListeners();
-      debugPrint("player exited");
     };
     //  token moved
     gameRepository.dataSource.onTokenMoved =

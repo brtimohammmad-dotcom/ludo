@@ -40,12 +40,25 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         );
       }
     };
-    widget.gameController.onPlayerExit = () {
+    widget.gameController.onPlayerExit = ()async {
       debugPrint('...player exited...');
 
+      // ۱. بستن دیالوگ
+      Navigator.of(context).pop();
+
+      // ۲. نابود کردن کنترلر فعلی (که باعث اجرای dispose دیتاسورس و بسته شدن سوکت می‌شود)
+      widget.gameController.deleteGameState();
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // ۳. 🌟 شاه‌کلید: پاک کردن کل صفحات قبلی و ساخت یک JoinScreen کاملاً نو
+      // این متد مطمئن می‌شود که استک ناوبری کاملاً خالی شده و اکانت دوقلو ساخته نمی‌شود
       if (mounted) {
-        // 🛡️ اگر دیالوگی (مثل پاپ‌آپ برنده یا اتصال مجدد) باز است، اول آن را ببند
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const JoinScreen()),
+          (route) => false, // کل صفحات قبلی را از حافظه حذف کن
+        );
       }
     };
     widget.gameController.onReconnectionFailed = () {
@@ -68,7 +81,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => const JoinScreen()),
-                        (route) => false, // کل صفحات قبلی را از حافظه حذف کن
+                    (route) => false, // کل صفحات قبلی را از حافظه حذف کن
                   );
                 }
               },
@@ -122,11 +135,11 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     return ListenableBuilder(
       listenable: widget.gameController,
       builder: ((context, child) {
-    if (widget.gameController.gameState == null ||
-        widget.gameController.gameState!.serverState == null) {
-      // اگر دیتا پاک شده، یک لودینگ ساده یا باکس خالی نشان بده تا صفحه راحت بسته شود
-      return const Center(child: CupertinoActivityIndicator());
-    }
+        if (widget.gameController.gameState == null ||
+            widget.gameController.gameState!.serverState == null) {
+          // اگر دیتا پاک شده، یک لودینگ ساده یا باکس خالی نشان بده تا صفحه راحت بسته شود
+          return const Center(child: CupertinoActivityIndicator());
+        }
         return widget.gameController.gameState!.serverState == null
             ? Center(
                 child: Lottie.asset(
