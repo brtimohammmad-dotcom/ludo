@@ -1,35 +1,6 @@
 const http = require("http");
 
-const server = http.createServer((req, res) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://ludo-tecb.onrender.com",
-  );
 
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    res.writeHead(204);
-    return res.end();
-  }
-
-  if (req.url === "/health") {
-    res.writeHead(200, {
-      "Content-Type": "application/json",
-    });
-
-    return res.end(
-      JSON.stringify({
-        status: "ok",
-      }),
-    );
-  }
-
-  res.writeHead(404);
-  res.end();
-});
 const isLocal = process.env.RENDER !== "true";
 
 const io = require("socket.io")(server, {
