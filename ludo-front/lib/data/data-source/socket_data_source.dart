@@ -35,63 +35,40 @@ class SocketDataSource {
   Completer<void> playerInitialized = Completer<void>();
 
   Map<String, dynamic> convertToJSData(dynamic data) {
-    if (data == null) {
-      debugPrint('⚠️ داده ورودی null است.');
-      return {};
-    }
+    if (data == null) return {};
 
-    // لایه ۱: اگر داده خودش مستقیم یک مپ استاندارد دارت باشد
-    if (data is Map<String, dynamic>) {
-      return data;
-    }
+    // لایه ۱: اگر خودش مستقیم مپ باشد
+    if (data is Map<String, dynamic>) return data;
 
     try {
-      // لایه ۲: بررسی اینکه آیا داده یک لیست یا امتداد قابل پیمایش است (مانند JSArray)
-      if (data is Iterable && data.isNotEmpty) {
-        final firstElement = data.first;
-        if (firstElement is Map) {
-          return Map<String, dynamic>.from(firstElement);
+      // لایه ۲: برخورد مینیفای‌سازگار با لیست‌ها (تبدیل به لیست داینامیک دارت)
+      if (data is Iterable) {
+        final list = data.toList();
+        if (list.isNotEmpty) {
+          final firstElement = list.first;
+
+          // به جای is Map، به صورت امن آن را کست می‌کنیم
+          try {
+            return Map<String, dynamic>.from(firstElement as Map);
+          } catch (_) {
+            // اگر کست مستقیم شکست خورد، از طریق String تبدیلش کن
+            final String jsonStr = jsonEncode(firstElement);
+            final decoded = jsonDecode(jsonStr);
+            if (decoded is Map) {
+              return Map<String, dynamic>.from(decoded);
+            }
+          }
         }
-        // اگر عنصر اول لیست، خودش یک ساختار دیگر بود، آن را دوباره بررسی کن
-        return convertToJSData(firstElement);
       }
 
-      // لایه ۳: اگر داده یک مپ با انواع دیگر کلیدها است (مثلاً Map<dynamic, dynamic>)
+      // لایه ۳: اگر داده مپ معمولی با ساختار کلید متفاوت باشد
       if (data is Map) {
         return data.map((key, value) => MapEntry(key.toString(), value));
       }
-
-      // لایه ۴: بررسی اینکه آیا داده به صورت یک رشته JSON خام (String) فرستاده شده است
-      if (data is String) {
-        final decoded = jsonDecode(data);
-        if (decoded is Map) {
-          return Map<String, dynamic>.from(decoded);
-        } else if (decoded is List &&
-            decoded.isNotEmpty &&
-            decoded.first is Map) {
-          return Map<String, dynamic>.from(decoded.first);
-        }
-      }
-
-      // لایه ۵: برخورد امن با اشیاء خاص جاوااسکریپت (مخصوص وب)
-      // برای مواقعی که پکیج سوکت شیء بومی مروگر را بدون تبدیل کلاینتی تحویل می‌دهد
-      if (data.toString() == '[object Object]' ||
-          data.toString().startsWith('{')) {
-        try {
-          // تلاش برای استخراج کلیدها به روش تبدیل دستی به مپ دارت
-          final converted = Map<dynamic, dynamic>.from(data as dynamic);
-          return converted.map((key, value) => MapEntry(key.toString(), value));
-        } catch (_) {}
-      }
     } catch (e) {
-      debugPrint('🚨 خطا در حین کالبدشکافی داده سوکت: $e');
+      debugPrint('🚨 خطا در کالبدشکافی لایه وب: $e');
     }
 
-    // لایه آخر: اگر به هر دلیلی کدهای بالا نتوانستند ساختار را تشخیص دهند، برای اینکه خروجی کرش نکند،
-    // تلاش می‌کنیم نوع داده دریافتی را دقیقاً پرینت کنیم تا بفهمیم سرور چه چیزی فرستاده است.
-    debugPrint(
-      '❌ ساختار ناشناخته سوکت کلاینت. نوع داده: ${data.runtimeType} | مقدار: $data',
-    );
     return {};
   }
 
@@ -155,43 +132,36 @@ class SocketDataSource {
     });
 
     socket!.on('initial_player', (data) {
-      if (data == null) {
-        dynamic initData;
+      debugPrint('📥 RAW DATA RECEIVED: Type: ${data.runtimeType} | Value: $data');
 
-        debugPrint(
-          '⚠️ سرور دیتای خالی فرستاد. درخواست مجدد احراز هویت بعد از ۱ ثانیه...',
-        );
-        Future.delayed(const Duration(seconds: 1), () {
-          final isLocal =
-              Uri.base.host == 'localhost' || Uri.base.host == '127.0.0.1';
-          if (isLocal) {
-            initData = {"first_name": "amir", "id": 0};
-          } else {
-            if (TelegramWebApp.instance.isSupported) {
-              TelegramWebApp.instance.ready();
-              TelegramWebApp.instance.expand();
-            }
-            initData = TelegramWebApp.instance.initData.raw;
-          }
+      Map<String, dynamic> cleanData = convertToJSData(data);
 
-          // 🚨 اصلاح شد: هر زمان که اتصال برقرار می‌شود (چه بار اول، چه ریکانکت بومی سوکت)،
-          // باید دیتای auth فرستاده شود تا سرور کلاینت قدیمی و جدید را جابجا کند و دوقلو ایجاد نشود.
-          debugPrint('📤 Sending auth event to server...');
-          socket!.emit("auth", {"initData": initData});
-        });
-        return; // بقیه کد را اجرا نکن و منتظر پاسخ بعدی بمان
+      // 🚨 بررسی خطای فرستاده شده از سمت سرور
+      if (cleanData.containsKey('error')) {
+        final String errorMessage = cleanData['error'] ?? 'خطای ناشناخته در سرور';
+        debugPrint('❌ خطا از سمت سرور دریافت شد: $errorMessage');
+
+        // اینجا می‌توانی آلرت تلگرام نشان دهی یا بعد از چند ثانیه دوباره auth کنی
+        if (TelegramWebApp.instance.isSupported) {
+          TelegramWebApp.instance.showAlert('خطا در احراز هویت بازی: $errorMessage');
+        }
+        return; // خروج از متد تا Player.fromJson روی دیتای خطا اجرا نشود
       }
-      debugPrint(
-        '📥 RAW DATA RECEIVED: Type: ${data.runtimeType} | Value: $data',
-      );
-      Player livePlayer = Player.fromJson(convertToJSData(data));
+
+      if (cleanData.isEmpty) {
+        debugPrint('🚨 هشدار: مپ خروجی پس از تبدیل خالی است!');
+        return;
+      }
+
+      // اگر خطایی نبود، بازیکن با موفقیت ساخته می‌شود
+      Player livePlayer = Player.fromJson(cleanData);
       debugPrint('👤 Initial Player received: ${livePlayer.username}');
       onPlayerUpdate?.call(livePlayer);
+
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
     });
-
     socket!.on('game_state_update', (data) async {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
