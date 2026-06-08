@@ -45,80 +45,61 @@ module.exports = (io) => {
       }
     }
 
-    socket.on("auth", async ({ initData }) => {
-      console.log("...authorize...");
+socket.on("auth", async ({ initData }) => {
+  console.log("...authorize...");
+  console.log("Received initData:", initData);
 
-      console.log("Received initData:", initData);
+  try {
+    let user;
 
-      try {
-        let user;
-        if (!isLocal) {
-          validate(
-            initData,
-            process.env.BOT_TOKEN ||
-              "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho",
-          );
+    if (!isLocal) {
+      validate(initData, BOT_TOKEN);
+      const parsedData = parse(initData);
+      user = parsedData.user;
 
-          const parsedData = parse(initData);
-          user = parsedData.user;
-
-          if (!user || !user.id) {
-            return socket.emit(
-              "error",
-              "User data not found in Telegram initData.",
-            );
-          }
-        } else {
-          idCounter++;
-          user = {
-            id: idCounter,
-            first_name: "amir",
-          };
-        }
-
-        console.log(
-          `User authorized successfully: ${user.first_name} (${user.id})`,
-        );
-        let { player } = await handleAuth(user.id, user.first_name);
-        let { game, newPlayer } = await hasExistGame(player, socket.id);
-        socket.data.telegramId = player.telegram_id;
-        socket.data.firstName = player.username;
-
-        if (game) {
-          if (!newPlayer) {
-            console.log("Player not found or database lag!");
-            // حتماً یک خطای مشخص بفرست یا به جای null، یک وضعیت خطا برگردان
-            return socket.emit("initial_player", {
-              error: "Player initialization failed",
-            });
-          }
-          socket.emit("initial_player", newPlayer);
-
-          // socket.data.gameId = game.game_id;
-          // let currentGameState = initialState.getGameState(socket.data.gameId);
-          // socket.join(socket.data.gameId);
-
-          // io.to(socket.data.gameId).emit("game_state_update", currentGameState);
-        } else {
-          if (!player) {
-            console.log("Player not found or database lag!");
-            // حتماً یک خطای مشخص بفرست یا به جای null، یک وضعیت خطا برگردان
-            return socket.emit("initial_player", {
-              error: "Player initialization failed",
-            });
-          }
-          console.log(player);
-          socket.emit("initial_player", player);
-        }
-      } catch (err) {
-        // اگر تایید هویت تلگرام شکست بخورد یا خطای دیتابیس رخ دهد، کد به اینجا می‌رسد
-        console.error("Auth error:", err.message || err);
-        socket.emit(
-          "error",
-          "Authentication failed. Invalid Telegram data or Database error.",
-        );
+      if (!user || !user.id) {
+        return socket.emit("initial_player", {
+          error: "Invalid Telegram initData",
+        });
       }
+    } else {
+      idCounter++;
+      user = { id: idCounter, first_name: "amir" };
+    }
+
+    console.log(
+      `User authorized successfully: ${user.first_name} (${user.id})`,
+    );
+
+    // دریافت یا ساخت پلیر
+    let { player } = await handleAuth(user.id, user.first_name);
+
+    // اگر پلیر وجود دارد، سوکت جدید را جایگزین کن
+    socket.data.telegramId = player.telegram_id;
+    socket.data.firstName = player.username;
+
+    // بررسی اینکه آیا پلیر در بازی است
+    let { game, newPlayer } = await hasExistGame(player, socket.id);
+
+    // 🌟 نکتهٔ طلایی:
+    // اگر newPlayer null بود، به‌جای خطا دادن، از player اصلی استفاده کن
+    const finalPlayer = newPlayer || player;
+
+    // ارسال پلیر به فرانت
+    socket.emit("initial_player", finalPlayer);
+
+    // اگر پلیر در بازی بود، gameId را ست کن
+    if (game) {
+      socket.data.gameId = game.game_id;
+    }
+  } catch (err) {
+    console.error("Auth error:", err.message || err);
+    socket.emit("initial_player", {
+      error: "Player initialization failed",
     });
+  }
+});
+
     // رویدادهای هم سطح
     socket.on("join_game", async ({ gameMode }) => {
       // ۱. بررسی معتبر بودن حالت بازی
