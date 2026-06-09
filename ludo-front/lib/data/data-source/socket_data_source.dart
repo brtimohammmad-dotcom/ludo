@@ -10,7 +10,8 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 typedef StateUpdateCallback = void Function(ServerState state);
-typedef OnGameStartedCallback=void Function(ServerState state);
+typedef OnGameStartedCallback = void Function(ServerState state);
+typedef OnPlayerJoinedCallBack = void Function(ServerState state);
 
 typedef PlayerUpdateCallback = void Function(Player player);
 typedef TokenMovedCallback = void Function(ServerState state);
@@ -20,7 +21,8 @@ typedef GameFinishedCallback = void Function(Player player);
 typedef ReconnectionFailedCallback = void Function();
 typedef OnDisconnectCallback = void Function();
 typedef PlayerExitCallback = void Function();
-typedef OnFastPingGetsCallback=void Function();
+typedef OnFastPingGetsCallback = void Function();
+
 class SocketDataSource {
   io.Socket? _socket;
 
@@ -29,6 +31,8 @@ class SocketDataSource {
 
   // --- Callbacks ---
   StateUpdateCallback? onStateUpdate;
+  OnGameStartedCallback? onGameStarted;
+  OnPlayerJoinedCallBack? onPlayerJoined;
   PlayerUpdateCallback? onPlayerUpdate;
   TokenMovedCallback? onTokenMoved;
   DiceRolledCallback? onDiceRolled;
@@ -38,7 +42,6 @@ class SocketDataSource {
   OnDisconnectCallback? onDisconnectCallback;
   PlayerExitCallback? onPlayerExit;
   OnFastPingGetsCallback? onFastPingGets;
-  OnGameStartedCallback?onGameStarted;
 
   // --- State ---
   ServerState? serverState;
@@ -82,7 +85,6 @@ class SocketDataSource {
   // CONNECT
   // -------------------------------------------------------
   void connectToGame() async {
-
     final serverUrl = Config.serverUrl;
     Config.printEnvironmentInfo();
 
@@ -164,7 +166,7 @@ class SocketDataSource {
     // -------------------------------------------------------
     // ON GET PING
     // -------------------------------------------------------
-    _socket!.on("fast_ping_gets",(data){
+    _socket!.on("fast_ping_gets", (data) {
       onFastPingGets?.call();
     });
     // -------------------------------------------------------
@@ -180,6 +182,10 @@ class SocketDataSource {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onGameStarted?.call(serverState!);
+    });    _socket!.on("player_joined", (data) async {
+      await playerInitialized.future;
+      serverState = ServerState.fromJson(convertToJSData(data));
+      onPlayerJoined?.call(serverState!);
     });
 
     _socket!.on("dice_rolled", (data) async {
@@ -255,7 +261,6 @@ class SocketDataSource {
       }
     } catch (_) {}
 
-
     try {
       _socket?.clearListeners();
       _socket?.disconnect();
@@ -284,7 +289,6 @@ class SocketDataSource {
     debugPrint("✅ SocketDataSource fully cleaned.");
   }
 
-
   // -------------------------------------------------------
   // GAME ACTIONS
   // -------------------------------------------------------
@@ -295,14 +299,17 @@ class SocketDataSource {
       _socket!.emit("join_game", {"gameMode": mode});
     }
   }
+
   void rollDice() {
     if (_socket?.connected ?? false) {
       _socket!.emit("roll_dice");
     }
   }
-  void getFastPing(){
+
+  void getFastPing() {
     if (onFastPingGets != null) onFastPingGets!();
   }
+
   void moveToken(Token t) {
     if (_socket?.connected ?? false) {
       _socket!.emit("move_token", t.toJson());

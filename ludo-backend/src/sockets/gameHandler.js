@@ -120,7 +120,9 @@ module.exports = (io) => {
       let currentGameState = initialState.getGameState(game.game_id);
 
       // ارسال state به همه
-      io.to(game.game_id).emit("game_state_update", currentGameState);
+      socket.emit("game_state_update", currentGameState);
+      socket.to(socket.data.gameId).emit("player_joined", currentGameState);
+      
 
       // اگر بازی کامل شد → شروع کن
       if (
@@ -133,7 +135,7 @@ module.exports = (io) => {
         initialState.updateGameState(game.game_id, { game_status: "start" });
 
         io.to(game.game_id).emit(
-          "game_state_update",
+          "game_started",
           initialState.getGameState(game.game_id),
         );
 

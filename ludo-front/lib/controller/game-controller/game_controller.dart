@@ -56,12 +56,23 @@ class GameController extends ChangeNotifier {
         (p) => p.userId == gameState!.livePlayer!.userId,
         orElse: () => gameState!.livePlayer!,
       );
-
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
       if (onGameReady != null) onGameReady!();
       notifyListeners();
     };
+
     ds.onGameStarted = (ServerState state) {
+      if (_isDisposed || gameState?.livePlayer == null) return;
+
+      final newLivePlayer = state.players.firstWhere(
+        (p) => p.userId == gameState!.livePlayer!.userId,
+        orElse: () => gameState!.livePlayer!,
+      );
+
+      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      notifyListeners();
+    };
+    ds.onPlayerJoined = (ServerState state) {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
       final newLivePlayer = state.players.firstWhere(
