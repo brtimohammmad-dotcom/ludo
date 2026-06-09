@@ -10,6 +10,8 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 typedef StateUpdateCallback = void Function(ServerState state);
+typedef OnGameStartedCallback=void Function(ServerState state);
+
 typedef PlayerUpdateCallback = void Function(Player player);
 typedef TokenMovedCallback = void Function(ServerState state);
 typedef DiceRolledCallback = void Function(ServerState state);
@@ -36,6 +38,7 @@ class SocketDataSource {
   OnDisconnectCallback? onDisconnectCallback;
   PlayerExitCallback? onPlayerExit;
   OnFastPingGetsCallback? onFastPingGets;
+  OnGameStartedCallback?onGameStarted;
 
   // --- State ---
   ServerState? serverState;
@@ -176,7 +179,7 @@ class SocketDataSource {
     _socket!.on("game_started", (data) async {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
-      onStateUpdate?.call(serverState!);
+      onGameStarted?.call(serverState!);
     });
 
     _socket!.on("dice_rolled", (data) async {

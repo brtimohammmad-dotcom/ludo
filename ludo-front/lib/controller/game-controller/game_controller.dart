@@ -61,6 +61,17 @@ class GameController extends ChangeNotifier {
       if (onGameReady != null) onGameReady!();
       notifyListeners();
     };
+    ds.onGameStarted = (ServerState state) {
+      if (_isDisposed || gameState?.livePlayer == null) return;
+
+      final newLivePlayer = state.players.firstWhere(
+        (p) => p.userId == gameState!.livePlayer!.userId,
+        orElse: () => gameState!.livePlayer!,
+      );
+
+      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      notifyListeners();
+    };
 
     // times up
     ds.onTimesUp = (ServerState state) {
@@ -122,7 +133,7 @@ class GameController extends ChangeNotifier {
 
     // token moved
     ds.onTokenMoved = (ServerState newState) async {
-      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null){
+      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null) {
         return;
       }
 
