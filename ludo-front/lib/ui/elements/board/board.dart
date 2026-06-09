@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
@@ -149,7 +148,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
           );
         }
 
-        final gameMode = state?.gameMode;
+        final gameMode = state.gameMode;
 
         final boardSize = (screenWidth < screenHeight
             ? screenWidth

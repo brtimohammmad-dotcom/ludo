@@ -122,8 +122,9 @@ class GameController extends ChangeNotifier {
 
     // token moved
     ds.onTokenMoved = (ServerState newState) async {
-      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null)
+      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null){
         return;
+      }
 
       _isMovingToken = true;
       try {

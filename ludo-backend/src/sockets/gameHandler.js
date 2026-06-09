@@ -66,7 +66,8 @@ module.exports = (io) => {
           }
         } else {
           idCounter++;
-          user = { id: idCounter, first_name: "amir" };
+          // user = { id: idCounter, first_name: "amir" };
+           user = initData;
         }
 
         console.log(
@@ -102,43 +103,43 @@ module.exports = (io) => {
       }
     });
 
-socket.on("join_game", async ({ gameMode }) => {
-  if (gameMode !== 2 && gameMode !== 4) {
-    return socket.emit("error", "Invalid game mode");
-  }
+    socket.on("join_game", async ({ gameMode }) => {
+      if (gameMode !== 2 && gameMode !== 4) {
+        return socket.emit("error", "Invalid game mode");
+      }
 
-  // بازیکن را وارد بازی کن
-  const { game } = await handleJoinGame(gameMode, socket);
+      // بازیکن را وارد بازی کن
+      const { game } = await handleJoinGame(gameMode, socket);
 
-  socket.data.gameId = game.game_id;
+      socket.data.gameId = game.game_id;
 
-  // سوکت را وارد روم کن
-  socket.join(game.game_id);
+      // سوکت را وارد روم کن
+      socket.join(game.game_id);
 
-  // state فعلی بازی را بگیر
-  let currentGameState = initialState.getGameState(game.game_id);
+      // state فعلی بازی را بگیر
+      let currentGameState = initialState.getGameState(game.game_id);
 
-  // ارسال state به همه
-  io.to(game.game_id).emit("game_state_update", currentGameState);
+      // ارسال state به همه
+      io.to(game.game_id).emit("game_state_update", currentGameState);
 
-  // اگر بازی کامل شد → شروع کن
-  if (
-    currentGameState.players.length === gameMode &&
-    currentGameState.game_status === "waitingForPlayer"
-  ) {
-    currentGameState.game_status = "start";
+      // اگر بازی کامل شد → شروع کن
+      if (
+        currentGameState.players.length === gameMode &&
+        currentGameState.game_status === "waitingForPlayer"
+      ) {
+        currentGameState.game_status = "start";
 
-    await updateGameState(game.game_id, { game_status: "start" });
-    initialState.updateGameState(game.game_id, { game_status: "start" });
+        await updateGameState(game.game_id, { game_status: "start" });
+        initialState.updateGameState(game.game_id, { game_status: "start" });
 
-    io.to(game.game_id).emit(
-      "game_state_update",
-      initialState.getGameState(game.game_id),
-    );
+        io.to(game.game_id).emit(
+          "game_state_update",
+          initialState.getGameState(game.game_id),
+        );
 
-    startTimer(socket, io);
-  }
-});
+        startTimer(socket, io);
+      }
+    });
 
     socket.on("roll_dice", () => {
       if (!socket.data.gameId) {

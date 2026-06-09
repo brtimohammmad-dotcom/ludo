@@ -24,7 +24,6 @@ class SocketDataSource {
 
   // --- Flags ---
   bool _isConnecting = false;
-  bool _isDisposed = false;
 
   // --- Callbacks ---
   StateUpdateCallback? onStateUpdate;
@@ -80,7 +79,6 @@ class SocketDataSource {
   // CONNECT
   // -------------------------------------------------------
   void connectToGame() async {
-    if (_isDisposed) return;
 
     final serverUrl = Config.serverUrl;
     Config.printEnvironmentInfo();
@@ -246,7 +244,14 @@ class SocketDataSource {
   Future<void> dispose() async {
     debugPrint("🧹 Disposing SocketDataSource...");
 
-    _isDisposed = true;
+    // ⛔ اول هر جور reconnect رو قطع کن
+    try {
+      if (_socket != null) {
+        _socket!.io.options?['reconnection'] = false;
+        _socket!.io.options?['reconnectionAttempts'] = 0;
+      }
+    } catch (_) {}
+
 
     try {
       _socket?.clearListeners();
@@ -265,7 +270,7 @@ class SocketDataSource {
     onReconnectionFailedCallback = null;
     onDisconnectCallback = null;
     onPlayerExit = null;
-    onFastPingGets=null;
+    onFastPingGets = null;
 
     serverState = null;
 
@@ -275,6 +280,7 @@ class SocketDataSource {
 
     debugPrint("✅ SocketDataSource fully cleaned.");
   }
+
 
   // -------------------------------------------------------
   // GAME ACTIONS

@@ -22448,9 +22448,9 @@ WW:function WW(a){this.a=a},
 WX:function WX(a){this.a=a},
 Jo:function Jo(a){var _=this
 _.a=null
-_.c=_.b=!1
-_.at=_.as=_.Q=_.z=_.y=_.x=_.w=_.r=_.f=_.e=_.d=null
-_.ax=a},
+_.b=!1
+_.as=_.Q=_.z=_.y=_.x=_.w=_.r=_.f=_.e=_.d=_.c=null
+_.at=a},
 a7o:function a7o(){},
 a7a:function a7a(a,b){this.a=a
 this.b=b},
@@ -71445,15 +71445,15 @@ A.FG.prototype={
 Jt(){var s,r=this,q=r.r
 q===$&&A.a()
 s=q.a
-s.as=new A.X6(r)
-s.d=new A.X7(r)
-s.w=new A.X8(r)
-s.x=new A.X9(r)
-s.y=new A.Xa(r)
-s.e=new A.Xb(r)
-s.Q=new A.Xc(r)
-s.f=new A.Xd(r)
-s.r=new A.Xe(r)},
+s.Q=new A.X6(r)
+s.c=new A.X7(r)
+s.r=new A.X8(r)
+s.w=new A.X9(r)
+s.x=new A.Xa(r)
+s.d=new A.Xb(r)
+s.z=new A.Xc(r)
+s.e=new A.Xd(r)
+s.f=new A.Xe(r)},
 Re(a){var s,r
 if(this.x)return
 s=this.r
@@ -71465,7 +71465,7 @@ s.q5("join_game",A.a8(["gameMode",a],t.N,t.S))}},
 PY(){if(this.x)return
 var s=this.r
 s===$&&A.a()
-s=s.a.as
+s=s.a.Q
 if(s!=null)s.$0()},
 lv(){if(this.x)return
 var s=this.r
@@ -71731,8 +71731,7 @@ return o}}catch(n){p=A.a5(n)
 A.cH().$1("\ud83d\udea8 JSON conversion error: "+A.j(p))}return A.q(t.N,t.z)},
 lv(){var s=0,r=A.O(t.H),q,p=this,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a
 var $async$lv=A.P(function(a0,a1){if(a0===1)return A.L(a1,r)
-for(;;)switch(s){case 0:if(p.c){s=1
-break}o=A.ans()
+for(;;)switch(s){case 0:a=A.ans()
 A.cH().$1("\ud83d\udcf1 Platform: Web")
 A.cH().$1("\ud83d\udccd Origin: "+A.oH().go3())
 A.cH().$1("\ud83d\udccd Host: "+A.oH().giH())
@@ -71746,43 +71745,43 @@ case 3:A.cH().$1("\ud83d\udd04 Disposing ghost socket before reconnect...")
 s=5
 return A.Q(p.m(),$async$lv)
 case 5:case 4:p.b=!0
-A.cH().$1("\ud83d\udfe2 Connecting to: "+o)
-n=t.N
-m=t.z
-l=A.q(n,m)
-l.l(0,"transports",A.b(["websocket"],t.s))
-l.l(0,"autoConnect",!1)
-l.B(0,"reconnection")
-l.l(0,"reconnectionAttempts",6)
-l.l(0,"reconnectionDelay",2000)
-l.l(0,"reconnectionDelayMax",5000)
-l.l(0,"timeout",3500)
-k=A.hB(o)
-j=k.ghp()+"://"+k.giH()+":"+k.go5()
-i=k.gfb()
-h=$.ahD.S(j)&&$.ahD.h(0,j).d.S(i)
-g=J.d(l.h(0,"forceNew"),!0)||J.d(l.h(0,"force new connection"),!0)||!1===l.h(0,"multiplex")||h
-f=A.bw()
-if(g){$.awj().ad(B.l,"ignoring socket cache for "+o,null,null)
-f.b=A.ap2(l,o)}else{e=$.ahD.h(0,j)
-if(e==null){e=A.ap2(l,o)
-$.ahD.l(0,j,e)}f.b=e}if(k.go7().length!==0&&l.h(0,"query")==null)l.l(0,"query",k.go7())
-else{e=l.h(0,"query")
-if(t.f.b(e))l.l(0,"query",A.aHF(l.h(0,"query")))}e=f.aD()
-d=k.gfb().length===0?"/":k.gfb()
-c=e.d
-b=c.h(0,d)
-if(b==null){a=t.sB
-b=new A.yP(e,[],[],[],d,l,A.q(m,m),A.q(m,m),[],[],A.c1(null,null,null,n,a),A.c1(null,null,null,n,a),A.b([],t.hx))
-l.h(0,"query")
-b.y=l.h(0,"auth")
-n=e.db
-n===$&&A.a()
-if(n)b.Az()
-c.l(0,d,b)}else{n=e.db
-n===$&&A.a()
-if(n&&b.cx==null)b.Az()}p.a=b
-b.cz("connect",new A.a7a(p,o))
+A.cH().$1("\ud83d\udfe2 Connecting to: "+a)
+o=t.N
+n=t.z
+m=A.q(o,n)
+m.l(0,"transports",A.b(["websocket"],t.s))
+m.l(0,"autoConnect",!1)
+m.B(0,"reconnection")
+m.l(0,"reconnectionAttempts",6)
+m.l(0,"reconnectionDelay",2000)
+m.l(0,"reconnectionDelayMax",5000)
+m.l(0,"timeout",3500)
+l=A.hB(a)
+k=l.ghp()+"://"+l.giH()+":"+l.go5()
+j=l.gfb()
+i=$.ahD.S(k)&&$.ahD.h(0,k).d.S(j)
+h=J.d(m.h(0,"forceNew"),!0)||J.d(m.h(0,"force new connection"),!0)||!1===m.h(0,"multiplex")||i
+g=A.bw()
+if(h){$.awj().ad(B.l,"ignoring socket cache for "+a,null,null)
+g.b=A.ap2(m,a)}else{f=$.ahD.h(0,k)
+if(f==null){f=A.ap2(m,a)
+$.ahD.l(0,k,f)}g.b=f}if(l.go7().length!==0&&m.h(0,"query")==null)m.l(0,"query",l.go7())
+else{f=m.h(0,"query")
+if(t.f.b(f))m.l(0,"query",A.aHF(m.h(0,"query")))}f=g.aD()
+e=l.gfb().length===0?"/":l.gfb()
+d=f.d
+c=d.h(0,e)
+if(c==null){b=t.sB
+c=new A.yP(f,[],[],[],e,m,A.q(n,n),A.q(n,n),[],[],A.c1(null,null,null,o,b),A.c1(null,null,null,o,b),A.b([],t.hx))
+m.h(0,"query")
+c.y=m.h(0,"auth")
+o=f.db
+o===$&&A.a()
+if(o)c.Az()
+d.l(0,e,c)}else{o=f.db
+o===$&&A.a()
+if(o&&c.cx==null)c.Az()}p.a=c
+c.cz("connect",new A.a7a(p,a))
 p.a.cz("initial_player",new A.a7b(p))
 p.a.cz("fast_ping_gets",new A.a7c(p))
 p.a.cz("game_state_update",new A.a7g(p))
@@ -71802,14 +71801,19 @@ return A.N($async$lv,r)},
 m(){var s=0,r=A.O(t.H),q=this,p,o
 var $async$m=A.P(function(a,b){if(a===1)return A.L(b,r)
 for(;;)switch(s){case 0:A.cH().$1("\ud83e\uddf9 Disposing SocketDataSource...")
-q.c=!0
 try{p=q.a
+if(p!=null){p=p.d.f
+p===$&&A.a()
+p.l(0,"reconnection",!1)
+p=q.a.d.f
+p===$&&A.a()
+p.l(0,"reconnectionAttempts",0)}}catch(n){}try{p=q.a
 if(p!=null)p.u8()
 p=q.a
 if(p!=null)p.a6i()
 p=q.a
-if(p!=null)p.uu()}catch(n){}q.at=q.as=q.Q=q.z=q.y=q.x=q.w=q.r=q.f=q.e=q.d=q.a=null
-if((q.ax.a.a&30)!==0)q.ax=new A.aU(new A.a7($.a6,t.D),t.h)
+if(p!=null)p.uu()}catch(n){}q.as=q.Q=q.z=q.y=q.x=q.w=q.r=q.f=q.e=q.d=q.c=q.a=null
+if((q.at.a.a&30)!==0)q.at=new A.aU(new A.a7($.a6,t.D),t.h)
 A.cH().$1("\u2705 SocketDataSource fully cleaned.")
 return A.M(null,r)}})
 return A.N($async$m,r)}}
@@ -71864,13 +71868,13 @@ s=$.eG
 if(s==null)s=$.eG=new A.j6()
 if(v.G.Telegram.WebApp.platform.toLowerCase()!=="unknown")s.Ey("\u062e\u0637\u0627 \u062f\u0631 \u0627\u062d\u0631\u0627\u0632 \u0647\u0648\u06cc\u062a \u0628\u0627\u0632\u06cc: "+A.j(q))
 return}p=A.a37(r)
-o=s.e
+o=s.d
 if(o!=null)o.$1(p)
-s=s.ax
+s=s.at
 if((s.a.a&30)===0)s.di()},
 $S:5}
 A.a7c.prototype={
-$1(a){var s=this.a.as
+$1(a){var s=this.a.Q
 if(s!=null)s.$0()},
 $S:5}
 A.a7g.prototype={
@@ -71878,10 +71882,10 @@ $1(a){var s=0,r=A.O(t.P),q=this,p,o
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
-return A.Q(o.ax.a,$async$$1)
+return A.Q(o.at.a,$async$$1)
 case 2:p=A.J8(o.lw(a))
-o.at=p
-o=o.d
+o.as=p
+o=o.c
 if(o!=null)o.$1(p)
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71891,10 +71895,10 @@ $1(a){var s=0,r=A.O(t.P),q=this,p,o
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
-return A.Q(o.ax.a,$async$$1)
+return A.Q(o.at.a,$async$$1)
 case 2:p=A.J8(o.lw(a))
-o.at=p
-o=o.d
+o.as=p
+o=o.c
 if(o!=null)o.$1(p)
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71904,10 +71908,10 @@ $1(a){var s=0,r=A.O(t.P),q=this,p,o
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
-return A.Q(o.ax.a,$async$$1)
+return A.Q(o.at.a,$async$$1)
 case 2:p=A.J8(o.lw(a))
-o.at=p
-o=o.r
+o.as=p
+o=o.f
 if(o!=null)o.$1(p)
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71917,10 +71921,10 @@ $1(a){var s=0,r=A.O(t.P),q=this,p,o
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
-return A.Q(o.ax.a,$async$$1)
+return A.Q(o.at.a,$async$$1)
 case 2:p=A.J8(o.lw(a))
-o.at=p
-o=o.w
+o.as=p
+o=o.r
 if(o!=null)o.$1(p)
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71930,9 +71934,9 @@ $1(a){var s=0,r=A.O(t.P),q=this,p,o
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
-return A.Q(o.ax.a,$async$$1)
+return A.Q(o.at.a,$async$$1)
 case 2:p=A.a37(o.lw(a))
-o=o.x
+o=o.w
 if(o!=null)o.$1(p)
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71942,10 +71946,10 @@ $1(a){var s=0,r=A.O(t.P),q=this,p,o
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:o=q.a
 s=2
-return A.Q(o.ax.a,$async$$1)
+return A.Q(o.at.a,$async$$1)
 case 2:p=A.J8(o.lw(a))
-o.at=p
-o=o.f
+o.as=p
+o=o.e
 if(o!=null)o.$1(p)
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71955,9 +71959,9 @@ $1(a){var s=0,r=A.O(t.P),q=this,p
 var $async$$1=A.P(function(b,c){if(b===1)return A.L(c,r)
 for(;;)switch(s){case 0:p=q.a
 s=2
-return A.Q(p.ax.a,$async$$1)
+return A.Q(p.at.a,$async$$1)
 case 2:p.a.u8()
-p=p.Q
+p=p.z
 if(p!=null)p.$0()
 return A.M(null,r)}})
 return A.N($async$$1,r)},
@@ -71966,8 +71970,8 @@ A.a7n.prototype={
 $1(a){var s
 A.cH().$1("\ud83d\udd0c Socket disconnected: "+A.j(a))
 s=this.a
-if((s.ax.a.a&30)!==0)s.ax=new A.aU(new A.a7($.a6,t.D),t.h)
-s=s.z
+if((s.at.a.a&30)!==0)s.at=new A.aU(new A.a7($.a6,t.D),t.h)
+s=s.y
 if(s!=null)s.$0()},
 $S:5}
 A.a7d.prototype={
@@ -71979,7 +71983,7 @@ $S:5}
 A.a7f.prototype={
 $1(a){var s
 A.cH().$1("\u274c Reconnect failed")
-s=this.a.y
+s=this.a.x
 if(s!=null)s.$0()},
 $S:5}
 A.FH.prototype={}
@@ -72359,7 +72363,7 @@ if($.eG==null)$.eG=new A.j6()
 r.Telegram.WebApp.expand()}s.lv()
 r=s.r
 r===$&&A.a()
-r.a.z=new A.adN(q)
+r.a.y=new A.adN(q)
 s.b=new A.adO(q)},
 a_t(a){var s=this.c
 s.toString
