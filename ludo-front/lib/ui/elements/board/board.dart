@@ -27,6 +27,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     // --- GAME FINISHED ---
     widget.gameController.onGameFinished = () {
       if (!mounted) return;
+      widget.gameController.deleteGameState();
 
       final winner = widget.gameController.gameState?.serverState?.winner;
       if (winner != null) {
@@ -36,7 +37,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
     // --- PLAYER EXIT ---
     widget.gameController.onPlayerExit = () async {
-      debugPrint('delete game state on on player exit notify');
 
       debugPrint('...player exited...');
 
@@ -59,7 +59,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
     // --- RECONNECTION FAILED ---
     widget.gameController.onReconnectionFailed = () {
-      debugPrint('delete game state on on onReconnectionFailed notify');
 
       if (!mounted) return;
 
