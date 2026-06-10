@@ -27,17 +27,22 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     // --- GAME FINISHED ---
     widget.gameController.onGameFinished = () {
       if (!mounted) return;
-      widget.gameController.deleteGameState();
 
       final winner = widget.gameController.gameState?.serverState?.winner;
       if (winner != null) {
-        _showDialog(AlertBackground(alert: WinnerAlert(winner: winner)));
+        _showDialog(
+          AlertBackground(
+            alert: WinnerAlert(
+              winner: winner,
+              gameController: widget.gameController,
+            ),
+          ),
+        );
       }
     };
 
     // --- PLAYER EXIT ---
     widget.gameController.onPlayerExit = () async {
-
       debugPrint('...player exited...');
 
       if (Navigator.canPop(context)) {
@@ -59,7 +64,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
     // --- RECONNECTION FAILED ---
     widget.gameController.onReconnectionFailed = () {
-
       if (!mounted) return;
 
       _showDialog(
@@ -139,7 +143,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         final state = widget.gameController.gameState?.serverState;
 
         if (state == null) {
-         return Center(
+          return Center(
             child: Lottie.asset(
               "assets/lotties/Happy girl.json",
               height: 200,

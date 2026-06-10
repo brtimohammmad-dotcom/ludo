@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/ui/join_screen.dart';
 
 
 
@@ -9,8 +9,9 @@ class WinnerAlert extends StatelessWidget {
   const WinnerAlert({
     super.key,
     required this.winner,
+    required this.gameController
   });
-
+  final GameController gameController;
   final Player winner;
 
   @override
@@ -56,11 +57,7 @@ class WinnerAlert extends StatelessWidget {
         SizedBox(height: boardSize * 0.016),
         ElevatedButton(
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const JoinScreen()),
-                  (route) => false, // کل صفحات قبلی را از حافظه حذف کن
-            );
+            gameController.exitGame();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,

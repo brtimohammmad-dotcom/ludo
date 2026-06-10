@@ -21,7 +21,9 @@ function handleRollDice(socket, io) {
   }
 
   // پیدا کردن بازیکن بر اساس socket.id
-  const player = gameState.players.find((p) => p.telegram_id === socket.data.telegramId);
+  const player = gameState.players.find(
+    (p) => p.telegram_id === socket.data.telegramId,
+  );
 
   if (!player) {
     return socket.emit("error", "Player not found!");
@@ -103,16 +105,17 @@ function handleRollDice(socket, io) {
     processingGames.delete(socket.data.gameId);
   }
 }
-function handleMoveToken( socket, token, io) {
+function handleMoveToken(socket, token, io) {
   // دریافت state از حافظه سراسری
   const gameState = initialState.getGameState(socket.data.gameId);
-  
+
   if (!gameState) {
     return { error: "Game not found!" };
   }
-  
-  const player = gameState.players.find((p) => p.telegram_id === socket.data.telegramId);
 
+  const player = gameState.players.find(
+    (p) => p.telegram_id === socket.data.telegramId,
+  );
 
   if (!player) return { error: "Player not found!" };
 
@@ -150,7 +153,7 @@ function handleMoveToken( socket, token, io) {
       gameState.last_dice_value,
       gameState.tokens,
     );
-          console.log("8");
+    console.log("8");
     if (kickedToken) {
       const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
       updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };
@@ -249,6 +252,9 @@ function handleMoveToken( socket, token, io) {
 }
 async function handleExitingGame(socket, io) {
   let currentGame = initialState.getGameState(socket.data.gameId);
+  if (!currentGame) {
+    socket.emit("player_exit");
+  }
   const correctPlayers = currentGame.players.map((p) => {
     if (p.telegram_id === socket.data.telegramId) {
       return { ...p, player_status: "offline" };
