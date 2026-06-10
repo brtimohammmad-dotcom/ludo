@@ -36,6 +36,8 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
     // --- PLAYER EXIT ---
     widget.gameController.onPlayerExit = () async {
+      debugPrint('delete game state on on player exit notify');
+
       debugPrint('...player exited...');
 
       if (Navigator.canPop(context)) {
@@ -57,6 +59,8 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
     // --- RECONNECTION FAILED ---
     widget.gameController.onReconnectionFailed = () {
+      debugPrint('delete game state on on onReconnectionFailed notify');
+
       if (!mounted) return;
 
       _showDialog(
@@ -114,16 +118,16 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     );
   }
 
-  // @override
-  // void dispose() {
-  //   debugPrint("🧹 Board dispose called");
-  //   widget.gameController.isInBoard = false;
-  //   if (!widget.gameController.isDisposed) {
-  //     widget.gameController.deleteGameState();
-  //   }
-  //
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    debugPrint("🧹 Board dispose called");
+    widget.gameController.isInBoard = false;
+    if (!widget.gameController.isDisposed) {
+      widget.gameController.deleteGameState();
+    }
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

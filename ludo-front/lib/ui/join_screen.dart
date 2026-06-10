@@ -41,6 +41,10 @@ class _JoinScreenState extends State<JoinScreen> {
     };
     // --- RECONNECTION FAILED ---
     gameController.onReconnectionFailed = () {
+      debugPrint(
+        'delete game state on on onReconnectionFailed in join screen notify',
+      );
+
       if (!mounted) return;
 
       _showDialog(
@@ -78,7 +82,6 @@ class _JoinScreenState extends State<JoinScreen> {
         ),
       );
     };
-
   }
 
   void _showDialog(Widget dialog) {
@@ -91,8 +94,10 @@ class _JoinScreenState extends State<JoinScreen> {
 
   @override
   void dispose() {
-    // پاکسازی کامل سوکت و وضعیت
-    gameController.deleteGameState();
+    // فقط اگر player در Board نیست، پاک کن
+    if (!gameController.isInBoard && gameController.isDisposed) {
+      gameController.deleteGameState();
+    }
     super.dispose();
   }
 

@@ -381,6 +381,7 @@ class GameController extends ChangeNotifier {
   }
 
   void deleteGameState() {
+    debugPrint('delete game state notify');
     try {
       gameRepository.dataSource.dispose();
     } catch (_) {}
@@ -434,6 +435,8 @@ class GameController extends ChangeNotifier {
 
   @override
   void dispose() {
+    debugPrint('dispose game state notify');
+
     if (_isDisposed) return;
     _isDisposed = true;
     deleteGameState();
