@@ -119,7 +119,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     debugPrint("🧹 Board dispose called");
     widget.gameController.isInBoard = false;
     if (!widget.gameController.isDisposed) {
-      widget.gameController.resetGame();
+      widget.gameController.deleteGameState();
     }
 
     super.dispose();
