@@ -15,35 +15,6 @@ let idCounter = 0;
 
 module.exports = (io) => {
   return async (socket) => {
-    console.log("Recovered:", socket.recovered);
-    if (socket.recovered) {
-      console.log("gameId:", socket.data.gameId);
-      console.log("user id:", socket.data.telegramId);
-      let currentGame = initialState.getGameState(socket.data.gameId);
-      if (!socket.data.gameId) {
-        console.log("no game id ");
-      } else if (!currentGame) {
-        const currentGameInDataBase = await getGameState(socket.data.gameId);
-        if (!currentGameInDataBase) {
-          console.log("no game found ");
-        } else {
-          socket.emit("game_finished", currentGameInDataBase.winner);
-        }
-      } else {
-        const updatedPlayers = currentGame.players.map((p) => {
-          if (p.telegram_id === socket.data.telegramId) {
-            return { ...p, telegram_id: socket.data.telegramId };
-          } else {
-            return p;
-          }
-        });
-        initialState.updateGameState(currentGame.game_id, {
-          players: updatedPlayers,
-        });
-        currentGame = initialState.getGameState(currentGame.game_id);
-        socket.emit("game_state_update", currentGame);
-      }
-    }
     socket.on("get_fast_ping", () => {
       socket.emit("fast_ping_gets");
     });
@@ -67,7 +38,7 @@ module.exports = (io) => {
         } else {
           idCounter++;
           // user = { id: idCounter, first_name: "amir" };
-           user = initData;
+          user = initData;
         }
 
         console.log(
@@ -81,26 +52,61 @@ module.exports = (io) => {
         socket.data.telegramId = player.telegram_id;
         socket.data.firstName = player.username;
 
-        // بررسی اینکه آیا پلیر در بازی است
-        let { game, newPlayer } = await hasExistGame(player, socket.id);
-
-        // 🌟 نکتهٔ طلایی:
-        // اگر newPlayer null بود، به‌جای خطا دادن، از player اصلی استفاده کن
-        const finalPlayer = newPlayer || player;
-
         // ارسال پلیر به فرانت
-        socket.emit("initial_player", finalPlayer);
-
-        // اگر پلیر در بازی بود، gameId را ست کن
-        if (game) {
-          socket.data.gameId = game.game_id;
-        }
+        socket.emit("initial_player", player);
       } catch (err) {
         console.error("Auth error:", err.message || err);
         socket.emit("initial_player", {
           error: "Player initialization failed",
         });
       }
+    });
+
+    socket.on("request_game_state", async () => {
+      if (!socket.data.telegramId) {
+
+        socket.emit("player_not_authorized");
+        return;
+      }
+      const player = {
+        telegram_id: socket.data.telegramId,
+        username: socket.data.firstName,
+      };
+
+      // 1) بررسی اینکه آیا بازیکن در بازی‌ای وجود دارد یا نه
+      const result = await hasExistGame(player, socket.id);
+
+      const existingGame = result.game;
+      const currentPlayer = result.player;
+
+      // 2) اگر بازیکن در هیچ بازی‌ای نیست
+      if (!existingGame) {
+        if(!socket.data.gameId){
+          return;
+        }
+        // 3) اگر بازی در دیتابیس وجود دارد ولی در حافظه نیست
+        const dbGame = await getGameState(currentPlayer.game_id);
+        if (!dbGame) {
+          socket.emit("not_in_game");
+          return;
+        }
+
+        if (dbGame.winner) {
+          socket.emit("game_finished", dbGame.winner);
+          return;
+        }
+        return;
+      }
+
+      // 4) اگر بازی تمام شده باشد
+      if (existingGame.winner) {
+        socket.emit("game_finished", existingGame.winner);
+        return;
+      }
+
+      // 5) ارسال state کامل بازی
+      socket.emit("game_recovered", existingGame);
+      socket.data.gameId = existingGame.game_id;
     });
 
     socket.on("join_game", async ({ gameMode }) => {
@@ -122,7 +128,6 @@ module.exports = (io) => {
       // ارسال state به همه
       socket.emit("game_state_update", currentGameState);
       socket.to(socket.data.gameId).emit("player_joined", currentGameState);
-      
 
       // اگر بازی کامل شد → شروع کن
       if (

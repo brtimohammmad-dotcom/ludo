@@ -64,6 +64,21 @@ class _JoinScreenState extends State<JoinScreen> {
         ),
       );
     };
+    gameController.onGameRecovered = () {
+      if (!mounted) return;
+
+      // اگر همین الان در Board هستیم → هیچ کاری نکن
+      if (gameController.isInBoard) return;
+
+      // اگر در JoinScreen هستیم → برو Board
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Board(gameController: gameController),
+        ),
+      );
+    };
+
   }
 
   void _showDialog(Widget dialog) {

@@ -1,3 +1,4 @@
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
@@ -25,11 +26,14 @@ class GameController extends ChangeNotifier {
   VoidCallback? onPlayerExit;
   VoidCallback? onFastPingGets;
   VoidCallback? onGameReady;
+  VoidCallback? onGameRecovered;
 
   GameState? gameState;
   late GameRepository gameRepository;
   AnimationController? animationController;
 
+  ///flags
+  bool isInBoard = false;
   bool _isDisposed = false;
   bool _isGameFinishedHandled = false;
   bool _isMovingToken = false;
@@ -61,6 +65,22 @@ class GameController extends ChangeNotifier {
       notifyListeners();
     };
 
+    // game recovered
+
+    ds.onGameRecovered = (ServerState state) {
+      if (_isDisposed || gameState?.livePlayer == null) return;
+
+      final newLivePlayer = state.players.firstWhere(
+        (p) => p.userId == gameState!.livePlayer!.userId,
+        orElse: () => gameState!.livePlayer!,
+      );
+      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      notifyListeners();
+      onGameRecovered?.call();
+    };
+
+    // game started
+
     ds.onGameStarted = (ServerState state) {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
@@ -72,6 +92,9 @@ class GameController extends ChangeNotifier {
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
       notifyListeners();
     };
+
+    // player joined
+
     ds.onPlayerJoined = (ServerState state) {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
@@ -85,6 +108,7 @@ class GameController extends ChangeNotifier {
     };
 
     // times up
+
     ds.onTimesUp = (ServerState state) {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
@@ -99,6 +123,7 @@ class GameController extends ChangeNotifier {
     };
 
     // game finished
+
     ds.onGameFinished = (Player winner) {
       if (_isDisposed || gameState == null) return;
 
@@ -117,6 +142,7 @@ class GameController extends ChangeNotifier {
     };
 
     // reconnection failed
+
     ds.onReconnectionFailedCallback = () {
       if (_isDisposed) return;
       animationController?.stop();
@@ -124,6 +150,7 @@ class GameController extends ChangeNotifier {
     };
 
     // player initialized
+
     ds.onPlayerUpdate = (Player player) {
       if (_isDisposed) return;
 
@@ -136,6 +163,7 @@ class GameController extends ChangeNotifier {
     };
 
     // player exit
+
     ds.onPlayerExit = () {
       if (_isDisposed) return;
       onPlayerExit?.call();
@@ -143,6 +171,7 @@ class GameController extends ChangeNotifier {
     };
 
     // token moved
+
     ds.onTokenMoved = (ServerState newState) async {
       if (_isDisposed || _isMovingToken || gameState?.livePlayer == null) {
         return;

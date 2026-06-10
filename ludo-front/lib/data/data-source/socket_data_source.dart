@@ -12,6 +12,7 @@ import 'package:telegram_web_app/telegram_web_app.dart';
 typedef StateUpdateCallback = void Function(ServerState state);
 typedef OnGameStartedCallback = void Function(ServerState state);
 typedef OnPlayerJoinedCallBack = void Function(ServerState state);
+typedef OnGameRecoveredCallback = void Function(ServerState state);
 
 typedef PlayerUpdateCallback = void Function(Player player);
 typedef TokenMovedCallback = void Function(ServerState state);
@@ -34,6 +35,7 @@ class SocketDataSource {
   OnGameStartedCallback? onGameStarted;
   OnPlayerJoinedCallBack? onPlayerJoined;
   PlayerUpdateCallback? onPlayerUpdate;
+  OnGameRecoveredCallback? onGameRecovered;
   TokenMovedCallback? onTokenMoved;
   DiceRolledCallback? onDiceRolled;
   TimesUpCallback? onTimesUp;
@@ -122,10 +124,18 @@ class SocketDataSource {
       debugPrint("✅ Connected to $serverUrl");
       _isConnecting = false;
 
+      debugPrint("📤 Sending request game state event to server...");
+      _socket!.emit("request_game_state");
+    });
+    // -------------------------------------------------------
+    // AUTHORIZE PLAYER
+    // -------------------------------------------------------
+    _socket!.on("player_not_authorized", (data) {
+      debugPrint('resid');
       dynamic initData;
 
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 0};
+        initData = {"first_name": "amir", "id": 1};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -133,11 +143,9 @@ class SocketDataSource {
         }
         initData = TelegramWebApp.instance.initData.raw;
       }
-
-      debugPrint("📤 Sending auth event to server...");
       _socket!.emit("auth", {"initData": initData});
-    });
 
+    });
     // -------------------------------------------------------
     // INITIAL PLAYER
     // -------------------------------------------------------
@@ -162,6 +170,7 @@ class SocketDataSource {
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
+      _socket!.emit("request_game_state");
     });
     // -------------------------------------------------------
     // ON GET PING
@@ -182,12 +191,17 @@ class SocketDataSource {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onGameStarted?.call(serverState!);
-    });    _socket!.on("player_joined", (data) async {
+    });
+    _socket!.on("player_joined", (data) async {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onPlayerJoined?.call(serverState!);
     });
-
+    _socket!.on("game_recovered", (data) async {
+      await playerInitialized.future;
+      serverState = ServerState.fromJson(convertToJSData(data));
+      onGameRecovered?.call(serverState!);
+    });
     _socket!.on("dice_rolled", (data) async {
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));

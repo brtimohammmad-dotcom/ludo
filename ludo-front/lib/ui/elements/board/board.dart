@@ -23,7 +23,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
+    widget.gameController.isInBoard = true;
     // --- GAME FINISHED ---
     widget.gameController.onGameFinished = () {
       if (!mounted) return;
@@ -117,7 +117,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   @override
   void dispose() {
     debugPrint("🧹 Board dispose called");
-
+    widget.gameController.isInBoard = false;
     if (!widget.gameController.isDisposed) {
       widget.gameController.resetGame();
     }
