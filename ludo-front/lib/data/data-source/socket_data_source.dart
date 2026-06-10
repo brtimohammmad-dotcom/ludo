@@ -199,6 +199,7 @@ class SocketDataSource {
     });
     _socket!.on("game_recovered", (data) async {
       await playerInitialized.future;
+      debugPrint(data);
       serverState = ServerState.fromJson(convertToJSData(data));
       onGameRecovered?.call(serverState!);
     });

@@ -103,7 +103,7 @@ module.exports = (io) => {
         socket.emit("game_finished", existingGame.winner);
         return;
       }
-
+      console.log("game recoverd");
       // 5) ارسال state کامل بازی
       socket.emit("game_recovered", existingGame);
       socket.data.gameId = existingGame.game_id;
