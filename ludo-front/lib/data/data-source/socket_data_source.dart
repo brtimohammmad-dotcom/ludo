@@ -131,7 +131,6 @@ class SocketDataSource {
     // AUTHORIZE PLAYER
     // -------------------------------------------------------
     _socket!.on("player_not_authorized", (data) {
-      debugPrint('resid');
       dynamic initData;
 
       if (Uri.base.host == "localhost") {
@@ -144,7 +143,6 @@ class SocketDataSource {
         initData = TelegramWebApp.instance.initData.raw;
       }
       _socket!.emit("auth", {"initData": initData});
-
     });
     // -------------------------------------------------------
     // INITIAL PLAYER
@@ -198,9 +196,12 @@ class SocketDataSource {
       onPlayerJoined?.call(serverState!);
     });
     _socket!.on("game_recovered", (data) async {
-      debugPrint(data);
-      await playerInitialized.future;
-      debugPrint(data);
+      debugPrint(data.toString());
+
+      if (!playerInitialized.isCompleted) {
+        playerInitialized.complete();
+      }
+
       serverState = ServerState.fromJson(convertToJSData(data));
       onGameRecovered?.call(serverState!);
     });
@@ -240,10 +241,6 @@ class SocketDataSource {
     _socket!.onDisconnect((reason) {
       debugPrint("🔌 Socket disconnected: $reason");
 
-      if (playerInitialized.isCompleted) {
-        playerInitialized = Completer<void>();
-      }
-
       onDisconnectCallback?.call();
     });
 
@@ -257,6 +254,9 @@ class SocketDataSource {
 
     _socket!.onReconnectFailed((_) {
       debugPrint("❌ Reconnect failed");
+      if (playerInitialized.isCompleted) {
+        playerInitialized = Completer<void>();
+      }
       onReconnectionFailedCallback?.call();
     });
 

@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
@@ -437,12 +436,7 @@ class GameController extends ChangeNotifier {
   void dispose() {
     if (_isDisposed) return;
     _isDisposed = true;
-
-    try {
-      gameRepository.dataSource.dispose();
-    } catch (_) {}
-
-    animationController?.dispose();
+    deleteGameState();
     super.dispose();
   }
 
