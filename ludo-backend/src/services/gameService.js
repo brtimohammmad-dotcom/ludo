@@ -279,7 +279,7 @@ async function handleExitingGame(socket, io) {
     });
     initialState.deleteGameState(socket.data.gameId);
   }
-  if (numberOfOnlines === 1) {
+  if (numberOfOnlines === 1 && currentGame.game_status === "start") {
     const player = currentGame.players.find(
       (p) => p.player_status === "online",
     );
