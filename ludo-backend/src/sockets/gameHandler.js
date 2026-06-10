@@ -64,7 +64,6 @@ module.exports = (io) => {
 
     socket.on("request_game_state", async () => {
       if (!socket.data.telegramId) {
-
         socket.emit("player_not_authorized");
         return;
       }
@@ -81,7 +80,7 @@ module.exports = (io) => {
 
       // 2) اگر بازیکن در هیچ بازی‌ای نیست
       if (!existingGame) {
-        if(!socket.data.gameId){
+        if (!socket.data.gameId) {
           return;
         }
         // 3) اگر بازی در دیتابیس وجود دارد ولی در حافظه نیست
@@ -104,10 +103,11 @@ module.exports = (io) => {
         return;
       }
       console.log("game recoverd");
-      console.log(existingGame);
+      socket.join(existingGame.game_id);
+      socket.data.gameId = existingGame.game_id;
+
       // 5) ارسال state کامل بازی
       socket.emit("game_recovered", existingGame);
-      socket.data.gameId = existingGame.game_id;
     });
 
     socket.on("join_game", async ({ gameMode }) => {
