@@ -167,7 +167,6 @@ module.exports = (io) => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
-      socket.leave();
       handleExitingGame(socket, io);
     });
 
