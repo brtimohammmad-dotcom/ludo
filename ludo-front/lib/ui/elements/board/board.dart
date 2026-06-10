@@ -114,16 +114,16 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     );
   }
 
-  @override
-  void dispose() {
-    debugPrint("🧹 Board dispose called");
-    widget.gameController.isInBoard = false;
-    if (!widget.gameController.isDisposed) {
-      widget.gameController.deleteGameState();
-    }
-
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   debugPrint("🧹 Board dispose called");
+  //   widget.gameController.isInBoard = false;
+  //   if (!widget.gameController.isDisposed) {
+  //     widget.gameController.deleteGameState();
+  //   }
+  //
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
