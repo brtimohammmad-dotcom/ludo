@@ -153,7 +153,6 @@ function handleMoveToken(socket, token, io) {
       gameState.last_dice_value,
       gameState.tokens,
     );
-    console.log("8");
     if (kickedToken) {
       const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
       updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };
@@ -252,7 +251,6 @@ function handleMoveToken(socket, token, io) {
 }
 async function handleExitingGame(socket, io) {
   let currentGame = initialState.getGameState(socket.data.gameId);
-  console.log(currentGame);
   if (!currentGame) {
     socket.emit("player_exit");
     return;

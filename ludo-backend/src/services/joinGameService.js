@@ -31,49 +31,59 @@ async function handleJoinGame(gameMode, socket) {
       game = initialState.createGameInGameState(game.game_id, gameMode);
     }
     const players = initialState.getGameState(game.game_id).players;
-    const playerIsInGame = players.some(
-      (p) => p.telegram_id === socket.data.telegramId,
-    );
+    const playerIsInGame = players.some((p) => {
+      if (p.telegram_id === socket.data.telegramId) {
+        console.log(p.telegram_id);
+        console.log(socket.data.telegramId);
+        return true;
+      } else {
+        return false;
+      }
+    });
     if (playerIsInGame) {
       const correctPlayers = game.players.map((p) => {
+        console.log(p.telegram_id);
+        console.log(socket.data.telegramId);
         if (p.telegram_id === socket.data.telegramId) {
           return { ...p, player_status: "online" };
         } else {
           return p;
         }
       });
-      initialState.updateGameState(socket.data.gameId, {
+      initialState.updateGameState(game.game_id, {
         players: correctPlayers,
       });
       game = initialState.getGameState(game.game_id);
+      console.log(game);
+      return {
+        game: game,
+      };
+    } else {
+      const color =
+        gameMode === 2
+          ? TOW_PLAYER_COLORS[players.length]
+          : FOUR_PLAYER_COLORS[players.length];
+
+      const playerInDataBase = await addPlayerToGameOnDatabase(
+        player,
+        game.game_id,
+        color,
+      );
+
+      const correctPlayer = {
+        ...playerInDataBase,
+        color: color,
+        player_status: "online",
+        numberOfAbsences: 0,
+        connection_status: "connected",
+      };
+      initialState.addPlayerToGameState(correctPlayer, game.game_id);
+      game = initialState.getGameState(game.game_id);
+
       return {
         game: game,
       };
     }
-    const color =
-      gameMode === 2
-        ? TOW_PLAYER_COLORS[players.length]
-        : FOUR_PLAYER_COLORS[players.length];
-
-    const playerInDataBase = await addPlayerToGameOnDatabase(
-      player,
-      game.game_id,
-      color,
-    );
-
-    const correctPlayer = {
-      ...playerInDataBase,
-      color: color,
-      player_status: "online",
-      numberOfAbsences: 0,
-      connection_status: "connected",
-    };
-    initialState.addPlayerToGameState(correctPlayer, game.game_id);
-    game = initialState.getGameState(game.game_id);
-
-    return {
-      game: game,
-    };
   });
 }
 module.exports = { handleJoinGame };
