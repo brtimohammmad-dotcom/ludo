@@ -31,6 +31,25 @@ async function handleJoinGame(gameMode, socket) {
       game = initialState.createGameInGameState(game.game_id, gameMode);
     }
     const players = initialState.getGameState(game.game_id).players;
+    const playerIsInGame = players.some(
+      (p) => p.telegram_id === socket.data.telegramId,
+    );
+    if (playerIsInGame) {
+      const correctPlayers = currentGame.players.map((p) => {
+        if (p.telegram_id === socket.data.telegramId) {
+          return { ...p, player_status: "online" };
+        } else {
+          return p;
+        }
+      });
+      initialState.updateGameState(socket.data.gameId, {
+        players: correctPlayers,
+      });
+      game = initialState.getGameState(game.game_id);
+      return {
+        game: game,
+      };
+    }
     const color =
       gameMode === 2
         ? TOW_PLAYER_COLORS[players.length]
@@ -50,6 +69,8 @@ async function handleJoinGame(gameMode, socket) {
       connection_status: "connected",
     };
     initialState.addPlayerToGameState(correctPlayer, game.game_id);
+    game = initialState.getGameState(game.game_id);
+
     return {
       game: game,
     };
