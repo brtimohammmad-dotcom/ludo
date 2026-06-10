@@ -35,7 +35,7 @@ async function handleJoinGame(gameMode, socket) {
       (p) => p.telegram_id === socket.data.telegramId,
     );
     if (playerIsInGame) {
-      const correctPlayers = currentGame.players.map((p) => {
+      const correctPlayers = game.players.map((p) => {
         if (p.telegram_id === socket.data.telegramId) {
           return { ...p, player_status: "online" };
         } else {
