@@ -198,6 +198,7 @@ class SocketDataSource {
       onPlayerJoined?.call(serverState!);
     });
     _socket!.on("game_recovered", (data) async {
+      debugPrint(data);
       await playerInitialized.future;
       debugPrint(data);
       serverState = ServerState.fromJson(convertToJSData(data));

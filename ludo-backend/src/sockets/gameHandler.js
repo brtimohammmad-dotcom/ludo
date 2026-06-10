@@ -104,6 +104,7 @@ module.exports = (io) => {
         return;
       }
       console.log("game recoverd");
+      console.log(existingGame);
       // 5) ارسال state کامل بازی
       socket.emit("game_recovered", existingGame);
       socket.data.gameId = existingGame.game_id;
