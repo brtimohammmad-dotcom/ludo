@@ -252,7 +252,9 @@ function handleMoveToken(socket, token, io) {
 }
 async function handleExitingGame(socket, io) {
   let currentGame = initialState.getGameState(socket.data.gameId);
-  if (!currentGame) {
+  console.log(currentGame);
+  console.log(currentGame.game_status);
+  if (!currentGame || currentGame.game_status === "finished") {
     socket.emit("player_exit");
   }
   const correctPlayers = currentGame.players.map((p) => {
