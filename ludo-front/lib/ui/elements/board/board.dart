@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/ui/alerts/alert_background.dart';
-import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
+import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
+import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/elements/board/main_board.dart';
-import 'package:ludo/ui/alerts/winner_alert.dart';
+import 'package:ludo/ui/utils/alerts/winner_alert.dart';
 import 'package:ludo/ui/join_screen.dart';
 import 'package:ludo/ui/mappers/player_bar_mapper.dart';
+import 'package:ludo/ui/utils/animated_route.dart';
 
 class Board extends StatefulWidget {
   final GameController gameController;
@@ -30,12 +31,11 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
 
       final winner = widget.gameController.gameState?.serverState?.winner;
       if (winner != null) {
-        _showDialog(
-          AlertBackground(
-            alert: WinnerAlert(
-              winner: winner,
-              gameController: widget.gameController,
-            ),
+        showAnimatedDialog(
+          context: context,
+          child: WinnerAlert(
+            winner: winner,
+            gameController: widget.gameController,
           ),
         );
       }
@@ -56,7 +56,11 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const JoinScreen()),
+          animatedRoute(
+            page: JoinScreen(),
+            duration: Duration(seconds: 1),
+            type: RouteAnimation.fade,
+          ),
           (route) => false,
         );
       }
@@ -65,29 +69,31 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     // --- RECONNECTION FAILED ---
     widget.gameController.onReconnectionFailed = () {
       if (!mounted) return;
+      showAnimatedDialog(
+        context: context,
+        child: ReconnectingFailedAlert(
+          onHomePressed: () async {
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
 
-      _showDialog(
-        AlertBackground(
-          alert: ReconnectingFailedAlert(
-            onHomePressed: () async {
-              if (Navigator.canPop(context)) {
-                Navigator.of(context).pop();
-              }
+            widget.gameController.deleteGameState();
 
-              widget.gameController.deleteGameState();
+            await Future.delayed(const Duration(milliseconds: 50));
 
-              await Future.delayed(const Duration(milliseconds: 50));
-
-              if (mounted) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const JoinScreen()),
-                  (route) => false,
-                );
-              }
-            },
-            textButton: "بازگشت به منو",
-          ),
+            if (mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                animatedRoute(
+                  page: JoinScreen(),
+                  duration: Duration(seconds: 1),
+                  type: RouteAnimation.fade,
+                ),
+                (route) => false,
+              );
+            }
+          },
+          textButton: "Home",
         ),
       );
     };
@@ -111,14 +117,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     for (int i = 1; i <= 6; i++) {
       precacheImage(AssetImage('assets/images/dice/$i.png'), context);
     }
-  }
-
-  void _showDialog(Widget dialog) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => dialog,
-    );
   }
 
   @override

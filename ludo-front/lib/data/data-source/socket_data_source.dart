@@ -134,7 +134,7 @@ class SocketDataSource {
       dynamic initData;
 
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 4};
+        initData = {"first_name": "amir", "id": 6};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -196,7 +196,6 @@ class SocketDataSource {
       onPlayerJoined?.call(serverState!);
     });
     _socket!.on("game_recovered", (data) async {
-
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
@@ -322,7 +321,9 @@ class SocketDataSource {
   }
 
   void getFastPing() {
-    if (onFastPingGets != null) onFastPingGets!();
+    if (_socket?.connected ?? false) {
+      _socket!.emit("get_fast_ping"); // ← باید emit بشه نه callback مستقیم
+    }
   }
 
   void moveToken(Token t) {

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/ui/alerts/alert_background.dart';
-import 'package:ludo/ui/alerts/reconnecting_failed_alert.dart';
+import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
+import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/elements/board/board.dart';
+import 'package:ludo/ui/utils/animated_route.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 class JoinScreen extends StatefulWidget {
@@ -34,37 +35,30 @@ class _JoinScreenState extends State<JoinScreen> {
     // هندل قطع اتصال
     gameController.gameRepository.dataSource.onDisconnectCallback = () {
       if (mounted && TelegramWebApp.instance.isSupported) {
-        TelegramWebApp.instance.showAlert(
-          'ارتباط با سرور قطع شد. در حال تلاش برای اتصال مجدد...',
-        );
+        TelegramWebApp.instance.showAlert('Connection lost. Reconnecting...');
       }
     };
     // --- RECONNECTION FAILED ---
     gameController.onReconnectionFailed = () {
-      debugPrint(
-        'delete game state on on onReconnectionFailed in join screen notify',
-      );
-
       if (!mounted) return;
 
-      _showDialog(
-        AlertBackground(
-          alert: ReconnectingFailedAlert(
-            onHomePressed: () async {
-              if (Navigator.canPop(context)) {
-                Navigator.of(context).pop();
-              }
+      showAnimatedDialog(
+        context: context,
+        child: ReconnectingFailedAlert(
+          onHomePressed: () async {
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
 
-              gameController.deleteGameState();
+            gameController.deleteGameState();
 
-              await Future.delayed(const Duration(milliseconds: 50));
+            await Future.delayed(const Duration(milliseconds: 50));
 
-              if (mounted) {
-                gameController.connectToGame();
-              }
-            },
-            textButton: "اتصال مجدد",
-          ),
+            if (mounted) {
+              gameController.connectToGame();
+            }
+          },
+          textButton: "Reconnect",
         ),
       );
     };
@@ -77,19 +71,13 @@ class _JoinScreenState extends State<JoinScreen> {
       // اگر در JoinScreen هستیم → برو Board
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => Board(gameController: gameController),
+        animatedRoute(
+          page: Board(gameController: gameController),
+          duration: Duration(seconds: 1),
+          type: RouteAnimation.scale,
         ),
       );
     };
-  }
-
-  void _showDialog(Widget dialog) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => dialog,
-    );
   }
 
   @override
@@ -111,13 +99,33 @@ class _JoinScreenState extends State<JoinScreen> {
         return Scaffold(
           body: player == null
               ? Center(
-                  child: Lottie.asset(
-                    "assets/lotties/Happy girl.json",
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.cover,
-                    frameRate: FrameRate(30),
-                    renderCache: RenderCache.raster,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: [
+                      Lottie.asset(
+                        "assets/lotties/Happy girl.json",
+                        height: 200,
+                        width: 200,
+                        fit: BoxFit.cover,
+                        frameRate: FrameRate(30),
+                        renderCache: RenderCache.raster,
+                      ),
+                      Text(
+                        'Connecting to Server...',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.lightGreenAccent,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black54,
+                              blurRadius: 2,
+                              offset: Offset(-2, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 )
               : Container(
@@ -199,13 +207,32 @@ class StartGameButton extends StatelessWidget {
             context: context,
             barrierDismissible: false,
             builder: (_) => Center(
-              child: Lottie.asset(
-                "assets/lotties/Happy girl.json",
-                height: 200,
-                width: 200,
-                fit: BoxFit.cover,
-                frameRate: const FrameRate(30),
-                renderCache: RenderCache.raster,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset(
+                    "assets/lotties/Happy girl.json",
+                    height: 200,
+                    width: 200,
+                    fit: BoxFit.cover,
+                    frameRate: const FrameRate(30),
+                    renderCache: RenderCache.raster,
+                  ),
+                  Text(
+                    'Waiting for Game',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.lightGreenAccent,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black54,
+                          blurRadius: 2,
+                          offset: Offset(-2, 3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -216,8 +243,10 @@ class StartGameButton extends StatelessWidget {
 
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => Board(gameController: gameController),
+            animatedRoute(
+              page: Board(gameController: gameController),
+              duration: Duration(seconds: 1),
+              type: RouteAnimation.slideFromBottom,
             ),
           );
         };
@@ -226,7 +255,7 @@ class StartGameButton extends StatelessWidget {
         gameController.getFastPing();
       },
       child: Text(
-        gameMode == 2 ? "2 players" : "4 players",
+        gameMode == 2 ? "2 Players" : "4 Players",
         style: const TextStyle(color: Colors.white, height: 1.5),
         textAlign: TextAlign.center,
       ),

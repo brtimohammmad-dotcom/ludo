@@ -44,19 +44,18 @@ class ReconnectingFailedAlert extends StatelessWidget {
 
             // متن اصلی خطا
             const Text(
-              "اتصال برقرار نشد",
+              "Connection Failed",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
-                fontFamily: 'Vazir', // در صورت داشتن فونت فارسی، در غیر این صورت حذف شود
               ),
             ),
             const SizedBox(height: 8),
 
             // متن توضیحات تکمیلی
             Text(
-              "زمان تلاش برای اتصال به پایان رسید. لطفاً وضعیت اینترنت خود را بررسی کنید.",
+              "Connection Timeout. Please check your Internet.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

@@ -3,8 +3,8 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/ui/alerts/alert_background.dart';
-import 'package:ludo/ui/alerts/exit_alert.dart';
+import 'package:ludo/ui/utils/alerts/exit_alert.dart';
+import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 
 class PlayerBar extends StatelessWidget {
   const PlayerBar({
@@ -40,10 +40,7 @@ class PlayerBar extends StatelessWidget {
               barHeight: barHeight,
             ),
             if (leftPlayerIndex == 1 || leftPlayerIndex == -1)
-              ExitIcon(
-                gameController: gameController,
-                boardSize: boardSize,
-              ),
+              ExitIcon(gameController: gameController, boardSize: boardSize),
             if (leftPlayerIndex == 0)
               RollButton(gameController: gameController, boardSize: boardSize),
 
@@ -141,15 +138,9 @@ class ExitIcon extends StatelessWidget {
         // ),
         GestureDetector(
           onTap: () {
-            showDialog(
+            showAnimatedDialog(
               context: context,
-              builder: (BuildContext context) {
-                return AlertBackground(
-                  alert: ExitButtonAlert(
-                    gameController: gameController,
-                  ),
-                );
-              },
+              child: ExitButtonAlert(gameController: gameController),
             );
           },
           child: Icon(

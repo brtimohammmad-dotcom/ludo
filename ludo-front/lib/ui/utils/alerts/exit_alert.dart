@@ -23,7 +23,7 @@ class ExitButtonAlert extends StatelessWidget {
         Text('🥺', style: TextStyle(fontSize: boardSize * 0.2)),
         SizedBox(height: boardSize * 0.01),
         Text(
-          'آیا میخواهید از بازی خارج شوید؟',
+          'Do you want Exit?',
           style: TextStyle(
             fontSize: boardSize * 0.03,
             fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class ExitButtonAlert extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'لغو',
+                'No!',
                 style: TextStyle(
                   fontSize: boardSize * 0.03,
                   fontWeight: FontWeight.w900,
@@ -69,7 +69,7 @@ class ExitButtonAlert extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'تایید',
+                'Yes',
                 style: TextStyle(
                   fontSize: boardSize * 0.03,
                   fontWeight: FontWeight.w900,

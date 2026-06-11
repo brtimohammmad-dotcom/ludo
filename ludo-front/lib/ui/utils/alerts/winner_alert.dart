@@ -31,7 +31,7 @@ class WinnerAlert extends StatelessWidget {
         Text('👑', style: TextStyle(fontSize: boardSize * 0.2)),
         SizedBox(height: boardSize * 0.01),
         Text(
-          '!برنده شد',
+          'Winner!',
           style: TextStyle(
             fontSize: boardSize * 0.1,
             fontWeight: FontWeight.bold,
@@ -68,7 +68,7 @@ class WinnerAlert extends StatelessWidget {
             ),
           ),
           child: Text(
-            'بستن',
+            'Home',
             style: TextStyle(
               fontSize: boardSize * 0.03,
               fontWeight: FontWeight.w900,
