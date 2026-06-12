@@ -1,4 +1,5 @@
 const http = require("http");
+const bot = require("./bot"); // فایل بالا
 
 const server = http.createServer((req, res) => {
   res.setHeader(
@@ -26,7 +27,22 @@ const server = http.createServer((req, res) => {
       }),
     );
   }
-
+  if (req.url === "/webhook" && req.method === "POST") {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try {
+        const update = JSON.parse(body);
+        bot.handleUpdate(update);
+        res.writeHead(200);
+        res.end();
+      } catch (err) {
+        res.writeHead(400);
+        res.end();
+      }
+    });
+    return;
+  }
   res.writeHead(404);
   res.end();
 });
