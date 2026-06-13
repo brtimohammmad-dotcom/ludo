@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/ui/utils/alerts/game_status_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/elements/board/main_board.dart';
@@ -20,6 +22,7 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   late Future<LottieComposition> diceComposition;
+  bool _isWaitingDialogShown = false; // ⬅️ اضافه شد
 
   @override
   void initState() {
@@ -65,7 +68,12 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         );
       }
     };
-
+    widget.gameController.onGameStarted = () {
+      if(_isWaitingDialogShown){
+        Navigator.of(context).pop();
+        _isWaitingDialogShown=false;
+      }
+    };
     // --- RECONNECTION FAILED ---
     widget.gameController.onReconnectionFailed = () {
       if (!mounted) return;
@@ -152,7 +160,24 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
             ),
           );
         }
-
+        if (state.gameStatus == GameStatus.waitingForPlayer &&
+            !_isWaitingDialogShown) {
+          debugPrint(state.gameStatus.toString());
+          _isWaitingDialogShown = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            showAnimatedDialog(
+              context: context,
+              barrierDismissible: false,
+              child: WaitingForPlayersAlert(
+                gameController: widget.gameController,
+                onExit: () {
+                  widget.gameController.exitGame();
+                },
+              ),
+            );
+          });
+        }
         final gameMode = state.gameMode;
 
         final boardSize = (screenWidth < screenHeight

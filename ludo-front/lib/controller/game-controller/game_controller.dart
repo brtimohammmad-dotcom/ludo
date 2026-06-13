@@ -26,6 +26,7 @@ class GameController extends ChangeNotifier {
   VoidCallback? onFastPingGets;
   VoidCallback? onGameReady;
   VoidCallback? onGameRecovered;
+  VoidCallback? onGameStarted;
 
   GameState? gameState;
   late GameRepository gameRepository;
@@ -90,6 +91,7 @@ class GameController extends ChangeNotifier {
 
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
       notifyListeners();
+      onGameStarted?.call();
     };
 
     // player joined
@@ -169,6 +171,18 @@ class GameController extends ChangeNotifier {
       notifyListeners();
     };
 
+    // opponent exit
+
+    ds.onOpponentExit=(ServerState state){
+      final newLivePlayer = state.players.firstWhere(
+            (p) => p.userId == gameState!.livePlayer!.userId,
+        orElse: () => gameState!.livePlayer!,
+      );
+
+      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      notifyListeners();
+      debugPrint('opponent Exit');
+    };
     // token moved
 
     ds.onTokenMoved = (ServerState newState) async {
@@ -381,7 +395,6 @@ class GameController extends ChangeNotifier {
   }
 
   void deleteGameState() {
-    debugPrint('delete game state notify');
     try {
       gameRepository.dataSource.dispose();
     } catch (_) {}

@@ -22,6 +22,7 @@ typedef GameFinishedCallback = void Function(Player player);
 typedef ReconnectionFailedCallback = void Function();
 typedef OnDisconnectCallback = void Function();
 typedef PlayerExitCallback = void Function();
+typedef OnOpponentExitCallback = void Function(ServerState state);
 typedef OnFastPingGetsCallback = void Function();
 
 class SocketDataSource {
@@ -43,6 +44,7 @@ class SocketDataSource {
   ReconnectionFailedCallback? onReconnectionFailedCallback;
   OnDisconnectCallback? onDisconnectCallback;
   PlayerExitCallback? onPlayerExit;
+  OnOpponentExitCallback? onOpponentExit;
   OnFastPingGetsCallback? onFastPingGets;
 
   // --- State ---
@@ -134,7 +136,7 @@ class SocketDataSource {
       dynamic initData;
 
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 6};
+        initData = {"first_name": "amir", "id": 2};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -144,6 +146,7 @@ class SocketDataSource {
       }
       _socket!.emit("auth", {"initData": initData});
     });
+
     // -------------------------------------------------------
     // INITIAL PLAYER
     // -------------------------------------------------------
@@ -231,6 +234,12 @@ class SocketDataSource {
       await playerInitialized.future;
       _socket!.clearListeners();
       onPlayerExit?.call();
+    });
+    _socket!.on("opponent_exit", (data) {
+
+      serverState = ServerState.fromJson(convertToJSData(data));
+
+      onOpponentExit?.call(serverState!);
     });
 
     // -------------------------------------------------------

@@ -255,6 +255,7 @@ async function handleExitingGame(socket, io) {
     socket.emit("player_exit");
     return;
   }
+  
   const correctPlayers = currentGame.players.map((p) => {
     if (p.telegram_id === socket.data.telegramId) {
       return { ...p, player_status: "offline" };
@@ -263,9 +264,10 @@ async function handleExitingGame(socket, io) {
     }
   });
   initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
-  socket.emit("player_exit");
-  socket.leave();
   currentGame = initialState.getGameState(socket.data.gameId);
+  socket.emit("player_exit");
+  socket.to(socket.data.gameId).emit("opponent_exit",currentGame);
+  socket.leave();
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",
   ).length;

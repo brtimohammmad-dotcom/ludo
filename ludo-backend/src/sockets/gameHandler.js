@@ -111,7 +111,12 @@ module.exports = (io) => {
     });
 
     socket.on("join_game", async ({ gameMode }) => {
-      if (gameMode !== 2 && gameMode !== 4) {
+      if (
+        gameMode !== 2 &&
+        gameMode !== 4 &&
+        gameMode !== -2 &&
+        gameMode !== -4
+      ) {
         return socket.emit("error", "Invalid game mode");
       }
 

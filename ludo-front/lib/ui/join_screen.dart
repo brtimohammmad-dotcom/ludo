@@ -16,6 +16,7 @@ class JoinScreen extends StatefulWidget {
 
 class _JoinScreenState extends State<JoinScreen> {
   late final GameController gameController;
+  bool showFriendsOptions = false;
 
   @override
   void initState() {
@@ -145,27 +146,51 @@ class _JoinScreenState extends State<JoinScreen> {
                     ),
                   ),
                   child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Stack(
                       children: [
-                        Lottie.asset(
-                          "assets/lotties/Happy Dice.json",
-                          width: 200,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            StartGameButton(
-                              gameController: gameController,
-                              gameMode: 2,
+                            Lottie.asset(
+                              "assets/lotties/Happy Dice.json",
+                              width: 200,
+                              height: 200,
+                              fit: BoxFit.cover,
                             ),
-                            const SizedBox(width: 20),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                StartGameButton(
+                                  gameController: gameController,
+                                  gameMode: 2,
+                                ),
+                                const SizedBox(width: 10),
+                                StartGameButton(
+                                  gameController: gameController,
+                                  gameMode: 4,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
                             StartGameButton(
                               gameController: gameController,
-                              gameMode: 4,
+                              gameMode: -1,
+                              onTap: () {
+                                setState(() {
+                                  showFriendsOptions = !showFriendsOptions;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 400),
+                            AnimatedFriendsButtons(
+                              show: showFriendsOptions,
+                              gameController: gameController,
                             ),
                           ],
                         ),
@@ -179,12 +204,132 @@ class _JoinScreenState extends State<JoinScreen> {
   }
 }
 
+class AnimatedFriendsButtons extends StatefulWidget {
+  const AnimatedFriendsButtons({
+    super.key,
+    required this.show,
+    required this.gameController,
+  });
+
+  final bool show;
+  final GameController gameController;
+
+  @override
+  State<AnimatedFriendsButtons> createState() => _AnimatedFriendsButtonsState();
+}
+
+class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  // مرحله ۱: fade-in + اسلاید از بالا به پایین (۰ تا ۰.6 از انیمیشن)
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideDownAnimation;
+
+  // مرحله ۲: حرکت کوچک به بالا برای جاگیری نهایی (۰.6 تا ۱ از انیمیشن)
+  late final Animation<Offset> _settleUpAnimation;
+
+  bool _isVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 1, curve: Curves.easeOut),
+    );
+
+    _slideDownAnimation =
+        Tween<Offset>(begin: const Offset(0, -0.6), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+          ),
+        );
+
+    _settleUpAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(0, -0.15)).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+          ),
+        );
+
+    if (widget.show) {
+      _isVisible = true;
+      _controller.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedFriendsButtons oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.show != oldWidget.show) {
+      if (widget.show) {
+        setState(() => _isVisible = true);
+        _controller.forward(from: 0);
+      } else {
+        _controller.reverse().then((_) {
+          if (mounted) setState(() => _isVisible = false);
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isVisible) return const SizedBox.shrink();
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final combinedOffset = Offset(
+          0,
+          _slideDownAnimation.value.dy + _settleUpAnimation.value.dy,
+        );
+
+        return Opacity(
+          opacity: _fadeAnimation.value,
+          child: FractionalTranslation(
+            translation: combinedOffset,
+            child: child,
+          ),
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          StartGameButton(gameController: widget.gameController, gameMode: -2),
+          const SizedBox(width: 10),
+          StartGameButton(gameController: widget.gameController, gameMode: -4),
+        ],
+      ),
+    );
+  }
+}
+
 class StartGameButton extends StatelessWidget {
   const StartGameButton({
     super.key,
     required this.gameController,
     required this.gameMode,
+    this.onTap,
   });
+
+  final VoidCallback? onTap;
 
   final int gameMode;
   final GameController gameController;
@@ -193,12 +338,18 @@ class StartGameButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        fixedSize: const Size(120, 50),
+        fixedSize: Size(gameMode == -1 ? 250 : 120, 50),
         elevation: 3,
-        backgroundColor: Colors.green,
+        backgroundColor: gameMode == -1 || gameMode == -2 || gameMode == -4
+            ? Colors.amber
+            : Colors.green,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
       onPressed: () {
+        if (gameMode == -1 && onTap != null) {
+          onTap!();
+          return; // ⬅️ از ادامه‌ی اجرای منطق اتصال جلوگیری می‌کند
+        }
         // اینجا callback را ست می‌کنیم تا مقدار gameMode درست باشد
         gameController.onFastPingGets = () async {
           gameController.startGame(gameMode: gameMode);
@@ -255,7 +406,11 @@ class StartGameButton extends StatelessWidget {
         gameController.getFastPing();
       },
       child: Text(
-        gameMode == 2 ? "2 Players" : "4 Players",
+        gameMode == -1
+            ? "Friends"
+            : gameMode == 2||gameMode==-2
+            ? "2 Players"
+            : "4 Players",
         style: const TextStyle(color: Colors.white, height: 1.5),
         textAlign: TextAlign.center,
       ),

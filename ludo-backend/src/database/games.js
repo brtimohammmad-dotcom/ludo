@@ -6,11 +6,17 @@ const initialState = require("../models/initialState");
  * ایجاد یک بازی جدید در دیتابیس
  */
 async function createNewGameInDatabase(gameMode) {
+  let isGlobal;
+  if (gameMode === 2 || gameMode === 4) {
+    isGlobal = true;
+  } else {
+    false;
+  }
   try {
     // درج رکورد جدید و دریافت آنی کل اطلاعات رکورد با استفاده از select()
     const { data: newGame, error } = await supabase
-      .from("game")
-      .insert([{ game_mode: gameMode }])
+      .from(isGlobal ? "game" : "room")
+      .insert([{ game_mode: isGlobal ? gameMode : -gameMode }])
       .select()
       .single();
 
@@ -77,5 +83,5 @@ async function getGameState(gameId) {
 module.exports = {
   createNewGameInDatabase,
   updateGameState,
-  getGameState
+  getGameState,
 };
