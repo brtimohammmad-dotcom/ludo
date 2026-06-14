@@ -124,7 +124,7 @@ async function handleJoinGame(numberOfPlayers, socket) {
 async function handleJoinGameFriendly(socket) {
   return await joinGameQueue(socket.data.gameId, async () => {
     let game = initialState.getGameState(socket.data.gameId);
-    debugPrint(game);
+    console.log(game);
     const players = game.players;
     const playerIsInGame = players.some(
       (p) => p.telegram_id === socket.data.telegramId,
