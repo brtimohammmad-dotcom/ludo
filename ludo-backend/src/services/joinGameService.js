@@ -6,8 +6,9 @@ const {
   FOUR_PLAYER_COLORS,
 } = require("../constants/gameConfig");
 const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
+const { updateGameState } = require("../database/games");
 
-async function handleJoinGame(numberOfPlayers, socket) {
+async function handleJoinGame(numberOfPlayers, socket, io) {
   console.log("player id: ", socket.data.telegramId, " joined");
   console.log("player name: ", socket.data.firstName, "joined");
   console.log("number of players is: ", numberOfPlayers);
@@ -17,6 +18,7 @@ async function handleJoinGame(numberOfPlayers, socket) {
       username: socket.data.firstName,
       telegram_id: socket.data.telegramId,
     };
+    let gameOrRoom;
 
     // ----------------------------------------------------
     // بخش بازی‌های عمومی (مقادیر مثبت ۲ و ۴)
@@ -74,8 +76,7 @@ async function handleJoinGame(numberOfPlayers, socket) {
         };
         initialState.addPlayerToGameState(correctPlayer, game.game_id);
         game = initialState.getGameState(game.game_id);
-
-        return { game: game };
+        gameOrRoom = game;
       }
     }
 
@@ -113,15 +114,14 @@ async function handleJoinGame(numberOfPlayers, socket) {
       initialState.addPlayerToGameState(correctPlayer, room.game_id);
       room = initialState.getGameState(room.game_id);
 
-      // ۶. تولید لینک دعوت عمیق (Deep Linking) برای ربات تلگرام
-
-      return {
-        game: room,
-      };
+      gameOrRoom = room;
     }
+    socket.data.gameId = gameOrRoom.game_id;
+
+    joiningGame(socket, io);
   });
 }
-async function handleJoinGameFriendly(socket) {
+async function handleJoinGameFriendly(socket, io) {
   return await joinGameQueue(socket.data.gameId, async () => {
     const player = {
       username: socket.data.firstName,
@@ -145,7 +145,6 @@ async function handleJoinGameFriendly(socket) {
         players: correctPlayers,
       });
       game = initialState.getGameState(game.game_id);
-      return { game: game };
     } else {
       if (game.game_status === "start") {
         socket.emit("game_already_started");
@@ -170,9 +169,43 @@ async function handleJoinGameFriendly(socket) {
       };
       initialState.addPlayerToGameState(correctPlayer, game.game_id);
       game = initialState.getGameState(game.game_id);
-
-      return { game: game };
     }
+    joiningGame(socket, io);
   });
+}
+async function joiningGame(socket, io) {
+  // سوکت را وارد روم کن
+  socket.join(socket.data.gameId);
+
+  // state فعلی بازی را بگیر
+  let currentGameState = initialState.getGameState(socket.data.gameId);
+  console.log(currentGameState);
+  // ارسال state به همه
+  socket.emit("game_state_update", currentGameState);
+  socket.to(socket.data.gameId).emit("player_joined", currentGameState);
+
+  // اگر بازی کامل شد → شروع کن
+  if (
+    currentGameState.players.length === currentGameState.numberOfPlayers &&
+    currentGameState.game_status === "waitingForPlayer"
+  ) {
+    currentGameState.game_status = "start";
+
+    await updateGameState(
+      socket.data.gameId,
+      { game_status: "start" },
+      currentGameState.game_mode,
+    );
+    initialState.updateGameState(socket.data.gameId, {
+      game_status: "start",
+    });
+
+    io.to(socket.data.gameId).emit(
+      "game_started",
+      initialState.getGameState(socket.data.gameId),
+    );
+
+    startTimer(socket, io);
+  }
 }
 module.exports = { handleJoinGame, handleJoinGameFriendly };

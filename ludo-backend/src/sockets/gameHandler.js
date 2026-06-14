@@ -9,7 +9,7 @@ const {
   handleExitingGame,
 } = require("../services/gameService");
 const initialState = require("../models/initialState");
-const { updateGameState, getGameState } = require("../database/games");
+const { getGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
 const { validate, parse } = require("@tma.js/init-data-node");
 const { BOT_TOKEN } = require("../constants/gameConfig");
@@ -77,10 +77,7 @@ module.exports = (io) => {
         socket.emit("player_not_authorized");
         return;
       }
-      if (gameMode && gameMode === "friendly") {
-        socket.data.gameId = gameId;
-        await handleJoinGameFriendly(socket);
-      }
+
       const player = {
         telegram_id: socket.data.telegramId,
         username: socket.data.firstName,
@@ -107,6 +104,10 @@ module.exports = (io) => {
         if (dbGame.winner) {
           socket.emit("game_finished", dbGame.winner);
           return;
+        }
+        if (gameMode && gameId && gameMode === "friendly") {
+          socket.data.gameId = gameId;
+          await handleJoinGameFriendly(socket);
         }
         return;
       }
@@ -135,37 +136,7 @@ module.exports = (io) => {
       }
 
       // بازیکن را وارد بازی کن
-      const { game } = await handleJoinGame(numberOfPlayers, socket);
-
-      socket.data.gameId = game.game_id;
-
-      // سوکت را وارد روم کن
-      socket.join(game.game_id);
-
-      // state فعلی بازی را بگیر
-      let currentGameState = initialState.getGameState(game.game_id);
-      console.log(currentGameState);
-      // ارسال state به همه
-      socket.emit("game_state_update", currentGameState);
-      socket.to(socket.data.gameId).emit("player_joined", currentGameState);
-
-      // اگر بازی کامل شد → شروع کن
-      if (
-        currentGameState.players.length === numberOfPlayers &&
-        currentGameState.game_status === "waitingForPlayer"
-      ) {
-        currentGameState.game_status = "start";
-
-        await updateGameState(game.game_id, { game_status: "start" },game.game_mode);
-        initialState.updateGameState(game.game_id, { game_status: "start" });
-
-        io.to(game.game_id).emit(
-          "game_started",
-          initialState.getGameState(game.game_id),
-        );
-
-        startTimer(socket, io);
-      }
+      const { game } = await handleJoinGame(numberOfPlayers, socket, io);
     });
 
     socket.on("roll_dice", () => {
