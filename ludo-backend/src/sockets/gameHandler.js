@@ -10,7 +10,6 @@ const {
 } = require("../services/gameService");
 const initialState = require("../models/initialState");
 const { getGameState } = require("../database/games");
-const { startTimer } = require("../services/turnTimerService");
 const { validate, parse } = require("@tma.js/init-data-node");
 const { BOT_TOKEN } = require("../constants/gameConfig");
 const isLocal = process.env.RENDER !== "true";

@@ -7,7 +7,7 @@ const {
 } = require("../constants/gameConfig");
 const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
 const { updateGameState } = require("../database/games");
-const { error } = require("node:console");
+const { startTimer } = require("../services/turnTimerService");
 
 async function handleJoinGame(numberOfPlayers, socket, io) {
   console.log("player id: ", socket.data.telegramId, " joined");
@@ -129,8 +129,8 @@ async function handleJoinGameFriendly(socket, io) {
       telegram_id: socket.data.telegramId,
     };
     let game = initialState.getGameState(socket.data.gameId);
-    if(!game){
-      socket.emit("error","game deleted")
+    if (!game) {
+      socket.emit("error", "game deleted");
     }
     const players = game.players;
     const playerIsInGame = players.some(
@@ -149,9 +149,9 @@ async function handleJoinGameFriendly(socket, io) {
       });
       game = initialState.getGameState(game.game_id);
     } else {
-      if (game.game_status === "start") {
-        socket.emit("game_already_started");
-      }
+      // if (game.game_status === "start") {
+      //   socket.emit("game_already_started");
+      // }
       const color =
         game.numberOfPlayers === 2
           ? TOW_PLAYER_COLORS[players.length]
@@ -186,12 +186,15 @@ async function joiningGame(socket, io) {
   // ارسال state به همه
   socket.emit("game_state_update", currentGameState);
   socket.to(socket.data.gameId).emit("player_joined", currentGameState);
+        console.log("residd1");
 
   // اگر بازی کامل شد → شروع کن
   if (
-    currentGameState.players.length === currentGameState.numberOfPlayers &&
+    currentGameState.players.length === currentGameState.number_of_players &&
     currentGameState.game_status === "waitingForPlayer"
   ) {
+        console.log("residd2");
+
     currentGameState.game_status = "start";
 
     await updateGameState(
@@ -202,7 +205,7 @@ async function joiningGame(socket, io) {
     initialState.updateGameState(socket.data.gameId, {
       game_status: "start",
     });
-
+    console.log("residd3");
     io.to(socket.data.gameId).emit(
       "game_started",
       initialState.getGameState(socket.data.gameId),

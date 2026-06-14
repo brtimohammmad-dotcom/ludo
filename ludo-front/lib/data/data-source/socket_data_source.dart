@@ -143,7 +143,7 @@ class SocketDataSource {
       dynamic initData;
 
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 4};
+        initData = {"first_name": "amir", "id": 6};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -200,6 +200,7 @@ class SocketDataSource {
     });
 
     _socket!.on("game_started", (data) async {
+      debugPrint("game starteddd");
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onGameStarted?.call(serverState!);
