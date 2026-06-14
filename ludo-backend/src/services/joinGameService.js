@@ -186,14 +186,12 @@ async function joiningGame(socket, io) {
   // ارسال state به همه
   socket.emit("game_state_update", currentGameState);
   socket.to(socket.data.gameId).emit("player_joined", currentGameState);
-        console.log("residd1");
 
   // اگر بازی کامل شد → شروع کن
   if (
     currentGameState.players.length === currentGameState.number_of_players &&
     currentGameState.game_status === "waitingForPlayer"
   ) {
-        console.log("residd2");
 
     currentGameState.game_status = "start";
 
@@ -205,7 +203,6 @@ async function joiningGame(socket, io) {
     initialState.updateGameState(socket.data.gameId, {
       game_status: "start",
     });
-    console.log("residd3");
     io.to(socket.data.gameId).emit(
       "game_started",
       initialState.getGameState(socket.data.gameId),

@@ -415,6 +415,7 @@ class StartGameButton extends StatelessWidget {
         };
 
         gameController.onGameReady = () {
+          debugPrint("on game ready called");
           if (Navigator.canPop(context)) Navigator.pop(context);
 
           Navigator.push(

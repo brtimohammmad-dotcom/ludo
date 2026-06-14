@@ -53,7 +53,9 @@ class GameController extends ChangeNotifier {
     ds.onFastPingGets = () {
       if (onFastPingGets != null) onFastPingGets!();
     };
+
     // state updated
+
     ds.onStateUpdate = (ServerState state) {
       if (_isDisposed || gameState?.livePlayer == null) return;
 
@@ -62,6 +64,7 @@ class GameController extends ChangeNotifier {
         orElse: () => gameState!.livePlayer!,
       );
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+      debugPrint("on state update call");
       if (onGameReady != null) onGameReady!();
       notifyListeners();
     };

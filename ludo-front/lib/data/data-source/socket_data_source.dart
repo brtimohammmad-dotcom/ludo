@@ -194,7 +194,7 @@ class SocketDataSource {
     // -------------------------------------------------------
     _socket!.on("game_state_update", (data) async {
       await playerInitialized.future;
-      debugPrint(data.toString());
+      debugPrint("game state updated");
       serverState = ServerState.fromJson(convertToJSData(data));
       onStateUpdate?.call(serverState!);
     });
