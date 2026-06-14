@@ -123,6 +123,10 @@ async function handleJoinGame(numberOfPlayers, socket) {
 }
 async function handleJoinGameFriendly(socket) {
   return await joinGameQueue(socket.data.gameId, async () => {
+    const player = {
+      username: socket.data.firstName,
+      telegram_id: socket.data.telegramId,
+    };
     let game = initialState.getGameState(socket.data.gameId);
     console.log(game);
     const players = game.players;
@@ -143,9 +147,9 @@ async function handleJoinGameFriendly(socket) {
       game = initialState.getGameState(game.game_id);
       return { game: game };
     } else {
-       if(game.game_status==='start'){
-        socket.emit("game_already_started")
-       }
+      if (game.game_status === "start") {
+        socket.emit("game_already_started");
+      }
       const color =
         game.numberOfPlayers === 2
           ? TOW_PLAYER_COLORS[players.length]
