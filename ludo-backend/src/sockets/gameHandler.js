@@ -136,7 +136,7 @@ module.exports = (io) => {
       }
 
       // بازیکن را وارد بازی کن
-      const { game } = await handleJoinGame(numberOfPlayers, socket, io);
+      await handleJoinGame(numberOfPlayers, socket, io);
     });
 
     socket.on("roll_dice", () => {
