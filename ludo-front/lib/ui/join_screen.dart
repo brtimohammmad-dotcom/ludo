@@ -44,7 +44,20 @@ class _JoinScreenState extends State<JoinScreen> {
     } else {
       gameController.connect(GameMode.global, null);
     }
-
+    gameController.onGameReady = () {
+      debugPrint("on game ready called");
+      if (Navigator.canPop(context)) Navigator.pop(context);
+      if (!gameController.isInBoard) {
+        Navigator.push(
+          context,
+          animatedRoute(
+            page: Board(gameController: gameController),
+            duration: Duration(seconds: 1),
+            type: RouteAnimation.fade,
+          ),
+        );
+      }
+    };
     // هندل قطع اتصال
     gameController.gameRepository.dataSource.onDisconnectCallback = () {
       if (mounted && TelegramWebApp.instance.isSupported) {
@@ -410,20 +423,6 @@ class StartGameButton extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          );
-        };
-
-        gameController.onGameReady = () {
-          debugPrint("on game ready called");
-          if (Navigator.canPop(context)) Navigator.pop(context);
-
-          Navigator.push(
-            context,
-            animatedRoute(
-              page: Board(gameController: gameController),
-              duration: Duration(seconds: 1),
-              type: RouteAnimation.fade,
             ),
           );
         };
