@@ -1,5 +1,8 @@
 const { handleAuth, hasExistGame } = require("../services/authService");
-const { handleJoinGame } = require("../services/joinGameService");
+const {
+  handleJoinGame,
+  handleJoinGameFriendly,
+} = require("../services/joinGameService");
 const {
   handleRollDice,
   handleMoveToken,
@@ -62,10 +65,21 @@ module.exports = (io) => {
       }
     });
 
-    socket.on("request_game_state", async () => {
+    socket.on("request_game_state", async (data) => {
+      if (!data) {
+        console.error("No data received for request_game_state");
+        return;
+      }
+      const { gameMode, gameId } = data;
+
+      console.log(`Received gameMode: ${gameMode}, gameId: ${gameId}`);
       if (!socket.data.telegramId) {
         socket.emit("player_not_authorized");
         return;
+      }
+      if (gameMode && gameMode === "friendly") {
+        socket.data.gameId = gameId;
+        await handleJoinGameFriendly(socket);
       }
       const player = {
         telegram_id: socket.data.telegramId,
@@ -84,7 +98,7 @@ module.exports = (io) => {
           return;
         }
         // 3) اگر بازی در دیتابیس وجود دارد ولی در حافظه نیست
-        const dbGame = await getGameState(currentPlayer.game_id);
+        const dbGame = await getGameState(currentPlayer.game_id, gameMode);
         if (!dbGame) {
           socket.emit("not_in_game");
           return;
@@ -110,18 +124,18 @@ module.exports = (io) => {
       socket.emit("game_recovered", existingGame);
     });
 
-    socket.on("join_game", async ({ gameMode }) => {
+    socket.on("join_game", async ({ numberOfPlayers }) => {
       if (
-        gameMode !== 2 &&
-        gameMode !== 4 &&
-        gameMode !== -2 &&
-        gameMode !== -4
+        numberOfPlayers !== 2 &&
+        numberOfPlayers !== 4 &&
+        numberOfPlayers !== -2 &&
+        numberOfPlayers !== -4
       ) {
         return socket.emit("error", "Invalid game mode");
       }
 
       // بازیکن را وارد بازی کن
-      const { game } = await handleJoinGame(gameMode, socket);
+      const { game } = await handleJoinGame(numberOfPlayers, socket);
 
       socket.data.gameId = game.game_id;
 
@@ -130,19 +144,19 @@ module.exports = (io) => {
 
       // state فعلی بازی را بگیر
       let currentGameState = initialState.getGameState(game.game_id);
-
+      console.log(currentGameState);
       // ارسال state به همه
       socket.emit("game_state_update", currentGameState);
       socket.to(socket.data.gameId).emit("player_joined", currentGameState);
 
       // اگر بازی کامل شد → شروع کن
       if (
-        currentGameState.players.length === gameMode &&
+        currentGameState.players.length === numberOfPlayers &&
         currentGameState.game_status === "waitingForPlayer"
       ) {
         currentGameState.game_status = "start";
 
-        await updateGameState(game.game_id, { game_status: "start" });
+        await updateGameState(game.game_id, { game_status: "start" },game.game_mode);
         initialState.updateGameState(game.game_id, { game_status: "start" });
 
         io.to(game.game_id).emit(

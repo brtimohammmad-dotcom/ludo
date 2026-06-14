@@ -233,12 +233,16 @@ function handleMoveToken(socket, token, io) {
           winner: player,
         });
         const winnerGameState = initialState.getGameState(socket.data.gameId);
-        await updateGameState(socket.data.gameId, {
-          game_status: "finished",
-          winner: player,
-          players: winnerGameState.players,
-          end_at: new Date(),
-        });
+        await updateGameState(
+          socket.data.gameId,
+          {
+            game_status: "finished",
+            winner: player,
+            players: winnerGameState.players,
+            end_at: new Date(),
+          },
+          winnerGameState.game_mode,
+        );
         stopTimer(socket.data.gameId);
         io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
         initialState.deleteGameState(socket.data.gameId);
@@ -255,7 +259,7 @@ async function handleExitingGame(socket, io) {
     socket.emit("player_exit");
     return;
   }
-  
+
   const correctPlayers = currentGame.players.map((p) => {
     if (p.telegram_id === socket.data.telegramId) {
       return { ...p, player_status: "offline" };
@@ -266,17 +270,21 @@ async function handleExitingGame(socket, io) {
   initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
   currentGame = initialState.getGameState(socket.data.gameId);
   socket.emit("player_exit");
-  socket.to(socket.data.gameId).emit("opponent_exit",currentGame);
+  socket.to(socket.data.gameId).emit("opponent_exit", currentGame);
   socket.leave();
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",
   ).length;
   if (numberOfOnlines === 0 && currentGame.game_status === "waitingForPlayer") {
-    await updateGameState(socket.data.gameId, {
-      game_status: "cancel",
-      players: currentGame.players,
-      end_at: new Date(),
-    });
+    await updateGameState(
+      socket.data.gameId,
+      {
+        game_status: "cancel",
+        players: currentGame.players,
+        end_at: new Date(),
+      },
+      currentGame.game_mode,
+    );
     initialState.deleteGameState(socket.data.gameId);
   }
   if (numberOfOnlines === 1 && currentGame.game_status === "start") {
@@ -291,12 +299,16 @@ async function handleExitingGame(socket, io) {
       winner: player,
     });
     const winnerGameState = initialState.getGameState(socket.data.gameId);
-    await updateGameState(socket.data.gameId, {
-      game_status: "finished",
-      winner: player,
-      players: winnerGameState.players,
-      end_at: new Date(),
-    });
+    await updateGameState(
+      socket.data.gameId,
+      {
+        game_status: "finished",
+        winner: player,
+        players: winnerGameState.players,
+        end_at: new Date(),
+      },
+      currentGame.game_mode,
+    );
     stopTimer(socket.data.gameId);
     io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
     initialState.deleteGameState(socket.data.gameId);

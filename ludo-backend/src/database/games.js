@@ -5,9 +5,9 @@ const initialState = require("../models/initialState");
 /**
  * ایجاد یک بازی جدید در دیتابیس
  */
-async function createNewGameInDatabase(gameMode) {
+async function createNewGameInDatabase(numberOfPlayers) {
   let isGlobal;
-  if (gameMode === 2 || gameMode === 4) {
+  if (numberOfPlayers === 2 || numberOfPlayers === 4) {
     isGlobal = true;
   } else {
     false;
@@ -16,7 +16,9 @@ async function createNewGameInDatabase(gameMode) {
     // درج رکورد جدید و دریافت آنی کل اطلاعات رکورد با استفاده از select()
     const { data: newGame, error } = await supabase
       .from(isGlobal ? "game" : "room")
-      .insert([{ game_mode: isGlobal ? gameMode : -gameMode }])
+      .insert([
+        { number_of_players: isGlobal ? numberOfPlayers : -numberOfPlayers },
+      ])
       .select()
       .single();
 
@@ -32,14 +34,14 @@ async function createNewGameInDatabase(gameMode) {
 /**
  * به‌روزرسانی فیلدهای داینامیک بازی
  */
-async function updateGameState(id, fields) {
+async function updateGameState(id, fields,gameMode) {
   try {
     // در سوپابیس برای آپدیت داینامیک نیازی به ساختن دستی کلاز SET (مثل نقشه کردن Keys و Values) نیست؛
     // خود پکیج آبجکت fields را می‌گیرد و فیلدهای تغییر یافته را اعمال می‌کند.
     const { data: updatedGame, error } = await supabase
-      .from("game")
+      .from(gameMode=="global"?"game":"room")
       .update(fields)
-      .eq("game_id", id)
+      .eq(gameMode=="global"?"game_id":"room_id", id)
       .select()
       .single();
 
@@ -63,12 +65,12 @@ async function updateGameState(id, fields) {
     throw error;
   }
 }
-async function getGameState(gameId) {
+async function getGameState(gameId,gameMode) {
   // روش 3: بدون single() - همیشه یک آرایه برمی‌گردد
   const { data: games, error } = await supabase
-    .from("game")
+    .from(gameMode=="global"?"game":"room")
     .select("*")
-    .eq("game_id", gameId);
+    .eq(gameMode=="global"?"game_id":"room_id", gameId);
 
   if (error) {
     console.error("خطا:", error);

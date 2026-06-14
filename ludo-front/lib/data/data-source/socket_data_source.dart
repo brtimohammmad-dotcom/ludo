@@ -6,6 +6,7 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/config_service.dart';
+import 'package:ludo/ui/join_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
 
@@ -49,6 +50,7 @@ class SocketDataSource {
 
   // --- State ---
   ServerState? serverState;
+  String? invitationLink;
   Completer<void> playerInitialized = Completer<void>();
 
   // -------------------------------------------------------
@@ -88,7 +90,7 @@ class SocketDataSource {
   // -------------------------------------------------------
   // CONNECT
   // -------------------------------------------------------
-  void connectToGame() async {
+  void connect(GameMode mode, String? gameId) async {
     final serverUrl = Config.serverUrl;
     Config.printEnvironmentInfo();
 
@@ -127,7 +129,12 @@ class SocketDataSource {
       _isConnecting = false;
 
       debugPrint("📤 Sending request game state event to server...");
-      _socket!.emit("request_game_state");
+      debugPrint(mode.toString());
+
+      _socket!.emit("request_game_state", {
+        "gameMode": mode.name,
+        "gameId": gameId ?? "",
+      });
     });
     // -------------------------------------------------------
     // AUTHORIZE PLAYER
@@ -171,7 +178,10 @@ class SocketDataSource {
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
-      _socket!.emit("request_game_state");
+      _socket!.emit("request_game_state", {
+        "gameMode": mode.name,
+        "gameId": gameId ?? "",
+      });
     });
     // -------------------------------------------------------
     // ON GET PING
@@ -184,6 +194,7 @@ class SocketDataSource {
     // -------------------------------------------------------
     _socket!.on("game_state_update", (data) async {
       await playerInitialized.future;
+      debugPrint(data.toString());
       serverState = ServerState.fromJson(convertToJSData(data));
       onStateUpdate?.call(serverState!);
     });
@@ -236,7 +247,6 @@ class SocketDataSource {
       onPlayerExit?.call();
     });
     _socket!.on("opponent_exit", (data) {
-
       serverState = ServerState.fromJson(convertToJSData(data));
 
       onOpponentExit?.call(serverState!);
@@ -304,6 +314,7 @@ class SocketDataSource {
     onFastPingGets = null;
 
     serverState = null;
+    invitationLink = null;
 
     if (playerInitialized.isCompleted) {
       playerInitialized = Completer<void>();
@@ -317,9 +328,9 @@ class SocketDataSource {
   // -------------------------------------------------------
   bool get isConnected => _socket?.connected ?? false;
 
-  void joinGame(int mode) {
+  void joinGame(int numberOfPlayers) {
     if (_socket?.connected ?? false) {
-      _socket!.emit("join_game", {"gameMode": mode});
+      _socket!.emit("join_game", {"numberOfPlayers": numberOfPlayers});
     }
   }
 

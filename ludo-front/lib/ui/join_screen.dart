@@ -7,6 +7,8 @@ import 'package:ludo/ui/elements/board/board.dart';
 import 'package:ludo/ui/utils/animated_route.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
+enum GameMode { global, friendly }
+
 class JoinScreen extends StatefulWidget {
   const JoinScreen({super.key});
 
@@ -22,16 +24,26 @@ class _JoinScreenState extends State<JoinScreen> {
   void initState() {
     super.initState();
 
+    void connect() {
+      final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
+      if (startParam != null && startParam.startsWith("game_")) {
+        final gameId = startParam.replaceAll("game_", "");
+        gameController.connect(GameMode.friendly, gameId);
+      } else {
+        gameController.connect(GameMode.global, null);
+      }
+    }
+
     // ساخت کنترلر فقط یک‌بار
     gameController = GameController();
 
     if (TelegramWebApp.instance.isSupported) {
       TelegramWebApp.instance.ready();
       TelegramWebApp.instance.expand();
+      connect();
+    } else {
+      gameController.connect(GameMode.global, null);
     }
-
-    // اتصال سوکت فقط یک‌بار
-    gameController.connectToGame();
 
     // هندل قطع اتصال
     gameController.gameRepository.dataSource.onDisconnectCallback = () {
@@ -56,7 +68,11 @@ class _JoinScreenState extends State<JoinScreen> {
             await Future.delayed(const Duration(milliseconds: 50));
 
             if (mounted) {
-              gameController.connectToGame();
+              if (TelegramWebApp.instance.isSupported) {
+                connect();
+              } else {
+                gameController.connect(GameMode.global, null);
+              }
             }
           },
           textButton: "Reconnect",
@@ -163,19 +179,19 @@ class _JoinScreenState extends State<JoinScreen> {
                               children: [
                                 StartGameButton(
                                   gameController: gameController,
-                                  gameMode: 2,
+                                  numberOfPlayers: 2,
                                 ),
                                 const SizedBox(width: 10),
                                 StartGameButton(
                                   gameController: gameController,
-                                  gameMode: 4,
+                                  numberOfPlayers: 4,
                                 ),
                               ],
                             ),
                             const SizedBox(height: 10),
                             StartGameButton(
                               gameController: gameController,
-                              gameMode: -1,
+                              numberOfPlayers: -1,
                               onTap: () {
                                 setState(() {
                                   showFriendsOptions = !showFriendsOptions;
@@ -312,9 +328,15 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StartGameButton(gameController: widget.gameController, gameMode: -2),
+          StartGameButton(
+            gameController: widget.gameController,
+            numberOfPlayers: -2,
+          ),
           const SizedBox(width: 10),
-          StartGameButton(gameController: widget.gameController, gameMode: -4),
+          StartGameButton(
+            gameController: widget.gameController,
+            numberOfPlayers: -4,
+          ),
         ],
       ),
     );
@@ -325,34 +347,37 @@ class StartGameButton extends StatelessWidget {
   const StartGameButton({
     super.key,
     required this.gameController,
-    required this.gameMode,
+    required this.numberOfPlayers,
     this.onTap,
   });
 
   final VoidCallback? onTap;
 
-  final int gameMode;
+  final int numberOfPlayers;
   final GameController gameController;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        fixedSize: Size(gameMode == -1 ? 250 : 120, 50),
+        fixedSize: Size(numberOfPlayers == -1 ? 250 : 120, 50),
         elevation: 3,
-        backgroundColor: gameMode == -1 || gameMode == -2 || gameMode == -4
+        backgroundColor:
+            numberOfPlayers == -1 ||
+                numberOfPlayers == -2 ||
+                numberOfPlayers == -4
             ? Colors.amber
             : Colors.green,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
       onPressed: () {
-        if (gameMode == -1 && onTap != null) {
+        if (numberOfPlayers == -1 && onTap != null) {
           onTap!();
           return; // ⬅️ از ادامه‌ی اجرای منطق اتصال جلوگیری می‌کند
         }
         // اینجا callback را ست می‌کنیم تا مقدار gameMode درست باشد
         gameController.onFastPingGets = () async {
-          gameController.startGame(gameMode: gameMode);
+          gameController.startGame(numberOfPlayers: numberOfPlayers);
 
           showDialog(
             context: context,
@@ -397,7 +422,7 @@ class StartGameButton extends StatelessWidget {
             animatedRoute(
               page: Board(gameController: gameController),
               duration: Duration(seconds: 1),
-              type: RouteAnimation.slideFromBottom,
+              type: RouteAnimation.fade,
             ),
           );
         };
@@ -406,9 +431,9 @@ class StartGameButton extends StatelessWidget {
         gameController.getFastPing();
       },
       child: Text(
-        gameMode == -1
+        numberOfPlayers == -1
             ? "Friends"
-            : gameMode == 2||gameMode==-2
+            : numberOfPlayers == 2 || numberOfPlayers == -2
             ? "2 Players"
             : "4 Players",
         style: const TextStyle(color: Colors.white, height: 1.5),

@@ -162,7 +162,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
         }
         if (state.gameStatus == GameStatus.waitingForPlayer &&
             !_isWaitingDialogShown) {
-          debugPrint(state.gameStatus.toString());
           _isWaitingDialogShown = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
@@ -178,7 +177,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
             );
           });
         }
-        final gameMode = state.gameMode;
+        final gameMode = state.numberOfPlayers;
 
         final boardSize = (screenWidth < screenHeight
             ? screenWidth

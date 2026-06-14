@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 
 class WaitingForPlayersAlert extends StatefulWidget {
@@ -12,21 +13,24 @@ class WaitingForPlayersAlert extends StatefulWidget {
   final VoidCallback onExit;
 
   @override
-  State<WaitingForPlayersAlert> createState() =>
-      _WaitingForPlayersAlertState();
+  State<WaitingForPlayersAlert> createState() => _WaitingForPlayersAlertState();
 }
 
 class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
     with SingleTickerProviderStateMixin {
   late final AnimationController _rotationController;
+  late String? invitationLink;
 
   @override
   void initState() {
+    invitationLink =
+        widget.gameController.gameState!.serverState!.invitationLink;
     super.initState();
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..repeat();
+    )
+      ..repeat();
   }
 
   @override
@@ -37,13 +41,15 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery
+        .of(context)
+        .size;
     final boardSize = size.width < size.height
         ? size.width
         : size.height * 0.86;
 
     final state = widget.gameController.gameState?.serverState;
-    final gameMode = state?.gameMode ?? 2;
+    final gameMode = state?.numberOfPlayers ?? 2;
     final requiredPlayers = gameMode == -1 ? 2 : gameMode;
 
     return ListenableBuilder(
@@ -68,10 +74,7 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                     width: boardSize * 0.012,
                   ),
                   gradient: const SweepGradient(
-                    colors: [
-                      Colors.transparent,
-                      Colors.white,
-                    ],
+                    colors: [Colors.transparent, Colors.white],
                   ),
                 ),
               ),
@@ -95,7 +98,9 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
             // نمایش تعداد بازیکنان فعلی / مورد نیاز
             Container(
               padding: EdgeInsets.symmetric(
-                horizontal:requiredPlayers==2? boardSize * 0.06: boardSize * 0.03,
+                horizontal: requiredPlayers == 2
+                    ? boardSize * 0.06
+                    : boardSize * 0.03,
                 vertical: boardSize * 0.025,
               ),
               decoration: BoxDecoration(
@@ -108,13 +113,19 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                   final isJoined = index < currentPlayers;
                   return Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal:requiredPlayers==2? boardSize * 0.015:boardSize * 0.005,
+                      horizontal: requiredPlayers == 2
+                          ? boardSize * 0.015
+                          : boardSize * 0.005,
                     ),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 400),
                       curve: Curves.easeOutBack,
-                      width:requiredPlayers==2? boardSize * 0.09:boardSize*0.08,
-                      height:requiredPlayers==2? boardSize * 0.09:boardSize*0.08,
+                      width: requiredPlayers == 2
+                          ? boardSize * 0.09
+                          : boardSize * 0.08,
+                      height: requiredPlayers == 2
+                          ? boardSize * 0.09
+                          : boardSize * 0.08,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isJoined
@@ -144,7 +155,44 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
             ),
 
             SizedBox(height: boardSize * 0.025),
-
+            if (invitationLink != null) ...[
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: boardSize * 0.05),
+                padding: EdgeInsets.symmetric(
+                  horizontal: boardSize * 0.03,
+                  vertical: boardSize * 0.015,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(boardSize * 0.02),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        invitationLink!,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: boardSize * 0.03,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, color: Colors.white),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: invitationLink!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Link copied to clipboard!')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: boardSize * 0.025),
+            ],
             // دکمه خروج
             ElevatedButton(
               onPressed: widget.onExit,

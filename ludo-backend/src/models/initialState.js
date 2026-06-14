@@ -29,9 +29,15 @@ const addPlayerToGameState = (newPlayer, gameId) => {
   }
 };
 
-const createGameInGameState = (gameId, gameMode) => {
+const createGameInGameState = (gameId, numberOfPlayers) => {
+  let invitationLink = null;
   let tokens;
-  if (gameMode === 2) {
+  if (numberOfPlayers < 0) {
+    const botUsername = "ludo_miniApp_bot";
+    const appShortName = "ludo";
+    invitationLink = `https://t.me/${botUsername}/${appShortName}?startapp=game_${gameId}`;
+  }
+  if (numberOfPlayers === 2) {
     tokens = [
       { id: 1, position: -1, color: "red" },
       { id: 2, position: -1, color: "red" },
@@ -71,7 +77,9 @@ const createGameInGameState = (gameId, gameMode) => {
     winner: null,
     players: [],
     tokens: tokens,
-    game_mode: gameMode,
+    number_of_players: numberOfPlayers > 0 ? numberOfPlayers : -numberOfPlayers,
+    invitationLink: invitationLink,
+    game_mode: numberOfPlayers>0?'global':'friendly',
   });
   return getGameState(gameId);
 };

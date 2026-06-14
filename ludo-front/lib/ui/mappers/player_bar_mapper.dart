@@ -173,7 +173,7 @@ class PlayerBarUsernameContainer extends StatelessWidget {
     ServerState state = gameController.gameState!.serverState!;
     PlayerColor playerColor = recognitionPlayerColor(
       playerIndex,
-      state.gameMode,
+      state.numberOfPlayers,
     );
     Text usernameStatusPicker() {
       if (state.players.length < playerIndex + 1) {
@@ -193,13 +193,13 @@ class PlayerBarUsernameContainer extends StatelessWidget {
               color: playerUserNameBoxColor(
                 gameController,
                 playerIndex,
-                state.gameMode,
+                state.numberOfPlayers,
               ),
               decoration: TextDecoration.none,
               fontSize: barHeight * 0.4,
               shadows: [
                 state.currentTurn ==
-                        recognitionPlayerColor(playerIndex, state.gameMode)
+                        recognitionPlayerColor(playerIndex, state.numberOfPlayers)
                     ? BoxShadow(
                         color: Colors.black54,
                         offset: Offset(-0.5, 0.5),
@@ -266,7 +266,7 @@ class PlayerBarUsernameContainer extends StatelessWidget {
                 color: playerUserNameBoxColor(
                   gameController,
                   playerIndex,
-                  state.gameMode,
+                  state.numberOfPlayers,
                 ),
                 width: boardSize * 0.004,
               ),

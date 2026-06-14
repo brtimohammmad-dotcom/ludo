@@ -7,6 +7,7 @@ import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/domain/rules/token_rules.dart';
+import 'package:ludo/ui/join_screen.dart';
 
 extension GameStateX on GameState {
   GameState toggleTurn() {
@@ -173,9 +174,9 @@ class GameController extends ChangeNotifier {
 
     // opponent exit
 
-    ds.onOpponentExit=(ServerState state){
+    ds.onOpponentExit = (ServerState state) {
       final newLivePlayer = state.players.firstWhere(
-            (p) => p.userId == gameState!.livePlayer!.userId,
+        (p) => p.userId == gameState!.livePlayer!.userId,
         orElse: () => gameState!.livePlayer!,
       );
 
@@ -268,9 +269,9 @@ class GameController extends ChangeNotifier {
   // -------------------------------------------------
   // PUBLIC API
   // -------------------------------------------------
-  void startGame({required int gameMode}) {
+  void startGame({required int numberOfPlayers}) {
     if (_isDisposed) return;
-    gameRepository.startGame(gameMode);
+    gameRepository.startGame(numberOfPlayers);
   }
 
   void getFastPing() {
@@ -280,9 +281,9 @@ class GameController extends ChangeNotifier {
     gameRepository.getFastPing();
   }
 
-  void connectToGame() {
+  void connect(GameMode mode, String? gameId) {
     if (_isDisposed) return;
-    gameRepository.connect();
+    gameRepository.connect(mode, gameId);
   }
 
   void moveToken(Token liveToken) {

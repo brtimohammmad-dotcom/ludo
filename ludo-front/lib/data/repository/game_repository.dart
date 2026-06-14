@@ -1,17 +1,18 @@
 import 'package:ludo/data/data-source/socket_data_source.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/ui/join_screen.dart';
 
 class GameRepository {
   final SocketDataSource dataSource;
 
   GameRepository(this.dataSource);
 
-  void connect() {
-    dataSource.connectToGame();
+  void connect(GameMode mode,String? gameId) {
+    dataSource.connect(mode,gameId);
   }
 
-  void startGame(int gameMode) {
-    dataSource.joinGame(gameMode);
+  void startGame(int numberOfPlayers) {
+    dataSource.joinGame(numberOfPlayers);
   }
 
   void rollDice() {

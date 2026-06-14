@@ -91,13 +91,17 @@ function startTimer(socket, io) {
             players: updatedPlayers,
           });
           const winnerGameState = initialState.getGameState(socket.data.gameId);
-          await updateGameState(socket.data.gameId, {
-            game_status: "finished",
-            players: winnerGameState.players,
+          await updateGameState(
+            socket.data.gameId,
+            {
+              game_status: "finished",
+              players: winnerGameState.players,
 
-            winner: onlinePlayer,
-            end_at: new Date(),
-          });
+              winner: onlinePlayer,
+              end_at: new Date(),
+            },
+            winnerGameState.game_mode,
+          );
 
           // ⭐ پاک کردن تایمر
 

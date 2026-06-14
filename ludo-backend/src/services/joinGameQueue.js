@@ -1,7 +1,7 @@
 const locks = new Map();
 
-async function joinGameQueue(gameMode, callback) {
-  const currentLock = locks.get(gameMode) || Promise.resolve();
+async function joinGameQueue(numberOfPlayers, callback) {
+  const currentLock = locks.get(numberOfPlayers) || Promise.resolve();
 
   let release;
 
@@ -10,7 +10,7 @@ async function joinGameQueue(gameMode, callback) {
   });
 
   locks.set(
-    gameMode,
+    numberOfPlayers,
     currentLock.then(() => nextLock),
   );
 
@@ -21,8 +21,8 @@ async function joinGameQueue(gameMode, callback) {
   } finally {
     release();
 
-    if (locks.get(gameMode) === nextLock) {
-      locks.delete(gameMode);
+    if (locks.get(numberOfPlayers) === nextLock) {
+      locks.delete(numberOfPlayers);
     }
   }
 }
