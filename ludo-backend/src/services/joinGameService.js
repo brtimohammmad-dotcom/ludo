@@ -27,8 +27,8 @@ async function handleJoinGame(numberOfPlayers, socket) {
         .find(
           (g) =>
             g.game_status === "waitingForPlayer" &&
-            g.number_of_players === numberOfPlayers&&
-            g.game_mode==="global",
+            g.number_of_players === numberOfPlayers &&
+            g.game_mode === "global",
         );
       if (!game) {
         game = await createNewGameInDatabase(numberOfPlayers);
@@ -63,7 +63,7 @@ async function handleJoinGame(numberOfPlayers, socket) {
           player,
           game.game_id,
           color,
-          game.game_mode
+          game.game_mode,
         );
         const correctPlayer = {
           ...playerInDataBase,
@@ -94,7 +94,7 @@ async function handleJoinGame(numberOfPlayers, socket) {
         numberOfPlayers === -2 ? TOW_PLAYER_COLORS[0] : FOUR_PLAYER_COLORS[0];
 
       // ۴. اضافه کردن سازنده بازی به دیتابیس بازی
-      
+
       const playerInDataBase = await addPlayerToGameOnDatabase(
         player,
         room.game_id,
@@ -123,18 +123,15 @@ async function handleJoinGame(numberOfPlayers, socket) {
 }
 async function handleJoinGameFriendly(socket) {
   return await joinGameQueue(socket.data.gameId, async () => {
-   let game = initialState.getGameState(socket.data.gameId);
-   if(game.game_status==='start'){
-    
-   }
-    const players =game.players;
+    let game = initialState.getGameState(socket.data.gameId);
+    debugPrint(game);
+    const players = game.players;
     const playerIsInGame = players.some(
       (p) => p.telegram_id === socket.data.telegramId,
     );
     if (playerIsInGame) {
       const correctPlayers = game.players.map((p) => {
         if (p.telegram_id === socket.data.telegramId) {
-          
           return { ...p, player_status: "online" };
         } else {
           return p;
@@ -146,6 +143,9 @@ async function handleJoinGameFriendly(socket) {
       game = initialState.getGameState(game.game_id);
       return { game: game };
     } else {
+      //  if(game.game_status==='start'){
+      //   socket.emit("game_already_started")
+      //  }
       const color =
         numberOfPlayers === 2
           ? TOW_PLAYER_COLORS[players.length]
@@ -155,7 +155,7 @@ async function handleJoinGameFriendly(socket) {
         player,
         game.game_id,
         color,
-        game.game_mode
+        game.game_mode,
       );
       const correctPlayer = {
         ...playerInDataBase,
