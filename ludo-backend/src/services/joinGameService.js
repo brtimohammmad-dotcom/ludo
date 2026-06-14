@@ -7,6 +7,7 @@ const {
 } = require("../constants/gameConfig");
 const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
 const { updateGameState } = require("../database/games");
+const { error } = require("node:console");
 
 async function handleJoinGame(numberOfPlayers, socket, io) {
   console.log("player id: ", socket.data.telegramId, " joined");
@@ -128,7 +129,9 @@ async function handleJoinGameFriendly(socket, io) {
       telegram_id: socket.data.telegramId,
     };
     let game = initialState.getGameState(socket.data.gameId);
-    console.log(game);
+    if(!game){
+      socket.emit("error","game deleted")
+    }
     const players = game.players;
     const playerIsInGame = players.some(
       (p) => p.telegram_id === socket.data.telegramId,
