@@ -283,7 +283,7 @@ async function handleExitingGame(socket, io) {
         players: currentGame.players,
         end_at: new Date(),
       },
-      currentGame.game.game_mode,
+      currentGame.game_mode,
     );
     initialState.deleteGameState(socket.data.gameId);
   }
@@ -307,7 +307,7 @@ async function handleExitingGame(socket, io) {
         players: winnerGameState.players,
         end_at: new Date(),
       },
-      currentGame.game.game_mode,
+      currentGame.game_mode,
     );
     stopTimer(socket.data.gameId);
     io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
