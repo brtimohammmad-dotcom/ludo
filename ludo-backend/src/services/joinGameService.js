@@ -153,7 +153,7 @@ async function handleJoinGameFriendly(socket, io) {
       //   socket.emit("game_already_started");
       // }
       const color =
-        game.numberOfPlayers === 2
+        game.number_of_players === 2
           ? TOW_PLAYER_COLORS[players.length]
           : FOUR_PLAYER_COLORS[players.length];
 
