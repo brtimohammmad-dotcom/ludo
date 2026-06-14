@@ -27,7 +27,8 @@ async function handleJoinGame(numberOfPlayers, socket) {
         .find(
           (g) =>
             g.game_status === "waitingForPlayer" &&
-            g.number_of_players === numberOfPlayers,
+            g.number_of_players === numberOfPlayers&&
+            g.game_mode==="global",
         );
       if (!game) {
         game = await createNewGameInDatabase(numberOfPlayers);

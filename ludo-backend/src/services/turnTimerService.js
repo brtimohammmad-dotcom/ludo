@@ -37,7 +37,7 @@ function startTimer(socket, io) {
     }
 
     let colorIdx =
-      game.game_mode === 4
+      game.number_of_players === 4
         ? FOUR_PLAYER_COLORS.indexOf(game.current_turn)
         : TOW_PLAYER_COLORS.indexOf(game.current_turn);
     let delayedPlayer = null;
@@ -74,7 +74,9 @@ function startTimer(socket, io) {
       ).length;
 
       // اگر 3 نفر آفلاین شدند
-      if (game.game_mode === 4 ? offlineCount === 3 : offlineCount === 1) {
+      if (
+        game.number_of_players === 4 ? offlineCount === 3 : offlineCount === 1
+      ) {
         const onlinePlayer = updatedPlayers.find(
           (p) => p.player_status === "online",
         );
@@ -122,18 +124,18 @@ function startTimer(socket, io) {
 
     // پیدا کردن نفر بعدی (که آفلاین نباشد)
     let nextPlayerIndex =
-      game.game_mode === 4 ? (colorIdx + 1) % 4 : (colorIdx + 1) % 2;
+      game.number_of_players === 4 ? (colorIdx + 1) % 4 : (colorIdx + 1) % 2;
     let checkedCount = 0;
 
     while (
       game.players[nextPlayerIndex].player_status === "offline" &&
-      checkedCount < game.game_mode
+      checkedCount < game.number_of_players
     ) {
-      game.game_mode === 4 ? (colorIdx + 1) % 4 : (colorIdx + 1) % 2;
+      game.number_of_players === 4 ? (colorIdx + 1) % 4 : (colorIdx + 1) % 2;
       checkedCount++;
 
       // اگر همه آفلاین شدند (ایمنی)
-      if (game.game_mode) {
+      if (game.number_of_players) {
         console.log(`All players offline for game ${socket.data.gameId}`);
 
         // همه آفلاین هستند، بازی را تمام کن
@@ -156,9 +158,9 @@ function startTimer(socket, io) {
     // به‌روزرسانی نوبت
     initialState.updateGameState(socket.data.gameId, {
       current_turn:
-        game.game_mode === 4
-          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.game_mode]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % game.game_mode],
+        game.number_of_players === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
+          : TOW_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players],
       turn_status: "waitingForRoll",
       players: updatedPlayers,
     });
@@ -167,9 +169,9 @@ function startTimer(socket, io) {
     io.to(socket.data.gameId).emit("times_up", game);
     console.log(
       `Turn changed to ${
-        game.game_mode === 4
-          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.game_mode]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % game.game_mode]
+        game.number_of_players === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
+          : TOW_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
       } for game ${socket.data.gameId}`,
     );
   }, time * 1000);

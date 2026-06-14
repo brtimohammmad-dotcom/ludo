@@ -143,7 +143,7 @@ class SocketDataSource {
       dynamic initData;
 
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 2};
+        initData = {"first_name": "amir", "id": 4};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();

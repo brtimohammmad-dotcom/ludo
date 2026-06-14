@@ -37,7 +37,7 @@ function handleRollDice(socket, io) {
   try {
     // بررسی نوبت بازیکن
     let colorIdx =
-      gameState.game_mode === 4
+      gameState.number_of_players === 4
         ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
         : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
     if (
@@ -65,15 +65,15 @@ function handleRollDice(socket, io) {
       updates.turn_status = "waitingForRoll";
     } else {
       while (
-        gameState.players[(colorIdx + 1) % gameState.game_mode]
+        gameState.players[(colorIdx + 1) % gameState.number_of_players]
           .player_status === "offline"
       ) {
         colorIdx = colorIdx + 1;
       }
       updates.current_turn =
-        gameState.game_mode === 4
-          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode];
+        gameState.number_of_players === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
+          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
       updates.turn_status = "waitingForRoll";
       changePlayer = true;
     }
@@ -133,7 +133,7 @@ function handleMoveToken(socket, token, io) {
   try {
     const currentToken = gameState.tokens[tokenIndex];
     let colorIdx =
-      gameState.game_mode === 4
+      gameState.number_of_players === 4
         ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
         : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
 
@@ -181,15 +181,15 @@ function handleMoveToken(socket, token, io) {
       updates.turn_status = "waitingForRoll";
     } else {
       while (
-        gameState.players[(colorIdx + 1) % gameState.game_mode]
+        gameState.players[(colorIdx + 1) % gameState.number_of_players]
           .player_status === "offline"
       ) {
         colorIdx = colorIdx + 1;
       }
       updates.current_turn =
-        gameState.game_mode === 4
-          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.game_mode];
+        gameState.number_of_players === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
+          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
       updates.turn_status = "waitingForRoll";
     }
 
@@ -241,7 +241,7 @@ function handleMoveToken(socket, token, io) {
             players: winnerGameState.players,
             end_at: new Date(),
           },
-          winnerGameState.game_mode,
+          winnerGameState.game.game_mode,
         );
         stopTimer(socket.data.gameId);
         io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
@@ -283,7 +283,7 @@ async function handleExitingGame(socket, io) {
         players: currentGame.players,
         end_at: new Date(),
       },
-      currentGame.game_mode,
+      currentGame.game.game_mode,
     );
     initialState.deleteGameState(socket.data.gameId);
   }
@@ -307,7 +307,7 @@ async function handleExitingGame(socket, io) {
         players: winnerGameState.players,
         end_at: new Date(),
       },
-      currentGame.game_mode,
+      currentGame.game.game_mode,
     );
     stopTimer(socket.data.gameId);
     io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
