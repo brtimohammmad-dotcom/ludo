@@ -241,7 +241,7 @@ function handleMoveToken(socket, token, io) {
             players: winnerGameState.players,
             end_at: new Date(),
           },
-          winnerGameState.game.game_mode,
+          winnerGameState.game_mode,
         );
         stopTimer(socket.data.gameId);
         io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
