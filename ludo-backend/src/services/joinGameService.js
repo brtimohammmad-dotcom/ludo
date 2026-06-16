@@ -124,6 +124,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
   });
 }
 async function handleJoinGameFriendly(socket, io) {
+  console.log("joining game friendly");
   return await joinGameQueue(socket.data.gameId, async () => {
     const player = {
       username: socket.data.firstName,
@@ -131,9 +132,6 @@ async function handleJoinGameFriendly(socket, io) {
     };
     try {
       let game = initialState.getGameState(socket.data.gameId);
-      if (!game) {
-        return;
-      }
       const players = game.players;
       const playerIsInGame = players.some(
         (p) => p.telegram_id === socket.data.telegramId,
