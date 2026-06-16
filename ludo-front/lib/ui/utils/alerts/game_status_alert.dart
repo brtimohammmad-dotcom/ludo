@@ -44,7 +44,7 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
     try {
       // پیدا کردن بخش game_ و استخراج آیدی بعد از آن
       final RegExp regExp = RegExp(
-        RegexPattern.friendlyGameIdFromLink ?? r'game_(.+)',
+        RegexPattern.friendlyGameIdFromLink,
       );
       final match = regExp.firstMatch(link);
       if (match != null && match.group(1) != null) {
@@ -186,16 +186,19 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    // 🎯 فرمت جادویی برای باز کردن پاپ‌آپ شیکِ اشتراک‌گذاری در داخل خود مینی‌اپ
-                    // این متد بدون خروج از برنامه، یک منوی گفتگوهای اخیر را از پایین صفحه بالا می‌آورد
+                    // ۱. ساختن متنی که می‌خواهی همراه با لینک فرستاده شود
                     final String msg = "🎲 من یک اتاق بازی منچ ایجاد کردم! بیا با هم بازی کنیم.\n\n"
                         "برای ورود مستقیم روی لینک زیر کلیک کن:\n$invitationLink";
 
                     final String encodedMsg = Uri.encodeComponent(msg);
-                    final String shareUrl = "tg://msg_url?url=$invitationLink&text=$encodedMsg";
 
-                    // باز کردن مستقیم در محیط تلگرام
-                    TelegramWebApp.instance.openTelegramLink(shareUrl);
+                    // ۲. لینک اشتراک‌گذاری استاندارد وب تلگرام
+                    final String webShareUrl = "https://t.me/share/url?url=${Uri.encodeComponent(invitationLink!)}&text=$encodedMsg";
+
+                    // 🎯 جادو اینجاست: به جای openTelegramLink از openLink استفاده می‌کنیم
+                    // این متد پاپ‌آپ بومی خود تلگرام را بدون بستن یا کرش کردن مینی‌اپ باز می‌کند
+                    TelegramWebApp.instance.openLink(webShareUrl);
+
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
