@@ -181,6 +181,9 @@ class GameController extends ChangeNotifier {
               TelegramWebApp.instance.close();
             },
           );
+        }else{
+          onPlayerExit?.call();
+          notifyListeners();
         }
       } else {
         onPlayerExit?.call();

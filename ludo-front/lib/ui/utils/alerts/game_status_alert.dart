@@ -30,8 +30,7 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )
-      ..repeat();
+    )..repeat();
   }
 
   @override
@@ -44,7 +43,9 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
   String _getInlineCopyText(String link) {
     try {
       // پیدا کردن بخش game_ و استخراج آیدی بعد از آن
-      final RegExp regExp = RegExp(RegexPattern.friendlyGameIdFromLink ?? r'game_(.+)');
+      final RegExp regExp = RegExp(
+        RegexPattern.friendlyGameIdFromLink ?? r'game_(.+)',
+      );
       final match = regExp.firstMatch(link);
       if (match != null && match.group(1) != null) {
         final gameId = match.group(1);
@@ -60,11 +61,15 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final boardSize = size.width < size.height ? size.width : size.height * 0.86;
+    final boardSize = size.width < size.height
+        ? size.width
+        : size.height * 0.86;
 
     final state = widget.gameController.gameState?.serverState;
     final gameMode = state?.numberOfPlayers ?? 2;
-    final requiredPlayers = gameMode < 0 ? -gameMode : (gameMode == -1 ? 2 : gameMode);
+    final requiredPlayers = gameMode < 0
+        ? -gameMode
+        : (gameMode == -1 ? 2 : gameMode);
 
     return ListenableBuilder(
       listenable: widget.gameController,
@@ -117,7 +122,9 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
             // نمایش گرافیکی وضعیت جایگاه صندلی بازیکنان
             Container(
               padding: EdgeInsets.symmetric(
-                horizontal: requiredPlayers == 2 ? boardSize * 0.06 : boardSize * 0.03,
+                horizontal: requiredPlayers == 2
+                    ? boardSize * 0.06
+                    : boardSize * 0.03,
                 vertical: boardSize * 0.025,
               ),
               decoration: BoxDecoration(
@@ -130,16 +137,24 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                   final isJoined = index < currentPlayers;
                   return Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: requiredPlayers == 2 ? boardSize * 0.015 : boardSize * 0.005,
+                      horizontal: requiredPlayers == 2
+                          ? boardSize * 0.015
+                          : boardSize * 0.005,
                     ),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 400),
                       curve: Curves.easeOutBack,
-                      width: requiredPlayers == 2 ? boardSize * 0.09 : boardSize * 0.08,
-                      height: requiredPlayers == 2 ? boardSize * 0.09 : boardSize * 0.08,
+                      width: requiredPlayers == 2
+                          ? boardSize * 0.09
+                          : boardSize * 0.08,
+                      height: requiredPlayers == 2
+                          ? boardSize * 0.09
+                          : boardSize * 0.08,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isJoined ? Colors.green.shade600 : Colors.grey.shade300,
+                        color: isJoined
+                            ? Colors.green.shade600
+                            : Colors.grey.shade300,
                       ),
                       child: Icon(
                         isJoined ? Icons.person : Icons.person_outline,
@@ -171,9 +186,19 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    TelegramWebApp.instance.openTelegramLink(invitationLink!);
+                    // 🧠 استخراج شناسه بازی از انتهای لینک شما
+                    final String gameId = invitationLink!.split('game_').last;
+
+                    // 🎯 روش رسمی و نیتیو تلگرام برای باز کردن پاپ‌آپ شیر اینلاین
+                    // این متد چت‌ها را باز کرده و خودکار عبارت زیر را تایپ می‌کند:
+                    // @ludo_miniApp_bot game_123
+                    TelegramWebApp.instance.switchInlineQuery("game_$gameId", [
+                      ChatType.users,
+                      ChatType.channels,
+                      ChatType.groups,
+                    ]);
                   } else {
-                    debugPrint("خارج از تلگرام: لینک باز نمیشود -> $invitationLink");
+                    debugPrint("خارج از تلگرام: $invitationLink");
                   }
                 },
                 icon: const Icon(Icons.share, color: Colors.black87),
@@ -222,15 +247,25 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.copy, color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.copy,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: inlineDisplayAndCopyText));
+                        Clipboard.setData(
+                          ClipboardData(text: inlineDisplayAndCopyText),
+                        );
 
                         if (TelegramWebApp.instance.isSupported) {
-                          TelegramWebApp.instance.showAlert("Inline code copied! Paste it in any chat.");
+                          TelegramWebApp.instance.showAlert(
+                            "Inline code copied! Paste it in any chat.",
+                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Code copied to clipboard!')),
+                            const SnackBar(
+                              content: Text('Code copied to clipboard!'),
+                            ),
                           );
                         }
                       },
