@@ -34,7 +34,6 @@ class _JoinScreenState extends State<JoinScreen> {
       }
     }
 
-    // ساخت کنترلر فقط یک‌بار
     gameController = GameController();
 
     if (TelegramWebApp.instance.isSupported) {
