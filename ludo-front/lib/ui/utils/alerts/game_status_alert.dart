@@ -186,17 +186,16 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    // 🧠 استخراج شناسه بازی از انتهای لینک شما
-                    final String gameId = invitationLink!.split('game_').last;
+                    // 🎯 فرمت جادویی برای باز کردن پاپ‌آپ شیکِ اشتراک‌گذاری در داخل خود مینی‌اپ
+                    // این متد بدون خروج از برنامه، یک منوی گفتگوهای اخیر را از پایین صفحه بالا می‌آورد
+                    final String msg = "🎲 من یک اتاق بازی منچ ایجاد کردم! بیا با هم بازی کنیم.\n\n"
+                        "برای ورود مستقیم روی لینک زیر کلیک کن:\n$invitationLink";
 
-                    // 🎯 روش رسمی و نیتیو تلگرام برای باز کردن پاپ‌آپ شیر اینلاین
-                    // این متد چت‌ها را باز کرده و خودکار عبارت زیر را تایپ می‌کند:
-                    // @ludo_miniApp_bot game_123
-                    TelegramWebApp.instance.switchInlineQuery("game_$gameId", [
-                      ChatType.users,
-                      ChatType.channels,
-                      ChatType.groups,
-                    ]);
+                    final String encodedMsg = Uri.encodeComponent(msg);
+                    final String shareUrl = "tg://msg_url?url=$invitationLink&text=$encodedMsg";
+
+                    // باز کردن مستقیم در محیط تلگرام
+                    TelegramWebApp.instance.openTelegramLink(shareUrl);
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
