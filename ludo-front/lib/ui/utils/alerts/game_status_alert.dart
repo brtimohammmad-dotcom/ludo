@@ -43,9 +43,7 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
   String _getInlineCopyText(String link) {
     try {
       // پیدا کردن بخش game_ و استخراج آیدی بعد از آن
-      final RegExp regExp = RegExp(
-        RegexPattern.friendlyGameIdFromLink,
-      );
+      final RegExp regExp = RegExp(RegexPattern.friendlyGameIdFromLink);
       final match = regExp.firstMatch(link);
       if (match != null && match.group(1) != null) {
         final gameId = match.group(1);
@@ -186,19 +184,21 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    // ۱. ساختن متنی که می‌خواهی همراه با لینک فرستاده شود
-                    final String msg = "🎲 من یک اتاق بازی منچ ایجاد کردم! بیا با هم بازی کنیم.\n\n"
-                        "برای ورود مستقیم روی لینک زیر کلیک کن:\n$invitationLink";
+                    // ۱. استخراج امن شناسه بازی از روی لینک دعوت
+                    final String gameId = invitationLink!.split('game_').last;
 
-                    final String encodedMsg = Uri.encodeComponent(msg);
+                    // ۲. فرمت کردن به صورت دستور اینلاین ربات شما (همان مقداری که کدهای نودجی‌اس منتظرش هستند)
+                    final String inlineQueryText =
+                        "@ludo_miniApp_bot game_$gameId";
 
-                    // ۲. لینک اشتراک‌گذاری استاندارد وب تلگرام
-                    final String webShareUrl = "https://t.me/share/url?url=${Uri.encodeComponent(invitationLink!)}&text=$encodedMsg";
+                    // ۳. ساخت لینک پاپ‌آپ نیتیو تلگرام
+                    // ارسال دستور اینلاین به پارامتر url باعث می‌شود پاپ‌آپ داخلی گفتگوها باز شده
+                    // و بلافاصله سیستم اینلاین ربات شما فعال شود تا کارت زنده تشکیل شود.
+                    final String webShareUrl =
+                        "https://t.me/share/url?url=${Uri.encodeComponent(inlineQueryText)}";
 
-                    // 🎯 جادو اینجاست: به جای openTelegramLink از openLink استفاده می‌کنیم
-                    // این متد پاپ‌آپ بومی خود تلگرام را بدون بستن یا کرش کردن مینی‌اپ باز می‌کند
+                    // ۴. باز کردن پاپ‌آپ بدون خروج از مینی‌اپ
                     TelegramWebApp.instance.openLink(webShareUrl);
-
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
