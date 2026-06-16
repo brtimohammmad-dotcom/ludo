@@ -45,7 +45,6 @@ class _JoinScreenState extends State<JoinScreen> {
       gameController.connect(GameMode.global, null);
     }
     gameController.onGameReady = () {
-      debugPrint("on game ready called");
       if (Navigator.canPop(context)) Navigator.pop(context);
       if (!gameController.isInBoard) {
         Navigator.push(
