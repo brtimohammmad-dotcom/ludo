@@ -1,5 +1,5 @@
 const { Telegraf, Markup } = require("telegraf");
-const initialState = require("./models/initialState"); // ⚠️ حتماً مسیر این فایل رو با پروژه خودت چک کن
+const initialState = require("./src/models/initialState");
 
 // توکن ربات شما
 const bot = new Telegraf(
