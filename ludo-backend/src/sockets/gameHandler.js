@@ -77,13 +77,17 @@ module.exports = (io) => {
         return;
       }
 
+      console.log(socket.data.telegramId)
       const player = {
         telegram_id: socket.data.telegramId,
         username: socket.data.firstName,
       };
-
+console.log(player.telegram_id)
       // 1) بررسی اینکه آیا بازیکن در بازی‌ای وجود دارد یا نه
-      const result = await hasExistGame(player, socket.id);
+      const result = await hasExistGame({
+        player: player,
+        socketId: socket.id,
+      });
 
       const existingGame = result.game;
       const currentPlayer = result.player;
@@ -92,7 +96,6 @@ module.exports = (io) => {
       if (!existingGame) {
         if (gameMode && gameId && gameMode === "friendly") {
           socket.data.gameId = gameId;
-
         }
         if (!socket.data.gameId) {
           return;
