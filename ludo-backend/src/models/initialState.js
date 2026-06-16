@@ -32,12 +32,17 @@ const addPlayerToGameState = (newPlayer, gameId) => {
 const createGameInGameState = (gameId, numberOfPlayers) => {
   let invitationLink = null;
   let tokens;
+
+  // ----------------------------------------------------
+  // 🎯 اصلاح ساخت لینک دعوت برای حالت عمومی اینلاین (گروه، پی‌وی، کانال)
+  // ----------------------------------------------------
   if (numberOfPlayers < 0) {
     const botUsername = "ludo_miniApp_bot";
-    const appShortName = "ludo";
-    invitationLink = `https://t.me/${botUsername}/${appShortName}?startapp=game_${gameId}`;
+    // استفاده از startinline به کاربر اجازه می‌دهد بازی را در هر جایی (حتی پی‌وی دوستانش) به اشتراک بگذارد
+    invitationLink = `https://t.me/${botUsername}?startinline=game_${gameId}`;
   }
-  if (numberOfPlayers === 2) {
+
+  if (numberOfPlayers === 2 || numberOfPlayers === -2) {
     tokens = [
       { id: 1, position: -1, color: "red" },
       { id: 2, position: -1, color: "red" },
@@ -68,6 +73,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
       { id: 16, position: -1, color: "green" },
     ];
   }
+
   setGameState(gameId, {
     game_id: gameId,
     last_dice_value: 1,
@@ -79,8 +85,10 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
     tokens: tokens,
     number_of_players: numberOfPlayers > 0 ? numberOfPlayers : -numberOfPlayers,
     invitationLink: invitationLink,
-    game_mode: numberOfPlayers>0?'global':'friendly',
+    game_mode: numberOfPlayers > 0 ? "global" : "friendly",
+    inline_message_id: null, // 🧠 فیلد جدید برای ذخیره کلید پیام اینلاین جهت آپدیت‌های داینامیک دکمه بازی
   });
+
   return getGameState(gameId);
 };
 
