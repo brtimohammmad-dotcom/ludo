@@ -185,11 +185,11 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
                     // ۱. استخراج امن شناسه بازی از روی لینک دعوت
-                    final String gameId = invitationLink!.split('game_').last;
+                    final String gameId = invitationLink!.split('game_').last.trim();
 
                     // ۲. فرمت کردن به صورت دستور اینلاین ربات شما (همان مقداری که کدهای نودجی‌اس منتظرش هستند)
                     final String inlineQueryText =
-                        "@ludo_miniApp_bot game_$gameId";
+                        "@ludo_miniApp_bot game_$gameId".trim();
 
                     // ۳. ساخت لینک پاپ‌آپ نیتیو تلگرام
                     // ارسال دستور اینلاین به پارامتر url باعث می‌شود پاپ‌آپ داخلی گفتگوها باز شده
