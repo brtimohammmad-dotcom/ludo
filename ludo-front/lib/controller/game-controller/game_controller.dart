@@ -8,6 +8,7 @@ import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/domain/rules/token_rules.dart';
 import 'package:ludo/ui/join_screen.dart';
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 extension GameStateX on GameState {
   GameState toggleTurn() {
@@ -171,8 +172,20 @@ class GameController extends ChangeNotifier {
 
     ds.onPlayerExit = () {
       if (_isDisposed) return;
-      onPlayerExit?.call();
-      notifyListeners();
+      if (TelegramWebApp.instance.isSupported) {
+        final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
+        if (startParam != null && startParam.startsWith("game_")) {
+          TelegramWebApp.instance.showAlert(
+            "You have left the friendly match room. The game will now close.\nif you want to play another game, go to bot",
+            () {
+              TelegramWebApp.instance.close();
+            },
+          );
+        }
+      } else {
+        onPlayerExit?.call();
+        notifyListeners();
+      }
     };
 
     // opponent exit

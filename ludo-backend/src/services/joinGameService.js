@@ -8,6 +8,7 @@ const {
 const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
 const { updateGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
+const { error } = require("node:console");
 
 async function handleJoinGame(numberOfPlayers, socket, io) {
   console.log("player id: ", socket.data.telegramId, " joined");
@@ -128,52 +129,53 @@ async function handleJoinGameFriendly(socket, io) {
       username: socket.data.firstName,
       telegram_id: socket.data.telegramId,
     };
-    let game = initialState.getGameState(socket.data.gameId);
-    if (!game) {
-      socket.emit("error", "game deleted");
-    }
-    const players = game.players;
-    const playerIsInGame = players.some(
-      (p) => p.telegram_id === socket.data.telegramId,
-    );
-    if (playerIsInGame) {
-      const correctPlayers = game.players.map((p) => {
-        if (p.telegram_id === socket.data.telegramId) {
-          return { ...p, player_status: "online" };
-        } else {
-          return p;
-        }
-      });
-      initialState.updateGameState(game.game_id, {
-        players: correctPlayers,
-      });
-      game = initialState.getGameState(game.game_id);
-    } else {
-      // if (game.game_status === "start") {
-      //   socket.emit("game_already_started");
-      // }
-      const color =
-        game.number_of_players === 2
-          ? TOW_PLAYER_COLORS[players.length]
-          : FOUR_PLAYER_COLORS[players.length];
-
-      const playerInDataBase = await addPlayerToGameOnDatabase(
-        player,
-        game.game_id,
-        color,
-        game.game_mode,
+    try {
+      let game = initialState.getGameState(socket.data.gameId);
+      if (!game) {
+        return;
+      }
+      const players = game.players;
+      const playerIsInGame = players.some(
+        (p) => p.telegram_id === socket.data.telegramId,
       );
-      const correctPlayer = {
-        ...playerInDataBase,
-        color: color,
-        player_status: "online",
-        numberOfAbsences: 0,
-        connection_status: "connected",
-      };
-      initialState.addPlayerToGameState(correctPlayer, game.game_id);
-      game = initialState.getGameState(game.game_id);
+      if (playerIsInGame) {
+        const correctPlayers = game.players.map((p) => {
+          if (p.telegram_id === socket.data.telegramId) {
+            return { ...p, player_status: "online" };
+          } else {
+            return p;
+          }
+        });
+        initialState.updateGameState(game.game_id, {
+          players: correctPlayers,
+        });
+        game = initialState.getGameState(game.game_id);
+      } else {
+        const color =
+          game.number_of_players === 2
+            ? TOW_PLAYER_COLORS[players.length]
+            : FOUR_PLAYER_COLORS[players.length];
+
+        const playerInDataBase = await addPlayerToGameOnDatabase(
+          player,
+          game.game_id,
+          color,
+          game.game_mode,
+        );
+        const correctPlayer = {
+          ...playerInDataBase,
+          color: color,
+          player_status: "online",
+          numberOfAbsences: 0,
+          connection_status: "connected",
+        };
+        initialState.addPlayerToGameState(correctPlayer, game.game_id);
+        game = initialState.getGameState(game.game_id);
+      }
+      joiningGame(socket, io);
+    } catch {
+      console.log(error);
     }
-    joiningGame(socket, io);
   });
 }
 async function joiningGame(socket, io) {
@@ -192,7 +194,6 @@ async function joiningGame(socket, io) {
     currentGameState.players.length === currentGameState.number_of_players &&
     currentGameState.game_status === "waitingForPlayer"
   ) {
-
     currentGameState.game_status = "start";
 
     await updateGameState(
