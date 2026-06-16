@@ -101,7 +101,7 @@ console.log(player.telegram_id)
           return;
         }
         // 3) اگر بازی در دیتابیس وجود دارد ولی در حافظه نیست
-        const dbGame = await getGameState(currentPlayer.game_id, gameMode);
+        const dbGame = await getGameState(socket.data.gameId, gameMode);
         if (!dbGame) {
           socket.emit("not_in_game");
           return;
