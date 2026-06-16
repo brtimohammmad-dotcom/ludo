@@ -92,8 +92,6 @@ module.exports = (io) => {
       if (!existingGame) {
         if (gameMode && gameId && gameMode === "friendly") {
           socket.data.gameId = gameId;
-          await handleJoinGameFriendly(socket,io);
-          return;
         }
         if (!socket.data.gameId) {
           return;
@@ -109,7 +107,10 @@ module.exports = (io) => {
           socket.emit("game_finished", dbGame.winner);
           return;
         }
-
+        if (gameMode && gameId && gameMode === "friendly") {
+          await handleJoinGameFriendly(socket, io);
+          return;
+        }
         return;
       }
 

@@ -129,9 +129,7 @@ async function handleJoinGameFriendly(socket, io) {
       telegram_id: socket.data.telegramId,
     };
     let game = initialState.getGameState(socket.data.gameId);
-    if (!game) {
-      socket.emit("error", "game deleted");
-    }
+
     const players = game.players;
     const playerIsInGame = players.some(
       (p) => p.telegram_id === socket.data.telegramId,
@@ -149,9 +147,7 @@ async function handleJoinGameFriendly(socket, io) {
       });
       game = initialState.getGameState(game.game_id);
     } else {
-      // if (game.game_status === "start") {
-      //   socket.emit("game_already_started");
-      // }
+
       const color =
         game.number_of_players === 2
           ? TOW_PLAYER_COLORS[players.length]
