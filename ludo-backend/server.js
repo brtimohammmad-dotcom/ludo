@@ -1,5 +1,5 @@
 const http = require("http");
-const bot = require("./bot"); // فایل بالا
+const {bot} = require("./bot"); // فایل بالا
 
 const server = http.createServer((req, res) => {
   res.setHeader(
