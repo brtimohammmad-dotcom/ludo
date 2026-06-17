@@ -184,16 +184,17 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    final String gameId = invitationLink!
-                        .split('game_')
-                        .last
-                        .trim();
+                    // ۱. استخراج امن شناسه بازی از روی لینک دعوت
+                    final String gameId = invitationLink!.split('game_').last.trim();
 
-                    // متن اینلاین بدون یوزرنیم ربات (خود تلگرام یوزرنیم ربات شما را اضافه میکند)
-                    final String inlineQueryText = "game_$gameId".trim();
+                    // ۲. فرمت کردن به صورت دستور اینلاین ربات شما (همان مقداری که کدهای نودجی‌اس منتظرش هستند)
+                    final String inlineQueryText =
+                        "@ludo_miniApp_bot game_$gameId".trim();
 
-                    // استفاده از متد بومی مینی‌اپ به جای openLink
-                    TelegramWebApp.instance.switchInlineQuery(inlineQueryText);
+
+                    final String shareUrl = "https://t.me/ludo_miniApp_bot?switchinline=$inlineQueryText";
+
+                    TelegramWebApp.instance.openLink(shareUrl);
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
