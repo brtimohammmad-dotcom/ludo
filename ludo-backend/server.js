@@ -28,7 +28,7 @@ const server = http.createServer((req, res) => {
     );
   }
   if (req.url === "/webhook" && req.method === "POST") {
-    let body = "";A
+    let body = "";
     req.on("data", (chunk) => (body += chunk));
     req.on("end", () => {
       try {
