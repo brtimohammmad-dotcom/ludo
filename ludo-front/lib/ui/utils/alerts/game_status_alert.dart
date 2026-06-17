@@ -184,21 +184,16 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    // ۱. استخراج امن شناسه بازی از روی لینک دعوت
-                    final String gameId = invitationLink!.split('game_').last.trim();
+                    final String gameId = invitationLink!
+                        .split('game_')
+                        .last
+                        .trim();
 
-                    // ۲. فرمت کردن به صورت دستور اینلاین ربات شما (همان مقداری که کدهای نودجی‌اس منتظرش هستند)
-                    final String inlineQueryText =
-                        "@ludo_miniApp_bot game_$gameId".trim();
+                    // متن اینلاین بدون یوزرنیم ربات (خود تلگرام یوزرنیم ربات شما را اضافه میکند)
+                    final String inlineQueryText = "game_$gameId".trim();
 
-                    // ۳. ساخت لینک پاپ‌آپ نیتیو تلگرام
-                    // ارسال دستور اینلاین به پارامتر url باعث می‌شود پاپ‌آپ داخلی گفتگوها باز شده
-                    // و بلافاصله سیستم اینلاین ربات شما فعال شود تا کارت زنده تشکیل شود.
-                    final String webShareUrl =
-                        "https://t.me/share/url?url=${Uri.encodeComponent(inlineQueryText)}";
-
-                    // ۴. باز کردن پاپ‌آپ بدون خروج از مینی‌اپ
-                    TelegramWebApp.instance.openLink(webShareUrl);
+                    // استفاده از متد بومی مینی‌اپ به جای openLink
+                    TelegramWebApp.instance.switchInlineQuery(inlineQueryText);
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
