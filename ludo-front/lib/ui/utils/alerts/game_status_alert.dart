@@ -192,9 +192,11 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                         "@ludo_miniApp_bot game_$gameId".trim();
 
 
-                    final String shareUrl = "https://t.me/ludo_miniApp_bot?switchinline=$inlineQueryText";
+                    final String webShareUrl =
+                        "https://t.me/share/url?url=&text=${Uri.encodeComponent(inlineQueryText)}";
 
-                    TelegramWebApp.instance.openLink(shareUrl);
+                    // ۴. باز کردن پاپ‌آپ بدون خروج از مینی‌اپ
+                    TelegramWebApp.instance.openLink(webShareUrl);
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
