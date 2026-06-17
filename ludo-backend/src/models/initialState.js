@@ -92,12 +92,15 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
   return getGameState(gameId);
 };
 
-const findPlayerGame = (playerId) =>
-  getAllGames().find((game) =>
-    game.players?.some(
+const findPlayerGame = (playerId) => {
+  console.log(playerId);
+  return getAllGames().find((game) => {
+    console.log(game)
+    return game.players?.some(
       (p) => p.telegram_id === playerId && p.player_status === "online",
-    ),
-  );
+    );
+  });
+};
 
 const findPlayerInfoInGame = (gameId, playerId) =>
   getGameState(gameId)?.players.find((p) => p.telegram_id === playerId);

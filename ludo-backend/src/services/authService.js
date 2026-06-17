@@ -13,9 +13,9 @@ async function handleAuth(telegramId, username) {
   return { player: player };
 }
 async function hasExistGame(player, socketId) {
-  const existingGame = initialState.findPlayerGame({
-    playerId: player.telegram_id,
-  });
+  const existingGame = initialState.findPlayerGame(
+    player.telegram_id,
+  );
 
   if (existingGame) {
     console.log(existingGame.players);
