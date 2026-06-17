@@ -141,7 +141,6 @@ class SocketDataSource {
     // -------------------------------------------------------
     _socket!.on("player_not_authorized", (data) {
       dynamic initData;
-      debugPrint(TelegramWebApp.instance.initData.raw);
       if (Uri.base.host == "localhost") {
         initData = {"first_name": "amir", "id": 6};
       } else {
