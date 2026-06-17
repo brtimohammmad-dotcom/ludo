@@ -161,17 +161,14 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               // دکمه طلایی اشتراک‌گذاری رسمی و نیتیو در محیط تلگرام
               ElevatedButton.icon(
                 onPressed: () {
-                  final gameId = invitationLink!
-                      .split("game_")
-                      .last;
+                  final gameId = invitationLink!.split("game_").last;
 
-                  final inlineText =
-                      "@ludo_miniApp_bot game_$gameId";
+                  final inlineText = "@ludo_miniApp_bot game_$gameId";
 
                   final telegramShareUrl =
                       "https://t.me/share/url?text=${Uri.encodeComponent(inlineText)}";
 
-                  TelegramWebApp.instance.openLink(telegramShareUrl);
+                  TelegramWebApp.instance.openTelegramLink(telegramShareUrl);
                 },
                 icon: const Icon(Icons.share, color: Colors.black87),
                 label: const Text('Share Invite Link'),

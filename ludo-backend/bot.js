@@ -22,7 +22,11 @@ bot.on("inline_query", async (ctx) => {
   }
 
   const gameId = query.replace("game_", "");
-    const botUsername = "ludo_miniApp_bot";
+
+  if (!gameId) {
+    return ctx.answerInlineQuery([]);
+  }
+  const botUsername = "ludo_miniApp_bot";
 
   const joinUrl = `https://t.me/${botUsername}?startapp=game_${gameId}`;
 

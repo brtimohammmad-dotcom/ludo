@@ -73022,7 +73022,7 @@ $0(){var s=this.a.e
 s===$&&A.a()
 s=A.pd(2,"@ludo_miniApp_bot game_"+B.b.gZ(s.split("game_")),B.N,!1)
 if($.cB==null)$.cB=new A.eS()
-v.G.Telegram.WebApp.openLink("https://t.me/share/url?text="+s,{try_instant_view:!0})},
+v.G.Telegram.WebApp.openTelegramLink("https://t.me/share/url?text="+s)},
 $S:0}
 A.CA.prototype={
 m(){var s=this,r=s.bX$
