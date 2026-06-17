@@ -188,7 +188,7 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                     final String gameId = parsedLink.queryParameters['startinline'] ?? '';
                     // gameId = "game_ABC123" - دیگه replaceFirst نمیخواد
 
-                    final String query = "@ludo_miniApp_bot $gameId";
+                    final String query = "\u200B@ludo_miniApp_bot $gameId";
                     // query = "@ludo_miniApp_bot game_ABC123"
 
                     final String shareUrl =

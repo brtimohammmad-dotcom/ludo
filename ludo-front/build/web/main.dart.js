@@ -74569,7 +74569,7 @@ q=this.a.e
 if(r!=="unknown"){q===$&&A.a()
 q.toString
 p=A.h7(q).gPM().i(0,"startinline")
-r=A.pu(2,"@ludo_miniApp_bot "+(p==null?"":p),B.N,!1)
+r=A.pu(2,"\u200b@ludo_miniApp_bot "+(p==null?"":p),B.N,!1)
 if($.ce==null)$.ce=new A.em()
 s.Telegram.WebApp.openLink("https://t.me/share/url?url="+r,{try_instant_view:!0})}else{q===$&&A.a()
 A.c1().$1("\u062e\u0627\u0631\u062c \u0627\u0632 \u062a\u0644\u06af\u0631\u0627\u0645: "+A.j(q))}},
