@@ -26,7 +26,6 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
   void initState() {
     invitationLink =
         widget.gameController.gameState!.serverState!.invitationLink;
-    debugPrint(invitationLink);
     super.initState();
     _rotationController = AnimationController(
       vsync: this,

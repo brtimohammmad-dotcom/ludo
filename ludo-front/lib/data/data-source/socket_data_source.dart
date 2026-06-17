@@ -199,7 +199,6 @@ class SocketDataSource {
     });
 
     _socket!.on("game_started", (data) async {
-      debugPrint("game starteddd");
       await playerInitialized.future;
       serverState = ServerState.fromJson(convertToJSData(data));
       onGameStarted?.call(serverState!);

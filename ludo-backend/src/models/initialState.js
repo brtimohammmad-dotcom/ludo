@@ -36,7 +36,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
   if (numberOfPlayers < 0) {
     const botUsername = "ludo_miniApp_bot";
 
-     invitationLink = `https://t.me/${botUsername}?startapp=game_${gameId}`;
+     invitationLink =   `https://t.me/${BOT_USERNAME}?startinline=game_${gameId}`;
   }
 
   if (numberOfPlayers === 2 || numberOfPlayers === -2) {
