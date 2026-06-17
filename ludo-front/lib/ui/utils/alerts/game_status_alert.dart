@@ -185,15 +185,14 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
                     final Uri parsedLink = Uri.parse(invitationLink!);
-                    final String gameId = (parsedLink.queryParameters['startinline'] ?? '')
-                        .replaceFirst('game_', '');
+                    final String gameId = parsedLink.queryParameters['startinline'] ?? '';
+                    // gameId = "game_ABC123" - دیگه replaceFirst نمیخواد
 
-                    // دقیقاً همان فرمتی که nodejs منتظرشه
-                    final String query = "game_$gameId"; // بدون هیچ فاصله‌ای
+                    final String query = "@ludo_miniApp_bot $gameId";
+                    // query = "@ludo_miniApp_bot game_ABC123"
 
-                    // encode دستی بدون فاصله
                     final String shareUrl =
-                        "https://t.me/share/url?url=https://t.me/ludo_miniApp_bot&text=${Uri.encodeComponent(query)}";
+                        "https://t.me/share/url?url=${Uri.encodeComponent(query)}";
 
                     TelegramWebApp.instance.openLink(shareUrl);
                   } else {
