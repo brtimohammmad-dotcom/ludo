@@ -4,7 +4,6 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const WEB_APP_URL = "https://ludo-tecb.onrender.com";
 
-// فقط استارت
 bot.start((ctx) => {
   return ctx.reply(
     "🎮 Welcome to Ludo",
@@ -15,3 +14,4 @@ bot.start((ctx) => {
 bot.launch();
 
 console.log("Bot is running...");
+module.exports = { bot };
