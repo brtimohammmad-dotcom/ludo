@@ -184,13 +184,18 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    final String gameId = invitationLink!.split('game_').last.trim();
+                    final Uri parsedLink = Uri.parse(invitationLink!);
+                    final String gameId = (parsedLink.queryParameters['startinline'] ?? '')
+                        .replaceFirst('game_', '');
 
-                    // این متد مستقیم inline query رو بدون فاصله باز می‌کنه
-                    TelegramWebApp.instance.switchInlineQuery(
-                      "game_$gameId",
+                    // دقیقاً همان فرمتی که nodejs منتظرشه
+                    final String query = "game_$gameId"; // بدون هیچ فاصله‌ای
 
-                    );
+                    // encode دستی بدون فاصله
+                    final String shareUrl =
+                        "https://t.me/share/url?url=https://t.me/ludo_miniApp_bot&text=${Uri.encodeComponent(query)}";
+
+                    TelegramWebApp.instance.openLink(shareUrl);
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
