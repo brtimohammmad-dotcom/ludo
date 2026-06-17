@@ -184,17 +184,17 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
               ElevatedButton.icon(
                 onPressed: () {
                   if (TelegramWebApp.instance.isSupported) {
-                    final Uri parsedLink = Uri.parse(invitationLink!);
-                    final String gameId = parsedLink.queryParameters['startinline'] ?? '';
-                    // gameId = "game_ABC123" - دیگه replaceFirst نمیخواد
+                    // ۱. استخراج امن شناسه بازی از روی لینک دعوت
+                    final String gameId = invitationLink!.split('game_').last.trim();
 
-                    final String query = "\u200B@ludo_miniApp_bot $gameId";
-                    // query = "@ludo_miniApp_bot game_ABC123"
+                    final String inlineQueryText =
+                    "@ludo_miniApp_bot game_$gameId".trim();
 
-                    final String shareUrl =
-                        "https://t.me/share/url?url=${Uri.encodeComponent(query)}";
 
-                    TelegramWebApp.instance.openLink(shareUrl);
+                    final String webShareUrl =
+                        "https://t.me/share/url?url=${Uri.encodeComponent(inlineQueryText)}";
+
+                    TelegramWebApp.instance.openLink(webShareUrl);
                   } else {
                     debugPrint("خارج از تلگرام: $invitationLink");
                   }
