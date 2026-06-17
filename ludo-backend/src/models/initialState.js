@@ -33,13 +33,10 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
   let invitationLink = null;
   let tokens;
 
-  // ----------------------------------------------------
-  // 🎯 اصلاح ساخت لینک دعوت برای حالت عمومی اینلاین (گروه، پی‌وی، کانال)
-  // ----------------------------------------------------
   if (numberOfPlayers < 0) {
     const botUsername = "ludo_miniApp_bot";
-    // استفاده از startinline به کاربر اجازه می‌دهد بازی را در هر جایی (حتی پی‌وی دوستانش) به اشتراک بگذارد
-    invitationLink = `https://t.me/${botUsername}?startinline=game_${gameId}`;
+
+    const invitationLink = `https://t.me/${botUsername}?startapp=game_${gameId}`;
   }
 
   if (numberOfPlayers === 2 || numberOfPlayers === -2) {
@@ -86,7 +83,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
     number_of_players: numberOfPlayers > 0 ? numberOfPlayers : -numberOfPlayers,
     invitationLink: invitationLink,
     game_mode: numberOfPlayers > 0 ? "global" : "friendly",
-    inline_message_id: null, // 🧠 فیلد جدید برای ذخیره کلید پیام اینلاین جهت آپدیت‌های داینامیک دکمه بازی
+    inline_message_id: null,
   });
 
   return getGameState(gameId);
@@ -95,7 +92,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
 const findPlayerGame = (playerId) => {
   console.log(playerId);
   return getAllGames().find((game) => {
-    console.log(game)
+    console.log(game);
     return game.players?.some(
       (p) => p.telegram_id === playerId && p.player_status === "online",
     );
