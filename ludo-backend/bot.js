@@ -60,9 +60,11 @@ bot.on("chosen_inline_result", async (ctx) => {
   const gameId = ctx.chosenInlineResult.result_id;
 
   const inlineMessageId = ctx.chosenInlineResult.inline_message_id;
-
-  if (!inlineMessageId) return;
-
+  if (!inlineMessageId) {
+    // مهم: لاگ کن ببین واقعاً چی میاد
+    console.log("NO inline_message_id:", ctx.chosenInlineResult);
+    return;
+  }
   setGameMessage(gameId, {
     inline_message_id: inlineMessageId,
   });
