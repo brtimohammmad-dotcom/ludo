@@ -83,9 +83,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
 };
 
 const findPlayerGame = (playerId) => {
-  console.log(playerId);
   return getAllGames().find((game) => {
-    console.log(game);
     return game.players?.some(
       (p) => p.telegram_id === playerId && p.player_status === "online",
     );

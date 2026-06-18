@@ -77,15 +77,14 @@ module.exports = (io) => {
         return;
       }
 
-      console.log(socket.data.telegramId);
       const player = {
         telegram_id: socket.data.telegramId,
         username: socket.data.firstName,
       };
-      console.log(player.telegram_id);
+      console.log("player telegram id:", player.telegram_id);
       // 1) بررسی اینکه آیا بازیکن در بازی‌ای وجود دارد یا نه
       const result = await hasExistGame(player, socket.id);
-
+      console.log(result);
       const existingGame = result.game;
       const currentPlayer = result.player;
 
