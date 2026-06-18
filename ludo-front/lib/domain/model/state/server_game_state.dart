@@ -14,6 +14,7 @@ enum TurnStatus {
 
 class ServerState {
   final int numberOfPlayers;
+  final String gameId;
   final TurnStatus turnStatus;
   final List<Token> tokens;
   final int lastDiceValue;
@@ -28,6 +29,7 @@ class ServerState {
     this.invitationLink,
     this.winner,
     required this.mode,
+    required this.gameId,
     required this.numberOfPlayers,
     required this.turnStatus,
     required this.tokens,
@@ -44,7 +46,7 @@ class ServerState {
       winner = Player.fromJson(json['winner']);
     }
     return ServerState(
-      invitationLink: json['invitationLink'],
+      gameId: json['gameId'],
       mode: GameMode.values.byName(json['game_mode']),
       numberOfPlayers: json['number_of_players'],
       turnStatus: TurnStatus.values.byName(json['turn_status']),
@@ -60,7 +62,7 @@ class ServerState {
   }
 
   ServerState copyWith({
-    String? invitationLink,
+    String? gameId,
     GameMode? mode,
     List<Token>? tokens,
     int? lastDiceValue,
@@ -72,7 +74,7 @@ class ServerState {
     Player? winner,
   }) {
     return ServerState(
-      invitationLink: invitationLink??this.invitationLink,
+      gameId: gameId ?? this.gameId,
       mode: mode ?? this.mode,
       winner: winner ?? this.winner,
       numberOfPlayers: numberOfPlayers ?? this.numberOfPlayers,

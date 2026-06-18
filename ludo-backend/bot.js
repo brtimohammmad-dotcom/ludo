@@ -16,48 +16,38 @@ bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query;
 
   if (!query.startsWith("game_")) {
-    return ctx.answerInlineQuery([], {
-      cache_time: 0,
-    });
+    return ctx.answerInlineQuery([]);
   }
 
   const gameId = query.replace("game_", "");
 
-  if (!gameId) {
-    return ctx.answerInlineQuery([]);
-  }
-  const botUsername = "ludo_miniApp_bot";
+  const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
 
-  const joinUrl = `https://t.me/${botUsername}?startapp=game_${gameId}`;
-
-  return ctx.answerInlineQuery(
-    [
-      {
-        type: "article",
-        id: gameId,
-        title: "🎲 Join Ludo Game",
-        description: "Tap to send game invitation",
-
-        input_message_content: {
-          message_text:
-            "🎲 Ludo Friendly Match\n\nClick the button below to join the game.",
-        },
-
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "▶️ Play Now",
-                url: joinUrl,
-              },
-            ],
-          ],
-        },
-      },
-    ],
+  return ctx.answerInlineQuery([
     {
-      cache_time: 0,
+      type: "article",
+      id: gameId,
+
+      title: "🎲 Invite Friends",
+
+      description: "Send this invitation to a friend",
+
+      input_message_content: {
+        message_text:
+          "🎲 Ludo Friendly Match\n\nClick the button below to join.",
+      },
+
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "▶️ Play Game",
+              url: joinUrl,
+            },
+          ],
+        ],
+      },
     },
-  );
+  ]);
 });
 module.exports = { bot };

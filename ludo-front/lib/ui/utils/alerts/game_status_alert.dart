@@ -20,12 +20,9 @@ class WaitingForPlayersAlert extends StatefulWidget {
 class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
     with SingleTickerProviderStateMixin {
   late final AnimationController _rotationController;
-  late String? invitationLink;
 
   @override
   void initState() {
-    invitationLink =
-        widget.gameController.gameState!.serverState!.invitationLink;
     super.initState();
     _rotationController = AnimationController(
       vsync: this,
@@ -47,10 +44,10 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
         : size.height * 0.86;
 
     final state = widget.gameController.gameState?.serverState;
-    final gameMode = state?.numberOfPlayers ?? 2;
-    final requiredPlayers = gameMode < 0
-        ? -gameMode
-        : (gameMode == -1 ? 2 : gameMode);
+    final numberOfPlayers = state?.numberOfPlayers ?? 2;
+    final requiredPlayers = numberOfPlayers < 0
+        ? -numberOfPlayers
+        : (numberOfPlayers == -1 ? 2 : numberOfPlayers);
 
     return ListenableBuilder(
       listenable: widget.gameController,
@@ -157,18 +154,17 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
 
             SizedBox(height: boardSize * 0.04),
 
-            if (invitationLink != null) ...[
+            if (numberOfPlayers == -2 || numberOfPlayers == -4) ...[
               // دکمه طلایی اشتراک‌گذاری رسمی و نیتیو در محیط تلگرام
               ElevatedButton.icon(
                 onPressed: () {
-                  final gameId = invitationLink!.split("game_").last;
+                  final gameId = state!.gameId;
 
-                  final inlineText = "@ludo_miniApp_bot game_$gameId";
-
-                  final telegramShareUrl =
-                      "https://t.me/share/url?text=${Uri.encodeComponent(inlineText)}";
-
-                  TelegramWebApp.instance.openTelegramLink(telegramShareUrl);
+                  TelegramWebApp.instance.switchInlineQuery("game_$gameId", [
+                    ChatType.groups,
+                    ChatType.users,
+                    ChatType.channels,
+                  ]);
                 },
                 icon: const Icon(Icons.share, color: Colors.black87),
                 label: const Text('Share Invite Link'),

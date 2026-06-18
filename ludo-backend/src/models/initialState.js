@@ -30,14 +30,9 @@ const addPlayerToGameState = (newPlayer, gameId) => {
 };
 
 const createGameInGameState = (gameId, numberOfPlayers) => {
-  let invitationLink = null;
+  let friendlyGameId = null;
   let tokens;
 
-  if (numberOfPlayers < 0) {
-    const botUsername = "ludo_miniApp_bot";
-
-     invitationLink =   `https://t.me/${botUsername}?startinline=game_${gameId}`;
-  }
 
   if (numberOfPlayers === 2 || numberOfPlayers === -2) {
     tokens = [
@@ -81,9 +76,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
     players: [],
     tokens: tokens,
     number_of_players: numberOfPlayers > 0 ? numberOfPlayers : -numberOfPlayers,
-    invitationLink: invitationLink,
     game_mode: numberOfPlayers > 0 ? "global" : "friendly",
-    inline_message_id: null,
   });
 
   return getGameState(gameId);
