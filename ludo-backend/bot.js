@@ -70,8 +70,9 @@ bot.on("chosen_inline_result", async (ctx) => {
 const updateLobbyMessage = (gameId) => {
   const game = initialState.getGameState(gameId);
   const message = getGameMessage(gameId);
-
-  if (!message?.inline_message_id) return;
+console.log("game in update lobby: ", game)
+console.log("message in update lobby: ", message)
+  if (game && !message?.inline_message_id) return;
 
   const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
 

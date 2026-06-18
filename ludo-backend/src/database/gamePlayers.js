@@ -3,7 +3,6 @@ const supabase = require("../../postgresql");
 const initialState = require("../models/initialState");
 
 async function addPlayerToGameOnDatabase(player, gameId, color, gameMode) {
-      console.log(gameMode);
 
   try {
     // ۱. ابتدا دیتای فعلی ستون players را برای این بازی می‌گیریم

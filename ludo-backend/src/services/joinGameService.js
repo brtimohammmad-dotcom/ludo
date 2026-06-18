@@ -183,7 +183,6 @@ async function joiningGame(socket, io) {
 
   // state فعلی بازی را بگیر
   let currentGameState = initialState.getGameState(socket.data.gameId);
-  console.log(currentGameState);
   // ارسال state به همه
   socket.emit("game_state_update", currentGameState);
   socket.to(socket.data.gameId).emit("player_joined", currentGameState);

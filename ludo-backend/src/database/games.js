@@ -78,7 +78,6 @@ async function getGameState(gameId,gameMode) {
     console.log("بازی پیدا نشد");
   } else {
     const game = games[0]; // اولین (و تنها) رکورد
-    console.log("بازی:", game);
     return game;
   }
 }
