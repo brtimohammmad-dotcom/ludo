@@ -44,7 +44,7 @@ class ServerState {
       winner = Player.fromJson(json['winner']);
     }
     return ServerState(
-      gameId: json['gameId'],
+      gameId: json['game_id'],
       mode: GameMode.values.byName(json['game_mode']),
       numberOfPlayers: json['number_of_players'],
       turnStatus: TurnStatus.values.byName(json['turn_status']),

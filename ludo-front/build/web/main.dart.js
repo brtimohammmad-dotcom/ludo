@@ -22581,7 +22581,7 @@ _.e=d
 _.f=e},
 dP:function dP(a,b){this.a=a
 this.b=b},
-ox(a){var s,r,q,p,o="winner",n=a.i(0,"tokens"),m=a.i(0,o)!=null&&t.f.b(a.i(0,o))?A.a3x(a.i(0,o)):null,l=a.i(0,"gameId"),k=A.nb(B.Fh,a.i(0,"game_mode")),j=a.i(0,"number_of_players"),i=A.nb(B.G6,a.i(0,"turn_status")),h=J.mB(n,new A.a7h(),t.vi)
+ox(a){var s,r,q,p,o="winner",n=a.i(0,"tokens"),m=a.i(0,o)!=null&&t.f.b(a.i(0,o))?A.a3x(a.i(0,o)):null,l=a.i(0,"game_id"),k=A.nb(B.Fh,a.i(0,"game_mode")),j=a.i(0,"number_of_players"),i=A.nb(B.G6,a.i(0,"turn_status")),h=J.mB(n,new A.a7h(),t.vi)
 h=A.T(h,h.$ti.h("af.E"))
 s=a.i(0,"last_dice_value")
 r=A.nb(B.jk,a.i(0,"current_turn"))
