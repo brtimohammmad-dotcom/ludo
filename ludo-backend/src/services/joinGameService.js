@@ -201,7 +201,6 @@ async function joiningGame(socket, io) {
     initialState.updateGameState(socket.data.gameId, {
       game_status: "start",
     });
-    updateLobbyMessage(socket.data.gameId);
 
     io.to(socket.data.gameId).emit(
       "game_started",
@@ -210,5 +209,6 @@ async function joiningGame(socket, io) {
 
     startTimer(socket, io);
   }
+  updateLobbyMessage(socket.data.gameId);
 }
 module.exports = { handleJoinGame, handleJoinGameFriendly };

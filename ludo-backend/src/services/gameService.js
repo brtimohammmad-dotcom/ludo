@@ -1,6 +1,7 @@
 const processingGames = new Set();
 const { updateGameState } = require("../database/games");
 const { canActivateToken, findKickToken } = require("../logic/canMove");
+const { updateLobbyMessage } = require("../../bot");
 const {
   TOW_PLAYER_COLORS,
   FOUR_PLAYER_COLORS,
@@ -232,7 +233,7 @@ function handleMoveToken(socket, token, io) {
           game_status: "finished",
           winner: player,
         });
-            updateLobbyMessage(socket.data.gameId);
+        updateLobbyMessage(socket.data.gameId);
 
         const winnerGameState = initialState.getGameState(socket.data.gameId);
         await updateGameState(

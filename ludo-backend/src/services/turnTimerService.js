@@ -1,5 +1,7 @@
 const { createInterval } = require("timerider");
 const { updateGameState } = require("../database/games");
+const { updateLobbyMessage } = require("../../bot");
+
 const initialState = require("../models/initialState");
 const {
   TOW_PLAYER_COLORS,
