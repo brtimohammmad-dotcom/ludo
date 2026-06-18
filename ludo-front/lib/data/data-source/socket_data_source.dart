@@ -50,7 +50,6 @@ class SocketDataSource {
 
   // --- State ---
   ServerState? serverState;
-  String? invitationLink;
   Completer<void> playerInitialized = Completer<void>();
 
   // -------------------------------------------------------
@@ -313,7 +312,6 @@ class SocketDataSource {
     onFastPingGets = null;
 
     serverState = null;
-    invitationLink = null;
 
     if (playerInitialized.isCompleted) {
       playerInitialized = Completer<void>();

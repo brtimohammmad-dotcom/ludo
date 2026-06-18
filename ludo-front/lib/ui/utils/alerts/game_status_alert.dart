@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:ludo/ui/join_screen.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 
@@ -154,11 +154,11 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
 
             SizedBox(height: boardSize * 0.04),
 
-            if (numberOfPlayers == -2 || numberOfPlayers == -4) ...[
+            if (state!.mode==GameMode.friendly) ...[
               // دکمه طلایی اشتراک‌گذاری رسمی و نیتیو در محیط تلگرام
               ElevatedButton.icon(
                 onPressed: () {
-                  final gameId = state!.gameId;
+                  final gameId = state.gameId;
 
                   TelegramWebApp.instance.switchInlineQuery("game_$gameId", [
                     ChatType.groups,

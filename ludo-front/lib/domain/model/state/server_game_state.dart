@@ -23,10 +23,8 @@ class ServerState {
   final List<Player> players;
   final GameMode mode;
   Player? winner;
-  String? invitationLink;
 
   ServerState({
-    this.invitationLink,
     this.winner,
     required this.mode,
     required this.gameId,
