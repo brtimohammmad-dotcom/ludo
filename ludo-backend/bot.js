@@ -136,7 +136,7 @@ ${playersList}
       reply_markup:
         game.game_status === "finished" ||
         game.game_status === "cancel" ||
-        game.game_status === "started"
+        game.game_status === "start"
           ? {
               inline_keyboard: [],
             }

@@ -289,6 +289,7 @@ async function handleExitingGame(socket, io) {
       currentGame.game_mode,
     );
     initialState.deleteGameState(socket.data.gameId);
+    updateLobbyMessage(socket.data.gameId);
   }
   if (numberOfOnlines === 1 && currentGame.game_status === "start") {
     const player = currentGame.players.find(
