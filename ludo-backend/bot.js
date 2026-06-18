@@ -89,7 +89,7 @@ const updateLobbyMessage = async (gameId) => {
   const maxPlayers = game.number_of_players;
 
   const text =
-    game.game_status === "started"
+    game.game_status === "start"
       ? `🎲 Ludo Friendly Match
 
 Players: ${playersCount}/${maxPlayers}
