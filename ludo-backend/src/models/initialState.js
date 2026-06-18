@@ -1,6 +1,9 @@
 const activeGames = new Map(); // gameId -> gameState
+const gameMessages = new Map(); // gameId -> message info
 
-// توابع پایه
+
+
+// توابع پایه state بازی
 const getGameState = (gameId) => activeGames.get(gameId);
 
 const setGameState = (gameId, gameState) => {

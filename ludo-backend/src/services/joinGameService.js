@@ -9,6 +9,7 @@ const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
 const { updateGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
 const { error } = require("node:console");
+const { updateLobbyMessage } = require("../../bot.js");
 
 async function handleJoinGame(numberOfPlayers, socket, io) {
   console.log("player id: ", socket.data.telegramId, " joined");
@@ -168,7 +169,7 @@ async function handleJoinGameFriendly(socket, io) {
           connection_status: "connected",
         };
         initialState.addPlayerToGameState(correctPlayer, game.game_id);
-        game = initialState.getGameState(game.game_id);
+        updateLobbyMessage(game.game_id)
       }
       joiningGame(socket, io);
     } catch {
