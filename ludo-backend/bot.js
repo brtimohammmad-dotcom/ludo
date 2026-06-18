@@ -69,28 +69,81 @@ bot.on("chosen_inline_result", async (ctx) => {
     inline_message_id: inlineMessageId,
   });
 });
-const updateLobbyMessage = (gameId) => {
+const updateLobbyMessage = async (gameId) => {
   const game = initialState.getGameState(gameId);
   const message = getGameMessage(gameId);
-console.log("game in update lobby: ", game)
-console.log("message in update lobby: ", message)
-  if (game && !message?.inline_message_id) return;
+
+  if (!game || !message?.inline_message_id) return;
+
+  const playersList = game.players
+    .map((player) => `🟢 ${player.username}`)
+    .join("\n");
+
+  const playersCount = game.players.length;
+  const maxPlayers = game.number_of_players;
+
+  const text =
+    game.game_status === "started"
+      ? `🎲 Ludo Friendly Match
+
+Players: ${playersCount}/${maxPlayers}
+
+${playersList}
+
+🔥 All players are ready!
+
+🚀 The match is now in progress.`
+      : game.game_status === "finished"
+        ? `🏆 Match Complete
+
+Players: ${playersCount}/${maxPlayers}
+
+${playersList}
+
+🎉 We have a winner!
+
+Thanks for joining the game.`
+        : game.game_status === "cancel"
+          ? `⚠️ Match Cancelled
+
+Players: ${playersCount}/${maxPlayers}
+
+${playersList}
+
+The lobby has been closed.`
+          : `🎲 Ludo Friendly Match
+
+Players: ${playersCount}/${maxPlayers}
+
+${playersList}
+
+🎯 Waiting for ${maxPlayers - playersCount} more player${maxPlayers - playersCount > 1 ? "s" : ""} to join...`;
 
   const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
 
-  bot.telegram.editMessageReplyMarkup(
+  await bot.telegram.editMessageText(
     undefined,
     undefined,
     message.inline_message_id,
+    text,
     {
-      inline_keyboard: [
-        [
-          {
-            text: `▶️ Play Game (${game.players.length}/${game.number_of_players})`,
-            url: joinUrl,
-          },
-        ],
-      ],
+      reply_markup:
+        game.game_status === "finished" ||
+        game.game_status === "cancel" ||
+        game.game_status === "started"
+          ? {
+              inline_keyboard: [],
+            }
+          : {
+              inline_keyboard: [
+                [
+                  {
+                    text: `▶️ Join Game (${playersCount}/${maxPlayers})`,
+                    url: joinUrl,
+                  },
+                ],
+              ],
+            },
     },
   );
 };
