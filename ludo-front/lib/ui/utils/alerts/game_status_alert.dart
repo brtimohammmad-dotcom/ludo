@@ -54,7 +54,10 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
       builder: (context, child) {
         final state = widget.gameController.gameState?.serverState;
         final currentPlayers = state?.players.length ?? 0;
-
+        debugPrint("game mode in alert: ");
+        debugPrint(state!.mode.toString());
+        debugPrint("game id in alert: ");
+        debugPrint(state.gameId);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -154,7 +157,7 @@ class _WaitingForPlayersAlertState extends State<WaitingForPlayersAlert>
 
             SizedBox(height: boardSize * 0.04),
 
-            if (state!.mode==GameMode.friendly) ...[
+            if (state.mode == GameMode.friendly) ...[
               // دکمه طلایی اشتراک‌گذاری رسمی و نیتیو در محیط تلگرام
               ElevatedButton.icon(
                 onPressed: () {
