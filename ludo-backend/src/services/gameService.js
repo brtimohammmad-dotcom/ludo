@@ -232,6 +232,8 @@ function handleMoveToken(socket, token, io) {
           game_status: "finished",
           winner: player,
         });
+            updateLobbyMessage(socket.data.gameId);
+
         const winnerGameState = initialState.getGameState(socket.data.gameId);
         await updateGameState(
           socket.data.gameId,
@@ -298,6 +300,8 @@ async function handleExitingGame(socket, io) {
       game_status: "finished",
       winner: player,
     });
+    updateLobbyMessage(socket.data.gameId);
+
     const winnerGameState = initialState.getGameState(socket.data.gameId);
     await updateGameState(
       socket.data.gameId,

@@ -40,7 +40,13 @@ bot.on("inline_query", async (ctx) => {
       description: "Send this invitation to a friend",
 
       input_message_content: {
-        message_text: `🎲 Ludo Friendly Match ${game.number_of_players} players mode\n\nClick the button below to join.`,
+        message_text: `🎲 Ludo Friendly Match
+
+Players: ${game.players.length}/${game.number_of_players}
+
+🟢 ${ctx.from.first_name}
+
+⏳ Waiting for ${game.number_of_players - game.players.length} more player${game.number_of_players - game.players.length > 1 ? "s" : ""}...`,
       },
 
       reply_markup: {

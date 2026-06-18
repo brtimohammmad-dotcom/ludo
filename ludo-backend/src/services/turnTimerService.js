@@ -92,6 +92,8 @@ function startTimer(socket, io) {
             winner: onlinePlayer,
             players: updatedPlayers,
           });
+          updateLobbyMessage(socket.data.gameId);
+
           const winnerGameState = initialState.getGameState(socket.data.gameId);
           await updateGameState(
             socket.data.gameId,
@@ -125,35 +127,6 @@ function startTimer(socket, io) {
     // پیدا کردن نفر بعدی (که آفلاین نباشد)
     let nextPlayerIndex =
       game.number_of_players === 4 ? (colorIdx + 1) % 4 : (colorIdx + 1) % 2;
-    let checkedCount = 0;
-
-    while (
-      game.players[nextPlayerIndex].player_status === "offline" &&
-      checkedCount < game.number_of_players
-    ) {
-      game.number_of_players === 4 ? (colorIdx + 1) % 4 : (colorIdx + 1) % 2;
-      checkedCount++;
-
-      // اگر همه آفلاین شدند (ایمنی)
-      if (game.number_of_players) {
-        console.log(`All players offline for game ${socket.data.gameId}`);
-
-        // همه آفلاین هستند، بازی را تمام کن
-        const activeTimer = activeTimers.get(socket.data.gameId);
-        if (activeTimer && typeof activeTimer.clear === "function") {
-          activeTimer.clear();
-        }
-        stopTimer(socket.data.gameId);
-        initialState.updateGameState(socket.data.gameId, {
-          game_status: "finished",
-        });
-
-        io.to(socket.data.gameId).emit("game_aborted", {
-          reason: "all_offline",
-        });
-        return;
-      }
-    }
 
     // به‌روزرسانی نوبت
     initialState.updateGameState(socket.data.gameId, {

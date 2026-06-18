@@ -169,7 +169,6 @@ async function handleJoinGameFriendly(socket, io) {
           connection_status: "connected",
         };
         initialState.addPlayerToGameState(correctPlayer, game.game_id);
-        updateLobbyMessage(game.game_id)
       }
       joiningGame(socket, io);
     } catch {
@@ -202,6 +201,8 @@ async function joiningGame(socket, io) {
     initialState.updateGameState(socket.data.gameId, {
       game_status: "start",
     });
+    updateLobbyMessage(socket.data.gameId);
+
     io.to(socket.data.gameId).emit(
       "game_started",
       initialState.getGameState(socket.data.gameId),
