@@ -65,9 +65,18 @@ class GameController extends ChangeNotifier {
         orElse: () => gameState!.livePlayer!,
       );
       gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      debugPrint("on state update call");
       if (onGameReady != null) onGameReady!();
       notifyListeners();
+    };
+
+    // in another game
+
+    ds.onInAnotherGameCallback = () {
+      if (TelegramWebApp.instance.isSupported) {
+        TelegramWebApp.instance.showAlert(
+           "You are already in another game!",(){}
+        );
+      }
     };
 
     // game recovered
@@ -172,23 +181,9 @@ class GameController extends ChangeNotifier {
 
     ds.onPlayerExit = () {
       if (_isDisposed) return;
-      if (TelegramWebApp.instance.isSupported) {
-        final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
-        if (startParam != null && startParam.startsWith("game_")) {
-          TelegramWebApp.instance.showAlert(
-            "You have left the friendly match room. The game will now close.\nif you want to play another game, go to bot",
-            () {
-              TelegramWebApp.instance.close();
-            },
-          );
-        }else{
-          onPlayerExit?.call();
-          notifyListeners();
-        }
-      } else {
-        onPlayerExit?.call();
-        notifyListeners();
-      }
+
+      onPlayerExit?.call();
+      notifyListeners();
     };
 
     // opponent exit

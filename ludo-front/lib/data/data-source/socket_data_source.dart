@@ -25,6 +25,7 @@ typedef OnDisconnectCallback = void Function();
 typedef PlayerExitCallback = void Function();
 typedef OnOpponentExitCallback = void Function(ServerState state);
 typedef OnFastPingGetsCallback = void Function();
+typedef InAnotherGameCallback = void Function();
 
 class SocketDataSource {
   io.Socket? _socket;
@@ -47,6 +48,7 @@ class SocketDataSource {
   PlayerExitCallback? onPlayerExit;
   OnOpponentExitCallback? onOpponentExit;
   OnFastPingGetsCallback? onFastPingGets;
+  InAnotherGameCallback? onInAnotherGameCallback;
 
   // --- State ---
   ServerState? serverState;
@@ -176,6 +178,16 @@ class SocketDataSource {
       if (!playerInitialized.isCompleted) {
         playerInitialized.complete();
       }
+      _socket!.emit("request_game_state", {
+        "gameMode": mode.name,
+        "gameId": gameId ?? "",
+      });
+    });
+    // -------------------------------------------------------
+    // IN ANOTHER GAME
+    // -------------------------------------------------------
+    _socket!.on("in_another_game", (data) {
+      onInAnotherGameCallback?.call();
       _socket!.emit("request_game_state", {
         "gameMode": mode.name,
         "gameId": gameId ?? "",

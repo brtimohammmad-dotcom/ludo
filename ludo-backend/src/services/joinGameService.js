@@ -10,6 +10,7 @@ const { updateGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
 const { error } = require("node:console");
 const { updateLobbyMessage } = require("../../bot.js");
+const { hasExistGame } = require("./authService.js");
 
 async function handleJoinGame(numberOfPlayers, socket, io) {
   console.log("player id: ", socket.data.telegramId, " joined");
@@ -21,8 +22,12 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       username: socket.data.firstName,
       telegram_id: socket.data.telegramId,
     };
+    const result = hasExistGame(player, socket.id);
+    if (result.game) {
+      socket.emit("in_another_game");
+      return;
+    }
     let gameOrRoom;
-
     // ----------------------------------------------------
     // بخش بازی‌های عمومی (مقادیر مثبت ۲ و ۴)
     // ----------------------------------------------------
@@ -59,25 +64,8 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
         game = initialState.getGameState(game.game_id);
         return { game: game };
       } else {
-        const color =
-          numberOfPlayers === 2
-            ? TOW_PLAYER_COLORS[players.length]
-            : FOUR_PLAYER_COLORS[players.length];
+        addPlayerToGame(game, player);
 
-        const playerInDataBase = await addPlayerToGameOnDatabase(
-          player,
-          game.game_id,
-          color,
-          game.game_mode,
-        );
-        const correctPlayer = {
-          ...playerInDataBase,
-          color: color,
-          player_status: "online",
-          numberOfAbsences: 0,
-          connection_status: "connected",
-        };
-        initialState.addPlayerToGameState(correctPlayer, game.game_id);
         game = initialState.getGameState(game.game_id);
         gameOrRoom = game;
       }
@@ -94,34 +82,14 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       room = initialState.createGameInGameState(room.room_id, numberOfPlayers);
 
       // ۳. تعیین رنگ اولین بازیکن (سازنده بازی همیشه ایندکس ۰ است)
-      const color =
-        numberOfPlayers === -2 ? TOW_PLAYER_COLORS[0] : FOUR_PLAYER_COLORS[0];
-
-      // ۴. اضافه کردن سازنده بازی به دیتابیس بازی
-
-      const playerInDataBase = await addPlayerToGameOnDatabase(
-        player,
-        room.game_id,
-        color,
-        room.game_mode,
-      );
-
-      // ۵. اضافه کردن سازنده بازی به وضعیت حافظه
-      const correctPlayer = {
-        ...playerInDataBase,
-        color: color,
-        player_status: "online",
-        numberOfAbsences: 0,
-        connection_status: "connected",
-      };
-      initialState.addPlayerToGameState(correctPlayer, room.game_id);
+      addPlayerToGame(room, player);
       room = initialState.getGameState(room.game_id);
 
       gameOrRoom = room;
     }
     socket.data.gameId = gameOrRoom.game_id;
 
-    joiningGame(socket, io);
+    callFront(socket, io);
   });
 }
 async function handleJoinGameFriendly(socket, io) {
@@ -132,51 +100,16 @@ async function handleJoinGameFriendly(socket, io) {
       telegram_id: socket.data.telegramId,
     };
     try {
-      let game = initialState.getGameState(socket.data.gameId);
-      const players = game.players;
-      const playerIsInGame = players.some(
-        (p) => p.telegram_id === socket.data.telegramId,
-      );
-      if (playerIsInGame) {
-        const correctPlayers = game.players.map((p) => {
-          if (p.telegram_id === socket.data.telegramId) {
-            return { ...p, player_status: "online" };
-          } else {
-            return p;
-          }
-        });
-        initialState.updateGameState(game.game_id, {
-          players: correctPlayers,
-        });
-        game = initialState.getGameState(game.game_id);
-      } else {
-        const color =
-          game.number_of_players === 2
-            ? TOW_PLAYER_COLORS[players.length]
-            : FOUR_PLAYER_COLORS[players.length];
+      const game = initialState.getGameState(socket.data.gameId);
 
-        const playerInDataBase = await addPlayerToGameOnDatabase(
-          player,
-          game.game_id,
-          color,
-          game.game_mode,
-        );
-        const correctPlayer = {
-          ...playerInDataBase,
-          color: color,
-          player_status: "online",
-          numberOfAbsences: 0,
-          connection_status: "connected",
-        };
-        initialState.addPlayerToGameState(correctPlayer, game.game_id);
-      }
-      joiningGame(socket, io);
+      addPlayerToGame(game, player);
+      callFront(socket, io);
     } catch {
       console.log(error);
     }
   });
 }
-async function joiningGame(socket, io) {
+async function callFront(socket, io) {
   // سوکت را وارد روم کن
   socket.join(socket.data.gameId);
 
@@ -210,5 +143,28 @@ async function joiningGame(socket, io) {
     startTimer(socket, io);
   }
   updateLobbyMessage(socket.data.gameId);
+}
+async function addPlayerToGame(game, player) {
+  const players = game.players;
+
+  const color =
+    game.number_of_players === 2
+      ? TOW_PLAYER_COLORS[players.length]
+      : FOUR_PLAYER_COLORS[players.length];
+
+  const playerInDataBase = await addPlayerToGameOnDatabase(
+    player,
+    game.game_id,
+    color,
+    game.game_mode,
+  );
+  const correctPlayer = {
+    ...playerInDataBase,
+    color: color,
+    player_status: "online",
+    numberOfAbsences: 0,
+    connection_status: "connected",
+  };
+  initialState.addPlayerToGameState(correctPlayer, game.game_id);
 }
 module.exports = { handleJoinGame, handleJoinGameFriendly };

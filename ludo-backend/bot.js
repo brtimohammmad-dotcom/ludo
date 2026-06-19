@@ -106,7 +106,7 @@ Players: ${playersCount}/${maxPlayers}
 
 ${playersList}
 
-🎉 We have a winner!
+🎉 ${game.winner.first_name} is winner!
 
 Thanks for joining the game.`
         : game.game_status === "cancel"
@@ -134,9 +134,7 @@ ${playersList}
     text,
     {
       reply_markup:
-        game.game_status === "finished" ||
-        game.game_status === "cancel" ||
-        game.game_status === "start"
+        game.game_status === "finished" || game.game_status === "cancel"
           ? {
               inline_keyboard: [],
             }
