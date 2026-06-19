@@ -23,6 +23,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       telegram_id: socket.data.telegramId,
     };
     const result = hasExistGame(player, socket.id);
+    console.log(result);
     if (result.game) {
       socket.emit("in_another_game");
       return;
