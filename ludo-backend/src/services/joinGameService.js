@@ -64,7 +64,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
         game = initialState.getGameState(game.game_id);
         return { game: game };
       } else {
-        addPlayerToGame(game, player);
+       await addPlayerToGame(game, player);
 
         game = initialState.getGameState(game.game_id);
         gameOrRoom = game;
@@ -82,7 +82,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       room = initialState.createGameInGameState(room.room_id, numberOfPlayers);
 
       // ۳. تعیین رنگ اولین بازیکن (سازنده بازی همیشه ایندکس ۰ است)
-      addPlayerToGame(room, player);
+     await addPlayerToGame(room, player);
       room = initialState.getGameState(room.game_id);
 
       gameOrRoom = room;
@@ -102,7 +102,7 @@ async function handleJoinGameFriendly(socket, io) {
     try {
       const game = initialState.getGameState(socket.data.gameId);
 
-      addPlayerToGame(game, player);
+     await addPlayerToGame(game, player);
       callFront(socket, io);
     } catch {
       console.log(error);
