@@ -3,25 +3,191 @@
 <head>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <base href="/">
+
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
     <meta name="description" content="A new Game named Ludo for Bale.">
 
-    <!-- iOS meta tags & icons -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="ludo">
-    <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png"/>
 
     <title>ludo</title>
     <link rel="manifest" href="manifest.json">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+            color: white;
+            background: radial-gradient(circle at center, #2a1455, #07070b);
+        }
+
+        /* 🌌 center glow */
+        .center-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60vmin;
+            height: 60vmin;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.08), transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%,100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+        }
+
+        /* 🎲 dice orbit */
+        .dice-bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80vmin;
+            height: 80vmin;
+            transform: translate(-50%, -50%);
+            animation: rotate 18s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .dice {
+            position: absolute;
+            font-size: 46px;
+            filter: drop-shadow(0 0 12px rgba(255,255,255,0.25));
+        }
+
+        .d1 { top: 0; left: 50%; transform: translate(-50%,-50%); color:#ff4d4d;}
+        .d2 { top: 15%; left: 85%; color:#4dd2ff;}
+        .d3 { top: 50%; left: 100%; color:#ffd24d;}
+        .d4 { top: 85%; left: 85%; color:#7dff4d;}
+        .d5 { top: 100%; left: 50%; transform: translate(-50%,-50%); color:#ff7de9;}
+        .d6 { top: 85%; left: 15%; color:#a64dff;}
+        .d7 { top: 50%; left: 0%; color:#ffb84d;}
+        .d8 { top: 15%; left: 15%; color:#4dffcc;}
+
+        /* 🎯 loader */
+        #loader {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: opacity 0.5s ease;
+        }
+
+        #lottie {
+            width: 190px;
+            height: 190px;
+        }
+
+        .text {
+            margin-top: 14px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            opacity: 0.95;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
 </head>
+
 <body>
+
+<div class="center-glow"></div>
+
+<div class="dice-bg">
+    <div class="orbit">
+        <div class="dice d1">⚀</div>
+        <div class="dice d2">⚁</div>
+        <div class="dice d3">⚂</div>
+        <div class="dice d4">⚃</div>
+        <div class="dice d5">⚄</div>
+        <div class="dice d6">⚅</div>
+        <div class="dice d7">⚀</div>
+        <div class="dice d8">⚁</div>
+    </div>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+    <div id="lottie"></div>
+    <div class="text" id="statusText">Loading game...</div>
+</div>
+
+<script>
+    let currentState = "downloading";
+
+    const statusText = document.getElementById("statusText");
+
+    function setBootState(state) {
+        currentState = state;
+
+        if (state === "downloading") {
+            statusText.innerText = "Downloading assets...";
+        }
+
+        if (state === "connecting") {
+            statusText.innerText = "Connecting to server...";
+        }
+
+        if (state === "ready") {
+            statusText.innerText = "Starting game...";
+            finishBoot();
+        }
+    }
+
+    function finishBoot() {
+        const loader = document.getElementById("loader");
+
+        loader.classList.add("hidden");
+
+        setTimeout(() => {
+            loader.remove();
+            document.querySelector(".dice-bg").remove();
+            document.querySelector(".center-glow").remove();
+        }, 500);
+    }
+
+    // Lottie
+    lottie.loadAnimation({
+        container: document.getElementById('lottie'),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'assets/lotties/Happy Dice.json'
+    });
+
+    // Flutter hook
+    window.addEventListener("flutter-first-frame", function () {
+        setBootState("ready");
+    });
+
+    // expose for Flutter (optional)
+    window.setBootState = setBootState;
+</script>
+
 <script src="flutter_bootstrap.js" async></script>
+
 </body>
 </html>
