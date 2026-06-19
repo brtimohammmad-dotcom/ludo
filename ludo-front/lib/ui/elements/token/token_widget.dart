@@ -5,7 +5,7 @@ import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/domain/rules/token_rules.dart';
 import 'package:ludo/ui/mappers/token_ui_mapper.dart';
 
-class TokenWidget extends StatelessWidget {
+class TokenWidget extends StatefulWidget {
   final Token token;
   final double size;
   final GameController gameController;
@@ -18,48 +18,103 @@ class TokenWidget extends StatelessWidget {
   });
 
   @override
+  State<TokenWidget> createState() => _TokenWidgetState();
+}
+
+class _TokenWidgetState extends State<TokenWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    GameState gameState = gameController.gameState!;
-    bool tokenIsActive = TokenRules.canActiveToken(token, gameState);
-    bool currentTurnAndTokenIsActive() =>
-        gameState.serverState!.currentTurn == gameState.livePlayer!.color &&
-        tokenIsActive;
+    final GameState gameState = widget.gameController.gameState!;
+
+    final tokenIsActive = TokenRules.canActiveToken(widget.token, gameState);
+
+    final isCurrentTurn =
+        gameState.serverState!.currentTurn == gameState.livePlayer!.color;
+
+    final highlight = isCurrentTurn && tokenIsActive;
+
+    void onTap() {
+      if (highlight) {
+        widget.gameController.moveToken(widget.token);
+      }
+    }
 
     return GestureDetector(
-      onTap: () {
-        if(currentTurnAndTokenIsActive()){
-          gameController.moveToken(token);
-
-        }
-      },
+      onTap: onTap,
       child: SizedBox(
-        width: size,
-        height: size,
-        child: AnimatedContainer(
-          curve: Curves.easeOut,
-          margin: EdgeInsets.all(tokenIsActive ? size / 9 : size / 5),
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            gradient: tokenGradient(token),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withAlpha(200),
-              width: size / 15,
-            ),
-            boxShadow: tokenIsActive
-                ? activeTokenShadow(token)
-                : [
-                    BoxShadow(
-                      color: Colors.black38,
-                      blurRadius: 2,
-                      spreadRadius: 0,
-                      offset: Offset(-2, 3),
-                    ),
+        width: widget.size,
+        height: widget.size,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (_, child) {
+            final glow = highlight ? 0.3 + (_controller.value * 0.7) : 0.0;
+
+            final bounce = highlight ? -6 * _controller.value : 0.0;
+
+            return Transform.translate(
+              offset: Offset(0, bounce),
+              child: Container(
+                margin: EdgeInsets.all(
+                  tokenIsActive ? widget.size / 9 : widget.size / 5,
+                ),
+                decoration: BoxDecoration(
+                  gradient: tokenGradient(widget.token),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withAlpha(200),
+                    width: widget.size / 15,
+                  ),
+                  boxShadow: [
+                    if (highlight)
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: glow),
+                        blurRadius: 12 + glow * 16,
+                        spreadRadius: 2 + glow * 4,
+                      )
+                    else if (tokenIsActive)
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: glow),
+                        blurRadius: 12 + glow * 16,
+                        spreadRadius: 2 + glow * 4,
+                      )
+                    else
+                      const BoxShadow(
+                        color: Colors.black38,
+                        blurRadius: 2,
+                        offset: Offset(-2, 3),
+                      ),
                   ],
-          ),
-          child: currentTurnAndTokenIsActive()
-              ? Icon(Icons.check_rounded)
-              : SizedBox(),
+                ),
+                child: child,
+              ),
+            );
+          },
+          child: highlight
+              ? Icon(
+                  Icons.touch_app_rounded,
+                  color: Colors.white,
+                  size: widget.size * 0.45,
+                )
+              : const SizedBox(),
         ),
       ),
     );

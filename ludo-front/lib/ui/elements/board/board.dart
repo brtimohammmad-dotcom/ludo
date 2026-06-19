@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
@@ -69,9 +70,9 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
       }
     };
     widget.gameController.onGameStarted = () {
-      if(_isWaitingDialogShown){
+      if (_isWaitingDialogShown) {
         Navigator.of(context).pop();
-        _isWaitingDialogShown=false;
+        _isWaitingDialogShown = false;
       }
     };
     // --- RECONNECTION FAILED ---
@@ -120,14 +121,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    for (int i = 1; i <= 6; i++) {
-      precacheImage(AssetImage('assets/images/dice/$i.png'), context);
-    }
-  }
-
-  @override
   void dispose() {
     debugPrint("🧹 Board dispose called");
     widget.gameController.isInBoard = false;
@@ -147,24 +140,24 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
       listenable: widget.gameController,
       builder: (context, child) {
         final state = widget.gameController.gameState?.serverState;
-
+        final boardSize = (screenWidth < screenHeight
+            ? screenWidth
+            : screenHeight * 0.86);
         if (state == null) {
           return Center(
-            child: Lottie.asset(
-              "assets/lotties/Happy girl.json",
-              height: 200,
-              width: 200,
-              fit: BoxFit.cover,
-              frameRate: const FrameRate(30),
-              renderCache: RenderCache.raster,
+            child: LoadingAnimationWidget.fourRotatingDots(
+              color: Colors.lightGreenAccent,
+              size: boardSize * 0.2,
             ),
           );
         }
+
         if (state.gameStatus == GameStatus.waitingForPlayer &&
             !_isWaitingDialogShown) {
           _isWaitingDialogShown = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
+
             showAnimatedDialog(
               context: context,
               barrierDismissible: false,
@@ -178,10 +171,6 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
           });
         }
         final gameMode = state.numberOfPlayers;
-
-        final boardSize = (screenWidth < screenHeight
-            ? screenWidth
-            : screenHeight * 0.86);
 
         final barHeight = boardSize * 0.08;
 

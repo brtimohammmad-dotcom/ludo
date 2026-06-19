@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
@@ -120,6 +121,11 @@ class _JoinScreenState extends State<JoinScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final boardSize = (screenWidth < screenHeight
+        ? screenWidth
+        : screenHeight * 0.86);
     return ListenableBuilder(
       listenable: gameController,
       builder: (context, child) {
@@ -132,14 +138,11 @@ class _JoinScreenState extends State<JoinScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
 
                     children: [
-                      Lottie.asset(
-                        "assets/lotties/Happy girl.json",
-                        height: 200,
-                        width: 200,
-                        fit: BoxFit.cover,
-                        frameRate: FrameRate(30),
-                        renderCache: RenderCache.raster,
+                      LoadingAnimationWidget.fourRotatingDots(
+                        color: Colors.lightGreenAccent,
+                        size: boardSize * 0.2,
                       ),
+                      SizedBox(height: boardSize * 0.01),
                       Text(
                         'Connecting to Server...',
                         style: TextStyle(
@@ -190,11 +193,13 @@ class _JoinScreenState extends State<JoinScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 StartGameButton(
+                                  boardSize: boardSize,
                                   gameController: gameController,
                                   numberOfPlayers: 2,
                                 ),
                                 const SizedBox(width: 10),
                                 StartGameButton(
+                                  boardSize: boardSize,
                                   gameController: gameController,
                                   numberOfPlayers: 4,
                                 ),
@@ -202,6 +207,7 @@ class _JoinScreenState extends State<JoinScreen> {
                             ),
                             const SizedBox(height: 10),
                             StartGameButton(
+                              boardSize: boardSize,
                               gameController: gameController,
                               numberOfPlayers: -1,
                               onTap: () {
@@ -217,6 +223,7 @@ class _JoinScreenState extends State<JoinScreen> {
                           children: [
                             const SizedBox(height: 400),
                             AnimatedFriendsButtons(
+                              boardSize: boardSize,
                               show: showFriendsOptions,
                               gameController: gameController,
                             ),
@@ -237,8 +244,10 @@ class AnimatedFriendsButtons extends StatefulWidget {
     super.key,
     required this.show,
     required this.gameController,
+    required this.boardSize,
   });
 
+  final double boardSize;
   final bool show;
   final GameController gameController;
 
@@ -341,11 +350,13 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           StartGameButton(
+            boardSize: widget.boardSize,
             gameController: widget.gameController,
             numberOfPlayers: -2,
           ),
           const SizedBox(width: 10),
           StartGameButton(
+            boardSize: widget.boardSize,
             gameController: widget.gameController,
             numberOfPlayers: -4,
           ),
@@ -358,13 +369,14 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
 class StartGameButton extends StatelessWidget {
   const StartGameButton({
     super.key,
+    required this.boardSize,
     required this.gameController,
     required this.numberOfPlayers,
     this.onTap,
   });
 
   final VoidCallback? onTap;
-
+  final double boardSize;
   final int numberOfPlayers;
   final GameController gameController;
 
@@ -398,14 +410,11 @@ class StartGameButton extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Lottie.asset(
-                    "assets/lotties/Happy girl.json",
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.cover,
-                    frameRate: const FrameRate(30),
-                    renderCache: RenderCache.raster,
+                  LoadingAnimationWidget.fourRotatingDots(
+                    color: Colors.lightGreenAccent,
+                    size: boardSize * 0.2,
                   ),
+                  SizedBox(height: boardSize * 0.01),
                   Text(
                     'Waiting for Game',
                     style: TextStyle(
