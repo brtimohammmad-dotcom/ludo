@@ -1,7 +1,22 @@
 
-enum PlayerColor { red, blue, yellow, green }
+import 'package:flutter/material.dart';
 
+enum PlayerColor { red, blue, yellow, green }
 extension PlayerColorExtension on PlayerColor {
+  Color toColor() {
+    switch (this) {
+      case PlayerColor.red:
+        return Colors.red;
+      case PlayerColor.green:
+        return Colors.green;
+      case PlayerColor.yellow:
+        return Colors.yellow;
+      case PlayerColor.blue:
+        return Colors.blue;
+    }
+  }
+}
+extension NextPlayerColorExtension on PlayerColor {
   PlayerColor get next {
     final values = PlayerColor.values;
     return values[(index + 1) % values.length];

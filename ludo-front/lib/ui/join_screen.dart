@@ -414,7 +414,7 @@ class StartGameButton extends StatelessWidget {
                     color: Colors.lightGreenAccent,
                     size: boardSize * 0.2,
                   ),
-                  SizedBox(height: boardSize * 0.01),
+                  SizedBox(height: boardSize*0.01,),
                   Text(
                     'Waiting for Game',
                     style: TextStyle(

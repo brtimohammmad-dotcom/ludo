@@ -143,7 +143,7 @@ class SocketDataSource {
     _socket!.on("player_not_authorized", (data) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 1};
+        initData = {"first_name": "amir", "id": 2};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();

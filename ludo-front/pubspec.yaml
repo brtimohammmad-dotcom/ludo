@@ -39,7 +39,7 @@ dependencies:
   telegram_web_app: ^0.3.3
   http: ^1.6.0
   loading_animation_widget:
-
+  confetti: ^0.7.0
 
 
 dev_dependencies:
