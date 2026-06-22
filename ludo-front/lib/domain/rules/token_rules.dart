@@ -19,6 +19,9 @@ class TokenRules {
   }
 
   static bool canActiveToken(Token liveToken, GameState? gameState) {
+    if (gameState?.serverState == null) {
+      return false;
+    }
     if (gameState!.serverState!.turnStatus != TurnStatus.waitingForMove) {
       return false;
     }

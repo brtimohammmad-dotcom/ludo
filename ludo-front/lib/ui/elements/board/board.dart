@@ -1,133 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
-import 'package:ludo/ui/utils/alerts/game_status_alert.dart';
-import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
-import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/elements/board/main_board.dart';
-import 'package:ludo/ui/utils/alerts/winner_alert.dart';
-import 'package:ludo/ui/join_screen.dart';
-import 'package:ludo/ui/mappers/player_bar_mapper.dart';
-import 'package:ludo/ui/utils/animated_route.dart';
+import 'package:ludo/ui/mappers/player-bar-mapper/player_bar.dart';
 
-class Board extends StatefulWidget {
-  final GameController gameController;
+import 'board_ui_event_handler.dart';
 
-  const Board({super.key, required this.gameController});
+class Board extends ConsumerStatefulWidget {
+  const Board({super.key});
 
   @override
-  State<Board> createState() => _BoardState();
+  ConsumerState<Board> createState() => _BoardState();
 }
 
-class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
-  late Future<LottieComposition> diceComposition;
-  bool _isWaitingDialogShown = false; // ⬅️ اضافه شد
+class _BoardState extends ConsumerState<Board>
+    with SingleTickerProviderStateMixin {
+  late Future<LottieComposition> _diceComposition;
+  late BoardUiEventHandler _uiEventHandler;
 
   @override
   void initState() {
     super.initState();
-    widget.gameController.isInBoard = true;
-    // --- GAME FINISHED ---
-    widget.gameController.onGameFinished = () {
-      if (!mounted) return;
+    _diceComposition = AssetLottie("assets/lotties/Dice Rolling.json").load();
+    final gameController = ref.read(gameControllerProvider.notifier);
+    // مقداردهی و ثبت کالبک‌ها از طریق هندلر اختصاصی UI
+    _uiEventHandler = BoardUiEventHandler(
+      context: context,
+      gameController: gameController,
+    );
+    _uiEventHandler.init();
+    _uiEventHandler.checkAndShowWaitingDialog();
 
-      final winner = widget.gameController.gameState?.serverState?.winner;
-      if (winner != null) {
-        showAnimatedDialog(
-          context: context,
-          child: WinnerAlert(
-            winner: winner,
-            gameController: widget.gameController,
-          ),
-        );
-      }
-    };
-
-    // --- PLAYER EXIT ---
-    widget.gameController.onPlayerExit = () async {
-      debugPrint('...player exited...');
-
-      if (Navigator.canPop(context)) {
-        Navigator.of(context).pop();
-      }
-
-      widget.gameController.deleteGameState();
-
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          animatedRoute(
-            page: JoinScreen(),
-            duration: Duration(seconds: 1),
-            type: RouteAnimation.fade,
-          ),
-          (route) => false,
-        );
-      }
-    };
-    widget.gameController.onGameStarted = () {
-      if (_isWaitingDialogShown) {
-        Navigator.of(context).pop();
-        _isWaitingDialogShown = false;
-      }
-    };
-    // --- RECONNECTION FAILED ---
-    widget.gameController.onReconnectionFailed = () {
-      if (!mounted) return;
-      showAnimatedDialog(
-        context: context,
-        child: ReconnectingFailedAlert(
-          onHomePressed: () async {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop();
-            }
-
-            widget.gameController.deleteGameState();
-
-            await Future.delayed(const Duration(milliseconds: 50));
-
-            if (mounted) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                animatedRoute(
-                  page: JoinScreen(),
-                  duration: Duration(seconds: 1),
-                  type: RouteAnimation.fade,
-                ),
-                (route) => false,
-              );
-            }
-          },
-          textButton: "Home",
-        ),
-      );
-    };
-
-    // --- ANIMATION CONTROLLER ---
-    widget.gameController.animationController =
+    // انیمیشن کنترلر محلی بورد
+    gameController.animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 10))
           ..addStatusListener((status) {
             if (status == AnimationStatus.completed) {
-              widget.gameController.animationController!.reset();
-              widget.gameController.animationController!.forward();
+              gameController.animationController!.reset();
+              gameController.animationController!.forward();
             }
           });
-
-    diceComposition = AssetLottie("assets/lotties/Dice Rolling.json").load();
   }
 
   @override
   void dispose() {
     debugPrint("🧹 Board dispose called");
-    widget.gameController.isInBoard = false;
-    if (!widget.gameController.isDisposed) {
-      widget.gameController.deleteGameState();
-    }
-
     super.dispose();
   }
 
@@ -135,72 +54,52 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final boardSize = (screenWidth < screenHeight
+        ? screenWidth
+        : screenHeight * 0.86);
 
-    return ListenableBuilder(
-      listenable: widget.gameController,
-      builder: (context, child) {
-        final state = widget.gameController.gameState?.serverState;
-        final boardSize = (screenWidth < screenHeight
-            ? screenWidth
-            : screenHeight * 0.86);
-        if (state == null) {
-          return Center(
-            child: LoadingAnimationWidget.fourRotatingDots(
-              color: Colors.lightGreenAccent,
-              size: boardSize * 0.2,
-            ),
-          );
+    final gameMode = ref.watch(
+      gameControllerProvider.select(
+        (state) => state?.serverState?.numberOfPlayers ?? 2,
+      ),
+    );
+    ref.listen<GameStatus?>(
+      gameControllerProvider.select((state) => state?.serverState?.gameStatus),
+      (previous, next) {
+        debugPrint("🔄 [UI Event] Game Status Changed: $next");
+
+        // اگر وضعیت تغییر کرد و دیگر منتظر بازیکن نبودیم، آلرت را ببند
+        if (next != GameStatus.waitingForPlayer) {
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
         }
-
-        if (state.gameStatus == GameStatus.waitingForPlayer &&
-            !_isWaitingDialogShown) {
-          _isWaitingDialogShown = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-
-            showAnimatedDialog(
-              context: context,
-              barrierDismissible: false,
-              child: WaitingForPlayersAlert(
-                gameController: widget.gameController,
-                onExit: () {
-                  widget.gameController.exitGame();
-                },
-              ),
-            );
-          });
-        }
-        final gameMode = state.numberOfPlayers;
-
-        final barHeight = boardSize * 0.08;
-
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              PlayerBar(
-                boardSize: boardSize,
-                barHeight: barHeight,
-                gameController: widget.gameController,
-                leftPlayerIndex: gameMode == 2 ? -1 : 1,
-                rightPlayerIndex: gameMode == 2 ? 1 : 2,
-              ),
-              MainBoard(
-                diceComposition: diceComposition,
-                boardSize: boardSize,
-                gameController: widget.gameController,
-              ),
-              PlayerBar(
-                boardSize: boardSize,
-                barHeight: barHeight,
-                gameController: widget.gameController,
-                leftPlayerIndex: 0,
-                rightPlayerIndex: gameMode == 2 ? -1 : 3,
-              ),
-            ],
-          ),
-        );
       },
+    );
+    final barHeight = boardSize * 0.08;
+
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            PlayerBar(
+              boardSize: boardSize,
+              barHeight: barHeight,
+              leftPlayerIndex: gameMode == 2 ? -1 : 1,
+              rightPlayerIndex: gameMode == 2 ? 1 : 2,
+            ),
+            MainBoard(diceComposition: _diceComposition, boardSize: boardSize),
+            PlayerBar(
+              boardSize: boardSize,
+              barHeight: barHeight,
+              leftPlayerIndex: 0,
+              rightPlayerIndex: gameMode == 2 ? -1 : 3,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

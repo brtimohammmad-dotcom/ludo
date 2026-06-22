@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/ui/app_body.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // 🟢 ۱. این امپورت را حتماً بگذار
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(), // یا هر ویجتی که ریشه اصلی برنامه‌ات است
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

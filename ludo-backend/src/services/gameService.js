@@ -274,7 +274,7 @@ async function handleExitingGame(socket, io) {
   currentGame = initialState.getGameState(socket.data.gameId);
   socket.emit("player_exit");
   socket.to(socket.data.gameId).emit("opponent_exit", currentGame);
-  socket.leave();
+  socket.leave(socket.data.gameId);
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",
   ).length;

@@ -71,11 +71,11 @@ module.exports = (io) => {
       }
       const { gameMode, gameId } = data;
 
-      console.log(`Received gameMode: ${gameMode}, gameId: ${gameId}`);
       if (!socket.data.telegramId) {
         socket.emit("player_not_authorized");
         return;
       }
+      console.log(`Received gameMode: ${gameMode}, gameId: ${gameId}`);
 
       const player = {
         telegram_id: socket.data.telegramId,
@@ -92,6 +92,7 @@ module.exports = (io) => {
           socket.data.gameId = gameId;
         }
         if (!socket.data.gameId) {
+          socket.emit("not_in_game");
           return;
         }
         // 3) اگر بازی در دیتابیس وجود دارد ولی در حافظه نیست

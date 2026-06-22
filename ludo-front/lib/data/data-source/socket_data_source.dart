@@ -1,20 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/config_service.dart';
-import 'package:ludo/ui/join_screen.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'package:telegram_web_app/telegram_web_app.dart';
+import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
+import 'socket_event_handler.dart';
+
+// تایپ‌دف‌ها کماکان اینجا یا در یک فایل types.dart می‌مانند
 typedef StateUpdateCallback = void Function(ServerState state);
 typedef OnGameStartedCallback = void Function(ServerState state);
 typedef OnPlayerJoinedCallBack = void Function(ServerState state);
 typedef OnGameRecoveredCallback = void Function(ServerState state);
-
 typedef PlayerUpdateCallback = void Function(Player player);
 typedef TokenMovedCallback = void Function(ServerState state);
 typedef DiceRolledCallback = void Function(ServerState state);
@@ -26,14 +25,13 @@ typedef PlayerExitCallback = void Function();
 typedef OnOpponentExitCallback = void Function(ServerState state);
 typedef OnFastPingGetsCallback = void Function();
 typedef InAnotherGameCallback = void Function();
+typedef NotInGame = void Function();
 
 class SocketDataSource {
   io.Socket? _socket;
-
-  // --- Flags ---
   bool _isConnecting = false;
 
-  // --- Callbacks ---
+  // --- کالبک‌ها ---
   StateUpdateCallback? onStateUpdate;
   OnGameStartedCallback? onGameStarted;
   OnPlayerJoinedCallBack? onPlayerJoined;
@@ -49,65 +47,23 @@ class SocketDataSource {
   OnOpponentExitCallback? onOpponentExit;
   OnFastPingGetsCallback? onFastPingGets;
   InAnotherGameCallback? onInAnotherGameCallback;
+  NotInGame? onNotInGame;
 
-  // --- State ---
+  // --- وضعیت سیستم ---
   ServerState? serverState;
   Completer<void> playerInitialized = Completer<void>();
 
-  // -------------------------------------------------------
-  // SAFE JSON CONVERTER
-  // -------------------------------------------------------
-  Map<String, dynamic> convertToJSData(dynamic data) {
-    if (data == null) return {};
-
-    if (data is Map<String, dynamic>) return data;
-
-    try {
-      if (data is Iterable) {
-        final list = data.toList();
-        if (list.isNotEmpty) {
-          final first = list.first;
-          try {
-            return Map<String, dynamic>.from(first as Map);
-          } catch (_) {
-            final decoded = jsonDecode(jsonEncode(first));
-            if (decoded is Map) {
-              return Map<String, dynamic>.from(decoded);
-            }
-          }
-        }
-      }
-
-      if (data is Map) {
-        return data.map((k, v) => MapEntry(k.toString(), v));
-      }
-    } catch (e) {
-      debugPrint('🚨 JSON conversion error: $e');
-    }
-
-    return {};
-  }
+  bool get isConnected => _socket?.connected ?? false;
 
   // -------------------------------------------------------
   // CONNECT
   // -------------------------------------------------------
-  void connect(GameMode mode, String? gameId) async {
+  void connect(GameMode mode, String? gameId) {
     final serverUrl = Config.serverUrl;
     Config.printEnvironmentInfo();
 
-    if (_isConnecting) {
-      debugPrint("⛔ Prevented duplicate connect()");
-      return;
-    }
-
-    if (_socket != null) {
-      debugPrint("🔄 Disposing ghost socket before reconnect...");
-      await dispose();
-    }
-
+    if (_isConnecting) return;
     _isConnecting = true;
-
-    debugPrint("🟢 Connecting to: $serverUrl");
 
     _socket = io.io(
       serverUrl,
@@ -122,248 +78,60 @@ class SocketDataSource {
           .build(),
     );
 
-    // -------------------------------------------------------
-    // ON CONNECT
-    // -------------------------------------------------------
+    // اتصال اولیه و فرستادن رکوئست استیت
     _socket!.onConnect((_) {
-      debugPrint("✅ Connected to $serverUrl");
       _isConnecting = false;
-
-      debugPrint("📤 Sending request game state event to server...");
-      debugPrint(mode.toString());
-
       _socket!.emit("request_game_state", {
         "gameMode": mode.name,
         "gameId": gameId ?? "",
       });
     });
-    // -------------------------------------------------------
-    // AUTHORIZE PLAYER
-    // -------------------------------------------------------
-    _socket!.on("player_not_authorized", (data) {
-      dynamic initData;
-      if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id": 2};
-      } else {
-        if (TelegramWebApp.instance.isSupported) {
-          TelegramWebApp.instance.ready();
-          TelegramWebApp.instance.expand();
-        }
-        initData = TelegramWebApp.instance.initData.raw;
-      }
-      _socket!.emit("auth", {"initData": initData});
-    });
 
-    // -------------------------------------------------------
-    // INITIAL PLAYER
-    // -------------------------------------------------------
-    _socket!.on("initial_player", (data) {
-      debugPrint("📥 RAW DATA RECEIVED: $data");
+    // ثبت رویدادها از طریق هندلر اختصاصی
+    SocketEventHandler(dataSource: this, socket: _socket!)
+        .registerEvents(mode, gameId);
 
-      final clean = convertToJSData(data);
-
-      if (clean.containsKey("error")) {
-        final msg = clean["error"];
-        debugPrint("❌ Server error: $msg");
-
-        if (TelegramWebApp.instance.isSupported) {
-          TelegramWebApp.instance.showAlert("خطا در احراز هویت بازی: $msg");
-        }
-        return;
-      }
-
-      final player = Player.fromJson(clean);
-      onPlayerUpdate?.call(player);
-
-      if (!playerInitialized.isCompleted) {
-        playerInitialized.complete();
-      }
-      _socket!.emit("request_game_state", {
-        "gameMode": mode.name,
-        "gameId": gameId ?? "",
-      });
-    });
-    // -------------------------------------------------------
-    // IN ANOTHER GAME
-    // -------------------------------------------------------
-    _socket!.on("in_another_game", (data) {
-      onInAnotherGameCallback?.call();
-      _socket!.emit("request_game_state", {
-        "gameMode": mode.name,
-        "gameId": gameId ?? "",
-      });
-    });
-    // -------------------------------------------------------
-    // ON GET PING
-    // -------------------------------------------------------
-    _socket!.on("fast_ping_gets", (data) {
-      onFastPingGets?.call();
-    });
-    // -------------------------------------------------------
-    // GAME EVENTS
-    // -------------------------------------------------------
-    _socket!.on("game_state_update", (data) async {
-      await playerInitialized.future;
-      debugPrint("game state updated");
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onStateUpdate?.call(serverState!);
-    });
-
-    _socket!.on("game_started", (data) async {
-      await playerInitialized.future;
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onGameStarted?.call(serverState!);
-    });
-    _socket!.on("player_joined", (data) async {
-      await playerInitialized.future;
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onPlayerJoined?.call(serverState!);
-    });
-    _socket!.on("game_recovered", (data) async {
-      if (!playerInitialized.isCompleted) {
-        playerInitialized.complete();
-      }
-
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onGameRecovered?.call(serverState!);
-    });
-    _socket!.on("dice_rolled", (data) async {
-      await playerInitialized.future;
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onDiceRolled?.call(serverState!);
-    });
-
-    _socket!.on("times_up", (data) async {
-      await playerInitialized.future;
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onTimesUp?.call(serverState!);
-    });
-
-    _socket!.on("game_finished", (data) async {
-      await playerInitialized.future;
-      final winner = Player.fromJson(convertToJSData(data));
-      onGameFinished?.call(winner);
-    });
-
-    _socket!.on("token_moved", (data) async {
-      await playerInitialized.future;
-      serverState = ServerState.fromJson(convertToJSData(data));
-      onTokenMoved?.call(serverState!);
-    });
-
-    _socket!.on("player_exit", (_) async {
-      await playerInitialized.future;
-      _socket!.clearListeners();
-      onPlayerExit?.call();
-    });
-    _socket!.on("opponent_exit", (data) {
-      serverState = ServerState.fromJson(convertToJSData(data));
-
-      onOpponentExit?.call(serverState!);
-    });
-
-    // -------------------------------------------------------
-    // DISCONNECT / RECONNECT
-    // -------------------------------------------------------
-    _socket!.onDisconnect((reason) {
-      debugPrint("🔌 Socket disconnected: $reason");
-
-      onDisconnectCallback?.call();
-    });
-
-    _socket!.onReconnectAttempt((a) {
-      debugPrint("🔄 Reconnect attempt #$a");
-    });
-
-    _socket!.onReconnectError((e) {
-      debugPrint("⚠️ Reconnect error: $e");
-    });
-
-    _socket!.onReconnectFailed((_) {
-      debugPrint("❌ Reconnect failed");
-      if (playerInitialized.isCompleted) {
-        playerInitialized = Completer<void>();
-      }
-      onReconnectionFailedCallback?.call();
-    });
+    // مدیریت وضعیت دیسکانیکت و ریکانکت سوکت
+    _setupConnectionLifeCycle();
 
     _socket!.connect();
   }
 
-  // -------------------------------------------------------
-  // DISPOSE
-  // -------------------------------------------------------
-  Future<void> dispose() async {
-    debugPrint("🧹 Disposing SocketDataSource...");
-
-    // ⛔ اول هر جور reconnect رو قطع کن
-    try {
-      if (_socket != null) {
-        _socket!.io.options?['reconnection'] = false;
-        _socket!.io.options?['reconnectionAttempts'] = 0;
-      }
-    } catch (_) {}
-
-    try {
-      _socket?.clearListeners();
-      _socket?.disconnect();
-      _socket?.destroy();
-    } catch (_) {}
-
-    _socket = null;
-
-    onStateUpdate = null;
-    onPlayerUpdate = null;
-    onTokenMoved = null;
-    onDiceRolled = null;
-    onTimesUp = null;
-    onGameFinished = null;
-    onReconnectionFailedCallback = null;
-    onDisconnectCallback = null;
-    onPlayerExit = null;
-    onFastPingGets = null;
-
-    serverState = null;
-
-    if (playerInitialized.isCompleted) {
-      playerInitialized = Completer<void>();
-    }
-
-    debugPrint("✅ SocketDataSource fully cleaned.");
+  void _setupConnectionLifeCycle() {
+    _socket!.onDisconnect((reason) => onDisconnectCallback?.call());
+    _socket!.onReconnectAttempt((a) => debugPrint("🔄 Reconnect attempt #$a"));
+    _socket!.onReconnectError((e) => debugPrint("⚠️ Reconnect error: $e"));
+    _socket!.onReconnectFailed((_) => onReconnectionFailedCallback?.call());
   }
 
   // -------------------------------------------------------
-  // GAME ACTIONS
+  // GAME ACTIONS (EMITS)
   // -------------------------------------------------------
-  bool get isConnected => _socket?.connected ?? false;
-
   void joinGame(int numberOfPlayers) {
-    if (_socket?.connected ?? false) {
-      _socket!.emit("join_game", {"numberOfPlayers": numberOfPlayers});
-    }
+    if (isConnected) _socket!.emit("join_game", {"numberOfPlayers": numberOfPlayers});
   }
 
   void rollDice() {
-    if (_socket?.connected ?? false) {
-      _socket!.emit("roll_dice");
-    }
+    if (isConnected) _socket!.emit("roll_dice");
   }
 
   void getFastPing() {
-    if (_socket?.connected ?? false) {
-      _socket!.emit("get_fast_ping"); // ← باید emit بشه نه callback مستقیم
-    }
+    if (isConnected) _socket!.emit("get_fast_ping");
   }
 
   void moveToken(Token t) {
-    if (_socket?.connected ?? false) {
-      _socket!.emit("move_token", t.toJson());
-    }
+    if (isConnected) _socket!.emit("move_token", t.toJson());
   }
 
   void exitGame() {
-    if (_socket?.connected ?? false) {
-      _socket!.emit("exit_game");
+    if (isConnected) _socket!.emit("exit_game");
+  }
+
+  void resumeReconnection() {
+    if (_socket != null) {
+      _socket!.io.reconnecting = false;
+      _socket!.io.skipReconnect = false;
+      _socket!.io.reconnect();
     }
   }
 }

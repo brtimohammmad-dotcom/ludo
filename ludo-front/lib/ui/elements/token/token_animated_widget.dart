@@ -1,6 +1,5 @@
 // token_animated_widget.dart
 import 'package:flutter/material.dart';
-import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/elements/token/token_widget.dart';
 
@@ -9,7 +8,6 @@ class TokenAnimatedWidget extends StatefulWidget {
   final double cellSize;
   final double left;
   final double top;
-  final GameController gameController;
 
   const TokenAnimatedWidget({
     super.key,
@@ -17,7 +15,6 @@ class TokenAnimatedWidget extends StatefulWidget {
     required this.cellSize,
     required this.left,
     required this.top,
-    required this.gameController,
   });
 
   @override
@@ -93,7 +90,6 @@ class _TokenAnimatedWidgetState extends State<TokenAnimatedWidget>
         },
         child: TokenWidget(
           token: widget.token,
-          gameController: widget.gameController,
           size: widget.cellSize,
         ),
       ),

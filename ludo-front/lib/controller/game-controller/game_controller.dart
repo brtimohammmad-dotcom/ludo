@@ -1,475 +1,172 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:ludo/controller/handler/game_animation_manager.dart';
+import 'package:ludo/controller/handler/game_socket_handler.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
 import 'package:ludo/data/repository/game_repository.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/domain/rules/token_rules.dart';
-import 'package:ludo/ui/join_screen.dart';
-import 'package:telegram_web_app/telegram_web_app.dart';
+import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
-extension GameStateX on GameState {
-  GameState toggleTurn() {
-    return copyWith(
-      serverState: serverState!.copyWith(
-        currentTurn: serverState!.currentTurn.next,
-      ),
-    );
-  }
-}
+part 'game_controller.g.dart';
 
-class GameController extends ChangeNotifier {
-  /// UI Callbacks
+@riverpod
+class GameController extends _$GameController {
+  // Repositories & Handlers
+  late final GameRepository gameRepository;
+  late final GameSocketHandler _socketHandler;
+  late final GameAnimationManager _animationManager;
+  AnimationController? animationController;
+
+  // Flags & Internal States
+  bool isGameFinishedHandled = false;
+  bool _isMovingToken = false;
+
+  // UI Callbacks
   VoidCallback? onGameFinished;
   VoidCallback? onReconnectionFailed;
   VoidCallback? onPlayerExit;
   VoidCallback? onFastPingGets;
   VoidCallback? onGameReady;
-  VoidCallback? onGameRecovered;
   VoidCallback? onGameStarted;
 
-  GameState? gameState;
-  late GameRepository gameRepository;
-  AnimationController? animationController;
-
-  ///flags
-  bool isInBoard = false;
-  bool _isDisposed = false;
-  bool _isGameFinishedHandled = false;
-  bool _isMovingToken = false;
-
-  GameController() {
+  @override
+  GameState? build() {
     final ds = SocketDataSource();
     gameRepository = GameRepository(ds);
-    _setupCallbacks();
+
+    // مقداردهی هندلرها با پاس دادن instance فعلی
+    _socketHandler = GameSocketHandler(this);
+    _animationManager = GameAnimationManager(this);
+
+    _socketHandler.init();
+
+    // 🧹 مدیریت Dispose خودکار در ریورپاد
+    ref.onDispose(() {
+      debugPrint('🧹 GameController Provider Disposed');
+      animationController?.stop();
+      animationController?.dispose();
+      animationController = null;
+    });
+
+    // وضعیت اولیه در بدو شروع بازی null است
+    return null;
   }
 
   // -------------------------------------------------
-  // SETUP CALLBACKS
+  // INTERNAL HELPERS (صرفا برای استفاده کامپوننت‌های کمکی)
   // -------------------------------------------------
-  void _setupCallbacks() {
-    final ds = gameRepository.dataSource;
-    ds.onFastPingGets = () {
-      if (onFastPingGets != null) onFastPingGets!();
-    };
+  GameState? get currentGameState => state;
 
-    // state updated
+  void updateState(GameState? newState) {
+    state = newState;
+  }
 
-    ds.onStateUpdate = (ServerState state) {
-      if (_isDisposed || gameState?.livePlayer == null) return;
-
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      if (onGameReady != null) onGameReady!();
-      notifyListeners();
-    };
-
-    // in another game
-
-    ds.onInAnotherGameCallback = () {
-      if (TelegramWebApp.instance.isSupported) {
-        TelegramWebApp.instance.showAlert(
-           "You are already in another game!",(){}
-        );
-      }
-    };
-
-    // game recovered
-
-    ds.onGameRecovered = (ServerState state) {
-      if (_isDisposed || gameState?.livePlayer == null) return;
-
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      notifyListeners();
-      onGameRecovered?.call();
-    };
-
-    // game started
-
-    ds.onGameStarted = (ServerState state) {
-      if (_isDisposed || gameState?.livePlayer == null) return;
-
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      notifyListeners();
-      onGameStarted?.call();
-    };
-
-    // player joined
-
-    ds.onPlayerJoined = (ServerState state) {
-      if (_isDisposed || gameState?.livePlayer == null) return;
-
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      notifyListeners();
-    };
-
-    // times up
-
-    ds.onTimesUp = (ServerState state) {
-      if (_isDisposed || gameState?.livePlayer == null) return;
-
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
+  // -------------------------------------------------
+  // ANIMATION BRIDGE
+  // -------------------------------------------------
+  Future<void> handleTokenMoved(ServerState newState) async {
+    if (_isMovingToken || state?.livePlayer == null) return;
+    _isMovingToken = true;
+    try {
+      animationController?.stop();
+      await _animationManager.moveTokenStepByStep(newState);
       animationController?.reset();
-      notifyListeners();
-    };
+      animationController?.forward();
+    } finally {
+      _isMovingToken = false;
+    }
+  }
 
-    // game finished
-
-    ds.onGameFinished = (Player winner) {
-      if (_isDisposed || gameState == null) return;
-
-      animationController?.stop();
-
-      gameState = gameState!.copyWith(
-        serverState: gameState!.serverState!.copyWith(winner: winner),
-      );
-
-      notifyListeners();
-
-      if (!_isGameFinishedHandled && onGameFinished != null) {
-        _isGameFinishedHandled = true;
-        onGameFinished!();
-      }
-    };
-
-    // reconnection failed
-
-    ds.onReconnectionFailedCallback = () {
-      if (_isDisposed) return;
-      animationController?.stop();
-      onReconnectionFailed?.call();
-    };
-
-    // player initialized
-
-    ds.onPlayerUpdate = (Player player) {
-      if (_isDisposed) return;
-
-      gameState = GameState(
-        serverState: gameState?.serverState,
-        livePlayer: player,
-      );
-
-      notifyListeners();
-    };
-
-    // player exit
-
-    ds.onPlayerExit = () {
-      if (_isDisposed) return;
-
-      onPlayerExit?.call();
-      notifyListeners();
-    };
-
-    // opponent exit
-
-    ds.onOpponentExit = (ServerState state) {
-      final newLivePlayer = state.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-
-      gameState = GameState(serverState: state, livePlayer: newLivePlayer);
-      notifyListeners();
-      debugPrint('opponent Exit');
-    };
-    // token moved
-
-    ds.onTokenMoved = (ServerState newState) async {
-      if (_isDisposed || _isMovingToken || gameState?.livePlayer == null) {
-        return;
-      }
-
-      _isMovingToken = true;
-      try {
-        animationController?.stop();
-        await _moveTokenStepByStep(newState);
-
-        final newLivePlayer = newState.players.firstWhere(
-          (p) => p.userId == gameState!.livePlayer!.userId,
-          orElse: () => gameState!.livePlayer!,
-        );
-
-        gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
-
-        animationController?.reset();
-        animationController?.forward();
-        notifyListeners();
-      } finally {
-        _isMovingToken = false;
-      }
-    };
-
-    // dice rolled
-    ds.onDiceRolled = (ServerState newState) async {
-      if (_isDisposed || gameState?.livePlayer == null) return;
-
-      final newLivePlayer = newState.players.firstWhere(
-        (p) => p.userId == gameState!.livePlayer!.userId,
-        orElse: () => gameState!.livePlayer!,
-      );
-
-      animationController?.stop();
-
-      gameState = GameState(
-        serverState: gameState!.serverState!.copyWith(
-          turnStatus: TurnStatus.rollDiceRequestInFlight,
-        ),
-        livePlayer: newLivePlayer,
-      );
-
-      notifyListeners();
-
-      await Future.delayed(const Duration(milliseconds: 250));
-
-      final tokenIsActive = newState.tokens.any((token) {
-        final newGameState = GameState(
-          serverState: newState,
-          livePlayer: gameState!.livePlayer,
-        );
-        return TokenRules.canActiveToken(token, newGameState);
-      });
-
-      if (tokenIsActive) {
-        gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
-        animationController?.reset();
-        notifyListeners();
-      } else {
-        gameState = GameState(
-          serverState: gameState!.serverState!.copyWith(
-            lastDiceValue: newState.lastDiceValue,
-            turnStatus: TurnStatus.waitingForAnimate,
-          ),
-          livePlayer: newLivePlayer,
-        );
-
-        notifyListeners();
-
-        await Future.delayed(const Duration(milliseconds: 750));
-
-        gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
-        animationController?.reset();
-        animationController?.forward();
-        notifyListeners();
-      }
-    };
+  Future<void> handleDiceRolled(ServerState newState) async {
+    await _animationManager.animateDiceRoll(newState);
   }
 
   // -------------------------------------------------
   // PUBLIC API
   // -------------------------------------------------
   void startGame({required int numberOfPlayers}) {
-    if (_isDisposed) return;
     gameRepository.startGame(numberOfPlayers);
   }
 
   void getFastPing() {
-    if (_isDisposed) {
-      return;
-    }
     gameRepository.getFastPing();
   }
 
   void connect(GameMode mode, String? gameId) {
-    if (_isDisposed) return;
     gameRepository.connect(mode, gameId);
   }
 
   void moveToken(Token liveToken) {
-    if (_isDisposed || gameState == null) return;
+    if (state == null) return;
 
-    if (gameState!.serverState!.turnStatus == TurnStatus.waitingForMove) {
-      gameState = gameState!.copyWith(
-        serverState: gameState!.serverState!.copyWith(
+    if (state!.serverState!.turnStatus == TurnStatus.waitingForMove) {
+      state = state!.copyWith(
+        serverState: state!.serverState!.copyWith(
           turnStatus: TurnStatus.moveTokenRequestInFlight,
         ),
       );
-      notifyListeners();
       gameRepository.moveToken(liveToken);
     }
   }
 
   void rollDice() {
-    if (_isDisposed || gameState == null) return;
+    if (state == null) return;
 
-    if (isMyTurnToRoll()) {
-      gameState = gameState!.copyWith(
-        serverState: gameState!.serverState!.copyWith(
+    if (state.isMyTurnToRoll) {
+      state = state!.copyWith(
+        serverState: state!.serverState!.copyWith(
           turnStatus: TurnStatus.rollDiceRequestInFlight,
         ),
       );
-      notifyListeners();
       gameRepository.rollDice();
     }
   }
 
-  bool isMyTurnToRoll() {
-    if (_isDisposed || gameState == null || gameState!.livePlayer == null) {
-      return false;
-    }
-
-    final s = gameState!.serverState!;
-    return s.currentTurn == gameState!.livePlayer!.color &&
-        s.turnStatus == TurnStatus.waitingForRoll &&
-        s.gameStatus == GameStatus.start;
-  }
-
   // -------------------------------------------------
-  // TOKEN ANIMATION
-  // -------------------------------------------------
-  Future<void> _moveTokenStepByStep(ServerState newState) async {
-    if (_isDisposed || gameState == null || gameState!.serverState == null) {
-      return;
-    }
-
-    final newLivePlayer = newState.players.firstWhere(
-      (p) => p.userId == gameState!.livePlayer!.userId,
-      orElse: () => gameState!.livePlayer!,
-    );
-
-    final newTokens = newState.tokens;
-    int? movedTokenIndex;
-    int? targetPathIndex;
-
-    for (int i = 0; i < gameState!.serverState!.tokens.length; i++) {
-      final oldToken = gameState!.serverState!.tokens[i];
-      final newToken = newTokens.firstWhere((t) => t.id == oldToken.id);
-
-      if (newToken.pathIndex != oldToken.pathIndex &&
-          newToken.playerColor == gameState!.serverState!.currentTurn) {
-        movedTokenIndex = i;
-        targetPathIndex = newToken.pathIndex;
-        break;
-      }
-    }
-
-    if (movedTokenIndex == null || targetPathIndex == null) {
-      gameState = GameState(serverState: newState, livePlayer: newLivePlayer);
-      return;
-    }
-
-    final oldPathIndex =
-        gameState!.serverState!.tokens[movedTokenIndex].pathIndex;
-
-    for (int step = oldPathIndex; step < targetPathIndex; step++) {
-      if (_isDisposed || gameState == null || gameState!.serverState == null) {
-        return;
-      }
-
-      final currentToken = gameState!.serverState!.tokens[movedTokenIndex];
-      final updatedToken = currentToken.copyWith(pathIndex: step + 1);
-      final updatedTokens = List<Token>.from(gameState!.serverState!.tokens);
-      updatedTokens[movedTokenIndex] = updatedToken;
-
-      final newServerState = gameState!.serverState!.copyWith(
-        turnStatus: TurnStatus.waitingForAnimate,
-        tokens: updatedTokens,
-      );
-
-      gameState = gameState!.copyWith(
-        serverState: newServerState,
-        livePlayer: newLivePlayer,
-      );
-
-      notifyListeners();
-      await Future.delayed(const Duration(milliseconds: 300));
-    }
-  }
-
-  // -------------------------------------------------
-  // EXIT / RESET / DISPOSE
+  // RESET / DISPOSE
   // -------------------------------------------------
   void exitGame() {
-    if (_isDisposed) return;
     gameRepository.exitGame();
   }
 
-  void deleteGameState() {
-    try {
-      gameRepository.dataSource.dispose();
-    } catch (_) {}
-
-    final newDS = SocketDataSource();
-    gameRepository = GameRepository(newDS);
-    _setupCallbacks();
-
-    animationController?.dispose();
-    animationController = null;
-
-    gameState = null;
+  void resetGame() {
+    // 🟢 ۲. کالبک‌های مربوط به لیسنرهای بورد قبلی را کاملاً پاک می‌کنیم
     onGameFinished = null;
     onReconnectionFailed = null;
     onPlayerExit = null;
+    onFastPingGets = null;
+    onGameReady = null;
+    onGameStarted = null;
 
-    _isGameFinishedHandled = false;
+    // 🟢 ۳. انیمیشن کنترلر بورد قبلی را دیسپوز می‌کنیم
+    animationController?.stop();
+    animationController?.dispose();
+    animationController = null;
+
+    isGameFinishedHandled = false;
     _isMovingToken = false;
 
-    notifyListeners();
-  }
-
-  void resetGame() {
-    if (gameState?.livePlayer != null) {
+    // 🟢 ۴. حالا با خیال راحت استیت را پاک می‌کنیم.
+    // چون isInBoard غیراکتیو شده، ویجت‌های بورد جلوی رندر خود را می‌گیرند.
+    if (state?.livePlayer != null) {
       final clearedPlayer = Player(
-        userId: gameState!.livePlayer!.userId,
-        username: gameState!.livePlayer!.username,
+        userId: state!.livePlayer!.userId,
+        username: state!.livePlayer!.username,
         color: null,
         connectionStatus: null,
         playerStatus: null,
         numberOfAbsences: 0,
       );
-
-      gameState = GameState(serverState: null, livePlayer: clearedPlayer);
+      state = GameState(
+        serverState: null,
+        livePlayer: clearedPlayer,
+        gameStage: GameStage.joinStage,
+      );
     } else {
-      gameState = null;
+      state = null;
     }
-
-    animationController?.dispose();
-    animationController = null;
-
-    onGameFinished = null;
-    onReconnectionFailed = null;
-    onPlayerExit = null;
-
-    _isGameFinishedHandled = false;
-    _isMovingToken = false;
-
-    notifyListeners();
   }
-
-  @override
-  void dispose() {
-    debugPrint('dispose game state notify');
-
-    if (_isDisposed) return;
-    _isDisposed = true;
-    deleteGameState();
-    super.dispose();
-  }
-
-  bool get isDisposed => _isDisposed;
 }

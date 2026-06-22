@@ -1,6 +1,6 @@
 import 'package:ludo/data/data-source/socket_data_source.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/ui/join_screen.dart';
+import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
 class GameRepository {
   final SocketDataSource dataSource;

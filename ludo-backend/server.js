@@ -81,7 +81,7 @@ server.listen(port, "0.0.0.0", async () => {
     );
     console.log("Webhook set!");
   } else {
-    bot.launch();
-    console.log("Bot polling (local mode)");
+    // bot.launch();
+    // console.log("Bot polling (local mode)");
   }
 });

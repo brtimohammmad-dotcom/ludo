@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/domain/rules/token_rules.dart';
 import 'package:ludo/ui/mappers/token_ui_mapper.dart';
 
-class TokenWidget extends StatefulWidget {
+class TokenWidget extends ConsumerStatefulWidget {
   final Token token;
   final double size;
-  final GameController gameController;
 
-  const TokenWidget({
-    super.key,
-    required this.token,
-    required this.size,
-    required this.gameController,
-  });
+  const TokenWidget({super.key, required this.token, required this.size});
 
   @override
-  State<TokenWidget> createState() => _TokenWidgetState();
+  ConsumerState<TokenWidget> createState() => _TokenWidgetState();
 }
 
-class _TokenWidgetState extends State<TokenWidget>
+class _TokenWidgetState extends ConsumerState<TokenWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -43,18 +37,20 @@ class _TokenWidgetState extends State<TokenWidget>
 
   @override
   Widget build(BuildContext context) {
-    final GameState gameState = widget.gameController.gameState!;
-
-    final tokenIsActive = TokenRules.canActiveToken(widget.token, gameState);
-
-    final isCurrentTurn =
-        gameState.serverState!.currentTurn == gameState.livePlayer!.color;
-
-    final highlight = isCurrentTurn && tokenIsActive;
+    final bool highlight = ref.watch(
+      gameControllerProvider.select(
+        (state) => state.canTokenMove(widget.token),
+      ),
+    );
+    final bool tokenIsActive = ref.watch(
+      gameControllerProvider.select(
+        (state) => state.canActiveToken(widget.token),
+      ),
+    );
 
     void onTap() {
       if (highlight) {
-        widget.gameController.moveToken(widget.token);
+        ref.read(gameControllerProvider.notifier).moveToken(widget.token);
       }
     }
 
@@ -92,9 +88,9 @@ class _TokenWidgetState extends State<TokenWidget>
                       )
                     else if (tokenIsActive)
                       BoxShadow(
-                        color: Colors.white.withValues(alpha: glow),
-                        blurRadius: 12 + glow * 16,
-                        spreadRadius: 2 + glow * 4,
+                        color: Colors.white,
+                        blurRadius: 6,
+                        spreadRadius: 1,
                       )
                     else
                       const BoxShadow(

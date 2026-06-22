@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/elements/board/board-cell/board_background.dart';
@@ -6,20 +7,20 @@ import 'package:ludo/ui/elements/board/board-cell/token-home/home_container_list
 import 'package:ludo/ui/elements/dice/dice_widget.dart';
 import 'package:ludo/ui/elements/token/create_animated_tokens.dart';
 
-class MainBoard extends StatelessWidget {
+class MainBoard extends ConsumerWidget {
   const MainBoard({
     super.key,
     required this.boardSize,
-    required this.gameController,
-    required this.diceComposition
+    required this.diceComposition,
   });
+
   final Future<LottieComposition> diceComposition;
 
   final double boardSize;
-  final GameController gameController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gameControllerNotifier = ref.read(gameControllerProvider.notifier);
     return SizedBox(
       width: boardSize,
       height: boardSize,
@@ -32,11 +33,14 @@ class MainBoard extends StatelessWidget {
             children: [
               ...createAnimatedTokens(
                 cellSize: boardSize / 11,
-                gameController: gameController,
+                gameController: gameControllerNotifier,
               ),
             ],
           ),
-          DiceWidget(cellSize: boardSize / 11, gameController: gameController,diceComposition:diceComposition),
+          DiceWidget(
+            cellSize: boardSize / 11,
+            diceComposition: diceComposition,
+          ),
         ],
       ),
     );
