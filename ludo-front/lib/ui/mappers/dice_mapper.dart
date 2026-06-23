@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
 
-class DiceWidgetMapper extends StatefulWidget {
+class DiceWidgetMapper extends ConsumerWidget {
   final int value;
   final double size;
   final bool isMyTurn;
@@ -13,74 +15,45 @@ class DiceWidgetMapper extends StatefulWidget {
   });
 
   @override
-  State<DiceWidgetMapper> createState() => _DiceWidgetMapperState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gameController = ref.read(gameControllerProvider.notifier);
+    final centralController = gameController.animationController;
 
-class _DiceWidgetMapperState extends State<DiceWidgetMapper>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-
-    if (widget.isMyTurn) {
-      _controller.repeat(reverse: true);
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant DiceWidgetMapper oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.isMyTurn && !_controller.isAnimating) {
-      _controller.repeat(reverse: true);
+    // 🟢 اگر نوبت ما نیست یا کنترلر مرکزی نال است، بدون انیمیشن رندر شود
+    if (!isMyTurn || centralController == null) {
+      return CustomPaint(
+        size: Size.square(size),
+        painter: PremiumDicePainter(value),
+      );
     }
 
-    if (!widget.isMyTurn && _controller.isAnimating) {
-      _controller.stop();
-      _controller.value = 0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    // 🟢 استفاده از انیمیشن مرکزی برای شبیه‌سازی انیمیشن تکرارشونده ۱.۲ ثانیه‌ای
     return AnimatedBuilder(
-      animation: _controller,
+      animation: centralController,
       builder: (_, child) {
-        final glow = widget.isMyTurn
-            ? 0.3 + (_controller.value * 0.7)
-            : 0.0;
+        // زمان کل کنترلر مرکزی ۱۰ ثانیه است. می‌خواهیم انیمیشن هر ۱.۲ ثانیه تکرار شود (فرکانس مناسب)
+        // با این فرمول یک موج سینوسی روان بین ۰ تا ۱ ایجاد می‌کنیم که ربطی به جلو رفتن کل تایمر ندارد
+        final double centralValue = centralController.value;
+        final double cycle = (centralValue * 10) / 1.2; // چند سیکل طی شده
+        final double animationProgress = (cycle - cycle.floor()); // مقدار باقیمانده بین 0.0 تا 1.0
 
-        final bounce = widget.isMyTurn
-            ? -6 * _controller.value
-            : 0.0;
+        // شبیه‌سازی حرکت reverse (رفت و برگشت) با تبدیل قدرمطلق ریاضی
+        final double pingPongValue = (animationProgress - 0.5).abs() * 2;
+
+        final glow = 0.3 + (pingPongValue * 0.7);
+        final bounce = -6 * pingPongValue;
 
         return Transform.translate(
           offset: Offset(0, bounce),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(
-                widget.size * .18,
-              ),
+              borderRadius: BorderRadius.circular(size * .18),
               boxShadow: [
-                if (widget.isMyTurn)
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: glow),
-                    blurRadius: 12 + glow * 14,
-                    spreadRadius: 2 + glow * 4,
-                  ),
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: glow),
+                  blurRadius: 12 + glow * 14,
+                  spreadRadius: 2 + glow * 4,
+                ),
               ],
             ),
             child: child,
@@ -88,13 +61,12 @@ class _DiceWidgetMapperState extends State<DiceWidgetMapper>
         );
       },
       child: CustomPaint(
-        size: Size.square(widget.size),
-        painter: PremiumDicePainter(widget.value),
+        size: Size.square(size),
+        painter: PremiumDicePainter(value),
       ),
     );
   }
 }
-
 class PremiumDicePainter extends CustomPainter {
   final int value;
 

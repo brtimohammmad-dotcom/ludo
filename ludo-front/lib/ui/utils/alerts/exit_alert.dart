@@ -19,8 +19,11 @@ class ExitButtonAlert extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // ایموجی تاج بزرگ
-        Text('🥺', style: TextStyle(fontSize: boardSize * 0.2)),
+        Icon(
+          Icons.sentiment_dissatisfied_rounded,
+          size: 85,
+          color: Colors.amber.shade600,
+        ),
         SizedBox(height: boardSize * 0.01),
         Text(
           'Do you want Exit?',

@@ -176,7 +176,7 @@ class _WaitingForPlayersAlertState extends ConsumerState<WaitingForPlayersAlert>
                 ),
                 textStyle: TextStyle(
                   inherit: true, // 🟢 رفع مشکل تداخل انیمیشن دکمه
-                  fontSize: boardSize * 0.038,
+                  fontSize: boardSize * 0.025,
                   fontWeight: FontWeight.bold,
                 ),
                 shape: RoundedRectangleBorder(

@@ -4,6 +4,10 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
+import 'dart:js_interop';
+
+@JS('onGameConnected')
+external void onGameConnected();
 
 class GameSocketHandler {
   final GameController controller;
@@ -19,6 +23,7 @@ class GameSocketHandler {
       if (controller.currentGameState?.livePlayer == null) return;
       _updateStateAndNotify(state, GameStage.boardStage);
       controller.onGameReady?.call();
+      onGameConnected();
     };
 
     ds.onInAnotherGameCallback = () {
@@ -43,6 +48,7 @@ class GameSocketHandler {
           gameStage: GameStage.boardStage,
         ),
       );
+      onGameConnected();
     };
 
     ds.onGameStarted = (ServerState state) {
@@ -103,6 +109,7 @@ class GameSocketHandler {
           gameStage: GameStage.joinStage,
         ),
       );
+      onGameConnected();
     };
     ds.onPlayerExit = () {
       controller.onPlayerExit?.call();
@@ -130,7 +137,11 @@ class GameSocketHandler {
       orElse: () => controller.currentGameState!.livePlayer!,
     );
     controller.updateState(
-      GameState(serverState: state, livePlayer: newLivePlayer,gameStage: gameStage),
+      GameState(
+        serverState: state,
+        livePlayer: newLivePlayer,
+        gameStage: gameStage,
+      ),
     );
   }
 }

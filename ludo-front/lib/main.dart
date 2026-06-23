@@ -20,14 +20,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+   return MaterialApp(
       title: 'Ludo',
       debugShowCheckedModeBanner: false,
+      // 🟢 شفاف کردن کامل پس‌زمینه تم اصلی اپلیکیشن وب
       theme: ThemeData(
-        colorScheme: const ColorScheme.dark(),
-        fontFamily: 'Roboto',
+        scaffoldBackgroundColor: Colors.transparent,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
       ),
-      home: AppBody(),
+      home: const AppBody(),
     );
   }
 }

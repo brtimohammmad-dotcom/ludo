@@ -23,9 +23,17 @@ class JoinScreen extends ConsumerStatefulWidget {
 class _JoinScreenState extends ConsumerState<JoinScreen> {
   bool _showFriendsOptions = false;
 
+  late final Future<LottieComposition> _happyDiceComposition;
+
   @override
   void initState() {
     super.initState();
+
+    // 🟢 ۱. پیش‌بارگذاری انیمیشن لاتی در بدو ورود به کامپوننت برای رندر آنی
+    _happyDiceComposition = AssetLottie(
+      "assets/lotties/Happy Dice.json",
+    ).load();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupControllerCallbacks();
     });
@@ -130,52 +138,54 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           ),
         ),
         child: Center(
-          child: Stack(
-            alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
+              FutureBuilder<LottieComposition>(
+                future: _happyDiceComposition,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Lottie(
+                      composition: snapshot.data,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    );
+                  }
+                  // یک باکس خالی بسیار سبک تا زمان رندر میلی‌ثانیه‌ای لاتی
+                  return const SizedBox(width: 200, height: 200);
+                },
+              ),
+              const SizedBox(height: 10),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Lottie.asset(
-                    "assets/lotties/Happy Dice.json",
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      StartGameButton(
-                        numberOfPlayers: 2,
-                        onPressed: () => _handleGameSearch(2, boardSize),
-                      ),
-                      const SizedBox(width: 10),
-                      StartGameButton(
-                        numberOfPlayers: 4,
-                        onPressed: () => _handleGameSearch(4, boardSize),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
                   StartGameButton(
-                    numberOfPlayers: -1,
-                    onPressed: () {
-                      setState(
-                        () => _showFriendsOptions = !_showFriendsOptions,
-                      );
-                    },
+                    numberOfPlayers: 2,
+                    onPressed: () => _handleGameSearch(2, boardSize),
+                  ),
+                  const SizedBox(width: 10),
+                  StartGameButton(
+                    numberOfPlayers: 4,
+                    onPressed: () => _handleGameSearch(4, boardSize),
                   ),
                 ],
               ),
-              Positioned(
-                bottom: screenHeight * 0.15,
-                child: AnimatedFriendsButtons(
-                  boardSize: boardSize,
-                  show: _showFriendsOptions,
-                  onPlay2Players: () => _handleGameSearch(-2, boardSize),
-                  onPlay4Players: () => _handleGameSearch(-4, boardSize),
-                ),
+              const SizedBox(height: 10),
+              StartGameButton(
+                numberOfPlayers: -1,
+                onPressed: () {
+                  setState(
+                    () => _showFriendsOptions = !_showFriendsOptions,
+                  );
+                },
+              ),
+              SizedBox(height: 15,),
+              AnimatedFriendsButtons(
+                boardSize: boardSize,
+                show: _showFriendsOptions,
+                onPlay2Players: () => _handleGameSearch(-2, boardSize),
+                onPlay4Players: () => _handleGameSearch(-4, boardSize),
               ),
             ],
           ),

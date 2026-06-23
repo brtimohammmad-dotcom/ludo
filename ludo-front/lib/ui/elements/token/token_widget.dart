@@ -5,113 +5,101 @@ import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/mappers/token_ui_mapper.dart';
 
-class TokenWidget extends ConsumerStatefulWidget {
+class TokenWidget extends ConsumerWidget {
   final Token token;
   final double size;
 
   const TokenWidget({super.key, required this.token, required this.size});
 
   @override
-  ConsumerState<TokenWidget> createState() => _TokenWidgetState();
-}
-
-class _TokenWidgetState extends ConsumerState<TokenWidget>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // گوش دادن مانیتور شده به وضعیت مهره
     final bool highlight = ref.watch(
-      gameControllerProvider.select(
-        (state) => state.canTokenMove(widget.token),
-      ),
+      gameControllerProvider.select((state) => state.canTokenMove(token)),
     );
     final bool tokenIsActive = ref.watch(
-      gameControllerProvider.select(
-        (state) => state.canActiveToken(widget.token),
-      ),
+      gameControllerProvider.select((state) => state.canActiveToken(token)),
     );
+
+    final gameController = ref.read(gameControllerProvider.notifier);
+    final centralController = gameController.animationController;
 
     void onTap() {
       if (highlight) {
-        ref.read(gameControllerProvider.notifier).moveToken(widget.token);
+        ref.read(gameControllerProvider.notifier).moveToken(token);
       }
     }
 
+    // 🟢 متد کمکی لایوت اصلی مهره با ابعاد و مارجین‌های کاملاً فیکس شده
+    Widget buildTokenBody({required double bounce, required double glow}) {
+      return Transform.translate(
+        offset: Offset(0, bounce),
+        child: Container(
+          // تعیین مارجین دقیق بر اساس وضعیت مهره جهت فیت شدن در خانه‌های بورد
+          margin: EdgeInsets.all(tokenIsActive ? size / 9 : size / 5),
+          decoration: BoxDecoration(
+            gradient: tokenGradient(token),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withAlpha(200),
+              width: size / 15,
+            ),
+            boxShadow: [
+              if (highlight)
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: glow),
+                  blurRadius: 12 + glow * 16,
+                  spreadRadius: 2 + glow * 4,
+                )
+              else if (tokenIsActive)
+                const BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                )
+              else
+                const BoxShadow(
+                  color: Colors.black38,
+                  blurRadius: 2,
+                  offset: Offset(-2, 3),
+                ),
+            ],
+          ),
+          child: highlight
+              ? Center(
+            child: Icon(
+              Icons.touch_app_rounded,
+              color: Colors.white,
+              size: size * 0.45,
+            ),
+          )
+              : const SizedBox(),
+        ),
+      );
+    }
+
+    // 🟢 محصور کردن کل ساختار در یک SizedBox با سایز قطعی جهت جلوگیری از به هم ریختن لایوت بورد
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
-        width: widget.size,
-        height: widget.size,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (_, child) {
-            final glow = highlight ? 0.3 + (_controller.value * 0.7) : 0.0;
+        width: size,
+        height: size,
+        child: (highlight && centralController != null)
+            ? AnimatedBuilder(
+          animation: centralController,
+          builder: (context, _) {
+            // خرد کردن تایمر ۱۰ ثانیه‌ای به پالس‌های حرکتی ۱.۱ ثانیه‌ای
+            final double cycle = (centralController.value * 10) / 1.1;
+            final double progress = cycle - cycle.floor();
+            final double pingPongValue = (progress - 0.5).abs() * 2;
 
-            final bounce = highlight ? -6 * _controller.value : 0.0;
+            final double currentGlow = 0.3 + (pingPongValue * 0.7);
+            final double currentBounce = -6 * pingPongValue;
 
-            return Transform.translate(
-              offset: Offset(0, bounce),
-              child: Container(
-                margin: EdgeInsets.all(
-                  tokenIsActive ? widget.size / 9 : widget.size / 5,
-                ),
-                decoration: BoxDecoration(
-                  gradient: tokenGradient(widget.token),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withAlpha(200),
-                    width: widget.size / 15,
-                  ),
-                  boxShadow: [
-                    if (highlight)
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: glow),
-                        blurRadius: 12 + glow * 16,
-                        spreadRadius: 2 + glow * 4,
-                      )
-                    else if (tokenIsActive)
-                      BoxShadow(
-                        color: Colors.white,
-                        blurRadius: 6,
-                        spreadRadius: 1,
-                      )
-                    else
-                      const BoxShadow(
-                        color: Colors.black38,
-                        blurRadius: 2,
-                        offset: Offset(-2, 3),
-                      ),
-                  ],
-                ),
-                child: child,
-              ),
-            );
+            return buildTokenBody(bounce: currentBounce, glow: currentGlow);
           },
-          child: highlight
-              ? Icon(
-                  Icons.touch_app_rounded,
-                  color: Colors.white,
-                  size: widget.size * 0.45,
-                )
-              : const SizedBox(),
-        ),
+        )
+            : buildTokenBody(bounce: 0.0, glow: 0.0),
       ),
     );
   }
