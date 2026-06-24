@@ -69,7 +69,7 @@ flutter:
         - asset: assets/fonts/Roboto-VariableFont_wdth,wght.ttf
   assets:
     - assets/lotties/
-    - assets/webp/
+    - assets/webp/happy-dice.webp
     - assets/audio/music/
     - assets/audio/sound-effect/
 
