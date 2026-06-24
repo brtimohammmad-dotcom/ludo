@@ -5,51 +5,64 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'audio_service.g.dart';
 
 class AudioService {
+  // تعریف دو پلier مجزا برای موزیک پس‌زمینه و افکت‌ها
   final AudioPlayer _bgmPlayer = AudioPlayer();
   final AudioPlayer _sfxPlayer = AudioPlayer();
 
   bool _isMuted = false;
-  // برای جلوگیری از لود همزمان و تداخل در وب
-  bool _isBgmLoading = false;
+  bool _isBgmLoading = false; // قفل برای جلوگیری از تداخل لود مرورگر (Abort Error)
+  String? _currentBgmPath;    // ذخیره آخرین آدرس پخش شده
 
   AudioService() {
+    // تنظیم لوپ بومی برای موزیک پس‌زمینه
     _bgmPlayer.setLoopMode(LoopMode.all);
   }
 
+  // ۱. پخش موزیک پس‌زمینه (سازگار با وب، لوکال و سرور Render)
   Future<void> playBackgroundMusic(String assetPath) async {
-    // ۱. اگر پلیر در حال لود کردن موزیک است، درخواست جدید را نادیده بگیر
+    // اصلاح آدرس برای ساختار بیلد فلاتر وب روی سرور رندر (تولید لایه assets/assets/)
+    final String correctPath = assetPath.startsWith('assets/')
+        ? assetPath
+        : 'assets/$assetPath';
+
+    // اگر همین الان این موزیک در حال پخش یا لود است، درخواست تکراری را نادیده بگیر
+    if (_currentBgmPath == correctPath && (_bgmPlayer.playing || _isBgmLoading)) {
+      return;
+    }
+
     if (_isBgmLoading) return;
 
     try {
       _isBgmLoading = true;
+      _currentBgmPath = correctPath;
 
-      // ساخت آدرس دو تایی assets/assets مخصوص سرور رندر
-      final String correctPath = assetPath.startsWith('assets/')
-          ? assetPath
-          : 'assets/$assetPath';
-
-      // ۲. قبل از لود موزیک جدید، اگر موزیکی در حال پخش است آن را متوقف کن
+      // توقف امن پلیر قبل از لود فایل جدید
       if (_bgmPlayer.playing) {
         await _bgmPlayer.stop();
       }
 
+      // لود کردن فایل از آدرس اصلاح شده
       await _bgmPlayer.setAsset(correctPath);
 
+      // مدیریت ولوم بر اساس وضعیت Mute
       if (_isMuted) {
         await _bgmPlayer.setVolume(0.0);
       } else {
         await _bgmPlayer.setVolume(1.0);
       }
 
-      // ۳. چک کن که پلیر در این فاصله دیسپوز یا بسته نشده باشد
-      _bgmPlayer.play();
+      // پخش نهایی (اگر در این فاصله کاربر آدرس را عوض نکرده باشد)
+      if (_currentBgmPath == correctPath) {
+        _bgmPlayer.play();
+      }
     } catch (e) {
-      debugPrint("❌ Error playing BG music: $e");
+      debugPrint("⚠️ Web Audio Load Handled (Abort Avoided): $e");
     } finally {
       _isBgmLoading = false;
     }
   }
 
+  // توقف موزیک پس‌زمینه
   Future<void> stopBackgroundMusic() async {
     try {
       if (_bgmPlayer.playing) {
@@ -60,6 +73,7 @@ class AudioService {
     }
   }
 
+  // ۲. پخش افکت‌های صوتی کوتاه (تاس، حرکت مهره و...) بدون قطع کردن موزیک اصلی
   Future<void> playSFX(String assetPath) async {
     if (_isMuted) return;
 
@@ -75,6 +89,7 @@ class AudioService {
     }
   }
 
+  // مدیریت قطع و وصل کردن کل صداهای بازی (Mute/Unmute)
   void toggleMute() {
     _isMuted = !_isMuted;
     _bgmPlayer.setVolume(_isMuted ? 0.0 : 1.0);
@@ -83,9 +98,8 @@ class AudioService {
 
   bool get isMuted => _isMuted;
 
-  // ۴. متد دیسپوز اصلاح شده برای لایه وب
+  // آزاد کردن حافظه و بستن امن استریم‌ها در وب
   void dispose() {
-    // در وب بهتر است ابتدا استاپ شوند و بعد دیسپوز
     _bgmPlayer.stop().then((_) => _bgmPlayer.dispose());
     _sfxPlayer.stop().then((_) => _sfxPlayer.dispose());
   }
