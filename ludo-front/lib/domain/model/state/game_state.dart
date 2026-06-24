@@ -28,6 +28,13 @@ extension GameStateX on GameState? {
     if (this?.serverState == null || this?.livePlayer == null) return false;
     return TokenRules.canActiveToken(token, this!);
   }
+
+  int getTargetTokensCountByColor(PlayerColor color) {
+    if (this?.serverState == null) return 0;
+    return this!.serverState!.tokens
+        .where((t) => t.playerColor == color && t.pathIndex == 39)
+        .length;
+  }
 }
 
 enum GameStage { connectionStage, joinStage, boardStage }
@@ -55,4 +62,3 @@ class GameState {
     );
   }
 }
-

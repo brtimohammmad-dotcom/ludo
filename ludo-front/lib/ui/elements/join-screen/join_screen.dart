@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:lottie/lottie.dart';
+// import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
@@ -23,16 +23,16 @@ class JoinScreen extends ConsumerStatefulWidget {
 class _JoinScreenState extends ConsumerState<JoinScreen> {
   bool _showFriendsOptions = false;
 
-  late final Future<LottieComposition> _happyDiceComposition;
+  // late final Future<LottieComposition> _happyDiceComposition;
 
   @override
   void initState() {
     super.initState();
 
     // 🟢 ۱. پیش‌بارگذاری انیمیشن لاتی در بدو ورود به کامپوننت برای رندر آنی
-    _happyDiceComposition = AssetLottie(
-      "assets/lotties/Happy Dice.json",
-    ).load();
+    // _happyDiceComposition = AssetLottie(
+    //   "assets/lotties/Happy Dice.json",
+    // ).load();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupControllerCallbacks();
@@ -141,20 +141,27 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FutureBuilder<LottieComposition>(
-                future: _happyDiceComposition,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Lottie(
-                      composition: snapshot.data,
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    );
-                  }
-                  // یک باکس خالی بسیار سبک تا زمان رندر میلی‌ثانیه‌ای لاتی
-                  return const SizedBox(width: 200, height: 200);
-                },
+              // FutureBuilder<LottieComposition>(
+              //   future: _happyDiceComposition,
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasData) {
+              //       return Lottie(
+              //         composition: snapshot.data,
+              //         width: 200,
+              //         height: 200,
+              //         fit: BoxFit.cover,
+              //       );
+              //     }
+              //     // یک باکس خالی بسیار سبک تا زمان رندر میلی‌ثانیه‌ای لاتی
+              //     return const SizedBox(width: 200, height: 200);
+              //   },
+              // ),
+              // به جای FutureBuilder سنگین لاتی، فقط همین را جایش بگذار:
+              Image.asset(
+                "assets/webp/happy-dice.webp",
+                width: 200,
+                height: 200,
+                fit: BoxFit.cover,
               ),
               const SizedBox(height: 10),
               Row(

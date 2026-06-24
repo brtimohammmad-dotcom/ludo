@@ -66,7 +66,6 @@ class GameSocketHandler {
     ds.onTimesUp = (ServerState state) {
       if (controller.currentGameState?.livePlayer == null) return;
       _updateStateAndNotify(state, GameStage.boardStage);
-      controller.animationController?.reset();
     };
 
     ds.onGameFinished = (Player winner) {
