@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/ui/elements/board/main_board.dart';
@@ -17,13 +16,11 @@ class Board extends ConsumerStatefulWidget {
 
 class _BoardState extends ConsumerState<Board>
     with SingleTickerProviderStateMixin {
-  late Future<LottieComposition> _diceComposition;
   late BoardUiEventHandler _uiEventHandler;
 
   @override
   void initState() {
     super.initState();
-    _diceComposition = AssetLottie("assets/lotties/Dice Rolling.json").load();
     final gameController = ref.read(gameControllerProvider.notifier);
     // مقداردهی و ثبت کالبک‌ها از طریق هندلر اختصاصی UI
     _uiEventHandler = BoardUiEventHandler(
@@ -90,7 +87,7 @@ class _BoardState extends ConsumerState<Board>
               leftPlayerIndex: gameMode == 2 ? -1 : 1,
               rightPlayerIndex: gameMode == 2 ? 1 : 2,
             ),
-            MainBoard(diceComposition: _diceComposition, boardSize: boardSize),
+            MainBoard( boardSize: boardSize),
             PlayerBar(
               boardSize: boardSize,
               barHeight: barHeight,
