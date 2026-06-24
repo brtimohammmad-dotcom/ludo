@@ -73104,7 +73104,7 @@ return A.avM(q,A.cT(q,A.ln(A.nF(A.c([new A.rd(A.aGX(q,q,new A.vD("assets/webp/ha
 A.aj6.prototype={
 $1(a){var s=this.a
 s.a7u()
-s.gir().e4($.asi(),t.Zv).p6("audio/music/join-screen-bg-music.mp3")},
+s.gir().e4($.asi(),t.Zv).p6("assets/audio/music/join-screen-bg-music.mp3")},
 $S:6}
 A.aiX.prototype={
 $0(){var s,r=this.a,q=r.c

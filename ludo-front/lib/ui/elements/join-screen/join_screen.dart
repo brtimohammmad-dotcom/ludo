@@ -32,7 +32,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupControllerCallbacks();
       ref.read(audioServiceProvider).playBackgroundMusic(
-        'audio/music/join-screen-bg-music.mp3', // 🟢 بدون نوشتن assets/ در ابتدا
+        'assets/audio/music/join-screen-bg-music.mp3', // 🟢 بدون نوشتن assets/ در ابتدا
       );
     });
   }
