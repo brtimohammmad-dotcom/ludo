@@ -157,7 +157,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               //   },
               // ),
               Image.network(
-                "webp/happy-dice.webp",
+                "https://ludo-tecb.onrender.com/webp/happy-dice.webp", // آدرس کامل و مطلق سایتت روی رندر
                 width: 200,
                 height: 200,
                 fit: BoxFit.cover,
