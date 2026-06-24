@@ -33,8 +33,7 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  audioplayers: ^6.0.0
-  cupertino_icons: ^1.0.8
+  just_audio: ^0.9.43 # 🟢 اضافه کردن این پکیج  cupertino_icons: ^1.0.8
   socket_io_client: ^3.1.4
   lottie: ^3.3.2
   telegram_web_app: ^0.3.3
@@ -70,7 +69,7 @@ flutter:
   assets:
     - assets/lotties/
     - assets/webp/
-    - assets/audio/music/
+    - assets/audio/music/join-screen-bg-music.mp3
     - assets/audio/sound-effect/
 
   # The following line ensures that the Material Icons font is

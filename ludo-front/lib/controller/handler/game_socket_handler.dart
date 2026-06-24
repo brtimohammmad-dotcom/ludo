@@ -121,8 +121,24 @@ class GameSocketHandler {
     };
 
     ds.onTokenMoved = (ServerState newState) async {
-      await controller.handleTokenMoved(newState);
-      _updateStateAndNotify(newState, GameStage.boardStage);
+      // تشخیص اینکه آیا این حرکت توسط خود این کاربر انجام شده بود یا دیگران
+      final isMyMovement =
+          controller.currentGameState!.serverState!.currentTurn ==
+          controller.currentGameState?.livePlayer?.color;
+
+      if (isMyMovement) {
+        // اگر انیمیشن محلی هنوز تمام نشده، صبر کن تا باز شدن پرچم
+        while (controller.isMovingToken) {
+          await Future.delayed(const Duration(milliseconds: 50));
+        }
+
+        // حالا که انیمیشن خودمان تمام شده، استیت نهایی سرور را بدون انیمیشن مجدد اعمال کن
+        _updateStateAndNotify(newState, GameStage.boardStage);
+      } else {
+        // اگر حرکت بازیکنان دیگر بود، روال قبلی را برو (انیمیشن مرحله به مرحله)
+        await controller.handleTokenMoved(newState);
+      }
+        _updateStateAndNotify(newState, GameStage.boardStage);
     };
 
     ds.onDiceRolled = (ServerState newState) async {

@@ -76,7 +76,76 @@ class GameAnimationManager {
       await Future.delayed(const Duration(milliseconds: 300));
     }
   }
+  Future<void> moveTokenStepByStepLocally(String tokenId, int steps) async {
+    if (controller.currentGameState?.serverState == null || controller.isMovingToken) return;
+    controller.isMovingToken = true;
 
+    try {
+      controller.animationController?.stop();
+
+      int movedTokenIndex = controller.currentGameState!.serverState!.tokens
+          .indexWhere((t) => t.id == tokenId);
+
+      if (movedTokenIndex == -1) return;
+
+      final currentToken = controller.currentGameState!.serverState!.tokens[movedTokenIndex];
+      final oldPathIndex = currentToken.pathIndex;
+
+      // 🟢 حالت خاص: مهره داخل Base است (1-) و تاس 6 آمده است
+      if (oldPathIndex == -1 && steps == 6) {
+        final updatedToken = currentToken.copyWith(pathIndex: 0);
+        final updatedTokens = List<Token>.from(controller.currentGameState!.serverState!.tokens);
+        updatedTokens[movedTokenIndex] = updatedToken;
+
+        controller.updateState(
+          controller.currentGameState!.copyWith(
+            serverState: controller.currentGameState!.serverState!.copyWith(
+              turnStatus: TurnStatus.waitingForAnimate,
+              tokens: updatedTokens,
+            ),
+          ),
+        );
+
+        // یک تاخیر کوتاه برای حس شدن حرکت ورود به زمین
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        controller.animationController?.reset();
+        controller.animationController?.forward();
+        return; // خروج از متد چون حرکت تمام شده است
+      }
+
+      // 🔴 حالت عادی: مهره در زمین است و باید پله‌پله جلو برود
+      // اگر مهره در بیس باشد و تاس ۶ نباشد، اصلاً نباید حرکت کند
+      if (oldPathIndex == -1) return;
+
+      final targetPathIndex = oldPathIndex + steps;
+
+      for (int step = oldPathIndex; step < targetPathIndex; step++) {
+        if (controller.currentGameState?.serverState == null) return;
+
+        final tokenAtStep = controller.currentGameState!.serverState!.tokens[movedTokenIndex];
+        final updatedToken = tokenAtStep.copyWith(pathIndex: step + 1);
+        final updatedTokens = List<Token>.from(controller.currentGameState!.serverState!.tokens);
+        updatedTokens[movedTokenIndex] = updatedToken;
+
+        controller.updateState(
+          controller.currentGameState!.copyWith(
+            serverState: controller.currentGameState!.serverState!.copyWith(
+              turnStatus: TurnStatus.waitingForAnimate,
+              tokens: updatedTokens,
+            ),
+          ),
+        );
+
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+
+      controller.animationController?.reset();
+      controller.animationController?.forward();
+    } finally {
+      controller.isMovingToken = false;
+    }
+  }
   Future<void> animateDiceRoll(ServerState newState) async {
     if (controller.currentGameState?.livePlayer == null) return;
 

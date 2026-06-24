@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-// import 'package:lottie/lottie.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
@@ -29,14 +29,19 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   void initState() {
     super.initState();
 
-    // 🟢 ۱. پیش‌بارگذاری انیمیشن لاتی در بدو ورود به کامپوننت برای رندر آنی
-    // _happyDiceComposition = AssetLottie(
-    //   "assets/lotties/Happy Dice.json",
-    // ).load();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupControllerCallbacks();
+      ref.read(audioServiceProvider).playBackgroundMusic(
+        'audio/music/join-screen-bg-music.mp3', // 🟢 بدون نوشتن assets/ در ابتدا
+      );
     });
+  }
+
+  @override
+  void dispose() {
+    // برای اطمینان، اگر کاربر کلاً از این بخش خارج شد صدا قطع شود
+    ref.read(audioServiceProvider).stopBackgroundMusic();
+    super.dispose();
   }
 
   void _setupControllerCallbacks() {
@@ -141,21 +146,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // FutureBuilder<LottieComposition>(
-              //   future: _happyDiceComposition,
-              //   builder: (context, snapshot) {
-              //     if (snapshot.hasData) {
-              //       return Lottie(
-              //         composition: snapshot.data,
-              //         width: 200,
-              //         height: 200,
-              //         fit: BoxFit.cover,
-              //       );
-              //     }
-              //     // یک باکس خالی بسیار سبک تا زمان رندر میلی‌ثانیه‌ای لاتی
-              //     return const SizedBox(width: 200, height: 200);
-              //   },
-              // ),
               Image.asset(
                 "assets/webp/happy-dice.webp",
                 width: 200,
@@ -181,12 +171,10 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               StartGameButton(
                 numberOfPlayers: -1,
                 onPressed: () {
-                  setState(
-                    () => _showFriendsOptions = !_showFriendsOptions,
-                  );
+                  setState(() => _showFriendsOptions = !_showFriendsOptions);
                 },
               ),
-              SizedBox(height: 15,),
+              SizedBox(height: 15),
               AnimatedFriendsButtons(
                 boardSize: boardSize,
                 show: _showFriendsOptions,

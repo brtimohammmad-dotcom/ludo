@@ -22,7 +22,7 @@ class GameController extends _$GameController {
 
   // Flags & Internal States
   bool isGameFinishedHandled = false;
-  bool _isMovingToken = false;
+  bool isMovingToken = false;
 
   // UI Callbacks
   VoidCallback? onGameFinished;
@@ -68,15 +68,15 @@ class GameController extends _$GameController {
   // ANIMATION BRIDGE
   // -------------------------------------------------
   Future<void> handleTokenMoved(ServerState newState) async {
-    if (_isMovingToken || state?.livePlayer == null) return;
-    _isMovingToken = true;
+    if (isMovingToken || state?.livePlayer == null) return;
+    isMovingToken = true;
     try {
       animationController?.stop();
       await _animationManager.moveTokenStepByStep(newState);
       animationController?.reset();
       animationController?.forward();
     } finally {
-      _isMovingToken = false;
+      isMovingToken = false;
     }
   }
 
@@ -109,6 +109,10 @@ class GameController extends _$GameController {
         ),
       );
       gameRepository.moveToken(liveToken);
+      final diceValue = state!.serverState!.lastDiceValue;
+
+      // اجرای انیمیشن به صورت Async و موازی با درخواست سرور
+      _animationManager.moveTokenStepByStepLocally(liveToken.id, diceValue);
     }
   }
 
@@ -147,7 +151,7 @@ class GameController extends _$GameController {
     animationController = null;
 
     isGameFinishedHandled = false;
-    _isMovingToken = false;
+    isMovingToken = false;
 
     // 🟢 ۴. حالا با خیال راحت استیت را پاک می‌کنیم.
     // چون isInBoard غیراکتیو شده، ویجت‌های بورد جلوی رندر خود را می‌گیرند.
