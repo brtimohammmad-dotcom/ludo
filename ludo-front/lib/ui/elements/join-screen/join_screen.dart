@@ -40,7 +40,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   @override
   void dispose() {
     // برای اطمینان، اگر کاربر کلاً از این بخش خارج شد صدا قطع شود
-    ref.read(audioServiceProvider).stopBackgroundMusic();
+    // ref.read(audioServiceProvider).stopBackgroundMusic();
     super.dispose();
   }
 

@@ -21,7 +21,7 @@ final class AudioServiceProvider
         argument: null,
         retry: null,
         name: r'audioServiceProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -48,4 +48,4 @@ final class AudioServiceProvider
   }
 }
 
-String _$audioServiceHash() => r'ae06412bcf9d8a2e8b0da3991b5f66fef36a4590';
+String _$audioServiceHash() => r'65dbd403796591c75d7ad4a9db885d5865ab899d';
