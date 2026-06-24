@@ -156,9 +156,8 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               //     return const SizedBox(width: 200, height: 200);
               //   },
               // ),
-              // به جای FutureBuilder سنگین لاتی، فقط همین را جایش بگذار:
               Image.network(
-                "assets/webp/happy-dice.webp",
+                "webp/happy-dice.webp",
                 width: 200,
                 height: 200,
                 fit: BoxFit.cover,

@@ -70324,7 +70324,7 @@ A.aIL(!1,new A.afb(a),s,t.z)},
 K(a){var s,r=this,q=null,p=t.w,o=A.bd(a,q,p).w.a.b,n=A.bd(a,q,p).w.a.a,m=n<o?n:o*0.86
 p=A.c([B.lt,B.cy,B.cy,B.lT],t.O)
 s=t.E
-return A.arJ(q,A.cO(q,A.kC(A.mT(A.c([new A.qf(A.aCv(q,q,new A.qF("assets/webp/happy-dice.webp",1,q,B.UK)),200,200,B.yS,q),B.xv,A.yx(A.c([new A.lK(2,new A.afd(r,m),q),B.xt,new A.lK(4,new A.afe(r,m),q)],s),B.aa,B.c7,B.bF,0),B.xv,new A.lK(-1,new A.aff(r),q),A.et(q,15,q),new A.ug(r.w,new A.afg(r,m),new A.afh(r,m),q)],s),B.aa,B.c7,B.bF),q,q),B.p,q,q,new A.bV(q,q,q,q,q,new A.ff(B.ck,B.d_,B.J,p,q,q),B.V),q,1/0,q,q,q,q,1/0))}}
+return A.arJ(q,A.cO(q,A.kC(A.mT(A.c([new A.qf(A.aCv(q,q,new A.qF("webp/happy-dice.webp",1,q,B.UK)),200,200,B.yS,q),B.xv,A.yx(A.c([new A.lK(2,new A.afd(r,m),q),B.xt,new A.lK(4,new A.afe(r,m),q)],s),B.aa,B.c7,B.bF,0),B.xv,new A.lK(-1,new A.aff(r),q),A.et(q,15,q),new A.ug(r.w,new A.afg(r,m),new A.afh(r,m),q)],s),B.aa,B.c7,B.bF),q,q),B.p,q,q,new A.bV(q,q,q,q,q,new A.ff(B.ck,B.d_,B.J,p,q,q),B.V),q,1/0,q,q,q,q,1/0))}}
 A.afi.prototype={
 $1(a){this.a.a52()},
 $S:6}
