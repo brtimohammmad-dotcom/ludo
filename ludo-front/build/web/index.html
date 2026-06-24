@@ -5,7 +5,7 @@
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
     <meta name="description" content="A new Game named Ludo for Bale.">
 
-    <base href="./">
+    <base href="/">
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -13,22 +13,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="ludo">
 
-    <link rel="apple-touch-icon" href="icons/Icon-192.png">
-    <link rel="icon" type="image/png" href="favicon.png"/>
-    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="./icons/Icon-192.png">
+    <link rel="icon" type="image/png" href="./favicon.png"/>
+    <link rel="manifest" href="./manifest.json">
 
     <title>ludo</title>
 
     <style>
+        /* 🟢 بدنه اصلی مرورگر را بدون رنگ نگه می‌داریم */
         body {
             margin: 0;
             height: 100vh;
             overflow: hidden;
             font-family: sans-serif;
             color: white;
-            background-color: #07070b;
+            background-color: #07070b; /* رنگ پایه تیره برای جلوگیری از فلش سفید */
         }
 
+        /* 🟢 روت‌های فلاتر را شیشه‌ای نگه می‌داریم */
         flt-glass-pane,
         flutter-view,
         .flt-background,
@@ -39,21 +41,24 @@
             background-color: transparent !important;
         }
 
+        /* 🟢 انتقال بک‌گراند اصلی و اتمسفر کهکشان به داخل کانتینر لودر */
         #loader {
             position: absolute;
             inset: 0;
-            z-index: 99999;
+            z-index: 99999; /* بالاتر از همه چیز، حتی فریم‌های سفید فلاتر وب */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             width: 100vw;
+            /* 🌌 همان بک‌گراند بنفش و تیره جذابی که داشتی، این‌بار در امن‌ترین لایه وب */
             background: radial-gradient(circle at center, #2a1455, #07070b);
             transition: opacity 0.5s ease;
             pointer-events: none;
         }
 
+        /* 🌌 center glow */
         .center-glow {
             position: absolute;
             top: 50%;
@@ -71,6 +76,7 @@
             50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
         }
 
+        /* 🎲 ORBIT SYSTEM */
         .dice-bg {
             position: absolute;
             inset: 0;
@@ -107,6 +113,7 @@
         .d7 { top: 50%; left: 0%; color: #ffb84d; }
         .d8 { top: 15%; left: 15%; color: #4dffcc; }
 
+        /* 🎲 3D Pure CSS Dice Loader */
         .dice-spinner {
             width: 60px;
             height: 60px;
@@ -226,7 +233,6 @@
 </div>
 
 <script>
-    // 🟢 اصلاح شد: تغییر وضعیت متون لودینگ به محض آماده شدن اولین فریم فلاتر
     window.addEventListener("flutter-first-frame", function () {
         const loadingText = document.getElementById("txt-loading");
         const connectingText = document.getElementById("txt-connecting");
@@ -242,7 +248,7 @@
         if (loader) {
             loader.style.opacity = "0";
             setTimeout(() => {
-                loader.remove();
+                loader.remove(); // به همراه لودر، بک‌گراند تیره هم در ثانیه آخر حذف شده و اسکرین اصلی باز می‌شود
             }, 500);
         }
     };
