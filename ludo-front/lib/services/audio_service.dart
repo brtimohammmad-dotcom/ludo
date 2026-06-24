@@ -1,22 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart'; // 🟢 ایمپورت پکیج جدید
+import 'package:just_audio/just_audio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'audio_service.g.dart';
 
 class AudioService {
-  // تعریف دو پلیر مجزا از نوع AudioPlayer پکیج just_audio
   final AudioPlayer _bgmPlayer = AudioPlayer();
   final AudioPlayer _sfxPlayer = AudioPlayer();
 
   bool _isMuted = false;
+  // برای جلوگیری از لود همزمان و تداخل در وب
+  bool _isBgmLoading = false;
 
-  // پخش موزیک پس‌زمینه (لوپ)
+  AudioService() {
+    _bgmPlayer.setLoopMode(LoopMode.all);
+  }
+
   Future<void> playBackgroundMusic(String assetPath) async {
-    try {
+    // ۱. اگر پلیر در حال لود کردن موزیک است، درخواست جدید را نادیده بگیر
+    if (_isBgmLoading) return;
 
-      await _bgmPlayer.setAsset(assetPath);
-      await _bgmPlayer.setLoopMode(LoopMode.all); // 🟢 تنظیم لوپ به صورت بومی
+    try {
+      _isBgmLoading = true;
+
+      // ساخت آدرس دو تایی assets/assets مخصوص سرور رندر
+      final String correctPath = assetPath.startsWith('assets/')
+          ? assetPath
+          : 'assets/$assetPath';
+
+      // ۲. قبل از لود موزیک جدید، اگر موزیکی در حال پخش است آن را متوقف کن
+      if (_bgmPlayer.playing) {
+        await _bgmPlayer.stop();
+      }
+
+      await _bgmPlayer.setAsset(correctPath);
 
       if (_isMuted) {
         await _bgmPlayer.setVolume(0.0);
@@ -24,54 +41,53 @@ class AudioService {
         await _bgmPlayer.setVolume(1.0);
       }
 
-      // پخش مستقیم بدون مسدود کردن ترد اصلی
+      // ۳. چک کن که پلیر در این فاصله دیسپوز یا بسته نشده باشد
       _bgmPlayer.play();
     } catch (e) {
       debugPrint("❌ Error playing BG music: $e");
+    } finally {
+      _isBgmLoading = false;
     }
   }
 
-  // توقف موزیک پس‌زمینه
   Future<void> stopBackgroundMusic() async {
     try {
-      await _bgmPlayer.stop();
+      if (_bgmPlayer.playing) {
+        await _bgmPlayer.stop();
+      }
     } catch (e) {
       debugPrint("❌ Error stopping BG music: $e");
     }
   }
 
-  // پخش افکت‌های صوتی کوتاه (تاس، حرکت و...)
   Future<void> playSFX(String assetPath) async {
     if (_isMuted) return;
 
     try {
+      final String correctPath = assetPath.startsWith('assets/')
+          ? assetPath
+          : 'assets/$assetPath';
 
-      // لود آنی و پخش افکت صوتی
-      await _sfxPlayer.setAsset(assetPath);
+      await _sfxPlayer.setAsset(correctPath);
       _sfxPlayer.play();
     } catch (e) {
       debugPrint("❌ Error playing SFX: $e");
     }
   }
 
-  // مدیریت قطع و وصل کردن صدا (Mute/Unmute)
   void toggleMute() {
     _isMuted = !_isMuted;
-    if (_isMuted) {
-      _bgmPlayer.setVolume(0.0);
-      _sfxPlayer.setVolume(0.0);
-    } else {
-      _bgmPlayer.setVolume(1.0);
-      _sfxPlayer.setVolume(1.0);
-    }
+    _bgmPlayer.setVolume(_isMuted ? 0.0 : 1.0);
+    _sfxPlayer.setVolume(_isMuted ? 0.0 : 1.0);
   }
 
   bool get isMuted => _isMuted;
 
-  // آزاد کردن حافظه پلیرها
+  // ۴. متد دیسپوز اصلاح شده برای لایه وب
   void dispose() {
-    _bgmPlayer.dispose();
-    _sfxPlayer.dispose();
+    // در وب بهتر است ابتدا استاپ شوند و بعد دیسپوز
+    _bgmPlayer.stop().then((_) => _bgmPlayer.dispose());
+    _sfxPlayer.stop().then((_) => _sfxPlayer.dispose());
   }
 }
 
