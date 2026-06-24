@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/services/audio_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ludo/controller/handler/game_animation_manager.dart';
 import 'package:ludo/controller/handler/game_socket_handler.dart';
@@ -127,6 +128,19 @@ class GameController extends _$GameController {
       );
       gameRepository.rollDice();
     }
+  }
+
+  // -------------------------------------------------
+  // MUSIC / SOUND PLAYER
+  // -------------------------------------------------
+  void playMenuMusic() {
+    ref
+        .read(audioServiceProvider)
+        .playBackgroundMusic('assets/audio/music/join-screen-bg-music.mp3');
+  }
+
+  void playSfx(String assetName) {
+    ref.read(audioServiceProvider).playSFX(assetName);
   }
 
   // -------------------------------------------------

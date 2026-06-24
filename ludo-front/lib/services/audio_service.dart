@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-
 part 'audio_service.g.dart';
 
 class AudioService {
   final AudioPlayer _bgmPlayer = AudioPlayer();
-  final AudioPlayer _sfxPlayer = AudioPlayer();
   bool _isMuted = false;
   String? _lastAssetPath;
 
@@ -16,21 +14,27 @@ class AudioService {
   }
 
   Future<void> playBackgroundMusic(String assetPath) async {
-    // هماهنگی با ساختار پوشه assets/assets در رندر
-    final String correctPath = assetPath.startsWith('assets/') ? assetPath : 'assets/$assetPath';
+    final bool isLocalhost = Uri.base.host.contains('localhost') || Uri.base.host.isEmpty;
+    String correctPath = assetPath;
 
-    // 🟢 اگر این موزیک از قبل در حال پخش است، دوباره لودش نکن تا ارور abort رخ ندهد
+    if (isLocalhost) {
+      if (correctPath.startsWith('assets/')) {
+        correctPath = correctPath.replaceFirst('assets/', '');
+      }
+    } else {
+      if (!correctPath.startsWith('assets/')) {
+        correctPath = 'assets/$correctPath';
+      }
+    }
+
     if (_lastAssetPath == correctPath && _bgmPlayer.playing) return;
 
     try {
       _lastAssetPath = correctPath;
-
-      // لود امن و پخش
       await _bgmPlayer.setAsset(correctPath);
-      await _bgmPlayer.setVolume(_isMuted ? 0.0 : 1.0);
+      await _bgmPlayer.setVolume(_isMuted ? 0.0 : 0.2);
       _bgmPlayer.play();
     } catch (e) {
-      // ارورهای احتمالی وب را بدون کرش کردن مدیریت کن
       debugPrint("🎵 Audio Web Notice: $e");
     }
   }
@@ -41,25 +45,51 @@ class AudioService {
     }
   }
 
+  // 🟢 متد جدید و چندکاناله برای پخش همزمان افکت‌های صوتی
   Future<void> playSFX(String assetPath) async {
     if (_isMuted) return;
+
     try {
-      final String correctPath = assetPath.startsWith('assets/') ? assetPath : 'assets/$assetPath';
-      await _sfxPlayer.setAsset(correctPath);
-      _sfxPlayer.play();
+      final bool isLocalhost = Uri.base.host.contains('localhost') || Uri.base.host.isEmpty;
+      String correctPath = assetPath;
+
+      if (isLocalhost) {
+        if (correctPath.startsWith('assets/')) {
+          correctPath = correctPath.replaceFirst('assets/', '');
+        }
+      } else {
+        if (!correctPath.startsWith('assets/')) {
+          correctPath = 'assets/$correctPath';
+        }
+      }
+
+      // ⚡ ساخت یک پلیر اختصاصی و موقت برای این افکت صوتی خاص
+      final AudioPlayer temporarySfxPlayer = AudioPlayer();
+
+      await temporarySfxPlayer.setAsset(correctPath);
+      await temporarySfxPlayer.setVolume(1.0);
+
+      // پخش صدا به صورت آتش‌وبرافروز (Fire and Forget)
+      temporarySfxPlayer.play();
+
+      // 🧹 مدیریت حافظه: به محض اینکه پخش صدا تمام شد، پلیر دیسپوز می‌شود تا حافظه آزاد شود
+      temporarySfxPlayer.processingStateStream.listen((state) async {
+        if (state == ProcessingState.completed) {
+          await temporarySfxPlayer.dispose();
+        }
+      });
+
     } catch (e) {
-      debugPrint("🎵 SFX Notice: $e");
+      debugPrint("🎵 SFX Multi-channel Notice: $e");
     }
   }
 
   void toggleMute() {
     _isMuted = !_isMuted;
-    _bgmPlayer.setVolume(_isMuted ? 0.0 : 1.0);
-    _sfxPlayer.setVolume(_isMuted ? 0.0 : 1.0);
+    _bgmPlayer.setVolume(_isMuted ? 0.0 : 0.2);
   }
 }
 
-// 🟢 با این کار سرویس صدا در تمام طول بازی زنده می‌ماند و بی‌دلیل نابود نمی‌شود
 @Riverpod(keepAlive: true)
 AudioService audioService(Ref ref) {
   return AudioService();

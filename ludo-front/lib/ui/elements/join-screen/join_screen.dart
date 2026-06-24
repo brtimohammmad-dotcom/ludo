@@ -23,24 +23,17 @@ class JoinScreen extends ConsumerStatefulWidget {
 class _JoinScreenState extends ConsumerState<JoinScreen> {
   bool _showFriendsOptions = false;
 
-  // late final Future<LottieComposition> _happyDiceComposition;
-
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupControllerCallbacks();
-      ref.read(audioServiceProvider).playBackgroundMusic(
-        'assets/audio/music/join-screen-bg-music.mp3', // 🟢 بدون نوشتن assets/ در ابتدا
-      );
     });
   }
 
   @override
   void dispose() {
-    // برای اطمینان، اگر کاربر کلاً از این بخش خارج شد صدا قطع شود
-    // ref.read(audioServiceProvider).stopBackgroundMusic();
     super.dispose();
   }
 
@@ -83,7 +76,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
   void _handleGameSearch(int numberOfPlayers, double boardSize) {
     final gameController = ref.read(gameControllerProvider.notifier);
-
+    ref.read(audioServiceProvider).playSFX(
+      'assets/audio/sound-effect/friend_button_sound.wav',
+    );
     gameController.onFastPingGets = () {
       gameController.startGame(numberOfPlayers: numberOfPlayers);
       _showWaitingDialog(boardSize);
@@ -171,6 +166,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               StartGameButton(
                 numberOfPlayers: -1,
                 onPressed: () {
+                  ref.read(audioServiceProvider).playSFX(
+                    'assets/audio/sound-effect/friend_button_sound.wav',
+                  );
                   setState(() => _showFriendsOptions = !_showFriendsOptions);
                 },
               ),

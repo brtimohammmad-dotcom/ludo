@@ -74,10 +74,15 @@ class GameAnimationManager {
       );
 
       await Future.delayed(const Duration(milliseconds: 300));
+      controller.playSfx("assets/audio/sound-effect/move_token.wav");
     }
   }
+
   Future<void> moveTokenStepByStepLocally(String tokenId, int steps) async {
-    if (controller.currentGameState?.serverState == null || controller.isMovingToken) return;
+    if (controller.currentGameState?.serverState == null ||
+        controller.isMovingToken) {
+      return;
+    }
     controller.isMovingToken = true;
 
     try {
@@ -88,13 +93,16 @@ class GameAnimationManager {
 
       if (movedTokenIndex == -1) return;
 
-      final currentToken = controller.currentGameState!.serverState!.tokens[movedTokenIndex];
+      final currentToken =
+          controller.currentGameState!.serverState!.tokens[movedTokenIndex];
       final oldPathIndex = currentToken.pathIndex;
 
       // 🟢 حالت خاص: مهره داخل Base است (1-) و تاس 6 آمده است
       if (oldPathIndex == -1 && steps == 6) {
         final updatedToken = currentToken.copyWith(pathIndex: 0);
-        final updatedTokens = List<Token>.from(controller.currentGameState!.serverState!.tokens);
+        final updatedTokens = List<Token>.from(
+          controller.currentGameState!.serverState!.tokens,
+        );
         updatedTokens[movedTokenIndex] = updatedToken;
 
         controller.updateState(
@@ -108,6 +116,7 @@ class GameAnimationManager {
 
         // یک تاخیر کوتاه برای حس شدن حرکت ورود به زمین
         await Future.delayed(const Duration(milliseconds: 300));
+        controller.playSfx("assets/audio/sound-effect/move_token.wav");
 
         controller.animationController?.reset();
         controller.animationController?.forward();
@@ -123,9 +132,12 @@ class GameAnimationManager {
       for (int step = oldPathIndex; step < targetPathIndex; step++) {
         if (controller.currentGameState?.serverState == null) return;
 
-        final tokenAtStep = controller.currentGameState!.serverState!.tokens[movedTokenIndex];
+        final tokenAtStep =
+            controller.currentGameState!.serverState!.tokens[movedTokenIndex];
         final updatedToken = tokenAtStep.copyWith(pathIndex: step + 1);
-        final updatedTokens = List<Token>.from(controller.currentGameState!.serverState!.tokens);
+        final updatedTokens = List<Token>.from(
+          controller.currentGameState!.serverState!.tokens,
+        );
         updatedTokens[movedTokenIndex] = updatedToken;
 
         controller.updateState(
@@ -138,6 +150,7 @@ class GameAnimationManager {
         );
 
         await Future.delayed(const Duration(milliseconds: 300));
+        controller.playSfx("assets/audio/sound-effect/move_token.wav");
       }
 
       controller.animationController?.reset();
@@ -146,6 +159,7 @@ class GameAnimationManager {
       controller.isMovingToken = false;
     }
   }
+
   Future<void> animateDiceRoll(ServerState newState) async {
     if (controller.currentGameState?.livePlayer == null) return;
 
@@ -155,6 +169,7 @@ class GameAnimationManager {
     );
 
     controller.animationController?.stop();
+    controller.playSfx("assets/audio/sound-effect/dice_rolling.wav");
 
     controller.updateState(
       GameState(
@@ -184,7 +199,6 @@ class GameAnimationManager {
           gameStage: GameStage.boardStage,
         ),
       );
-
     } else {
       controller.updateState(
         GameState(
@@ -210,5 +224,4 @@ class GameAnimationManager {
     controller.animationController?.reset();
     controller.animationController?.forward();
   }
-
 }

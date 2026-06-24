@@ -62,42 +62,58 @@ class SocketEventHandler {
     // --- رویدادهای اصلی گیم‌پلی ---
     socket.on("game_state_update", (data) async {
       await dataSource.playerInitialized.future;
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onStateUpdate?.call(dataSource.serverState!);
     });
 
     socket.on("game_started", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onGameStarted?.call(dataSource.serverState!);
     });
 
     socket.on("player_joined", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onPlayerJoined?.call(dataSource.serverState!);
     });
 
     socket.on("game_recovered", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onGameRecovered?.call(dataSource.serverState!);
     });
 
     socket.on("dice_rolled", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onDiceRolled?.call(dataSource.serverState!);
     });
 
     socket.on("times_up", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onTimesUp?.call(dataSource.serverState!);
     });
 
     socket.on("token_moved", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onTokenMoved?.call(dataSource.serverState!);
     });
 
     socket.on("opponent_exit", (data) {
-      dataSource.serverState = ServerState.fromJson(SocketUtils.convertToJSData(data));
+      dataSource.serverState = ServerState.fromJson(
+        SocketUtils.convertToJSData(data),
+      );
       dataSource.onOpponentExit?.call(dataSource.serverState!);
     });
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/services/audio_service.dart';
 
-class WinnerAlert extends StatefulWidget {
+class WinnerAlert extends ConsumerStatefulWidget {
   const WinnerAlert({
     super.key,
     required this.winner,
@@ -15,10 +17,10 @@ class WinnerAlert extends StatefulWidget {
   final GameController gameController;
 
   @override
-  State<WinnerAlert> createState() => _WinnerAlertState();
+  ConsumerState<WinnerAlert> createState() => _WinnerAlertState();
 }
 
-class _WinnerAlertState extends State<WinnerAlert>
+class _WinnerAlertState extends ConsumerState<WinnerAlert>
     with SingleTickerProviderStateMixin {
   late final AnimationController _anim;
   late final ConfettiController _confetti;
@@ -35,7 +37,9 @@ class _WinnerAlertState extends State<WinnerAlert>
     _confetti = ConfettiController(
       duration: const Duration(seconds: 3),
     );
-
+    ref
+        .read(audioServiceProvider)
+        .playSFX("assets/audio/sound-effect/winner_sound.wav");
     _anim.forward();
     _confetti.play();
   }

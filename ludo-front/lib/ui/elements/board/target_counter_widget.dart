@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/services/audio_service.dart';
 
 class TargetCounterWidget extends ConsumerWidget {
   const TargetCounterWidget({
@@ -27,10 +28,14 @@ class TargetCounterWidget extends ConsumerWidget {
     // گوش دادن اختصاصی فقط به تعداد مهره‌های نهایی همین رنگ
     final targetCount = ref.watch(
       gameControllerProvider.select(
-            (state) => state.getTargetTokensCountByColor(playerColor),
+        (state) => state.getTargetTokensCountByColor(playerColor),
       ),
     );
-
+    if (targetCount > 0) {
+      ref
+          .read(audioServiceProvider)
+          .playSFX("assets/audio/sound-effect/target_token.wav");
+    }
     // انیمیشن بر اساس تعداد مهره‌ها (اگر صفر باشد غایب است)
     final double scale = targetCount > 0 ? 1.0 : 0.0;
 
@@ -42,17 +47,17 @@ class TargetCounterWidget extends ConsumerWidget {
         duration: const Duration(milliseconds: 300),
         curve: Curves.bounceOut, // افکت پاپ‌آپ جذاب هنگام پدیدار شدن
         child: Container(
-          padding: EdgeInsets.all(boardSize*0.01),
+          padding: EdgeInsets.all(boardSize * 0.01),
           decoration: BoxDecoration(
             color: _getFlutterColor(playerColor),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: boardSize*0.0033),
+            border: Border.all(color: Colors.white, width: boardSize * 0.0033),
             boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 4,
                 offset: Offset(0, 2),
-              )
+              ),
             ],
           ),
           child: Text(

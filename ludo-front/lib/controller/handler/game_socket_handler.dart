@@ -24,6 +24,7 @@ class GameSocketHandler {
       _updateStateAndNotify(state, GameStage.boardStage);
       controller.onGameReady?.call();
       onGameConnected();
+      controller.playMenuMusic();
     };
 
     ds.onInAnotherGameCallback = () {
@@ -49,6 +50,7 @@ class GameSocketHandler {
         ),
       );
       onGameConnected();
+      controller.playMenuMusic();
     };
 
     ds.onGameStarted = (ServerState state) {
@@ -65,6 +67,12 @@ class GameSocketHandler {
 
     ds.onTimesUp = (ServerState state) {
       if (controller.currentGameState?.livePlayer == null) return;
+      final isMyTurn =
+          state.currentTurn == controller.currentGameState!.livePlayer!.color &&
+          state.gameStatus == GameStatus.start;
+      if (isMyTurn) {
+        controller.playSfx("assets/audio/sound-effect/current_turn_sound.wav");
+      }
       _updateStateAndNotify(state, GameStage.boardStage);
     };
 
@@ -109,6 +117,7 @@ class GameSocketHandler {
         ),
       );
       onGameConnected();
+      controller.playMenuMusic();
     };
     ds.onPlayerExit = () {
       controller.onPlayerExit?.call();
@@ -138,11 +147,23 @@ class GameSocketHandler {
         // اگر حرکت بازیکنان دیگر بود، روال قبلی را برو (انیمیشن مرحله به مرحله)
         await controller.handleTokenMoved(newState);
       }
-        _updateStateAndNotify(newState, GameStage.boardStage);
+      final isMyTurn =
+          newState.currentTurn == controller.currentGameState!.livePlayer!.color &&
+              newState.gameStatus == GameStatus.start;
+      if (isMyTurn) {
+        controller.playSfx("assets/audio/sound-effect/current_turn_sound.wav");
+      }
+      _updateStateAndNotify(newState, GameStage.boardStage);
     };
 
     ds.onDiceRolled = (ServerState newState) async {
       await controller.handleDiceRolled(newState);
+      final isMyTurn =
+          newState.currentTurn == controller.currentGameState!.livePlayer!.color &&
+              newState.gameStatus == GameStatus.start;
+      if (isMyTurn) {
+        controller.playSfx("assets/audio/sound-effect/current_turn_sound.wav");
+      }
     };
   }
 
