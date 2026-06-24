@@ -157,7 +157,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               //   },
               // ),
               Image.asset(
-                "webp/happy-dice.webp",
+                "assets/webp/1.png",
                 width: 200,
                 height: 200,
                 fit: BoxFit.cover,
