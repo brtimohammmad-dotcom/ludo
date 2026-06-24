@@ -156,7 +156,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               //     return const SizedBox(width: 200, height: 200);
               //   },
               // ),
-              Image.network(
+              Image.asset(
                 "webp/happy-dice.webp", // آدرس کامل و مطلق سایتت روی رندر
                 width: 200,
                 height: 200,
