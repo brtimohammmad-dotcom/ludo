@@ -157,7 +157,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               //   },
               // ),
               // به جای FutureBuilder سنگین لاتی، فقط همین را جایش بگذار:
-              Image.asset(
+              Image.network(
                 "assets/webp/happy-dice.webp",
                 width: 200,
                 height: 200,
