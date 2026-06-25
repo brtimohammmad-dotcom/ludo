@@ -154,7 +154,9 @@ function handleMoveToken(socket, token, io) {
       gameState.last_dice_value,
       gameState.tokens,
     );
+    let hasKick = false;
     if (kickedToken) {
+      hasKick = true;
       const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
       updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };
     }
@@ -203,7 +205,10 @@ function handleMoveToken(socket, token, io) {
     const animatingGameState = initialState.getGameState(socket.data.gameId);
 
     // پخش رویداد به همه بازیکنان این بازی
-    io.to(socket.data.gameId).emit("token_moved", animatingGameState);
+    io.to(socket.data.gameId).emit("token_moved", {
+     state: animatingGameState,
+     hasKick: hasKick,
+    });
     initialState.updateGameState(socket.data.gameId, {
       turn_status: "waitingForAnimate",
     });

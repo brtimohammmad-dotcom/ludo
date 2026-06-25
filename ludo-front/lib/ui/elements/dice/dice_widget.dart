@@ -18,21 +18,31 @@ class DiceWidget extends ConsumerStatefulWidget {
 
 class _DiceWidgetState extends ConsumerState<DiceWidget>
     with SingleTickerProviderStateMixin {
-  late AnimationController _rotationController;
+  late AnimationController _animationController;
+  late Animation<double> _rotationAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    // تعریف کنترلر انیمیشن برای چرخش مداوم تاس
-    _rotationController = AnimationController(
+    // یک کنترلر برای مدیریت هم‌زمان چرخش و اسکیل تاس
+    _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _rotationAnimation = Tween<double>(begin: 0.0, end: 2 * math.pi).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.linear),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
   }
 
   @override
   void dispose() {
-    _rotationController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -51,7 +61,7 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
     // 🎯 ۳. مقدار عددی آخرین تاس
     final lastDiceValue = ref.watch(
       gameControllerProvider.select(
-        (state) => state?.serverState?.lastDiceValue ?? 1,
+            (state) => state?.serverState?.lastDiceValue ?? 1,
       ),
     );
 
@@ -64,64 +74,49 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
 
     if (currentTurn == null) return const SizedBox.shrink();
 
-    // 🔄 مدیریت اجرای انیمیشن بر اساس وضعیت شرط سرور
+    // 🔄 کنترل بهینه انیمیشن بدون لگ
     final bool isRolling = turnStatus == TurnStatus.rollDiceRequestInFlight;
     if (isRolling) {
-      _rotationController.repeat(); // چرخش بی‌انتها در زمان درخواست سرور
+      if (!_animationController.isAnimating) {
+        _animationController.repeat(); // چرخش بی‌انتها و بزرگ‌شدن تاس در حین درخواست
+      }
     } else {
-      _rotationController.stop(); // توقف انیمیشن زمان دریافت پاسخ
+      if (_animationController.isAnimating) {
+        _animationController.stop(); // توقف در زمان دریافت پاسخ
+        _animationController.reverse(); // بازگشت اندازه به حالت عادی (۱.۰)
+      }
     }
 
     return AnimatedPositioned(
       curve: Curves.easeOutCirc,
-      duration: const Duration(milliseconds: 500),
-      left:
-          dicePath[currentTurn.index].dy * widget.cellSize +
-          (widget.cellSize / 4),
-      top:
-          dicePath[currentTurn.index].dx * widget.cellSize +
-          (widget.cellSize / 4),
+      duration: const Duration(milliseconds: 400), // کمی سریع‌تر برای حس چابکی بیشتر
+      left: dicePath[currentTurn.index].dy * widget.cellSize + (widget.cellSize / 4),
+      top: dicePath[currentTurn.index].dx * widget.cellSize + (widget.cellSize / 4),
       child: GestureDetector(
         onTap: () {
-          // فقط در صورتی که نوبت پلیر باشد و در حال حاضر تاسی ریخته نشود، متد صدا زده شود
           if (isMyTurn && !isRolling) {
             gameControllerNotifier.rollDice();
           }
         },
-        child: AnimatedBuilder(
-          animation: _rotationController,
-          builder: (context, child) {
-            // ۱. ابتدا ماتریس چرخش ۳ بعدی را بدون اسکیل می‌سازیم
-            final transformMatrix = Matrix4.identity()
-              ..setEntry(3, 2, 0.002) // افکت پرسپکتیو ۳ بعدی
-              ..rotateZ(_rotationController.value * 2 * math.pi) // چرخش دوبعدی
-              ..rotateY(
-                isRolling ? _rotationController.value * 2 * math.pi : 0,
-              ); // چرخش سه بعدی
-
-            // ۲. حالا از خود ویجت استاندارد Transform.scale برای بزرگ‌نمایی استفاده می‌کنیم
-            return Transform.scale(
-              scale: isRolling ? 1.2 : 1.0,
-              // تغییر اندازه کاملاً استاندارد و بدون ارور
-              child: Transform(
-                alignment: Alignment.center,
-                transform: transformMatrix,
-                child: child,
+        // استفاده از ترنزیشن‌های پیش‌فرض فلاتر که مستقیماً روی GPU رندر می‌شوند
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: RotationTransition(
+            turns: _rotationAnimation,
+            child: SizedBox(
+              width: widget.cellSize * 1.5,
+              height: widget.cellSize * 1.5,
+              // حذف AnimatedContainer سنگین و استفاده از پدینگ ساده
+              child: Padding(
+                padding: EdgeInsets.all(
+                  isMyTurn ? widget.cellSize / 8 : widget.cellSize / 5,
+                ),
+                child: DiceWidgetMapper(
+                  isMyTurn: isMyTurn,
+                  value: lastDiceValue,
+                  size: 72,
+                ),
               ),
-            );
-          },
-          child: AnimatedContainer(
-            padding: EdgeInsets.all(
-              isMyTurn ? widget.cellSize / 8 : widget.cellSize / 5,
-            ),
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOutCirc,
-            width: widget.cellSize * 1.5,
-            height: widget.cellSize * 1.5,
-            child: DiceWidgetMapper(
-              isMyTurn: isMyTurn,
-              value: lastDiceValue,
-              size: 72,
             ),
           ),
         ),

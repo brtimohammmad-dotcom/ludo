@@ -129,7 +129,7 @@ class GameSocketHandler {
       debugPrint('opponent Exit');
     };
 
-    ds.onTokenMoved = (ServerState newState) async {
+    ds.onTokenMoved = (ServerState newState, bool hasKick) async {
       // تشخیص اینکه آیا این حرکت توسط خود این کاربر انجام شده بود یا دیگران
       final isMyMovement =
           controller.currentGameState!.serverState!.currentTurn ==
@@ -140,27 +140,33 @@ class GameSocketHandler {
         while (controller.isMovingToken) {
           await Future.delayed(const Duration(milliseconds: 50));
         }
-
+        if (hasKick) {
+          controller.playSfx("assets/audio/sound-effect/kick_token.wav");
+        }
         // حالا که انیمیشن خودمان تمام شده، استیت نهایی سرور را بدون انیمیشن مجدد اعمال کن
-        _updateStateAndNotify(newState, GameStage.boardStage);
       } else {
         // اگر حرکت بازیکنان دیگر بود، روال قبلی را برو (انیمیشن مرحله به مرحله)
         await controller.handleTokenMoved(newState);
+        if (hasKick) {
+          controller.playSfx("assets/audio/sound-effect/kick_token.wav");
+        }
       }
+      _updateStateAndNotify(newState, GameStage.boardStage);
       final isMyTurn =
-          newState.currentTurn == controller.currentGameState!.livePlayer!.color &&
-              newState.gameStatus == GameStatus.start;
+          newState.currentTurn ==
+              controller.currentGameState!.livePlayer!.color &&
+          newState.gameStatus == GameStatus.start;
       if (isMyTurn) {
         controller.playSfx("assets/audio/sound-effect/current_turn_sound.wav");
       }
-      _updateStateAndNotify(newState, GameStage.boardStage);
     };
 
     ds.onDiceRolled = (ServerState newState) async {
       await controller.handleDiceRolled(newState);
       final isMyTurn =
-          newState.currentTurn == controller.currentGameState!.livePlayer!.color &&
-              newState.gameStatus == GameStatus.start;
+          newState.currentTurn ==
+              controller.currentGameState!.livePlayer!.color &&
+          newState.gameStatus == GameStatus.start;
       if (isMyTurn) {
         controller.playSfx("assets/audio/sound-effect/current_turn_sound.wav");
       }

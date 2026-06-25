@@ -22,6 +22,7 @@ class JoinScreen extends ConsumerStatefulWidget {
 
 class _JoinScreenState extends ConsumerState<JoinScreen> {
   bool _showFriendsOptions = false;
+  bool _isAssetCached = false;
 
   @override
   void initState() {
@@ -33,8 +34,14 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // کش کردن عکس در اولین باری که وابستگی‌ها لود می‌شوند
+    if (!_isAssetCached) {
+      precacheImage(const AssetImage("assets/webp/happy-dice.webp"), context);
+      _isAssetCached = true;
+    }
   }
 
   void _setupControllerCallbacks() {
@@ -76,9 +83,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
   void _handleGameSearch(int numberOfPlayers, double boardSize) {
     final gameController = ref.read(gameControllerProvider.notifier);
-    ref.read(audioServiceProvider).playSFX(
-      'assets/audio/sound-effect/friend_button_sound.wav',
-    );
+    ref
+        .read(audioServiceProvider)
+        .playSFX('assets/audio/sound-effect/friend_button_sound.wav');
     gameController.onFastPingGets = () {
       gameController.startGame(numberOfPlayers: numberOfPlayers);
       _showWaitingDialog(boardSize);
@@ -166,9 +173,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               StartGameButton(
                 numberOfPlayers: -1,
                 onPressed: () {
-                  ref.read(audioServiceProvider).playSFX(
-                    'assets/audio/sound-effect/friend_button_sound.wav',
-                  );
+                  ref
+                      .read(audioServiceProvider)
+                      .playSFX(
+                        'assets/audio/sound-effect/friend_button_sound.wav',
+                      );
                   setState(() => _showFriendsOptions = !_showFriendsOptions);
                 },
               ),

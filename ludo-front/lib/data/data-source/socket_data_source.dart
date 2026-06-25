@@ -15,7 +15,7 @@ typedef OnGameStartedCallback = void Function(ServerState state);
 typedef OnPlayerJoinedCallBack = void Function(ServerState state);
 typedef OnGameRecoveredCallback = void Function(ServerState state);
 typedef PlayerUpdateCallback = void Function(Player player);
-typedef TokenMovedCallback = void Function(ServerState state);
+typedef TokenMovedCallback = void Function(ServerState state, bool hasKick);
 typedef DiceRolledCallback = void Function(ServerState state);
 typedef TimesUpCallback = void Function(ServerState state);
 typedef GameFinishedCallback = void Function(Player player);
@@ -88,8 +88,10 @@ class SocketDataSource {
     });
 
     // ثبت رویدادها از طریق هندلر اختصاصی
-    SocketEventHandler(dataSource: this, socket: _socket!)
-        .registerEvents(mode, gameId);
+    SocketEventHandler(
+      dataSource: this,
+      socket: _socket!,
+    ).registerEvents(mode, gameId);
 
     // مدیریت وضعیت دیسکانیکت و ریکانکت سوکت
     _setupConnectionLifeCycle();
@@ -108,7 +110,9 @@ class SocketDataSource {
   // GAME ACTIONS (EMITS)
   // -------------------------------------------------------
   void joinGame(int numberOfPlayers) {
-    if (isConnected) _socket!.emit("join_game", {"numberOfPlayers": numberOfPlayers});
+    if (isConnected) {
+      _socket!.emit("join_game", {"numberOfPlayers": numberOfPlayers});
+    }
   }
 
   void rollDice() {

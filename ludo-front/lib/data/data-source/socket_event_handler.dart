@@ -17,7 +17,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "amir", "id":3};
+        initData = {"first_name": "amir", "id": 7};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -105,9 +105,13 @@ class SocketEventHandler {
 
     socket.on("token_moved", (data) {
       dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
+        SocketUtils.convertToJSData(data[0]['state']),
       );
-      dataSource.onTokenMoved?.call(dataSource.serverState!);
+
+      dataSource.onTokenMoved?.call(
+        dataSource.serverState!,
+        data[0]['hasKick'],
+      );
     });
 
     socket.on("opponent_exit", (data) {
