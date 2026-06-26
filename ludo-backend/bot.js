@@ -8,7 +8,8 @@ const bot = new Telegraf(
   process.env.BOT_TOKEN || "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho",
 );
 
-const WEB_APP_URL = "https://ludo-tecb.onrender.com";
+const WEB_APP_URL =
+  "AgACAgQAAxkBAANWaj7CJA8BUAYAAa-OFtVJ7M4hjQ4qAAMOaxthRfBR1YyGsvn7DdkBAAMCAAN4AAM8BA";
 bot.start((ctx) => {
   // استفاده از file_id به جای لینک اینترنتی برای لود فوق‌العاده سریع
   const PHOTO_FILE_ID =
@@ -22,14 +23,7 @@ bot.start((ctx) => {
     ]),
   });
 });
-bot.on("photo", (ctx) => {
-  // گرفتن باکیفیت‌ترین عکس
-  const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-  console.log("------------------------");
-  console.log("YOUR BOT FILE_ID:", fileId);
-  console.log("------------------------");
-  ctx.reply("آیدی عکس در کنسول چاپ شد! دمت گرم.");
-});
+
 
 bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query;
