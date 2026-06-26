@@ -8,12 +8,11 @@ const bot = new Telegraf(
   process.env.BOT_TOKEN || "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho",
 );
 
-const WEB_APP_URL =
-  "AgACAgQAAxkBAANWaj7CJA8BUAYAAa-OFtVJ7M4hjQ4qAAMOaxthRfBR1YyGsvn7DdkBAAMCAAN4AAM8BA";
+const WEB_APP_URL = "https://ludo-tecb.onrender.com";
 bot.start((ctx) => {
   // استفاده از file_id به جای لینک اینترنتی برای لود فوق‌العاده سریع
   const PHOTO_FILE_ID =
-    "AgACAgQAAxkBAAErUx1qPsAK0Vnzzu1yyQWz21xi2htjjwADDmsbYUXwURvSMz42vBehAQADAgADeAADPAQ";
+    "AgACAgQAAxkBAANWaj7CJA8BUAYAAa-OFtVJ7M4hjQ4qAAMOaxthRfBR1YyGsvn7DdkBAAMCAAN4AAM8BA";
 
   return ctx.replyWithPhoto(PHOTO_FILE_ID, {
     caption: "🎮 Welcome to Ludo",
