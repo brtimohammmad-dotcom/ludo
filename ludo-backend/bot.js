@@ -9,12 +9,18 @@ const bot = new Telegraf(
 );
 
 const WEB_APP_URL = "https://ludo-tecb.onrender.com";
-
 bot.start((ctx) => {
-  return ctx.reply(
-    "🎮 Welcome to Ludo",
-    Markup.inlineKeyboard([Markup.button.webApp("🎲 Play Now", WEB_APP_URL)]),
-  );
+  // استفاده از file_id به جای لینک اینترنتی برای لود فوق‌العاده سریع
+  const PHOTO_FILE_ID =
+    "AgACAgQAAxkBAAErUx1qPsAK0Vnzzu1yyQWz21xi2htjjwADDmsbYUXwURvSMz42vBehAQADAgADeAADPAQ";
+
+  return ctx.replyWithPhoto(PHOTO_FILE_ID, {
+    caption: "🎮 Welcome to Ludo",
+    ...Markup.inlineKeyboard([
+      [Markup.button.webApp("🎲 Play Now", WEB_APP_URL)],
+      [Markup.button.switchToChat("📢 Share with Friends", "")],
+    ]),
+  });
 });
 bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query;
@@ -136,7 +142,14 @@ ${playersList}
       reply_markup:
         game.game_status === "finished" || game.game_status === "cancel"
           ? {
-              inline_keyboard: [],
+              inline_keyboard: [
+                [
+                  {
+                    text: `play ludo`,
+                    url: "https://t.me/ludo_miniApp_bot?startapp=main",
+                  },
+                ],
+              ],
             }
           : {
               inline_keyboard: [
