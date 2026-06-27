@@ -16,7 +16,9 @@ class BoardUiEventHandler {
 
     // --- رویداد پایان بازی ---
     gameController.onGameFinished = () {
+      debugPrint("game finished1");
       if (!context.mounted) return;
+      debugPrint("game finished2");
       final currentState = gameController.currentGameState;
       final winner = currentState?.serverState?.winner;
       if (winner != null) {
