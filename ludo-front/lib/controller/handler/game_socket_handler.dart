@@ -78,6 +78,12 @@ class GameSocketHandler {
 
     ds.onGameFinished = (Player winner) {
       if (controller.currentGameState == null) return;
+      if (controller.currentGameState!.gameStage == GameStage.connectionStage) {
+        controller.updateState(
+          controller.currentGameState!.copyWith(gameStage: GameStage.joinStage),
+        );
+        return;
+      }
       controller.animationController?.stop();
 
       controller.updateState(
