@@ -103,10 +103,12 @@ module.exports = (io) => {
         }
 
         if (dbGame.winner) {
+          console.log ("has winner")
           socket.emit("game_finished", dbGame.winner);
           return;
         }
         if (gameMode && gameId && gameMode === "friendly") {
+          
           await handleJoinGameFriendly(socket, io);
           return;
         }
