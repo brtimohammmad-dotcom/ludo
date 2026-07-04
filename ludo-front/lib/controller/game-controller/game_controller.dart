@@ -68,12 +68,22 @@ class GameController extends _$GameController {
   // -------------------------------------------------
   // ANIMATION BRIDGE
   // -------------------------------------------------
-  Future<void> handleTokenMoved(ServerState newState) async {
+  Future<void> handleTokenMoved({
+    required int tokenId,
+    required bool hasKick,
+    int? kickedTokenId,
+    required int targetPosition,
+  }) async {
     if (isMovingToken || state?.livePlayer == null) return;
     isMovingToken = true;
     try {
       animationController?.stop();
-      await _animationManager.moveTokenStepByStep(newState);
+      await _animationManager.moveTokenStepByStep(
+        tokenId: tokenId,
+        hasKick: hasKick,
+        targetPosition: targetPosition,
+        kickedTokenId: kickedTokenId,
+      );
       animationController?.reset();
       animationController?.forward();
     } finally {

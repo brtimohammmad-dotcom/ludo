@@ -1,13 +1,16 @@
+
 import 'package:flutter/material.dart';
 
 class StartGameButton extends StatelessWidget {
   final int numberOfPlayers;
   final VoidCallback onPressed;
+  final double boardSize;
 
   const StartGameButton({
     super.key,
     required this.numberOfPlayers,
     required this.onPressed,
+    required this.boardSize
   });
 
   @override
@@ -27,15 +30,15 @@ class StartGameButton extends StatelessWidget {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        fixedSize: Size(isWide ? 250 : 120, 50),
-        elevation: 3,
+        fixedSize: Size(isWide ? boardSize*0.41 : boardSize*0.2, boardSize*0.08),
+        elevation: boardSize*0.003,
         backgroundColor: isAmber ? Colors.amber : Colors.green,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(boardSize*0.005)),
       ),
       onPressed: onPressed,
       child: Text(
         label,
-        style: const TextStyle(color: Colors.white, height: 1.5),
+        style:  TextStyle(color: Colors.white, height: boardSize*0.0015,fontSize: boardSize*0.025,),
         textAlign: TextAlign.center,
       ),
     );

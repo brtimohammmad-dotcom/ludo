@@ -84,10 +84,8 @@ function handleRollDice(socket, io) {
       ...updates,
     });
 
-    const finalGameState = initialState.getGameState(socket.data.gameId);
-
     // پخش رویداد به همه بازیکنان این بازی
-    io.to(socket.data.gameId).emit("dice_rolled", finalGameState);
+    io.to(socket.data.gameId).emit("dice_rolled", updates);
     if (changePlayer) {
       initialState.updateGameState(socket.data.gameId, {
         turn_status: "waitingForAnimate",
@@ -146,7 +144,7 @@ function handleMoveToken(socket, token, io) {
 
     if (!canMove) return { error: "Invalid move!" };
 
-    // کپی از توکن‌ها برای تغییر
+    // کپی از توکن‌ها برای اعمال تغییرات در سرور
     let updatedTokens = [...gameState.tokens];
 
     const kickedToken = findKickToken(
@@ -161,12 +159,9 @@ function handleMoveToken(socket, token, io) {
       updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };
     }
 
-    // حرکت توکن
+    // حرکت توکن در آرایه سرور
     if (currentToken.position === -1) {
-      updatedTokens[tokenIndex] = {
-        ...currentToken,
-        position: 0,
-      };
+      updatedTokens[tokenIndex] = { ...currentToken, position: 0 };
     } else {
       updatedTokens[tokenIndex] = {
         ...currentToken,
@@ -176,12 +171,18 @@ function handleMoveToken(socket, token, io) {
 
     const isSix = gameState.last_dice_value === 6;
 
-    let updates = {
-      tokens: updatedTokens,
+    // ۱. دیتای سبک و بهینه فقط برای فرستادن روی سوکت (کلاینت)
+    let socketUpdates = {
+      token_id: currentToken.id,
+      target_position: updatedTokens[tokenIndex].position,
+      has_kick: hasKick,
+      kicked_token_id: kickedToken ? kickedToken.id : null,
     };
 
+    // ۲. متغیرهای وضعیت بعدی بازی برای ذخیره در سرور
+    let nextTurn = gameState.current_turn;
     if (isSix) {
-      updates.turn_status = "waitingForRoll";
+      socketUpdates.turn_status = "waitingForRoll";
     } else {
       while (
         gameState.players[(colorIdx + 1) % gameState.number_of_players]
@@ -189,48 +190,53 @@ function handleMoveToken(socket, token, io) {
       ) {
         colorIdx = colorIdx + 1;
       }
-      updates.current_turn =
+      nextTurn =
         gameState.number_of_players === 4
           ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
           : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
-      updates.turn_status = "waitingForRoll";
+      socketUpdates.current_turn = nextTurn;
+      socketUpdates.turn_status = "waitingForRoll";
     }
 
-    // آپدیت در حافظه سراسری
+    // ۳. آپدیت حیاتی حافظه سراسری سرور (هم دیتای کلاینت و هم آرایه توکن‌ها اعمال می‌شود)
     initialState.updateGameState(socket.data.gameId, {
-      tokens: updatedTokens,
-      turn_status: updates.turn_status,
-      current_turn: updates.current_turn || gameState.current_turn,
+      tokens: updatedTokens, // 🌟 بسیار مهم: آرایه توکن‌ها روی سرور حتماً باید بروزرسانی شود
+      current_turn: nextTurn,
+      turn_status: socketUpdates.turn_status,
     });
-    const animatingGameState = initialState.getGameState(socket.data.gameId);
 
-    // پخش رویداد به همه بازیکنان این بازی
+    // پخش رویداد بهینه به همه بازیکنان
     io.to(socket.data.gameId).emit("token_moved", {
-     state: animatingGameState,
-     hasKick: hasKick,
+      updates: socketUpdates,
+      has_kick: hasKick,
     });
+    // بردن وضعیت به انیمیشن روی سرور
     initialState.updateGameState(socket.data.gameId, {
       turn_status: "waitingForAnimate",
     });
     pauseTimer(socket.data.gameId);
 
-    let time;
-    if (currentToken.position === -1) {
-      time = 300;
-    } else {
-      time = gameState.last_dice_value * 300;
-    }
+    // مدیریت زمان‌بندی سرور با فرانت
+    let time =
+      currentToken.position === -1 ? 300 : gameState.last_dice_value * 300;
+
     setTimeout(async () => {
-      const playerTokens = initialState
-        .getGameState(socket.data.gameId)
-        .tokens.filter((t) => t.color === player.color);
+      const currentGameState = initialState.getGameState(socket.data.gameId);
+      if (!currentGameState) return;
+
+      const playerTokens = currentGameState.tokens.filter(
+        (t) => t.color === player.color,
+      );
+
       initialState.updateGameState(socket.data.gameId, {
         turn_status: "waitingForRoll",
       });
+
       const hasNotWon = playerTokens.some((t) => t.position !== 39);
       if (hasNotWon) {
         resetTimer(socket, io);
       } else {
+        // ... منطق پایان بازی (کاملاً درست است)
         console.log(
           `Game ${socket.data.gameId} finished, winner: ${player.username}`,
         );
@@ -278,7 +284,9 @@ async function handleExitingGame(socket, io) {
   initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
   currentGame = initialState.getGameState(socket.data.gameId);
   socket.emit("player_exit");
-  socket.to(socket.data.gameId).emit("opponent_exit", currentGame);
+  socket
+    .to(socket.data.gameId)
+    .emit("opponent_exit", { userId: socket.data.telegramId });
   socket.leave(socket.data.gameId);
   const numberOfOnlines = currentGame.players.filter(
     (p) => p.player_status === "online",

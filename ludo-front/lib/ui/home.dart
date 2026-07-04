@@ -21,6 +21,7 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
+
   @override
   void initState() {
     super.initState();
@@ -49,11 +50,7 @@ class _HomeState extends ConsumerState<Home> {
       );
     };
 
-    gameController.gameRepository.dataSource.onDisconnectCallback = () {
-      if (mounted && TelegramWebApp.instance.isSupported) {
-        TelegramWebApp.instance.showAlert('Connection lost. Reconnecting...');
-      }
-    };
+
   }
 
   void _establishConnection(GameController gameController) {

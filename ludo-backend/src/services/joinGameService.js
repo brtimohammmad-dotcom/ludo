@@ -22,7 +22,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       username: socket.data.firstName,
       telegram_id: socket.data.telegramId,
     };
-    const result =await hasExistGame(player, socket.id);
+    const result = await hasExistGame(player, socket.id);
     if (result.game) {
       socket.emit("in_another_game");
       return;
@@ -64,7 +64,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
         game = initialState.getGameState(game.game_id);
         return { game: game };
       } else {
-       await addPlayerToGame(game, player);
+        await addPlayerToGame(game, player);
 
         game = initialState.getGameState(game.game_id);
         gameOrRoom = game;
@@ -82,7 +82,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       room = initialState.createGameInGameState(room.room_id, numberOfPlayers);
 
       // ۳. تعیین رنگ اولین بازیکن (سازنده بازی همیشه ایندکس ۰ است)
-     await addPlayerToGame(room, player);
+      await addPlayerToGame(room, player);
       room = initialState.getGameState(room.game_id);
 
       gameOrRoom = room;
@@ -102,7 +102,7 @@ async function handleJoinGameFriendly(socket, io) {
     try {
       const game = initialState.getGameState(socket.data.gameId);
 
-     await addPlayerToGame(game, player);
+      await addPlayerToGame(game, player);
       callFront(socket, io);
     } catch {
       console.log(error);
@@ -117,7 +117,12 @@ async function callFront(socket, io) {
   let currentGameState = initialState.getGameState(socket.data.gameId);
   // ارسال state به همه
   socket.emit("game_state_update", currentGameState);
-  socket.to(socket.data.gameId).emit("player_joined", currentGameState);
+  const newPlayer = currentGameState.players.find(
+    (p) => p.telegram_id === socket.data.telegramId,
+  );
+  if (newPlayer) {
+    socket.to(socket.data.gameId).emit("player_joined", newPlayer);
+  }
 
   // اگر بازی کامل شد → شروع کن
   if (
@@ -135,10 +140,7 @@ async function callFront(socket, io) {
       game_status: "start",
     });
 
-    io.to(socket.data.gameId).emit(
-      "game_started",
-      initialState.getGameState(socket.data.gameId),
-    );
+    io.to(socket.data.gameId).emit("game_started");
 
     startTimer(socket, io);
   }

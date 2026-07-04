@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/config_service.dart';
@@ -9,45 +8,15 @@ import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
 import 'socket_event_handler.dart';
 
-// تایپ‌دف‌ها کماکان اینجا یا در یک فایل types.dart می‌مانند
-typedef StateUpdateCallback = void Function(ServerState state);
-typedef OnGameStartedCallback = void Function(ServerState state);
-typedef OnPlayerJoinedCallBack = void Function(ServerState state);
-typedef OnGameRecoveredCallback = void Function(ServerState state);
-typedef PlayerUpdateCallback = void Function(Player player);
-typedef TokenMovedCallback = void Function(ServerState state, bool hasKick);
-typedef DiceRolledCallback = void Function(ServerState state);
-typedef TimesUpCallback = void Function(ServerState state);
-typedef GameFinishedCallback = void Function(Player player);
-typedef ReconnectionFailedCallback = void Function();
-typedef OnDisconnectCallback = void Function();
-typedef PlayerExitCallback = void Function();
-typedef OnOpponentExitCallback = void Function(ServerState state);
-typedef OnFastPingGetsCallback = void Function();
-typedef InAnotherGameCallback = void Function();
-typedef NotInGame = void Function();
+typedef OnGameEventCallback =
+    void Function(String eventName, Map<String, dynamic> data);
 
 class SocketDataSource {
   io.Socket? _socket;
   bool _isConnecting = false;
 
   // --- کالبک‌ها ---
-  StateUpdateCallback? onStateUpdate;
-  OnGameStartedCallback? onGameStarted;
-  OnPlayerJoinedCallBack? onPlayerJoined;
-  PlayerUpdateCallback? onPlayerUpdate;
-  OnGameRecoveredCallback? onGameRecovered;
-  TokenMovedCallback? onTokenMoved;
-  DiceRolledCallback? onDiceRolled;
-  TimesUpCallback? onTimesUp;
-  GameFinishedCallback? onGameFinished;
-  ReconnectionFailedCallback? onReconnectionFailedCallback;
-  OnDisconnectCallback? onDisconnectCallback;
-  PlayerExitCallback? onPlayerExit;
-  OnOpponentExitCallback? onOpponentExit;
-  OnFastPingGetsCallback? onFastPingGets;
-  InAnotherGameCallback? onInAnotherGameCallback;
-  NotInGame? onNotInGame;
+  OnGameEventCallback? onGameEventReceived;
 
   // --- وضعیت سیستم ---
   ServerState? serverState;
@@ -100,10 +69,12 @@ class SocketDataSource {
   }
 
   void _setupConnectionLifeCycle() {
-    _socket!.onDisconnect((reason) => onDisconnectCallback?.call());
+    _socket!.onDisconnect(
+      (reason) => onGameEventReceived?.call('disconnect', {}),
+    );
     _socket!.onReconnectAttempt((a) => debugPrint("🔄 Reconnect attempt #$a"));
     _socket!.onReconnectError((e) => debugPrint("⚠️ Reconnect error: $e"));
-    _socket!.onReconnectFailed((_) => onReconnectionFailedCallback?.call());
+    _socket!.onReconnectFailed((_) => onGameEventReceived?.call('reconnection_failed',{}));
   }
 
   // -------------------------------------------------------

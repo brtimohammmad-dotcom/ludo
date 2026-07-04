@@ -9,72 +9,83 @@ class GameAnimationManager {
 
   GameAnimationManager(this.controller);
 
-  Future<void> moveTokenStepByStep(ServerState newState) async {
+  Future<void> moveTokenStepByStep({
+    required int tokenId,
+    required int targetPosition,
+    required bool hasKick,
+    int? kickedTokenId,
+  }) async {
     if (controller.currentGameState?.serverState == null) return;
 
-    final newLivePlayer = newState.players.firstWhere(
-      (p) => p.userId == controller.currentGameState!.livePlayer!.userId,
-      orElse: () => controller.currentGameState!.livePlayer!,
+    final serverState = controller.currentGameState!.serverState!;
+
+    // ۱. پیدا کردن ایندکس توکن حرکت‌کرده در استیت فعلی فرانت‌اند
+    final movedTokenIndex = serverState.tokens.indexWhere(
+      (t) => t.id == tokenId.toString(),
     );
+    if (movedTokenIndex == -1) return;
 
-    int? movedTokenIndex;
-    int? targetPathIndex;
+    final oldToken = serverState.tokens[movedTokenIndex];
 
-    for (
-      int i = 0;
-      i < controller.currentGameState!.serverState!.tokens.length;
-      i++
-    ) {
-      final oldToken = controller.currentGameState!.serverState!.tokens[i];
-      final newToken = newState.tokens.firstWhere((t) => t.id == oldToken.id);
+    // پوزیشن فعلی توکن در فرانت‌اَند قبل از حرکت
+    final oldPosition = oldToken
+        .pathIndex; // یا هر فیلدی که نام پوزیشن شماست (مثلاً position یا pathIndex)
 
-      if (newToken.pathIndex != oldToken.pathIndex &&
-          newToken.playerColor ==
-              controller.currentGameState!.serverState!.currentTurn) {
-        movedTokenIndex = i;
-        targetPathIndex = newToken.pathIndex;
-        break;
-      }
-    }
+    // ۲. اجرای انیمیشن پله‌پله به سمت جلو
+    for (int step = oldPosition; step < targetPosition; step++) {
+      if (controller.currentGameState?.serverState == null) return;
 
-    if (movedTokenIndex == null || targetPathIndex == null) {
-      controller.updateState(
-        GameState(serverState: newState, livePlayer: newLivePlayer),
-      );
-      return;
-    }
+      // آپدیت کردن پوزیشن توکن یک قدم به جلو
+      final updatedToken = controller
+          .currentGameState!
+          .serverState!
+          .tokens[movedTokenIndex]
+          .copyWith(pathIndex: step + 1);
 
-    final oldPathIndex = controller
-        .currentGameState!
-        .serverState!
-        .tokens[movedTokenIndex]
-        .pathIndex;
-
-    for (int step = oldPathIndex; step < targetPathIndex; step++) {
-      if (controller.currentGameState?.serverState == null) {
-        return;
-      }
-
-      final currentToken =
-          controller.currentGameState!.serverState!.tokens[movedTokenIndex];
-      final updatedToken = currentToken.copyWith(pathIndex: step + 1);
       final updatedTokens = List<Token>.from(
         controller.currentGameState!.serverState!.tokens,
       );
       updatedTokens[movedTokenIndex] = updatedToken;
 
+      // اعمال استیت جدید برای رندر شدن تک‌قدم توکن
       controller.updateState(
         controller.currentGameState!.copyWith(
           serverState: controller.currentGameState!.serverState!.copyWith(
             turnStatus: TurnStatus.waitingForAnimate,
             tokens: updatedTokens,
           ),
-          livePlayer: newLivePlayer,
         ),
       );
 
-      await Future.delayed(const Duration(milliseconds: 300));
+      // صدا و تاخیر برای حس حرکت مهره
       controller.playSfx("assets/audio/sound-effect/move_token.wav");
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+
+    // ۳. مدیریت انیمیشن کیک (Kicked) یا زدن مهره حریف
+    if (hasKick && kickedTokenId != null) {
+      final kickedTokenIndex = controller.currentGameState!.serverState!.tokens
+          .indexWhere((t) => t.id == kickedTokenId.toString());
+
+      if (kickedTokenIndex != -1) {
+        // پخش افکت صدای زدن مهره
+        controller.playSfx("assets/audio/sound-effect/kick_token.wav");
+
+        final updatedTokens = List<Token>.from(
+          controller.currentGameState!.serverState!.tokens,
+        );
+        // برگرداندن مهره خورده شده به خانه ابتدا (پوزیشن ۱-)
+        updatedTokens[kickedTokenIndex] = updatedTokens[kickedTokenIndex]
+            .copyWith(pathIndex: -1);
+
+        controller.updateState(
+          controller.currentGameState!.copyWith(
+            serverState: controller.currentGameState!.serverState!.copyWith(
+              tokens: updatedTokens,
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -170,35 +181,28 @@ class GameAnimationManager {
 
     controller.animationController?.stop();
     controller.playSfx("assets/audio/sound-effect/dice_rolling.wav");
-
     controller.updateState(
       GameState(
         serverState: controller.currentGameState!.serverState!.copyWith(
           turnStatus: TurnStatus.rollDiceRequestInFlight,
+          lastDiceValue: newState.lastDiceValue,
         ),
         livePlayer: newLivePlayer,
         gameStage: GameStage.boardStage,
       ),
     );
     await Future.delayed(const Duration(milliseconds: 250));
-
+    final currentGameState = GameState(
+      serverState: newState,
+      livePlayer: newLivePlayer,
+      gameStage: GameStage.boardStage,
+    );
     final tokenIsActive = newState.tokens.any((token) {
-      final newGameState = GameState(
-        serverState: newState,
-        livePlayer: controller.currentGameState!.livePlayer,
-        gameStage: GameStage.boardStage,
-      );
-      return TokenRules.canActiveToken(token, newGameState);
+      return TokenRules.canActiveToken(token, currentGameState);
     });
 
     if (tokenIsActive) {
-      controller.updateState(
-        GameState(
-          serverState: newState,
-          livePlayer: newLivePlayer,
-          gameStage: GameStage.boardStage,
-        ),
-      );
+      controller.updateState(currentGameState);
     } else {
       controller.updateState(
         GameState(
@@ -212,14 +216,7 @@ class GameAnimationManager {
       );
 
       await Future.delayed(const Duration(milliseconds: 750));
-
-      controller.updateState(
-        GameState(
-          serverState: newState,
-          livePlayer: newLivePlayer,
-          gameStage: GameStage.boardStage,
-        ),
-      );
+      controller.updateState(currentGameState);
     }
     controller.animationController?.reset();
     controller.animationController?.forward();

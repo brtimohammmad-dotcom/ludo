@@ -53,7 +53,11 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final boardSize = (screenWidth < screenHeight
+        ? screenWidth
+        : screenHeight * 0.86);
 
     return Material(
       color: Colors.transparent,
@@ -81,7 +85,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
             child: FadeTransition(
               opacity: _anim,
               child:  Container(
-              width: size.width * 0.8,
+              width: boardSize * 0.8,
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(22),
@@ -107,7 +111,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                 children: [
                   /// 👑 ICON
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding:  EdgeInsets.all(boardSize * 0.01),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
@@ -118,33 +122,33 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                         ],
                       ),
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.emoji_events,
-                      size: 85,
+                      size: boardSize * 0.3,
                       color: Color(0xfffbbf24), // gold
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                   SizedBox(height: boardSize*0.12),
 
                   /// TITLE
-                  const Text(
+                   Text(
                     "WINNER",
                     style: TextStyle(
-                      fontSize: 30,
+                      fontSize: boardSize*0.06,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                       letterSpacing: 3,
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: boardSize*0.1),
 
                   /// PLAYER NAME (glass effect)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 12,
+                    padding:  EdgeInsets.symmetric(
+                      horizontal: boardSize*0.041,
+                      vertical: boardSize*0.022,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withAlpha(20),
@@ -156,7 +160,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                     child: Text(
                       widget.winner.username,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: boardSize*0.03,
                         fontWeight: FontWeight.bold,
                         color: widget.winner.color?.toColor() ?? Colors.white,
                       ),
@@ -187,15 +191,16 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 12,
+                        padding:  EdgeInsets.symmetric(
+                          horizontal: boardSize*0.04,
+                          vertical: boardSize*0.012,
                         ),
                       ),
                       onPressed: widget.gameController.exitGame,
-                      child: const Text(
+                      child:  Text(
                         "Back to Home",
                         style: TextStyle(
+                          fontSize: boardSize*0.02,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           letterSpacing: 1,

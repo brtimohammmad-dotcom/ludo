@@ -1,7 +1,5 @@
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
-import 'package:ludo/domain/model/player.dart';
-import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 import 'socket_data_source.dart';
 import 'socket_utils.dart';
@@ -17,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "lana", "id": 75};
+        initData = {"first_name": "lana", "id": 7};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -29,14 +27,20 @@ class SocketEventHandler {
     });
 
     // --- وضعیت‌های عمومی بازی ---
-    socket.on("not_in_game", (_) => dataSource.onNotInGame?.call());
+    socket.on(
+      "not_in_game",
+      (_) => dataSource.onGameEventReceived?.call('not_in_game', {}),
+    );
 
     socket.on("in_another_game", (_) {
-      dataSource.onInAnotherGameCallback?.call();
+      dataSource.onGameEventReceived?.call('in_another_game', {});
       _requestGameState(mode, gameId);
     });
 
-    socket.on("fast_ping_gets", (_) => dataSource.onFastPingGets?.call());
+    socket.on(
+      "fast_ping_gets",
+      (_) => dataSource.onGameEventReceived?.call('fast_ping_gets', {}),
+    );
 
     // --- بازیکن اولیه ---
     socket.on("initial_player", (data) {
@@ -50,8 +54,7 @@ class SocketEventHandler {
         return;
       }
 
-      final player = Player.fromJson(clean);
-      dataSource.onPlayerUpdate?.call(player);
+      dataSource.onGameEventReceived?.call("player_update", clean);
 
       if (!dataSource.playerInitialized.isCompleted) {
         dataSource.playerInitialized.complete();
@@ -62,71 +65,55 @@ class SocketEventHandler {
     // --- رویدادهای اصلی گیم‌پلی ---
     socket.on("game_state_update", (data) async {
       await dataSource.playerInitialized.future;
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onStateUpdate?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+
+      dataSource.onGameEventReceived?.call("game_state_update", cleanData);
     });
 
     socket.on("game_started", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onGameStarted?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+
+      dataSource.onGameEventReceived?.call("game_started", cleanData);
     });
 
     socket.on("player_joined", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onPlayerJoined?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("player_joined", cleanData);
     });
 
     socket.on("game_recovered", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onGameRecovered?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("game_recovered", cleanData);
     });
 
     socket.on("dice_rolled", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onDiceRolled?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("dice_rolled", cleanData);
     });
 
     socket.on("times_up", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onTimesUp?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("times_up", cleanData);
     });
 
     socket.on("token_moved", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data[0]['state']),
-      );
-
-      dataSource.onTokenMoved?.call(
-        dataSource.serverState!,
-        data[0]['hasKick'],
-      );
+      final cleanData = SocketUtils.convertToJSData(data);
+      // اسم ایونت اصلاح شد به token_moved
+      dataSource.onGameEventReceived?.call("token_moved", cleanData);
     });
 
     socket.on("opponent_exit", (data) {
-      dataSource.serverState = ServerState.fromJson(
-        SocketUtils.convertToJSData(data),
-      );
-      dataSource.onOpponentExit?.call(dataSource.serverState!);
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("opponent_exit", cleanData);
     });
 
     socket.on("game_finished", (data) {
-      final winner = Player.fromJson(SocketUtils.convertToJSData(data));
-      dataSource.onGameFinished?.call(winner);
+      final cleanData = SocketUtils.convertToJSData(data);
+
+      dataSource.onGameEventReceived?.call('game_finished', cleanData);
     });
 
-    socket.on("player_exit", (_) => dataSource.onPlayerExit?.call());
+    socket.on("player_exit", (_) => dataSource.onGameEventReceived?.call('player_exit',{}));
   }
 
   void _requestGameState(GameMode mode, String? gameId) {

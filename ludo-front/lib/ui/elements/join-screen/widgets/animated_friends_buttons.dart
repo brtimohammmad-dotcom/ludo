@@ -25,7 +25,9 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
   late final Animation<double> _fadeAnimation;
   late final Animation<Offset> _slideDownAnimation;
   late final Animation<Offset> _settleUpAnimation;
-  bool _isVisible = false;
+
+  // استفاده از ValueNotifier به جای متغیر معمولی و setState
+  final ValueNotifier<bool> _isVisibleNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -61,7 +63,7 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
     );
 
     if (widget.show) {
-      _isVisible = true;
+      _isVisibleNotifier.value = true;
       _controller.forward();
     }
   }
@@ -71,11 +73,11 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
     super.didUpdateWidget(oldWidget);
     if (widget.show != oldWidget.show) {
       if (widget.show) {
-        setState(() => _isVisible = true);
+        _isVisibleNotifier.value = true; // تغییر مقدار بدون setState
         _controller.forward(from: 0);
       } else {
         _controller.reverse().then((_) {
-          if (mounted) setState(() => _isVisible = false);
+          if (mounted) _isVisibleNotifier.value = false; // تغییر مقدار بدون setState
         });
       }
     }
@@ -84,42 +86,53 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
   @override
   void dispose() {
     _controller.dispose();
+    _isVisibleNotifier.dispose(); // دیسپوز کردن ناظر برای جلوگیری از لیک
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isVisible) return const SizedBox.shrink();
+    // فقط بخش مربوط به حضور یا عدم حضور ویجت به این واچر گوش می‌دهد
+    return ValueListenableBuilder<bool>(
+      valueListenable: _isVisibleNotifier,
+      builder: (context, isVisible, child) {
+        if (!isVisible) return const SizedBox.shrink();
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final combinedOffset = Offset(
-          0,
-          _slideDownAnimation.value.dy + _settleUpAnimation.value.dy,
-        );
-        return Opacity(
-          opacity: _fadeAnimation.value,
-          child: FractionalTranslation(
-            translation: combinedOffset,
-            child: child,
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final combinedOffset = Offset(
+              0,
+              _slideDownAnimation.value.dy + _settleUpAnimation.value.dy,
+            );
+            return Opacity(
+              opacity: _fadeAnimation.value,
+              child: FractionalTranslation(
+                translation: combinedOffset,
+                child: child,
+              ),
+            );
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              StartGameButton(
+                numberOfPlayers: -2,
+                onPressed: widget.onPlay2Players,
+                  boardSize:widget.boardSize
+
+              ),
+               SizedBox(width:widget.boardSize*0.01 ),
+              StartGameButton(
+                numberOfPlayers: -4,
+                onPressed: widget.onPlay4Players,
+                  boardSize:widget.boardSize
+
+              ),
+            ],
           ),
         );
       },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          StartGameButton(
-            numberOfPlayers: -2,
-            onPressed: widget.onPlay2Players,
-          ),
-          const SizedBox(width: 10),
-          StartGameButton(
-            numberOfPlayers: -4,
-            onPressed: widget.onPlay4Players,
-          ),
-        ],
-      ),
     );
   }
 }

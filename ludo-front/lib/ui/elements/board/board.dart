@@ -26,6 +26,7 @@ class _BoardState extends ConsumerState<Board>
     _uiEventHandler = BoardUiEventHandler(
       context: context,
       gameController: gameController,
+
     );
     _uiEventHandler.init();
     _uiEventHandler.checkAndShowWaitingDialog();
