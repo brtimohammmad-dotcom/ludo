@@ -13,6 +13,7 @@ import 'package:ludo/controller/events/opponent_exited_event.dart';
 import 'package:ludo/controller/events/player_exit_event.dart';
 import 'package:ludo/controller/events/player_update_event.dart';
 import 'package:ludo/controller/events/player_joined_event.dart';
+import 'package:ludo/controller/events/reconnection_failed_event.dart';
 import 'package:ludo/controller/events/times_up_event.dart';
 
 class GameEventFactory {
@@ -49,7 +50,7 @@ class GameEventFactory {
       case 'player_exit':
         return PlayerExitEvent();
       case 'reconnection_failed':
-        return PlayerExitEvent();
+        return ReconnectionFailedEvent();
       default:
         return null;
     }

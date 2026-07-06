@@ -3,12 +3,12 @@ const { updateGameState } = require("../database/games");
 const { canActivateToken, findKickToken } = require("../logic/canMove");
 const { updateLobbyMessage } = require("../../bot");
 const {
-  TOW_PLAYER_COLORS,
+  TWO_PLAYER_COLORS,
   FOUR_PLAYER_COLORS,
 } = require("../constants/gameConfig");
 const initialState = require("../models/initialState"); // اضافه شود
 const { resetTimer, pauseTimer, stopTimer } = require("./turnTimerService");
-
+const { finishGame } = require("../helpers/game_helpers");
 function handleRollDice(socket, io) {
   // دریافت state از حافظه سراسری
   const gameState = initialState.getGameState(socket.data.gameId);
@@ -40,7 +40,7 @@ function handleRollDice(socket, io) {
     let colorIdx =
       gameState.number_of_players === 4
         ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
-        : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
+        : TWO_PLAYER_COLORS.indexOf(gameState.current_turn);
     if (
       player.color !== gameState.current_turn ||
       gameState.turn_status !== "waitingForRoll"
@@ -74,7 +74,7 @@ function handleRollDice(socket, io) {
       updates.current_turn =
         gameState.number_of_players === 4
           ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
+          : TWO_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
       updates.turn_status = "waitingForRoll";
       changePlayer = true;
     }
@@ -134,7 +134,7 @@ function handleMoveToken(socket, token, io) {
     let colorIdx =
       gameState.number_of_players === 4
         ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
-        : TOW_PLAYER_COLORS.indexOf(gameState.current_turn);
+        : TWO_PLAYER_COLORS.indexOf(gameState.current_turn);
 
     const canMove =
       gameState.turn_status === "waitingForMove" &&
@@ -193,7 +193,7 @@ function handleMoveToken(socket, token, io) {
       nextTurn =
         gameState.number_of_players === 4
           ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
+          : TWO_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
       socketUpdates.current_turn = nextTurn;
       socketUpdates.turn_status = "waitingForRoll";
     }
@@ -240,27 +240,13 @@ function handleMoveToken(socket, token, io) {
         console.log(
           `Game ${socket.data.gameId} finished, winner: ${player.username}`,
         );
-        initialState.updateGameState(socket.data.gameId, {
-          game_status: "finished",
-          winner: player,
-        });
-        updateLobbyMessage(socket.data.gameId);
-
-        const winnerGameState = initialState.getGameState(socket.data.gameId);
-        await updateGameState(
+        //finish game
+        await finishGame(
           socket.data.gameId,
-          {
-            game_status: "finished",
-            winner: player,
-            players: winnerGameState.players,
-            end_at: new Date(),
-          },
-          winnerGameState.game_mode,
+          winnerPlayer,
+          currentGameState.game_mode,
+          io,
         );
-        stopTimer(socket.data.gameId);
-        io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
-        initialState.deleteGameState(socket.data.gameId);
-        socket.leave();
       }
     }, time);
   } finally {
@@ -268,71 +254,129 @@ function handleMoveToken(socket, token, io) {
   }
 }
 async function handleExitingGame(socket, io) {
-  let currentGame = initialState.getGameState(socket.data.gameId);
+  const gameId = socket.data.gameId;
+  const telegramId = socket.data.telegramId;
+
+  if (!gameId) return;
+
+  let currentGame = initialState.getGameState(gameId);
   if (!currentGame) {
     socket.emit("player_exit");
     return;
   }
 
-  const correctPlayers = currentGame.players.map((p) => {
-    if (p.telegram_id === socket.data.telegramId) {
-      return { ...p, player_status: "offline" };
-    } else {
-      return p;
-    }
-  });
-  initialState.updateGameState(socket.data.gameId, { players: correctPlayers });
-  currentGame = initialState.getGameState(socket.data.gameId);
-  socket.emit("player_exit");
-  socket
-    .to(socket.data.gameId)
-    .emit("opponent_exit", { userId: socket.data.telegramId });
-  socket.leave(socket.data.gameId);
-  const numberOfOnlines = currentGame.players.filter(
-    (p) => p.player_status === "online",
-  ).length;
-  if (numberOfOnlines === 0 && currentGame.game_status === "waitingForPlayer") {
-    await updateGameState(
-      socket.data.gameId,
-      {
-        game_status: "cancel",
-        players: currentGame.players,
-        end_at: new Date(),
-      },
-      currentGame.game_mode,
+  // ==========================================
+  // حالت اول: بازی هنوز شروع نشده و در لابی است
+  // ==========================================
+  if (currentGame.game_status === "waitingForPlayer") {
+    const deletePlayerList = currentGame.players.filter(
+      (p) => p.telegram_id !== telegramId,
     );
-    initialState.updateGameState(socket.data.gameId, { game_status: "cancel" });
-    updateLobbyMessage(socket.data.gameId);
-    initialState.deleteGameState(socket.data.gameId);
+
+    // اصلاح رنگ‌ها بر اساس لیست جدید
+    const correctColorPlayersList = deletePlayerList.map((p, index) => {
+      return {
+        ...p,
+        color:
+          currentGame.number_of_players === 2
+            ? TWO_PLAYER_COLORS[index]
+            : FOUR_PLAYER_COLORS[index],
+      };
+    });
+
+    initialState.updateGameState(gameId, {
+      players: correctColorPlayersList,
+    });
+
+    // گرفتن وضعیت جدید بعد از آپدیت
+    currentGame = initialState.getGameState(gameId);
+
+    socket.emit("player_exit");
+    socket.to(gameId).emit("opponent_exit", { userId: telegramId });
+    socket.leave(gameId);
+
+    // اگر لابی کاملاً خالی شد
+    if (currentGame.players.length === 0) {
+      await updateGameState(
+        gameId,
+        {
+          game_status: "cancel",
+          players: currentGame.players,
+          end_at: new Date(),
+        },
+        currentGame.game_mode,
+      );
+
+      initialState.deleteGameState(gameId);
+      updateLobbyMessage(gameId);
+    } else {
+      // اگر هنوز افرادی در لابی هستند، پیام لابی تلگرام آپدیت شود تا تعداد جدید را نشان دهد
+      updateLobbyMessage(gameId);
+    }
+
+    socket.data.gameId = null;
   }
-  if (numberOfOnlines === 1 && currentGame.game_status === "start") {
-    const player = currentGame.players.find(
+
+  // ==========================================
+  // حالت دوم: بازی شروع شده و وسط مسابقه هستند
+  // ==========================================
+  else if (currentGame.game_status === "start") {
+    const correctPlayers = currentGame.players.map((p) => {
+      if (p.telegram_id === telegramId) {
+        return { ...p, player_status: "offline" };
+      }
+      return p;
+    });
+
+    initialState.updateGameState(gameId, {
+      players: correctPlayers,
+    });
+
+    currentGame = initialState.getGameState(gameId);
+
+    socket.emit("player_exit");
+    socket.to(gameId).emit("opponent_exit", { userId: telegramId });
+    socket.leave(gameId);
+
+    const onlinesList = currentGame.players.filter(
       (p) => p.player_status === "online",
     );
-    console.log(
-      `Game ${socket.data.gameId} finished, winner: ${player.username}`,
-    );
-    initialState.updateGameState(socket.data.gameId, {
-      game_status: "finished",
-      winner: player,
-    });
-    updateLobbyMessage(socket.data.gameId);
+    const numberOfOnlines = onlinesList.length;
 
-    const winnerGameState = initialState.getGameState(socket.data.gameId);
-    await updateGameState(
-      socket.data.gameId,
-      {
-        game_status: "finished",
-        winner: player,
-        players: winnerGameState.players,
-        end_at: new Date(),
-      },
-      currentGame.game_mode,
-    );
-    stopTimer(socket.data.gameId);
-    io.to(socket.data.gameId).emit("game_finished", winnerGameState.winner);
-    initialState.deleteGameState(socket.data.gameId);
+    // سناریو الف: فقط یک نفر آنلاین باقی مانده است -> او برنده است!
+    if (numberOfOnlines === 1) {
+      const winnerPlayer = onlinesList[0];
+
+      console.log(
+        `Game ${gameId} finished, winner: ${winnerPlayer.username || winnerPlayer.telegram_id}`,
+      );
+      //finish game
+      await finishGame(
+        currentGame.game_id,
+        winnerPlayer,
+        currentGame.game_mode,
+        io,
+      );
+    }
+    // سناریو ب: هیچکس آنلاین نیست (آخرین نفر هم لفت داد یا بازی کلاً خالی شد)
+    else if (numberOfOnlines === 0) {
+      console.log(`Game ${gameId} finished with no online players. Canceling.`);
+
+      await updateGameState(
+        gameId,
+        {
+          game_status: "cancel", // یا هر وضعیتی که برای بازی‌های رها شده داری
+          players: currentGame.players,
+          end_at: new Date(),
+        },
+        currentGame.game_mode,
+      );
+
+      stopTimer(gameId);
+      initialState.deleteGameState(gameId);
+    }
+
+    socket.data.gameId = null;
   }
-  socket.data.gameId = null;
 }
 module.exports = { handleRollDice, handleMoveToken, handleExitingGame };

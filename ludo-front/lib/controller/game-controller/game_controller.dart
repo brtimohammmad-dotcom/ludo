@@ -183,6 +183,7 @@ class GameController extends _$GameController {
       final clearedPlayer = Player(
         userId: state!.livePlayer!.userId,
         username: state!.livePlayer!.username,
+        coin: state!.livePlayer!.coin,
         color: null,
         connectionStatus: null,
         playerStatus: null,

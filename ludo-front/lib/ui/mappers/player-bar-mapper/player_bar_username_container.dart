@@ -1,8 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/mappers/player-bar-mapper/player_bar_utils.dart';
 
 class PlayerBarUsernameContainer extends ConsumerWidget {
@@ -19,100 +21,167 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final double fullWidth = boardSize * 0.22; // کمی عرض را بیشتر کردیم تا سکه هم جا شود
     if (playerIndex == -1) {
-      return SizedBox(width: boardSize * 0.29, height: boardSize * 0.06);
+      return SizedBox(width: fullWidth, height: boardSize * 0.06);
     }
 
-    // 🟢 ۱. فقط گوش دادن به وضعیت بازی (شروع، پایان و...) و تعداد کل بازیکنان
-    final gameStatus = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.gameStatus),
-    );
-    final turnStatus = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.turnStatus),
-    );
+    // ۱. تعداد کل بازیکنان
     final totalPlayers = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.numberOfPlayers ?? 2,
+            (s) => s?.serverState?.numberOfPlayers ?? 2,
+      ),
+    );
+    final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
+
+    // ۲. بررسی نوبت
+    final isMyTurn = ref.watch(
+      gameControllerProvider.select(
+            (s) => s?.serverState?.currentTurn == playerColor,
       ),
     );
 
-    // 🟢 ۲. فقط گوش دادن به نوبت فعلی
-    final currentTurn = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.currentTurn),
-    );
-
-    // 🟢 ۳. فقط گوش دادن به اطلاعات بازیکنِ همین ایندکس خاص (نه همه بازیکنان!)
-    final player = ref.watch(
+    // ۳. گوش دادن به وضعیت نوبت فقط زمانی که نوبت این بازیکن است
+    final turnStatus = ref.watch(
       gameControllerProvider.select((s) {
-        final players = s?.serverState?.players;
-        if (players != null && players.length > playerIndex) {
-          return players[playerIndex];
+        if (s?.serverState?.currentTurn == playerColor) {
+          return s?.serverState?.turnStatus;
         }
         return null;
       }),
     );
 
-    // کنترلر انیمیشن را از روی کنترلر (بدون واچ کردن استیت) می‌خوانیم
+    // ۴. وضعیت کلی بازی
+    final gameStatus = ref.watch(
+      gameControllerProvider.select((s) => s?.serverState?.gameStatus),
+    );
+
+    // ۵. دریافت اطلاعات پایه بازیکن
+    final playerData = ref.watch(
+      gameControllerProvider.select((s) {
+        final players = s?.serverState?.players;
+        if (players != null && players.length > playerIndex) {
+          final p = players[playerIndex];
+          return (
+          username: p.username,
+          status: p.playerStatus,
+          absences: p.numberOfAbsences,
+          exists: true,
+          );
+        }
+        return (
+        username: '',
+        status: PlayerStatus.online,
+        absences: 0,
+        exists: false,
+        );
+      }),
+    );
+
+    final playerCoin = ref.watch(
+      gameControllerProvider.select((s) {
+        final players = s?.serverState?.players;
+        if (players != null && players.length > playerIndex) {
+          return players[playerIndex].coin;
+        }
+        return 0;
+      }),
+    );
+
     final gameController = ref.read(gameControllerProvider.notifier);
 
-    // اگر هنوز دیتایی از سرور نیامده، یک باکس خالی بده
     if (gameStatus == null) {
       return SizedBox(width: boardSize * 0.29, height: boardSize * 0.06);
     }
 
     debugPrint("--build player bar for index $playerIndex--");
 
-    final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
-
-    // محاسبه وضعیت نوبت این بازیکن
     final isCurrentTurn =
-        currentTurn == playerColor &&
-        gameStatus == GameStatus.start &&
-        turnStatus != TurnStatus.waitingForAnimate;
+        isMyTurn &&
+            gameStatus == GameStatus.start &&
+            turnStatus != TurnStatus.waitingForAnimate;
 
-    final double fullWidth = boardSize * 0.29;
-
-    // متد کمکی داخلی برای نمایش نام کاربری یا وضعیت
     Widget usernameStatusPicker() {
-      if (player == null) {
+      if (!playerData.exists) {
         return Text(
           "waiting...",
           style: TextStyle(
             inherit: true,
-            color: Colors.black45.withAlpha(30),
-            fontSize: barHeight * 0.36,
+            color: Colors.white.withValues(alpha: 0.3),
+            fontSize: barHeight * 0.2,
           ),
         );
       }
 
-      if (player.playerStatus == PlayerStatus.online) {
-        return Text(
-          player.username,
-          style: TextStyle(
-            inherit: true,
-            color: playerUserNameBoxColor(
-              playerIndex: playerIndex,
-              numberOfPlayers: totalPlayers, // متغیری که بالاتر واچ شده
-              currentTurn: currentTurn, // متغیری که بالاتر واچ شده
+      if (playerData.status == PlayerStatus.online) {
+        final currentTurnField = isCurrentTurn ? playerColor : null;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // نام کاربری
+            Text(
+              playerData.username,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                inherit: true,
+                color: playerUserNameBoxColor(
+                  playerIndex: playerIndex,
+                  numberOfPlayers: totalPlayers,
+                  currentTurn: currentTurnField,
+                ),
+                fontSize: barHeight * 0.26, // سایز را کمی تعدیل کردیم
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  isMyTurn
+                      ? const BoxShadow(
+                    color: Colors.black54,
+                    offset: Offset(-0.5, 0.5),
+                    blurRadius: 0.2,
+                  )
+                      : const BoxShadow(color: Colors.transparent),
+                ],
+              ),
             ),
-            fontSize: barHeight * 0.4,
-            shadows: [
-              currentTurn == playerColor
-                  ? const BoxShadow(
-                      color: Colors.black54,
-                      offset: Offset(-0.5, 0.5),
-                      blurRadius: 0.2,
-                    )
-                  : const BoxShadow(color: Colors.transparent),
-            ],
-          ),
+            const SizedBox(width: 6),
+
+            // 🪙 مینی‌باکس نمایش سکه به صورت فوق‌العاده شیک
+            Container(
+              padding:  EdgeInsets.symmetric(horizontal: boardSize*0.01, vertical: boardSize*0.005),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   Icon(
+                    Icons.monetization_on, // آیکون سکه طلایی
+                    color: Colors.amber,
+                    size: boardSize*0.02,
+                  ),
+                   SizedBox(width: boardSize * 0.005),
+                  Text(
+                    playerCoin.toString(),
+                    style:  TextStyle(
+                      color: Colors.amberAccent,
+                      fontSize: boardSize *0.02,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       } else {
         return Text(
           "out",
           style: TextStyle(
             inherit: true,
-            color: Colors.black45.withAlpha(30),
+            color: Colors.white.withValues(alpha: 0.3),
             fontSize: barHeight * 0.36,
           ),
         );
@@ -121,57 +190,91 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
 
     Color usernameTimerBoxColor() {
       if (gameStatus != GameStatus.start) {
-        return player == null ? Colors.transparent : Colors.white;
+        return !playerData.exists ? Colors.transparent : Colors.white24;
       }
 
-      switch (player?.numberOfAbsences ?? 0) {
+      switch (playerData.absences) {
         case 0:
-          return Colors.white;
+          return Colors.white.withValues(alpha: 0.2);
         case 1:
-          return Colors.yellow.shade200;
+          return Colors.yellow.withValues(alpha: 0.3);
         case 2:
-          return Colors.red.shade200;
+          return Colors.red.withValues(alpha: 0.3);
         default:
           return Colors.transparent;
       }
     }
 
+    final borderRadius = BorderRadius.circular(boardSize * 0.1);
+
+    final activeBorderColor = playerColor == PlayerColor.red
+        ? Colors.redAccent
+        : playerColor == PlayerColor.green
+        ? Colors.greenAccent
+        : playerColor == PlayerColor.yellow
+        ? Colors.amberAccent
+        : Colors.cyanAccent;
+
     return Container(
       width: fullWidth,
       height: boardSize * 0.06,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(boardSize * 0.1),
-        color: Colors.blueGrey,
-        boxShadow: const [
-          BoxShadow(color: Colors.black38, offset: Offset(-1, 3)),
-        ],
+        borderRadius: borderRadius,
+        boxShadow: isCurrentTurn
+            ? [
+          BoxShadow(
+            color: activeBorderColor.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          )
+        ]
+            : null,
       ),
-      child: Stack(
-        children: [
-          if (gameController.animationController != null)
-            Align(
-              alignment: Alignment.center,
-              child: AnimatedBuilder(
-                animation: gameController.animationController!,
-                builder: (context, child) {
-                  final double targetWidth = isCurrentTurn
-                      ? fullWidth *
-                            (1 - gameController.animationController!.value)
-                      : 0.0;
-
-                  return Container(
-                    width: targetWidth,
-                    height: boardSize * 0.06,
-                    decoration: BoxDecoration(
-                      color: usernameTimerBoxColor(),
-                      borderRadius: BorderRadius.circular(boardSize * 0.1),
-                    ),
-                  );
-                },
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              color: isCurrentTurn
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.25),
+              border: Border.all(
+                color: isCurrentTurn
+                    ? activeBorderColor.withValues(alpha: 0.4)
+                    : Colors.white10,
+                width: 1.2,
               ),
             ),
-          Center(child: usernameStatusPicker()),
-        ],
+            child: Stack(
+              children: [
+                if (gameController.animationController != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AnimatedBuilder(
+                      animation: gameController.animationController!,
+                      builder: (context, child) {
+                        final double targetWidth = isCurrentTurn
+                            ? fullWidth * (1 - gameController.animationController!.value)
+                            : 0.0;
+
+                        return Container(
+                          width: targetWidth,
+                          height: boardSize * 0.06,
+                          decoration: BoxDecoration(
+                            color: usernameTimerBoxColor(),
+                            borderRadius: borderRadius,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                Center(child: usernameStatusPicker()),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

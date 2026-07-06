@@ -42,25 +42,21 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
       curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
     );
 
-    _slideDownAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.6),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
+    _slideDownAnimation =
+        Tween<Offset>(begin: const Offset(0, -0.6), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+          ),
+        );
 
-    _settleUpAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0, -0.15),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
-      ),
-    );
+    _settleUpAnimation =
+        Tween<Offset>(begin: Offset.zero, end: const Offset(0, -0.15)).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+          ),
+        );
 
     if (widget.show) {
       _isVisibleNotifier.value = true;
@@ -77,7 +73,9 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
         _controller.forward(from: 0);
       } else {
         _controller.reverse().then((_) {
-          if (mounted) _isVisibleNotifier.value = false; // تغییر مقدار بدون setState
+          if (mounted) {
+            _isVisibleNotifier.value = false; // تغییر مقدار بدون setState
+          }
         });
       }
     }
@@ -117,17 +115,19 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               StartGameButton(
+                prizePool: 0,
+                entryFee: 0,
                 numberOfPlayers: -2,
                 onPressed: widget.onPlay2Players,
-                  boardSize:widget.boardSize
-
+                boardSize: widget.boardSize,
               ),
-               SizedBox(width:widget.boardSize*0.01 ),
+              SizedBox(width: widget.boardSize * 0.01),
               StartGameButton(
+                entryFee: 0,
+                prizePool: 0,
                 numberOfPlayers: -4,
                 onPressed: widget.onPlay4Players,
-                  boardSize:widget.boardSize
-
+                boardSize: widget.boardSize,
               ),
             ],
           ),

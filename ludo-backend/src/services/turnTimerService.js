@@ -1,10 +1,9 @@
 const { createInterval } = require("timerider");
 const { updateGameState } = require("../database/games");
 const { updateLobbyMessage } = require("../../bot");
-
 const initialState = require("../models/initialState");
 const {
-  TOW_PLAYER_COLORS,
+  TWO_PLAYER_COLORS,
   FOUR_PLAYER_COLORS,
 } = require("../constants/gameConfig");
 const time = 10;
@@ -41,7 +40,7 @@ function startTimer(socket, io) {
     let colorIdx =
       game.number_of_players === 4
         ? FOUR_PLAYER_COLORS.indexOf(game.current_turn)
-        : TOW_PLAYER_COLORS.indexOf(game.current_turn);
+        : TWO_PLAYER_COLORS.indexOf(game.current_turn);
     let delayedPlayer = null;
     let updatedPlayers = game.players.map((p) => {
       if (p.color === game.current_turn) {
@@ -87,37 +86,15 @@ function startTimer(socket, io) {
           console.log(
             `Game ${socket.data.gameId} finished, winner: ${onlinePlayer.username}`,
           );
+          const { finishGame } = require("../helpers/game_helpers");
 
           // اتمام بازی
-          initialState.updateGameState(socket.data.gameId, {
-            game_status: "finished",
-            winner: onlinePlayer,
-            players: updatedPlayers,
-          });
-          updateLobbyMessage(socket.data.gameId);
-
-          const winnerGameState = initialState.getGameState(socket.data.gameId);
-          await updateGameState(
+          await finishGame(
             socket.data.gameId,
-            {
-              game_status: "finished",
-              players: winnerGameState.players,
-
-              winner: onlinePlayer,
-              end_at: new Date(),
-            },
-            winnerGameState.game_mode,
+            onlinePlayer,
+            game.game_mode,
+            io,
           );
-
-          // ⭐ پاک کردن تایمر
-
-          stopTimer(socket.data.gameId);
-          // فرستادن به کلاینت
-          io.to(socket.data.gameId).emit(
-            "game_finished",
-            winnerGameState.winner,
-          );
-          initialState.deleteGameState(socket.data.gameId);
         }
         return; // مهم: خارج شدن از تابع
       }
@@ -128,7 +105,7 @@ function startTimer(socket, io) {
 
     // پیدا کردن نفر بعدی (که آفلاین نباشد)
     const currentColorsList =
-      game.number_of_players === 4 ? FOUR_PLAYER_COLORS : TOW_PLAYER_COLORS;
+      game.number_of_players === 4 ? FOUR_PLAYER_COLORS : TWO_PLAYER_COLORS;
     let nextColorIdx = colorIdx;
     let nextPlayer = null;
 
@@ -174,7 +151,7 @@ function startTimer(socket, io) {
       `Turn changed to ${
         game.number_of_players === 4
           ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
-          : TOW_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
+          : TWO_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
       } for game ${socket.data.gameId}`,
     );
   }, time * 1000);

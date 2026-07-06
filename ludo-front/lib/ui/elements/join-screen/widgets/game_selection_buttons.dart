@@ -39,11 +39,15 @@ class _GameSelectionButtonsState extends ConsumerState<GameSelectionButtons> {
           children: [
             StartGameButton(
               numberOfPlayers: 2,
+              entryFee: 100,
+              prizePool: 180,
               onPressed: () => widget.handler.handleGameSearch(2, widget.boardSize),
               boardSize:widget.boardSize
             ),
              SizedBox(width: widget.boardSize*0.01),
             StartGameButton(
+              entryFee: 100,
+              prizePool: 300,
               numberOfPlayers: 4,
               onPressed: () => widget.handler.handleGameSearch(4, widget.boardSize),
                 boardSize:widget.boardSize
@@ -53,6 +57,8 @@ class _GameSelectionButtonsState extends ConsumerState<GameSelectionButtons> {
         ),
         SizedBox(height: widget.boardSize*0.01),
         StartGameButton(
+          entryFee: 0,
+          prizePool: 0,
           numberOfPlayers: -1,
           onPressed: () {
             ref.read(audioServiceProvider).playSFX(
@@ -64,7 +70,7 @@ class _GameSelectionButtonsState extends ConsumerState<GameSelectionButtons> {
             boardSize:widget.boardSize
 
         ),
-        SizedBox(height: widget.boardSize*0.015),
+        SizedBox(height: widget.boardSize*0.025),
 
         // جادوی اصلی اینجاست: فقط این بخش کوچک به تغییرات گوش می‌دهد و ری‌بیلد می‌شود
         ValueListenableBuilder<bool>(

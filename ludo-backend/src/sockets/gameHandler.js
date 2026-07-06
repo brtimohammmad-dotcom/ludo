@@ -53,6 +53,7 @@ module.exports = (io) => {
         // اگر پلیر وجود دارد، سوکت جدید را جایگزین کن
         socket.data.telegramId = player.telegram_id;
         socket.data.firstName = player.username;
+        socket.data.coin = player.coin;
 
         // ارسال پلیر به فرانت
         socket.emit("initial_player", player);

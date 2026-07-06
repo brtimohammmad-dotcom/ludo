@@ -4,7 +4,6 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/game/logic/token-logic/token_logic.dart';
 import 'package:ludo/ui/elements/token/token_animated_widget.dart';
 
-/// 🟢 ویجت واسطه برای آپدیت میکروسکوپی مختصات هر مهره به صورت مجزا
 class TokenPositionWrapper extends ConsumerWidget {
   const TokenPositionWrapper({
     super.key,
@@ -17,7 +16,6 @@ class TokenPositionWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🎯 جادوی ریورپاد: تماشای اختصاصی توکنی که آیدی آن با این ویجت برابر است
     final token = ref.watch(
       gameControllerProvider.select((state) {
         if (state?.serverState?.tokens == null) return null;

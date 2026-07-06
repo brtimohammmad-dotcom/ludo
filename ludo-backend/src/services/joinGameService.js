@@ -2,10 +2,11 @@ const { joinGameQueue } = require("./joinGameQueue.js");
 const initialState = require("../models/initialState");
 const { createNewGameInDatabase } = require("../database/games");
 const {
-  TOW_PLAYER_COLORS,
+  TWO_PLAYER_COLORS,
   FOUR_PLAYER_COLORS,
 } = require("../constants/gameConfig");
 const { addPlayerToGameOnDatabase } = require("../database/gamePlayers");
+const { reduceMultiplePlayersCoin } = require("../database/players.js");
 const { updateGameState } = require("../database/games");
 const { startTimer } = require("../services/turnTimerService");
 const { error } = require("node:console");
@@ -21,6 +22,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
     const player = {
       username: socket.data.firstName,
       telegram_id: socket.data.telegramId,
+      coin: socket.data.coin,
     };
     const result = await hasExistGame(player, socket.id);
     if (result.game) {
@@ -48,27 +50,10 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
         );
       }
       const players = initialState.getGameState(game.game_id).players;
-      const playerIsInGame = players.some(
-        (p) => p.telegram_id === socket.data.telegramId,
-      );
 
-      if (playerIsInGame) {
-        const correctPlayers = game.players.map((p) => {
-          if (p.telegram_id === socket.data.telegramId) {
-            return { ...p, player_status: "online" };
-          } else {
-            return p;
-          }
-        });
-        initialState.updateGameState(game.game_id, { players: correctPlayers });
-        game = initialState.getGameState(game.game_id);
-        return { game: game };
-      } else {
-        await addPlayerToGame(game, player);
-
-        game = initialState.getGameState(game.game_id);
-        gameOrRoom = game;
-      }
+      await addPlayerToGame(game, player);
+      game = initialState.getGameState(game.game_id);
+      gameOrRoom = game;
     }
 
     // ----------------------------------------------------
@@ -110,18 +95,24 @@ async function handleJoinGameFriendly(socket, io) {
   });
 }
 async function callFront(socket, io) {
+  const gameId = socket.data.gameId;
+  const telegramId = socket.data.telegramId;
+
   // سوکت را وارد روم کن
-  socket.join(socket.data.gameId);
+  socket.join(gameId);
 
   // state فعلی بازی را بگیر
-  let currentGameState = initialState.getGameState(socket.data.gameId);
-  // ارسال state به همه
+  let currentGameState = initialState.getGameState(gameId);
+  if (!currentGameState) return;
+
+  // ارسال state به بازیکن جدید
   socket.emit("game_state_update", currentGameState);
+
   const newPlayer = currentGameState.players.find(
-    (p) => p.telegram_id === socket.data.telegramId,
+    (p) => p.telegram_id === telegramId,
   );
   if (newPlayer) {
-    socket.to(socket.data.gameId).emit("player_joined", newPlayer);
+    socket.to(gameId).emit("player_joined", newPlayer);
   }
 
   // اگر بازی کامل شد → شروع کن
@@ -131,27 +122,63 @@ async function callFront(socket, io) {
   ) {
     currentGameState.game_status = "start";
 
+    // بررسی حالت بازی برای کم کردن سکه
+    if (currentGameState.game_mode === "global") {
+      // تعیین مقدار سکه بر اساس تعداد بازیکنان (با پرانتز و املای درست)
+      const coinCost = currentGameState.number_of_players === 2 ? 100 : 100;
+
+      let playersTelegramId = [];
+
+      // ۱. آپدیت سکه بازیکنان در حافظه سرور (State)
+      const reducedPlayers = currentGameState.players.map((p) => {
+        playersTelegramId.push(p.telegram_id);
+        return {
+          ...p,
+          coin: p.coin - coinCost, // محاسبه امن با متغیر کمکی
+        };
+      });
+
+      initialState.updateGameState(gameId, {
+        players: reducedPlayers,
+      });
+
+      // ۲. آپدیت هم‌زمان تمام بازیکنان در دیتابیس با تابعی که قبلاً نوشتیم
+      try {
+        await reduceMultiplePlayersCoin(playersTelegramId, coinCost);
+      } catch (dbError) {
+        console.error("Error reducing coins from DB:", dbError);
+      }
+      const sockets = await io.in(gameId).fetchSockets();
+      sockets.forEach((socket) => {
+        socket.data.coin=socket.data.coin-coinCost;
+      });
+    }
+
+    // ۳. آپدیت وضعیت بازی در دیتابیس و استیت سرور
     await updateGameState(
-      socket.data.gameId,
+      gameId,
       { game_status: "start" },
       currentGameState.game_mode,
     );
-    initialState.updateGameState(socket.data.gameId, {
+
+    initialState.updateGameState(gameId, {
       game_status: "start",
     });
 
-    io.to(socket.data.gameId).emit("game_started");
+    // اطلاع‌رسانی شروع بازی به همه اعضای اتاق
+    io.to(gameId).emit("game_started");
 
     startTimer(socket, io);
   }
-  updateLobbyMessage(socket.data.gameId);
+
+  updateLobbyMessage(gameId);
 }
 async function addPlayerToGame(game, player) {
   const players = game.players;
 
   const color =
     game.number_of_players === 2
-      ? TOW_PLAYER_COLORS[players.length]
+      ? TWO_PLAYER_COLORS[players.length]
       : FOUR_PLAYER_COLORS[players.length];
 
   const playerInDataBase = await addPlayerToGameOnDatabase(

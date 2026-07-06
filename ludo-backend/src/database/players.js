@@ -23,5 +23,33 @@ async function getOrCreatePlayer(telegramId, username) {
     throw error;
   }
 }
+async function updateCoin(telegramId, action, value) {
+  // action باید 'add' یا 'subtract' باشد
+  const { data, error } = await supabase.rpc("update_player_coin", {
+    target_telegram_id: telegramId,
+    action_type: action,
+    coin_value: value,
+  });
 
-module.exports = { getOrCreatePlayer };
+  if (error) {
+    console.error("خطا در به‌روزرسانی سکه:", error.message);
+    throw error;
+  }
+
+  return data;
+}
+async function reduceMultiplePlayersCoin(telegramIds, value) {
+  // action باید 'add' یا 'subtract' باشد
+  const { data, error } = await supabase.rpc("reduce_multiple_players_coin", {
+    target_telegram_ids: telegramIds,
+    coin_value: value,
+  });
+
+  if (error) {
+    console.error("خطا در کاهش گروهی سکه ی بازیکنان:", error.message);
+    throw error;
+  }
+
+  return data;
+}
+module.exports = { getOrCreatePlayer, updateCoin, reduceMultiplePlayersCoin };

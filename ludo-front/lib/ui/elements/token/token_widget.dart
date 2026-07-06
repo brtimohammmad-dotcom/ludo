@@ -30,18 +30,21 @@ class TokenWidget extends ConsumerWidget {
       }
     }
 
-    // 🟢 متد کمکی لایوت اصلی مهره با ابعاد و مارجین‌های کاملاً فیکس شده
+    // 🟢 متد کمکی لایوت اصلی مهره با اعمال رفلکس سه‌بعدیِ مینیمال در لایه‌های داخلی
     Widget buildTokenBody({required double bounce, required double glow}) {
+      final double currentMargin = tokenIsActive ? size / 9 : size / 5;
+      final double innerSize = size - (currentMargin * 2);
+
       return Transform.translate(
         offset: Offset(0, bounce),
         child: Container(
-          // تعیین مارجین دقیق بر اساس وضعیت مهره جهت فیت شدن در خانه‌های بورد
-          margin: EdgeInsets.all(tokenIsActive ? size / 9 : size / 5),
+          // حفظ دقیق مارجین‌های اصلی طرح اول شما جهت فیت شدن کامل روی بورد
+          margin: EdgeInsets.all(currentMargin),
           decoration: BoxDecoration(
             gradient: tokenGradient(token),
             shape: BoxShape.circle,
             border: Border.all(
-              color: Colors.white.withAlpha(200),
+              color: Colors.white.withValues(alpha: 0.75), // شفافیت کنترل‌شده برای استروک دور
               width: size / 15,
             ),
             boxShadow: [
@@ -61,19 +64,68 @@ class TokenWidget extends ConsumerWidget {
                 const BoxShadow(
                   color: Colors.black38,
                   blurRadius: 2,
-                  offset: Offset(-2, 3),
+                  offset: Offset(-2, 3), // همان سایه اصلی و کلاسیک شما روی بورد
                 ),
             ],
           ),
-          child: highlight
-              ? Center(
-            child: Icon(
-              Icons.touch_app_rounded,
-              color: Colors.white,
-              size: size * 0.45,
-            ),
-          )
-              : const SizedBox(),
+          // 💎 استفاده از Stack داخلی برای تزریقِ افکت سه‌بعدی متالیک بدون دستکاری بدنه اصلی
+          child: Stack(
+            children: [
+              // ۱. رفلکس نوریِ هلالی (Glossy Highlight) بالا سمت چپ
+              Positioned(
+                top: innerSize * 0.05,
+                left: innerSize * 0.08,
+                child: Container(
+                  width: innerSize * 0.45,
+                  height: innerSize * 0.2,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.45),
+                        Colors.white.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ۲. حلقه نوری داخلی ظریف برای عمق دادن به مرکز مهره
+              Center(
+                child: Container(
+                  width: innerSize * 0.45,
+                  height: innerSize * 0.45,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+
+              // ۳. محتوای مرکز (آیکون یا فضای خالی)
+              Center(
+                child: highlight
+                    ? Icon(
+                  Icons.touch_app_rounded,
+                  color: Colors.white,
+                  size: size * 0.45,
+                  shadows: const [
+                    Shadow(
+                      color: Colors.black38,
+                      offset: Offset(0, 1),
+                      blurRadius: 2,
+                    )
+                  ],
+                )
+                    : const SizedBox(),
+              ),
+            ],
+          ),
         ),
       );
     }

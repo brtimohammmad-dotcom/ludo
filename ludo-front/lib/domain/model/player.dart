@@ -7,12 +7,14 @@ enum PlayerStatus { online, offline }
 class Player {
   final int userId;
   final String username;
+  final int coin;
   final PlayerColor? color;
   final ConnectionStatus? connectionStatus;
   final PlayerStatus? playerStatus;
   final int? numberOfAbsences;
 
   Player({
+    required this.coin,
     required this.numberOfAbsences,
     required this.userId,
     required this.username,
@@ -23,6 +25,7 @@ class Player {
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
+      coin: json['coin'],
       numberOfAbsences: json['numberOfAbsences'],
       username: json['username'],
       color: json['color'] == null
@@ -46,12 +49,14 @@ class Player {
   Player copyWith({
     int? userId,
     String? username,
+    int? coin,
     PlayerColor? color,
     ConnectionStatus? connectionStatus,
     PlayerStatus? playerStatus,
     int? numberOfAbsences,
   }) {
     return Player(
+      coin: coin ?? this.coin,
       numberOfAbsences: numberOfAbsences ?? this.numberOfAbsences,
       playerStatus: playerStatus ?? this.playerStatus,
       connectionStatus: connectionStatus ?? this.connectionStatus,

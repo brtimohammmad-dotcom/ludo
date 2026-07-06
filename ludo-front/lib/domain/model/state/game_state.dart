@@ -35,6 +35,16 @@ extension GameStateX on GameState? {
         .where((t) => t.playerColor == color && t.pathIndex == 39)
         .length;
   }
+
+  int reduceCoin() {
+    final s = this!.serverState!;
+    return s.numberOfPlayers == 2 ? 100 : 100;
+  }
+
+  int winPrice() {
+    final s = this!.serverState;
+    return s==null?0: s.numberOfPlayers == 2 ? 180 : 300;
+  }
 }
 
 enum GameStage { connectionStage, joinStage, boardStage }

@@ -74,28 +74,31 @@ class _BoardState extends ConsumerState<Board>
         }
       },
     );
-    final barHeight = boardSize * 0.08;
+    final barHeight = boardSize * 0.1;
 
     return Center(
       child: FittedBox(
         fit: BoxFit.contain,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            PlayerBar(
-              boardSize: boardSize,
-              barHeight: barHeight,
-              leftPlayerIndex: gameMode == 2 ? -1 : 1,
-              rightPlayerIndex: gameMode == 2 ? 1 : 2,
-            ),
-            MainBoard( boardSize: boardSize),
-            PlayerBar(
-              boardSize: boardSize,
-              barHeight: barHeight,
-              leftPlayerIndex: 0,
-              rightPlayerIndex: gameMode == 2 ? -1 : 3,
-            ),
-          ],
+        child: Container(
+          color: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PlayerBar(
+                boardSize: boardSize,
+                barHeight: barHeight,
+                leftPlayerIndex: gameMode == 2 ? -1 : 1,
+                rightPlayerIndex: gameMode == 2 ? 1 : 2,
+              ),
+              MainBoard( boardSize: boardSize),
+              PlayerBar(
+                boardSize: boardSize,
+                barHeight: barHeight,
+                leftPlayerIndex: 0,
+                rightPlayerIndex: gameMode == 2 ? -1 : 3,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -16,6 +16,7 @@ class ExitIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gameController = ref.read(gameControllerProvider.notifier);
+    final buttonSize = boardSize * 0.055; 
 
     return GestureDetector(
       onTap: () {
@@ -27,10 +28,31 @@ class ExitIcon extends ConsumerWidget {
           child: ExitButtonAlert(gameController: gameController),
         );
       },
-      child: Icon(
-        Icons.exit_to_app_rounded,
-        color: Colors.black38,
-        size: boardSize * 0.06,
+      child: Container(
+        width: buttonSize,
+        height: buttonSize,
+        decoration: BoxDecoration(
+          color: Colors.blueGrey,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.4),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Icon(
+            Icons.logout_rounded,
+            color: Colors.white.withValues(alpha: 0.4),
+            size: buttonSize * 0.55,
+          ),
+        ),
       ),
     );
   }

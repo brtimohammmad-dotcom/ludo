@@ -16,16 +16,26 @@ class GameFinishedEvent implements GameEvent {
   @override
   void execute(GameController controller) {
     if (controller.currentGameState == null) return;
+    final livePlayer = controller.currentGameState?.livePlayer;
     if (controller.currentGameState!.gameStage != GameStage.boardStage) {
       controller.updateState(
-        controller.currentGameState!.copyWith(gameStage: GameStage.joinStage),
+        controller.currentGameState!.copyWith(
+          gameStage: GameStage.joinStage,
+          livePlayer: livePlayer?.copyWith(
+            coin: livePlayer.coin + controller.currentGameState.winPrice(),
+          ),
+        ),
       );
       return;
     }
     controller.animationController?.stop();
-
     controller.updateState(
       controller.currentGameState!.copyWith(
+        livePlayer: livePlayer?.copyWith(
+          coin: livePlayer.userId == newPlayer.userId
+              ? livePlayer.coin + controller.currentGameState.winPrice()
+              : livePlayer.coin,
+        ),
         serverState: controller.currentGameState!.serverState!.copyWith(
           winner: newPlayer,
         ),

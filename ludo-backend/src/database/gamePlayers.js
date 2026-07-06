@@ -3,7 +3,6 @@ const supabase = require("../../postgresql");
 const initialState = require("../models/initialState");
 
 async function addPlayerToGameOnDatabase(player, gameId, color, gameMode) {
-
   try {
     // ۱. ابتدا دیتای فعلی ستون players را برای این بازی می‌گیریم
 
@@ -25,8 +24,7 @@ async function addPlayerToGameOnDatabase(player, gameId, color, gameMode) {
 
     // ۲. ساختن آبجکت بازیکن جدید با ساختاری که مد نظرت بود
     const newPlayerObj = {
-      telegram_id: player.telegram_id,
-      username: player.username,
+      ...player,
       color: color,
     };
 
@@ -35,9 +33,9 @@ async function addPlayerToGameOnDatabase(player, gameId, color, gameMode) {
 
     // ۳. آپدیت کردن دیتابیس با آرایهٔ جدید و گرفتن خروجی آپدیت شده (select)
     const { data: updatedGame, error: updateError } = await supabase
-      .from(gameMode==="global"?"game":"room")
+      .from(gameMode === "global" ? "game" : "room")
       .update({ players: currentPlayers })
-      .eq(gameMode==="global"?"game_id":"room_id", gameId)
+      .eq(gameMode === "global" ? "game_id" : "room_id", gameId)
       .select("players")
       .single();
 
