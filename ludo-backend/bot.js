@@ -120,7 +120,7 @@ const updateLobbyMessage = async (gameId) => {
     const text =
       game.game_status === "start"
         ? `🎲 Ludo Friendly Match\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🔥 All players are ready!\n\n🚀 The match is now in progress.`
-        : game.game_status === "finish"
+        : game.game_status === "finished"
           ? `🏆 Match Complete\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 ${game.winner ? game.winner.first_name : "Someone"} is winner!\n\nThanks for joining the game.`
           : game.game_status === "cancel"
             ? `⚠️ Match Cancelled\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\nThe lobby has been closed.`
@@ -129,7 +129,7 @@ const updateLobbyMessage = async (gameId) => {
     const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
 
     const replyMarkup =
-      game.game_status === "finish" ||
+      game.game_status === "finished" ||
       game.game_status === "cancel" ||
       game.game_status === "start"
         ? {

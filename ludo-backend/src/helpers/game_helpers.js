@@ -5,15 +5,15 @@ const { stopTimer } = require("../services/turnTimerService");
 const { updateCoin } = require("../database/players");
 
 async function finishGame(gameId, winnerPlayer, gameMode, io) {
-  updateLobbyMessage(gameId);
   const winnerGameState = initialState.getGameState(gameId);
   if (!winnerGameState) return;
-
+  
   initialState.updateGameState(gameId, {
     game_status: "finished",
     winner: winnerPlayer,
   });
-
+  
+  await updateLobbyMessage(gameId);
   await updateGameState(
     gameId,
     {

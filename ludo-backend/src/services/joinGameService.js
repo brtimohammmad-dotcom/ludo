@@ -83,6 +83,7 @@ async function handleJoinGameFriendly(socket, io) {
     const player = {
       username: socket.data.firstName,
       telegram_id: socket.data.telegramId,
+      coin: socket.data.coin,
     };
     try {
       const game = initialState.getGameState(socket.data.gameId);
