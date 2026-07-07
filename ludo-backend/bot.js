@@ -121,7 +121,7 @@ const updateLobbyMessage = async (gameId) => {
       game.game_status === "start"
         ? `🎲 Ludo Friendly Match\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🔥 All players are ready!\n\n🚀 The match is now in progress.`
         : game.game_status === "finished"
-          ? `🏆 Match Complete\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 ${game.winner ? game.winner.first_name : "Someone"} is winner!\n\nThanks for joining the game.`
+          ? `🏆 Match Complete\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 ${game.winner ? game.winner.username : "Someone"} is winner!\n\nThanks for joining the game.`
           : game.game_status === "cancel"
             ? `⚠️ Match Cancelled\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\nThe lobby has been closed.`
             : `🎲 Ludo Friendly Match\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎯 Waiting for ${maxPlayers - playersCount} more player${maxPlayers - playersCount > 1 ? "s" : ""} to join...`;
