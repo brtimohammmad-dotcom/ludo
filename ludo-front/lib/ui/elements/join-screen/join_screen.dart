@@ -75,7 +75,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             ),
           ),
 
-          CoinBox(),
+          CoinBox(boardSize: boardSize,),
 
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/services/audio_service.dart';
+import 'package:ludo/ui/utils/alerts/daily_reward_dialog.dart';
 import 'package:ludo/ui/utils/alerts/insufficient_coins_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
@@ -59,6 +60,33 @@ class JoinScreenHandler {
         child: InsufficientCoinsAlert(
           requiredCoins: 100,
           currentCoins: playerCoin,
+        ),
+      );
+    };
+    gameController.onHasDailyReward = () {
+      if (!isMounted()) return;
+
+      final livePlayer = gameController.currentGameState?.livePlayer;
+      if (livePlayer == null) return;
+
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+      final double boardSize = (screenWidth < screenHeight
+          ? screenWidth
+          : screenHeight * 0.86);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        // کاربر حتماً باید دکمه را بزند تا دیالوگ بسته شود
+        builder: (context) => DailyRewardDialog(
+          currentStreak: livePlayer.rewardStreak,
+          canClaim: livePlayer.canClaimDailyReward,
+          boardSize: boardSize,
+          onClaimPressed: () async {
+            if (Navigator.canPop(context)) Navigator.pop(context);
+            audioService.playSFX('assets/audio/sound-effect/coin_claim.wav');
+            // کدهای متد سرور شما...
+          },
         ),
       );
     };

@@ -12,6 +12,8 @@ class Player {
   final ConnectionStatus? connectionStatus;
   final PlayerStatus? playerStatus;
   final int? numberOfAbsences;
+  final int rewardStreak;
+  final bool canClaimDailyReward;
 
   Player({
     required this.coin,
@@ -21,13 +23,15 @@ class Player {
     required this.color,
     required this.connectionStatus,
     required this.playerStatus,
+    this.rewardStreak = 2,          // مقدار پیش‌فرض ۱
+    this.canClaimDailyReward = false, // مقدار پیش‌فرض غیرفعال
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
-      coin: json['coin'],
+      coin: json['coin'] ?? 0,
       numberOfAbsences: json['numberOfAbsences'],
-      username: json['username'],
+      username: json['username'] ?? '',
       color: json['color'] == null
           ? null
           : PlayerColor.values.byName(json['color']),
@@ -38,12 +42,18 @@ class Player {
       connectionStatus: json['connection_status'] == null
           ? null
           : ConnectionStatus.values.byName(json['connection_status']),
+
+      rewardStreak: json['reward_streak'] ?? 2,
+      canClaimDailyReward: json['can_claim_daily_reward'] ?? true,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'username': username,
     'telegram_id': userId,
+    'coin': coin,
+    'reward_streak': rewardStreak,
+    'can_claim_daily_reward': canClaimDailyReward,
   };
 
   Player copyWith({
@@ -54,6 +64,8 @@ class Player {
     ConnectionStatus? connectionStatus,
     PlayerStatus? playerStatus,
     int? numberOfAbsences,
+    int? rewardStreak,
+    bool? canClaimDailyReward,
   }) {
     return Player(
       coin: coin ?? this.coin,
@@ -63,6 +75,9 @@ class Player {
       userId: userId ?? this.userId,
       username: username ?? this.username,
       color: color ?? this.color,
+      // 🔄 اضافه شدن به کپی‌ویت برای آپدیت راحت در کنترلر
+      rewardStreak: rewardStreak ?? this.rewardStreak,
+      canClaimDailyReward: canClaimDailyReward ?? this.canClaimDailyReward,
     );
   }
 }

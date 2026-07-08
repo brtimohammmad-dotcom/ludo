@@ -33,6 +33,7 @@ class GameController extends _$GameController {
   VoidCallback? onGameReady;
   VoidCallback? onGameStarted;
   VoidCallback? onInsufficientCoin;
+  VoidCallback? onHasDailyReward;
 
   @override
   GameState? build() {
@@ -164,6 +165,8 @@ class GameController extends _$GameController {
   void resetGame() {
     // 🟢 ۲. کالبک‌های مربوط به لیسنرهای بورد قبلی را کاملاً پاک می‌کنیم
     onGameFinished = null;
+    onInsufficientCoin = null; // 👈 اضافه شد
+    onHasDailyReward = null;
     onReconnectionFailed = null;
     onPlayerExit = null;
     onFastPingGets = null;
