@@ -8,10 +8,6 @@ class AppBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('Ludo')),
-        backgroundColor: Colors.white12,
-      ),
       body: Home(),
     );
   }

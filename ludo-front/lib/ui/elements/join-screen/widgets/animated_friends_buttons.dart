@@ -23,10 +23,8 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fadeAnimation;
-  late final Animation<Offset> _slideDownAnimation;
-  late final Animation<Offset> _settleUpAnimation;
+  late final Animation<Offset> _slideAnimation;
 
-  // استفاده از ValueNotifier به جای متغیر معمولی و setState
   final ValueNotifier<bool> _isVisibleNotifier = ValueNotifier<bool>(false);
 
   @override
@@ -34,29 +32,23 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
     );
+
 
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      curve: Curves.easeOutCubic,
     );
 
-    _slideDownAnimation =
-        Tween<Offset>(begin: const Offset(0, -0.6), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-          ),
-        );
-
-    _settleUpAnimation =
-        Tween<Offset>(begin: Offset.zero, end: const Offset(0, -0.15)).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
-          ),
-        );
+    // جابجایی یکپارچه از بالا (-0.4) به مکان اصلی (0.0)
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -0.4),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
 
     if (widget.show) {
       _isVisibleNotifier.value = true;
@@ -69,12 +61,12 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
     super.didUpdateWidget(oldWidget);
     if (widget.show != oldWidget.show) {
       if (widget.show) {
-        _isVisibleNotifier.value = true; // تغییر مقدار بدون setState
+        _isVisibleNotifier.value = true;
         _controller.forward(from: 0);
       } else {
         _controller.reverse().then((_) {
           if (mounted) {
-            _isVisibleNotifier.value = false; // تغییر مقدار بدون setState
+            _isVisibleNotifier.value = false;
           }
         });
       }
@@ -84,55 +76,47 @@ class _AnimatedFriendsButtonsState extends State<AnimatedFriendsButtons>
   @override
   void dispose() {
     _controller.dispose();
-    _isVisibleNotifier.dispose(); // دیسپوز کردن ناظر برای جلوگیری از لیک
+    _isVisibleNotifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // فقط بخش مربوط به حضور یا عدم حضور ویجت به این واچر گوش می‌دهد
     return ValueListenableBuilder<bool>(
       valueListenable: _isVisibleNotifier,
       builder: (context, isVisible, child) {
         if (!isVisible) return const SizedBox.shrink();
 
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            final combinedOffset = Offset(
-              0,
-              _slideDownAnimation.value.dy + _settleUpAnimation.value.dy,
-            );
-            return Opacity(
-              opacity: _fadeAnimation.value,
-              child: FractionalTranslation(
-                translation: combinedOffset,
-                child: child,
-              ),
-            );
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StartGameButton(
-                prizePool: 0,
-                entryFee: 0,
-                numberOfPlayers: -2,
-                onPressed: widget.onPlay2Players,
-                boardSize: widget.boardSize,
-              ),
-              SizedBox(width: widget.boardSize * 0.01),
-              StartGameButton(
-                entryFee: 0,
-                prizePool: 0,
-                numberOfPlayers: -4,
-                onPressed: widget.onPlay4Players,
-                boardSize: widget.boardSize,
-              ),
-            ],
+        // 🟢 استفاده از ترنزیشن‌های بومی و نیتیو فلاتر بدون درگیر کردن لایه لایوت و کاملا شتاب‌یافته گرافیکی
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: child, // فرزندان کاملاً ایزوله هستند و در هر فریم ریبلد نمی‌شوند
           ),
         );
       },
+      // دکمه‌ها را به بخش ثابت (child) منتقل کردیم تا در طول فرآیند انیمیشن، کدهای داخلی دکمه‌ها پردازش مجدد نشوند
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          StartGameButton(
+            prizePool: 0,
+            entryFee: 0,
+            numberOfPlayers: -2,
+            onPressed: widget.onPlay2Players,
+            boardSize: widget.boardSize,
+          ),
+          SizedBox(width: widget.boardSize * 0.01),
+          StartGameButton(
+            entryFee: 0,
+            prizePool: 0,
+            numberOfPlayers: -4,
+            onPressed: widget.onPlay4Players,
+            boardSize: widget.boardSize,
+          ),
+        ],
+      ),
     );
   }
 }

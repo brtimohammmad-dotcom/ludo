@@ -13,47 +13,66 @@ class RollButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🎯 گوش دادن هوشمند به وضعیت نوبت تاس ریختن کاربر
+    // 🎯 گوش دادن کاملاً مجزا و بهینه به وضعیت نوبت تاس
     final myTurnToRoll = ref.watch(
       gameControllerProvider.select((state) => state?.isMyTurnToRoll ?? false),
     );
 
     final gameControllerNotifier = ref.read(gameControllerProvider.notifier);
+    final borderRadius = BorderRadius.circular(8);
+
+    // استایل‌های ثابت و کاملاً Solid (بدون محاسبات داینامیک گران‌قیمت در متریال دکمه)
+    final activeGradient = LinearGradient(
+      colors: [
+        const Color(0xFF66BB6A), // سبز زنده و تخت
+        const Color(0xFF43A047), // سبز پررنگ‌تر تخت
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    final inactiveGradient = const LinearGradient(
+      colors: [Color(0x33FFFFFF), Color(0x42FFFFFF)],
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: boardSize * 0.01),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: myTurnToRoll
-              ? LinearGradient(
-            colors: [
-              Colors.lightGreenAccent,
-              Colors.lightGreenAccent.shade400,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-              : const LinearGradient(colors: [Colors.white30, Colors.white38]),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: boardSize * 0.02),
-            backgroundColor: Colors.transparent,
-            foregroundColor: myTurnToRoll ? Colors.white : Colors.white54,
-            elevation: myTurnToRoll ? 4 : 0,
-            shadowColor: Colors.green.shade900,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+      child: GestureDetector(
+        // اگر نوبت کاربر بود متد اجرا شود، در غیر این صورت تاچ کاملاً خاموش است
+        onTap: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150), // یک انیمیشن بسیار سبک برای تغییر حالت نوبت
+          curve: Curves.easeIn,
+          padding: EdgeInsets.symmetric(
+            horizontal: boardSize * 0.05,
+            vertical: boardSize * 0.015,
+          ),
+          decoration: BoxDecoration(
+            gradient: myTurnToRoll ? activeGradient : inactiveGradient,
+            borderRadius: borderRadius,
+            // ⚡ استفاده از سایه تخت بدون بلور (Solid shadow) برای ایجاد عمق ۳ بعدی کاملاً بهینه
+            boxShadow: myTurnToRoll
+                ? [
+              const BoxShadow(
+                color: Color(0x661B5E20),
+                blurRadius: 0,
+                offset: Offset(0, 3),
+              )
+            ]
+                : null,
+            border: Border.all(
+              color: myTurnToRoll ? const Color(0xFF81C784) : Colors.white10,
+              width: 1.2,
             ),
           ),
-          onPressed: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: boardSize * 0.03,
-              vertical: boardSize * 0.01,
+          child: Text(
+            'ROLL',
+            style: TextStyle(
+              color: myTurnToRoll ? Colors.white : Colors.white54,
+              fontSize: boardSize * 0.025,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
             ),
-            child: Text('roll', style: TextStyle(fontSize: boardSize * 0.03)),
           ),
         ),
       ),

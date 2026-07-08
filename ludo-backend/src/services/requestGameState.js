@@ -1,4 +1,5 @@
 const { hasExistGame } = require("./authService");
+const { getGameState } = require("../database/games");
 
 async function handleRequestGameState(socket, data) {
   if (!data) {

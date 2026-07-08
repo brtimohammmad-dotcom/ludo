@@ -63,7 +63,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // ⚡ این تصویر اکنون فوراً و بدون حتی ۱ میلی‌ثانیه تاخیر یا سفید شدن نمایش داده می‌شود
                   Image.asset(
                     "assets/webp/happy-dice.webp",
                     width: boardSize * 0.4,

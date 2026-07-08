@@ -70,7 +70,7 @@ class _GameSelectionButtonsState extends ConsumerState<GameSelectionButtons> {
             boardSize:widget.boardSize
 
         ),
-        SizedBox(height: widget.boardSize*0.025),
+        SizedBox(height: widget.boardSize*0.01),
 
         // جادوی اصلی اینجاست: فقط این بخش کوچک به تغییرات گوش می‌دهد و ری‌بیلد می‌شود
         ValueListenableBuilder<bool>(
