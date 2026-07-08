@@ -2,7 +2,7 @@ const { hasExistGame } = require("./authService");
 const { handleJoinGameFriendly } = require("./joinGameService");
 const { getGameState } = require("../database/games");
 
-async function handleRequestGameState(socket, data) {
+async function handleRequestGameState(socket, data,io) {
   if (!data) {
     console.error("No data received for request_game_state");
     return;

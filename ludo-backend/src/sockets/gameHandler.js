@@ -23,7 +23,7 @@ module.exports = (io) => {
     });
 
     socket.on("request_game_state", async (data) => {
-      await handleRequestGameState(socket,data)
+      await handleRequestGameState(socket,data,io)
     });
 
     socket.on("join_game", async ({ numberOfPlayers }) => {
