@@ -26,9 +26,6 @@ async function handleAuth(initData, socket) {
     console.log(
       `User authorized successfully: ${user.first_name} (${user.id})`,
     );
-    socket.emit("initial_player", {
-      error: "Player initialization failed",
-    });
     let player = await getOrCreatePlayer(user.id, user.first_name);
     if (!player) {
       console.log("Player not found or database lag!");

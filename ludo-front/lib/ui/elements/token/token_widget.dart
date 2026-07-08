@@ -32,20 +32,28 @@ class TokenWidget extends ConsumerWidget {
     final double currentMargin = tokenIsActive ? size / 9 : size / 5;
     final double innerSize = size - (currentMargin * 2);
 
-    // ⚡ بهینه‌سازی کلیدی: بدنه ثابت مهره را یک‌بار اینجا می‌سازیم تا در انیمیشن ریبلد نشود
+    // 🟢 لایه اصلی و ثابت مهره (بدون سایه و با رنگ‌های کاملاً Solid)
     final Widget staticTokenBody = Container(
       margin: EdgeInsets.all(currentMargin),
       decoration: BoxDecoration(
-        gradient: tokenGradient(token), // فقط یک‌بار اجرا می‌شود
+          boxShadow: [
+             BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 0,
+              spreadRadius: 0,
+              offset: Offset(-size*0.04, size*0.07),
+            ),
+          ],
+        gradient: tokenGradient(token),
         shape: BoxShape.circle,
         border: Border.all(
-          color: const Color(0xBFFFFFFF), // معادل Colors.white.withValues(alpha: 0.75) ثابت
-          width: size / 15,
+          color: const Color(0xFFFFFFFF), // سفید ۱۰۰٪ بدون شفافیت
+          width: size / 14,
         ),
       ),
       child: Stack(
         children: [
-          // ۱. رفلکس نوری هلالی
+          // رفلکس نوری هلالی قطعی (بدون محو شدگی شدید)
           Positioned(
             top: innerSize * 0.05,
             left: innerSize * 0.08,
@@ -54,15 +62,11 @@ class TokenWidget extends ConsumerWidget {
               height: innerSize * 0.2,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0x73FFFFFF), Color(0x00FFFFFF)],
-                ),
+                color: Color(0x40FFFFFF), // سفید ثابت با شفافیت کم برای رفلکس
               ),
             ),
           ),
-          // ۲. حلقه نوری داخلی
+          // حلقه نوری داخلی تخت
           Center(
             child: Container(
               width: innerSize * 0.45,
@@ -70,22 +74,19 @@ class TokenWidget extends ConsumerWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0x26FFFFFF),
+                  color: const Color(0x33FFFFFF),
                   width: 1.5,
                 ),
               ),
             ),
           ),
-          // ۳. آیکون مرکز
+          // آیکون راهنما در مرکز
           Center(
             child: highlight
                 ? Icon(
               Icons.touch_app_rounded,
               color: Colors.white,
               size: size * 0.45,
-              shadows: const [
-                Shadow(color: Colors.black38, offset: Offset(0, 1), blurRadius: 2)
-              ],
             )
                 : const SizedBox(),
           ),
@@ -101,45 +102,33 @@ class TokenWidget extends ConsumerWidget {
         child: (highlight && centralController != null)
             ? AnimatedBuilder(
           animation: centralController,
-          child: staticTokenBody, // 🟢 پاس دادن به عنوان child ثابت
+          child: staticTokenBody,
           builder: (context, child) {
             final double cycle = (centralController.value * 10) / 1.1;
             final double progress = cycle - cycle.floor();
             final double pingPongValue = (progress - 0.5).abs() * 2;
 
-            final double currentGlow = 0.3 + (pingPongValue * 0.7);
-            final double currentBounce = -6 * pingPongValue;
+            // ⚡ به جای سایه، یک افکت رینگ نئون تخت دور مهره ایجاد می‌کنیم که بزرگ و کوچک می‌شود
+            final double ringScale = 1.0 + (pingPongValue * 0.12);
 
-            return Transform.translate(
-              offset: Offset(0, currentBounce),
+            return Transform.scale(
+              scale: ringScale,
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.white.withValues(alpha: currentGlow),
-                      blurRadius: 10 + currentGlow * 10,
-                      spreadRadius: 1 + currentGlow * 2,
+                  border: Border.fromBorderSide(
+                    BorderSide(
+                      color: Colors.white, // رنگ زرد نئون قطعی (Solid) برای جلب توجه نوبت
+                      width: 2.5,
                     ),
-                  ],
+                  ),
                 ),
-                child: child, // لایه‌های سنگین داخلی بدون ریبلد شدن اینجا قرار می‌گیرند
+                child: child,
               ),
             );
           },
         )
-            : DecoratedBox(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              if (tokenIsActive)
-                const BoxShadow(color: Colors.white, blurRadius: 6, spreadRadius: 1)
-              else
-                const BoxShadow(color: Colors.black38, blurRadius: 2, offset: Offset(-2, 3)),
-            ],
-          ),
-          child: staticTokenBody,
-        ),
+            : staticTokenBody, // اگر هایلایت نبود، مستقیماً و بدون هیچ کانتینر اضافه‌ای رندر می‌شود
       ),
     );
   }
