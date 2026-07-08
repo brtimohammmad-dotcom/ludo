@@ -432,6 +432,7 @@ class CompiledApp {
       _1483: x0 => x0.play(),
       _1484: (x0,x1,x2) => ({src: x0,loop: x1,volume: x2}),
       _1485: x0 => x0.stop(),
+      _1486: (x0,x1) => x0.volume(x1),
       _1497: Date.now,
       _1499: s => new Date(s * 1000).getTimezoneOffset() * 60,
       _1500: s => {
