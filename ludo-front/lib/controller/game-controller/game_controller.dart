@@ -32,6 +32,7 @@ class GameController extends _$GameController {
   VoidCallback? onFastPingGets;
   VoidCallback? onGameReady;
   VoidCallback? onGameStarted;
+  VoidCallback? onInsufficientCoin;
 
   @override
   GameState? build() {

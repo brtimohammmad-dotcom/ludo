@@ -116,65 +116,69 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       if (playerData.status == PlayerStatus.online) {
         final currentTurnField = isCurrentTurn ? playerColor : null;
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // نام کاربری
-            Text(
-              playerData.username,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                inherit: true,
-                color: playerUserNameBoxColor(
-                  playerIndex: playerIndex,
-                  numberOfPlayers: totalPlayers,
-                  currentTurn: currentTurnField,
-                ),
-                fontSize: barHeight * 0.26, // سایز را کمی تعدیل کردیم
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  isMyTurn
-                      ? const BoxShadow(
-                    color: Colors.black54,
-                    offset: Offset(-0.5, 0.5),
-                    blurRadius: 0.2,
-                  )
-                      : const BoxShadow(color: Colors.transparent),
-                ],
-              ),
-            ),
-            const SizedBox(width: 6),
-
-            // 🪙 مینی‌باکس نمایش سکه به صورت فوق‌العاده شیک
-            Container(
-              padding:  EdgeInsets.symmetric(horizontal: boardSize*0.01, vertical: boardSize*0.005),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                   Icon(
-                    Icons.monetization_on, // آیکون سکه طلایی
-                    color: Colors.amber,
-                    size: boardSize*0.02,
-                  ),
-                   SizedBox(width: boardSize * 0.005),
-                  Text(
-                    playerCoin.toString(),
-                    style:  TextStyle(
-                      color: Colors.amberAccent,
-                      fontSize: boardSize *0.02,
-                      fontWeight: FontWeight.w600,
+        return Padding(
+          padding:  EdgeInsets.all(boardSize*0.01),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  playerData.username,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    inherit: true,
+                    color: playerUserNameBoxColor(
+                      playerIndex: playerIndex,
+                      numberOfPlayers: totalPlayers,
+                      currentTurn: currentTurnField,
                     ),
+                    fontSize: barHeight * 0.26,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      isMyTurn
+                          ? const BoxShadow(
+                        color: Colors.black54,
+                        offset: Offset(-0.5, 0.5),
+                        blurRadius: 0.2,
+                      )
+                          : const BoxShadow(color: Colors.transparent),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+               SizedBox(width: boardSize*0.005),
+
+              // 🪙 مینی‌باکس نمایش سکه (همیشه ثابت و نمایان می‌مونه)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: boardSize * 0.01, vertical: boardSize * 0.005),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.monetization_on,
+                      color: Colors.amber,
+                      size: boardSize * 0.02,
+                    ),
+                    SizedBox(width: boardSize * 0.005),
+                    Text(
+                      playerCoin.toString(),
+                      style: TextStyle(
+                        color: Colors.amberAccent,
+                        fontSize: boardSize * 0.02,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       } else {
         return Text(

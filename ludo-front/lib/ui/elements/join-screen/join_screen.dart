@@ -34,7 +34,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     });
   }
 
-  // 🧹 متد didChangeDependencies کاملاً حذف شد چون نیازی به کش مجدد نیست
 
   @override
   Widget build(BuildContext context) {

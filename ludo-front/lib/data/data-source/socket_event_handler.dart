@@ -15,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "lana", "id": 101};
+        initData = {"first_name": "امیرمحمد براتی", "id": 1};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -113,7 +113,13 @@ class SocketEventHandler {
       dataSource.onGameEventReceived?.call('game_finished', cleanData);
     });
 
-    socket.on("player_exit", (_) => dataSource.onGameEventReceived?.call('player_exit',{}));
+    socket.on(
+      "player_exit",
+      (_) => dataSource.onGameEventReceived?.call('player_exit', {}),
+    );
+    socket.on("insufficient_coin", (_) {
+      dataSource.onGameEventReceived?.call('insufficient_coin', {});
+    });
   }
 
   void _requestGameState(GameMode mode, String? gameId) {

@@ -34,6 +34,10 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
     // بخش بازی‌های عمومی (مقادیر مثبت ۲ و ۴)
     // ----------------------------------------------------
     if (numberOfPlayers === 2 || numberOfPlayers === 4) {
+      if (player.coin < 100) {
+        socket.emit("insufficient_coin");
+        return;
+      }
       let game = initialState
         .getAllGames()
         .find(
@@ -151,7 +155,7 @@ async function callFront(socket, io) {
       }
       const sockets = await io.in(gameId).fetchSockets();
       sockets.forEach((socket) => {
-        socket.data.coin=socket.data.coin-coinCost;
+        socket.data.coin = socket.data.coin - coinCost;
       });
     }
 

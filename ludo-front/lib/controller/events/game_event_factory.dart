@@ -7,6 +7,7 @@ import 'package:ludo/controller/events/game_recovered_event.dart';
 import 'package:ludo/controller/events/game_started_event.dart';
 import 'package:ludo/controller/events/game_state_update_event.dart';
 import 'package:ludo/controller/events/in_another_game_event.dart';
+import 'package:ludo/controller/events/insufficient_coin_event.dart';
 import 'package:ludo/controller/events/move_token_event.dart';
 import 'package:ludo/controller/events/not_in_game_event.dart';
 import 'package:ludo/controller/events/opponent_exited_event.dart';
@@ -51,6 +52,8 @@ class GameEventFactory {
         return PlayerExitEvent();
       case 'reconnection_failed':
         return ReconnectionFailedEvent();
+      case 'insufficient_coin':
+        return InsufficientCoinEvent();
       default:
         return null;
     }

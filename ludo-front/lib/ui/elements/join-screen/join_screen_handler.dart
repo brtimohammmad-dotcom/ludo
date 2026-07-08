@@ -3,6 +3,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/services/audio_service.dart';
+import 'package:ludo/ui/utils/alerts/insufficient_coins_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 
@@ -31,7 +32,6 @@ class JoinScreenHandler {
       );
     };
 
-
     gameController.onReconnectionFailed = () {
       if (!isMounted()) return;
       if (Navigator.canPop(context)) Navigator.pop(context);
@@ -49,10 +49,37 @@ class JoinScreenHandler {
         ),
       );
     };
+    gameController.onInsufficientCoin = () {
+      final int playerCoin =
+          gameController.currentGameState?.livePlayer?.coin ?? 0;
+      if (!isMounted()) return;
+      if (Navigator.canPop(context)) Navigator.pop(context);
+      showAnimatedDialog(
+        context: context,
+        child: InsufficientCoinsAlert(
+          requiredCoins: 100,
+          currentCoins: playerCoin,
+        ),
+      );
+    };
   }
 
   void handleGameSearch(int numberOfPlayers, double boardSize) {
     audioService.playSFX('assets/audio/sound-effect/friend_button_sound.wav');
+    final int playerCoin =
+        gameController.currentGameState?.livePlayer?.coin ?? 0;
+    final int coinCost = numberOfPlayers > 0 ? 100 : 0;
+    if (playerCoin < coinCost) {
+      if (!isMounted()) return;
+      showAnimatedDialog(
+        context: context,
+        child: InsufficientCoinsAlert(
+          requiredCoins: coinCost,
+          currentCoins: playerCoin,
+        ),
+      );
+      return;
+    }
     gameController.onFastPingGets = () {
       if (!isMounted()) return;
       gameController.startGame(numberOfPlayers: numberOfPlayers);

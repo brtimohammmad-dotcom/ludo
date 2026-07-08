@@ -124,7 +124,6 @@ class _HomeState extends ConsumerState<Home> {
       gameControllerProvider.select((state) => state?.gameStage),
     );
 
-    // 🟢 اگر خطا رخ داده باشد، یک داربست (Scaffold) معتبر برمی‌گردانیم تا آلرت بتواند روی آن نمایش داده شود
     if (_hasConnectionError) {
       return const Scaffold(
         backgroundColor: Color(0x0007070b), // هماهنگ با بک‌گراند وب
