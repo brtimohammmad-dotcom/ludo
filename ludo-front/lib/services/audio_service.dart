@@ -1,47 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'audio_service.g.dart';
 
 class AudioService {
-  final AudioPlayer _bgmPlayer = AudioPlayer();
   bool _isMuted = false;
   String? _lastAssetPath;
 
-  final Map<String, List<AudioPlayer>> _sfxCache = {};
-  final int _maxConcurrentPlayers = 3;
-
   AudioService() {
-    _bgmPlayer.setLoopMode(LoopMode.all);
+    // ⚡ تنظیم پیش‌فرض مسیر فایل‌های صوتی برای فلیم
+    // اگر فایل‌هایت مستقیماً داخل آستس هستند این را خالی '' بگذار
+    FlameAudio.audioCache.prefix = '';
+
+    // مقداردهی اولیه و آماده‌سازی سیستم موزیک پس‌زمینه فلیم
+    FlameAudio.bgm.initialize();
   }
 
-  Future<void> initAudioCache(List<String> sfxAssets) async {
-    List<Future<void>> cacheTasks = [];
+  /// بارگذاری موازی و کش کردن تمام صداها (هم افکت‌ها و هم موزیک پس‌زمینه) در حافظه RAM
+  Future<void> initAudioCache(List<String> sfxAssets, {String? bgmAsset}) async {
+    try {
+      // تمیز کردن لیست آدرس‌ها بر اساس ساختار وب/لوکال‌هاست شما
+      List<String> allAssetsToCache = sfxAssets.map((path) => _getCorrectPath(path)).toList();
 
-    for (String assetPath in sfxAssets) {
-      String correctPath = _getCorrectPath(assetPath);
-      _sfxCache[assetPath] = [];
-
-      for (int i = 0; i < _maxConcurrentPlayers; i++) {
-        final player = AudioPlayer();
-        _sfxCache[assetPath]!.add(player);
-
-        // وظیفه لود شدن را بدون await درون لیست می‌ریزیم تا موازی اجرا شوند
-        cacheTasks.add(
-          player
-              .setAsset(correctPath)
-              .then((_) => player.setVolume(1.0))
-              .catchError((e) {
-                debugPrint("🎵 Error caching SFX ($assetPath): $e");
-              }),
-        );
+      if (bgmAsset != null) {
+        allAssetsToCache.add(_getCorrectPath(bgmAsset));
       }
-    }
 
-    // حالا منتظر می‌مونیم تا همه صداها با هم در پس‌زمینه لود بشن
-    await Future.wait(cacheTasks);
-    debugPrint("⚡ Audio cache completed in parallel!");
+      // 🟢 لود و دیکود کردن تمام فایل‌های صوتی به صورت یکجا در RAM مرورگر
+      await FlameAudio.audioCache.loadAll(allAssetsToCache);
+      debugPrint("⚡ FlameAudio: All Audio resources preloaded into Web Audio API successfully!");
+    } catch (e) {
+      debugPrint("🎵 FlameAudio Cache Error: $e");
+    }
   }
 
   String _getCorrectPath(String assetPath) {
@@ -61,68 +52,58 @@ class AudioService {
     return correctPath;
   }
 
+  /// 🟢 پخش موزیک پس‌زمینه به صورت لوپ (Loop) با تاخیر صفر و حجم صدای ملایم
   Future<void> playBackgroundMusic(String assetPath) async {
     String correctPath = _getCorrectPath(assetPath);
-    if (_lastAssetPath == correctPath && _bgmPlayer.playing) return;
+
+    // اگر همین موزیک در حال پخش است، کاری نکن
+    if (_lastAssetPath == correctPath && FlameAudio.bgm.isPlaying) return;
 
     try {
       _lastAssetPath = correctPath;
-      await _bgmPlayer.setAsset(correctPath);
-      await _bgmPlayer.setVolume(_isMuted ? 0.0 : 0.2);
-      _bgmPlayer.play();
+
+      // متد play در ماژول bgm صدا را به صورت خودکار لوپ (LoopMode.all) می‌کند
+      await FlameAudio.bgm.play(
+        correctPath,
+        volume: _isMuted ? 0.0 : 0.2,
+      );
     } catch (e) {
-      debugPrint("🎵 Audio Web Notice: $e");
+      debugPrint("🎵 FlameAudio BGM Error: $e");
     }
   }
 
+  /// متوقف کردن موزیک پس‌زمینه
   Future<void> stopBackgroundMusic() async {
-    if (_bgmPlayer.playing) {
-      await _bgmPlayer.stop();
+    if (FlameAudio.bgm.isPlaying) {
+      await FlameAudio.bgm.stop();
     }
   }
 
-  void playSFX(String assetPath) async {
-    // ⚡ اضافه کردن async برای کار با متدهای کنترل پلیر
+  /// ⚡ شلیک آنی و همزمان افکت صوتی (SFX) بدون تاخیر
+  void playSFX(String assetPath) {
     if (_isMuted) return;
 
-    final players = _sfxCache[assetPath];
-    if (players == null || players.isEmpty) {
-      debugPrint("⚠️ Sound $assetPath was not preloaded!");
-      return;
-    }
-
-    AudioPlayer? availablePlayer;
-    for (var player in players) {
-      if (!player.playing) {
-        availablePlayer = player;
-        break;
-      }
-    }
-
-    // اگر همه پلیرها مشغول بودند، قدیمی‌ترین پلیر (اولین پلیر لیست) را برمی‌داریم
-    if (availablePlayer == null) {
-      availablePlayer = players.first;
-      // 🛑 کلید حل مشکل: چون پلیر در حال پخش است، اول آن را استاپ می‌کنیم تا ریست شود
-      await availablePlayer.stop();
-    }
-
     try {
-      await availablePlayer.seek(Duration.zero); // بازگشت به ابتدای فایل صوتی
-      availablePlayer.play(); // پخش مجدد و بدون مشکل
+      String correctPath = _getCorrectPath(assetPath);
+      // فلیم خودش خروجی چندکاناله ایجاد می‌کند و صداها بدون قطع شدن روی هم لایه می‌خورند
+      FlameAudio.play(correctPath);
     } catch (e) {
-      debugPrint("🎵 SFX Playback Error: $e");
+      debugPrint("🎵 FlameAudio SFX Play Error: $e");
     }
   }
 
+  /// مدیریت قطع و وصل صدا (Mute / Unmute) کل بازی
   void toggleMute() {
     _isMuted = !_isMuted;
-    _bgmPlayer.setVolume(_isMuted ? 0.0 : 0.2);
 
-    _sfxCache.forEach((key, players) {
-      for (var player in players) {
-        player.setVolume(_isMuted ? 0.0 : 1.0);
-      }
-    });
+    if (_isMuted) {
+      // میوت کردن موزیک پس‌زمینه
+      FlameAudio.bgm.audioPlayer.setVolume(0.0);
+      // نکته: افکت‌های صوتی در متد playSFX با چک کردن پرچم _isMuted جلوی پخششان گرفته می‌شود
+    } else {
+      // آن‌میوت کردن و بازگرداندن صدا به ولوم قبلی
+      FlameAudio.bgm.audioPlayer.setVolume(0.2);
+    }
   }
 }
 
