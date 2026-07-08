@@ -1,109 +1,133 @@
+import 'dart:js_interop';
 import 'package:flutter/material.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'audio_service.g.dart';
 
+// -----------------------------------------------------------------------------
+// لایه ارتباط مستقیم و بدون واسطه با جاوااسکریپت (Howler.js) برای سرعت فضایی
+// -----------------------------------------------------------------------------
+@JS('Howl')
+extension type Howl._(JSObject _) implements JSObject {
+  external Howl(HowlOptions options);
+  external void play();
+  external void stop();
+  external void volume(double vol);
+}
+
+@JS()
+@anonymous
+extension type HowlOptions._(JSObject _) implements JSObject {
+  external factory HowlOptions({
+    JSArray<JSString> src,
+    bool loop,
+    double volume,
+    bool preload,
+  });
+}
+// -----------------------------------------------------------------------------
+
 class AudioService {
+  final Map<String, Howl> _cachedHowls = {};
+  Howl? _bgmHowl;
+
   bool _isMuted = false;
-  String? _lastAssetPath;
+  String? _lastBgmPath;
 
-  AudioService() {
-    // ⚡ تنظیم پیش‌فرض مسیر فایل‌های صوتی برای فلیم
-    // اگر فایل‌هایت مستقیماً داخل آستس هستند این را خالی '' بگذار
-    FlameAudio.audioCache.prefix = '';
+  AudioService();
 
-    // مقداردهی اولیه و آماده‌سازی سیستم موزیک پس‌زمینه فلیم
-    FlameAudio.bgm.initialize();
-  }
-
-  /// بارگذاری موازی و کش کردن تمام صداها (هم افکت‌ها و هم موزیک پس‌زمینه) در حافظه RAM
+  /// ⚡ لود صوتی مستقیم در رم مرورگر (Web Audio API Buffer) - کاملاً همگام با کدهای قبلی شما
   Future<void> initAudioCache(List<String> sfxAssets, {String? bgmAsset}) async {
     try {
-      // تمیز کردن لیست آدرس‌ها بر اساس ساختار وب/لوکال‌هاست شما
-      List<String> allAssetsToCache = sfxAssets.map((path) => _getCorrectPath(path)).toList();
+      // کش کردن صداهای تک‌ضرب (SFX) با اولویت پرفورمنس بالا
+      for (final asset in sfxAssets) {
+        if (_cachedHowls.containsKey(asset)) continue;
 
-      if (bgmAsset != null) {
-        allAssetsToCache.add(_getCorrectPath(bgmAsset));
+        final howl = Howl(HowlOptions(
+          src: [asset.toJS].toJS,
+          loop: false,
+          volume: 1.0,
+          preload: true,
+        ));
+        _cachedHowls[asset] = howl;
       }
 
-      // 🟢 لود و دیکود کردن تمام فایل‌های صوتی به صورت یکجا در RAM مرورگر
-      await FlameAudio.audioCache.loadAll(allAssetsToCache);
-      debugPrint("⚡ FlameAudio: All Audio resources preloaded into Web Audio API successfully!");
+      // آماده‌سازی موزیک پس‌زمینه
+      if (bgmAsset != null && _bgmHowl == null) {
+        _bgmHowl = Howl(HowlOptions(
+          src: [bgmAsset.toJS].toJS,
+          loop: true,
+          volume: 0.2,
+          preload: true,
+        ));
+        _cachedHowls[bgmAsset] = _bgmHowl!;
+      }
+
+      debugPrint("🚀 Blazing Fast Web Audio (Howler) initialized successfully for Ludo!");
     } catch (e) {
-      debugPrint("🎵 FlameAudio Cache Error: $e");
+      debugPrint("❌ Web Audio Init Error: $e");
     }
   }
 
-  String _getCorrectPath(String assetPath) {
-    final bool isLocalhost =
-        Uri.base.host.contains('localhost') || Uri.base.host.isEmpty;
-    String correctPath = assetPath;
-
-    if (isLocalhost) {
-      if (correctPath.startsWith('assets/')) {
-        correctPath = correctPath.replaceFirst('assets/', '');
-      }
-    } else {
-      if (!correctPath.startsWith('assets/')) {
-        correctPath = 'assets/$correctPath';
-      }
-    }
-    return correctPath;
-  }
-
-  /// 🟢 پخش موزیک پس‌زمینه به صورت لوپ (Loop) با تاخیر صفر و حجم صدای ملایم
-  Future<void> playBackgroundMusic(String assetPath) async {
-    String correctPath = _getCorrectPath(assetPath);
-
-    // اگر همین موزیک در حال پخش است، کاری نکن
-    if (_lastAssetPath == correctPath && FlameAudio.bgm.isPlaying) return;
-
-    try {
-      _lastAssetPath = correctPath;
-
-      // متد play در ماژول bgm صدا را به صورت خودکار لوپ (LoopMode.all) می‌کند
-      await FlameAudio.bgm.play(
-        correctPath,
-        volume: _isMuted ? 0.0 : 0.2,
-      );
-    } catch (e) {
-      debugPrint("🎵 FlameAudio BGM Error: $e");
-    }
-  }
-
-  /// متوقف کردن موزیک پس‌زمینه
-  Future<void> stopBackgroundMusic() async {
-    if (FlameAudio.bgm.isPlaying) {
-      await FlameAudio.bgm.stop();
-    }
-  }
-
-  /// ⚡ شلیک آنی و همزمان افکت صوتی (SFX) بدون تاخیر
+  /// 🔥 شلیک آنی صدا بدون کوچک‌ترین تاخیر (مشابه سیستم صوتی Flame)
   void playSFX(String assetPath) {
     if (_isMuted) return;
 
-    try {
-      String correctPath = _getCorrectPath(assetPath);
-      // فلیم خودش خروجی چندکاناله ایجاد می‌کند و صداها بدون قطع شدن روی هم لایه می‌خورند
-      FlameAudio.play(correctPath);
-    } catch (e) {
-      debugPrint("🎵 FlameAudio SFX Play Error: $e");
+    final howl = _cachedHowls[assetPath];
+    if (howl != null) {
+      // در Howler صداها می‌توانند همزمان و روی هم بدون هیچ لگی پخش شوند
+      howl.play();
+    } else {
+      // لود آنی در صورت فراموشی کش اولیه
+      final newHowl = Howl(HowlOptions(
+        src: [assetPath.toJS].toJS,
+        loop: false,
+        volume: 1.0,
+      ));
+      _cachedHowls[assetPath] = newHowl;
+      newHowl.play();
     }
   }
 
-  /// مدیریت قطع و وصل صدا (Mute / Unmute) کل بازی
+  /// پخش و لوپ موزیک پس‌زمینه بدون ایجاد گلوگاه پردازشی
+  Future<void> playBackgroundMusic(String assetPath) async {
+    if (_lastBgmPath == assetPath) return;
+    _lastBgmPath = assetPath;
+
+    try {
+      _bgmHowl?.stop();
+
+      _bgmHowl = _cachedHowls[assetPath] ?? Howl(HowlOptions(
+        src: [assetPath.toJS].toJS,
+        loop: true,
+        volume: _isMuted ? 0.0 : 0.2,
+      ));
+
+      _cachedHowls[assetPath] = _bgmHowl!;
+      _bgmHowl!.play();
+    } catch (e) {
+      debugPrint("🎵 Web Audio BGM Error: $e");
+    }
+  }
+
+  /// متوقف کردن موزیک بک‌گراند
+  Future<void> stopBackgroundMusic() async {
+    _bgmHowl?.stop();
+    _lastBgmPath = null;
+  }
+
+  /// میوت و آن‌میوت آنی و سراسری در سطح مرورگر
   void toggleMute() {
     _isMuted = !_isMuted;
 
-    if (_isMuted) {
-      // میوت کردن موزیک پس‌زمینه
-      FlameAudio.bgm.audioPlayer.setVolume(0.0);
-      // نکته: افکت‌های صوتی در متد playSFX با چک کردن پرچم _isMuted جلوی پخششان گرفته می‌شود
-    } else {
-      // آن‌میوت کردن و بازگرداندن صدا به ولوم قبلی
-      FlameAudio.bgm.audioPlayer.setVolume(0.2);
-    }
+    // تغییر ولوم تمام صداها در حافظه بدون پردازش سنگین فلاتر
+    _bgmHowl?.volume(_isMuted ? 0.0 : 0.2);
+
+    _cachedHowls.forEach((_, howl) {
+      if (howl != _bgmHowl) {
+        howl.volume(_isMuted ? 0.0 : 1.0);
+      }
+    });
   }
 }
 
