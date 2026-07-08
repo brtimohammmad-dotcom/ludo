@@ -2,7 +2,6 @@ const { handleAuth } = require("../services/authService");
 const { handleRequestGameState } = require("../services/requestGameState");
 const {
   handleJoinGame,
-  handleJoinGameFriendly,
 } = require("../services/joinGameService");
 const {
   handleRollDice,
