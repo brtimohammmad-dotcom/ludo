@@ -15,12 +15,14 @@ class BoardBackground extends StatelessWidget {
           BoxShadow(color: Colors.black.withAlpha(100), blurRadius: 20,),
         ],
       ),
-      child: Table(
-        children: List.generate(size, (row) {
-          return TableRow(
-            children: List.generate(size, (col) => _cell(row, col)),
-          );
-        }),
+      child: RepaintBoundary(
+        child: Table(
+          children: List.generate(size, (row) {
+            return TableRow(
+              children: List.generate(size, (col) => _cell(row, col)),
+            );
+          }),
+        ),
       ),
     );
   }
