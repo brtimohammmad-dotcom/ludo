@@ -791,14 +791,14 @@ class CompiledApp {
       _4179: x0 => x0.data,
       _4568: x0 => x0.binaryType,
       _4569: (x0,x1) => { x0.binaryType = x1 },
-      _13219: () => globalThis.console,
-      _13258: (x0,x1) => x0.error(x1),
-      _13271: () => globalThis.Telegram,
-      _13272: x0 => x0.WebApp,
-      _13273: x0 => x0.initData,
-      _13275: x0 => x0.platform,
-      _13303: x0 => x0.initDataUnsafe,
-      _13443: x0 => x0.start_param,
+      _13217: () => globalThis.Telegram,
+      _13218: x0 => x0.WebApp,
+      _13219: x0 => x0.initData,
+      _13221: x0 => x0.platform,
+      _13249: x0 => x0.initDataUnsafe,
+      _13389: x0 => x0.start_param,
+      _13406: () => globalThis.console,
+      _13445: (x0,x1) => x0.error(x1),
 
     };
 
