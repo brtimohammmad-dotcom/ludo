@@ -16,18 +16,23 @@ class TokenPositionWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // استفاده از select بسیار دقیق؛ این ویجت فقط و فقط در صورتی ری‌بیلد می‌شود
+    // که مختصات یا وضعیت همین یک مهره خاص تغییر کرده باشد.
     final token = ref.watch(
       gameControllerProvider.select((state) {
         if (state?.serverState?.tokens == null) return null;
-        // پیدا کردن مهره خاص از لیست سرور
-        return state!.serverState!.tokens.firstWhere((t) => t.id == tokenId);
+        try {
+          return state!.serverState!.tokens.firstWhere((t) => t.id == tokenId);
+        } catch (_) {
+          return null; // جلوگیری از کرش در صورتی که دیتای توکن هنوز سینک نشده باشد
+        }
       }),
     );
 
-    // اگر بازی هنوز کامل لود نشده یا مهره یافت نشد، چیزی رندر نمی‌کنیم
+    // اگر دیتای بازی هنوز لود نشده، ویجت خالی رندر می‌شود اما جایگاهش در استک حفظ می‌شود
     if (token == null) return const SizedBox.shrink();
 
-    // محاسبه دقیق مختصات مهره بر اساس دیتای سلکت شده و زنده
+    // محاسبه دقیق مختصات مهره بر اساس دیتای زنده
     Offset cell;
     if (token.pathIndex == -1) {
       cell = homePaths[token.playerColor.index]![((int.parse(token.id)) % 4)];
@@ -36,7 +41,7 @@ class TokenPositionWrapper extends ConsumerWidget {
     }
 
     return TokenAnimatedWidget(
-      key: ValueKey(token.id), // حفظ کلید اصلی برای جلوگیری از قاطی شدن ویجت‌ها در استک
+      key: ValueKey(token.id), // حفظ هویت منحصربه‌فرد ویجت در گرافیک فلاتر
       token: token,
       cellSize: cellSize,
       left: token.isInHome
@@ -47,26 +52,4 @@ class TokenPositionWrapper extends ConsumerWidget {
           : cell.dx * cellSize,
     );
   }
-}
-
-/// 🟢 تابع اصلی تولید لیست مهره‌ها برای استفاده در استک بورد اصلی
-List<Widget> createAnimatedTokens({
-  required double cellSize,
-  required GameController gameController,
-}) {
-  // اگر در ابتدای لود برنامه استیت خالی است، لیست تهی برمی‌گردانیم
-  if (gameController.currentGameState?.serverState?.tokens == null) {
-    return const [];
-  }
-
-  // نقشه کردن لیست توکن‌های اولیه به ویجت‌های واسطه
-  return [
-    ...gameController.currentGameState!.serverState!.tokens.map((token) {
-      return TokenPositionWrapper(
-        key: ValueKey("wrap_${token.id}"),
-        tokenId: token.id,
-        cellSize: cellSize,
-      );
-    }),
-  ];
 }
