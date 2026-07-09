@@ -9,6 +9,7 @@ class DisconnectEvent implements GameEvent {
   void execute(GameController controller) {
     if (_isDisconnectAlertShow) return;
     if (TelegramWebApp.instance.isSupported) {
+      controller.clearAllLoadings();
       _isDisconnectAlertShow = true;
       TelegramWebApp.instance.showAlert(
         'Connection lost. Reconnecting...',

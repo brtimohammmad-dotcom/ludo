@@ -52,4 +52,26 @@ async function reduceMultiplePlayersCoin(telegramIds, value) {
 
   return data;
 }
-module.exports = { getOrCreatePlayer, updateCoin, reduceMultiplePlayersCoin };
+async function getDailyRewardStreak(
+  nextStreak,
+  now,
+  newCoinBalance,
+  telegramId,
+) {
+  const { data, error } = await supabase
+    .from("players")
+    .update({
+      last_claim_date: now.toISOString(),
+      reward_streak: nextStreak, // روز زنجیره برای فردا آماده می‌شود
+      coin: newCoinBalance,
+    })
+    .eq("telegram_id", telegramId);
+
+  if (error) throw error;
+}
+module.exports = {
+  getOrCreatePlayer,
+  updateCoin,
+  reduceMultiplePlayersCoin,
+  getDailyRewardStreak,
+};

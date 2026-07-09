@@ -13,9 +13,7 @@ class NotInGameEvent implements GameEvent {
       controller.currentGameState?.copyWith(gameStage: GameStage.joinStage),
     );
     onGameConnected();
-    if (controller.currentGameState?.livePlayer?.canClaimDailyReward == true) {
-      controller.onHasDailyReward?.call();
-    }
+
     controller.playMenuMusic();
   }
 }

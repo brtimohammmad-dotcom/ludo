@@ -1,8 +1,7 @@
 const { handleAuth } = require("../services/authService");
 const { handleRequestGameState } = require("../services/requestGameState");
-const {
-  handleJoinGame,
-} = require("../services/joinGameService");
+const { handleJoinGame } = require("../services/joinGameService");
+const { handleClaimDailyReward } = require("../services/claim_daily_reward");
 const {
   handleRollDice,
   handleMoveToken,
@@ -18,12 +17,15 @@ module.exports = (io) => {
       console.log("...authorize...");
       console.log("Received initData:", initData);
 
-        await handleAuth(initData,socket);
-
+      await handleAuth(initData, socket);
     });
 
     socket.on("request_game_state", async (data) => {
-      await handleRequestGameState(socket,data,io)
+      await handleRequestGameState(socket, data, io);
+    });
+
+    socket.on("claim_daily_reward", async(data) => {
+    await  handleClaimDailyReward(socket);
     });
 
     socket.on("join_game", async ({ numberOfPlayers }) => {

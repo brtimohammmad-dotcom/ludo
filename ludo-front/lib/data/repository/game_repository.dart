@@ -29,4 +29,8 @@ class GameRepository {
   void getFastPing(){
     dataSource.getFastPing();
   }
+
+  void claimDailyReward() {
+    dataSource.claimDailyReward();
+  }
 }

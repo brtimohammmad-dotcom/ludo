@@ -63,33 +63,30 @@ class JoinScreenHandler {
         ),
       );
     };
-    gameController.onHasDailyReward = () {
-      if (!isMounted()) return;
+    if (gameController.currentGameState?.livePlayer?.canClaimDailyReward == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!isMounted()) return;
 
-      final livePlayer = gameController.currentGameState?.livePlayer;
-      if (livePlayer == null) return;
+        final livePlayer = gameController.currentGameState?.livePlayer;
+        if (livePlayer == null) return;
 
-      final screenWidth = MediaQuery.of(context).size.width;
-      final screenHeight = MediaQuery.of(context).size.height;
-      final double boardSize = (screenWidth < screenHeight
-          ? screenWidth
-          : screenHeight * 0.86);
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        // کاربر حتماً باید دکمه را بزند تا دیالوگ بسته شود
-        builder: (context) => DailyRewardDialog(
-          currentStreak: livePlayer.rewardStreak,
-          canClaim: livePlayer.canClaimDailyReward,
-          boardSize: boardSize,
-          onClaimPressed: () async {
-            if (Navigator.canPop(context)) Navigator.pop(context);
-            audioService.playSFX('assets/audio/sound-effect/coin_claim.wav');
-            // کدهای متد سرور شما...
-          },
-        ),
-      );
-    };
+        final screenWidth = MediaQuery.of(context).size.width;
+        final screenHeight = MediaQuery.of(context).size.height;
+        final double boardSize = (screenWidth < screenHeight
+            ? screenWidth
+            : screenHeight * 0.86);
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          // کاربر حتماً باید دکمه را بزند تا دیالوگ بسته شود
+          builder: (context) => DailyRewardDialog(
+            boardSize: boardSize,
+
+          ),
+        );
+      });
+    }
+
   }
 
   void handleGameSearch(int numberOfPlayers, double boardSize) {

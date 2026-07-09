@@ -14,7 +14,6 @@ class CoinBox extends ConsumerWidget {
       gameControllerProvider.select((state) => state?.livePlayer),
     );
     final int coins = livePlayer?.coin ?? 0;
-    final int currentStreak = livePlayer?.rewardStreak ?? 1;
     final bool canClaim = livePlayer?.canClaimDailyReward ?? false;
 
     return Positioned(
@@ -68,13 +67,8 @@ class CoinBox extends ConsumerWidget {
                 context: context,
                 barrierDismissible: false, // کاربر حتماً باید دکمه را بزند تا دیالوگ بسته شود
                 builder: (context) => DailyRewardDialog(
-                  currentStreak: currentStreak,
-                  canClaim: canClaim,
                   boardSize: boardSize,
-                  onClaimPressed: () async {
-                    if (Navigator.canPop(context)) Navigator.pop(context);
-                    // کدهای متد سرور شما...
-                  },
+
                 ),
               );
 

@@ -1,13 +1,31 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/ui/app_body.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // 🟢 ۱. این امپورت را حتماً بگذار
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MyApp(), // یا هر ویجتی که ریشه اصلی برنامه‌ات است
-    ),
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ۲. مدیریت و خنثی‌سازی ارورهای زامبی فلاتر وب در حالت Hot Restart
+  if (kIsWeb && kDebugMode) {
+    final originalOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      final errorStr = details.exception.toString();
+
+      // اگر خطای مربوط به ویوهای دیسپوز شده وب بود، بی‌صدا ردش کن تا برنامه بالا بیاید
+      if (errorStr.contains('EngineFlutterView') ||
+          errorStr.contains('!isDisposed') ||
+          errorStr.contains('transitMode')) {
+        debugPrint('🧹 Ignored Web Engine zombie error during Hot Restart.');
+        return;
+      }
+
+      // بقیه خطاهای واقعی برنامه را طبق روال عادی نشان بده
+      originalOnError?.call(details);
+    };
+  }
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

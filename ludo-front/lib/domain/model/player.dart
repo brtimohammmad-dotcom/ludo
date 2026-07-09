@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:ludo/domain/model/token.dart';
 
 enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
@@ -23,11 +24,12 @@ class Player {
     required this.color,
     required this.connectionStatus,
     required this.playerStatus,
-    this.rewardStreak = 2,          // مقدار پیش‌فرض ۱
+    this.rewardStreak = 1,          // مقدار پیش‌فرض ۱
     this.canClaimDailyReward = false, // مقدار پیش‌فرض غیرفعال
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
+    debugPrint(json.toString());
     return Player(
       coin: json['coin'] ?? 0,
       numberOfAbsences: json['numberOfAbsences'],
@@ -43,8 +45,8 @@ class Player {
           ? null
           : ConnectionStatus.values.byName(json['connection_status']),
 
-      rewardStreak: json['reward_streak'] ?? 2,
-      canClaimDailyReward: json['can_claim_daily_reward'] ?? true,
+      rewardStreak: json['reward_streak'] ?? 1,
+      canClaimDailyReward: json['can_claim_daily_reward'] ?? false,
     );
   }
 

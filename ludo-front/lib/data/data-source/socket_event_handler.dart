@@ -15,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "امیرمحمد براتی", "id": 6};
+        initData = {"first_name": "امیرمحمد براتی", "id": 20};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -117,8 +117,19 @@ class SocketEventHandler {
       "player_exit",
       (_) => dataSource.onGameEventReceived?.call('player_exit', {}),
     );
+
     socket.on("insufficient_coin", (_) {
       dataSource.onGameEventReceived?.call('insufficient_coin', {});
+    });
+
+    socket.on("daily_reward_claimed", (data) {
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("daily_reward_claimed", cleanData);
+    });
+    socket.on("already_claimed_daily_reward", (data) {
+      if (TelegramWebApp.instance.isSupported) {
+        TelegramWebApp.instance.showAlert("You are already claimed!", () {});
+      }
     });
   }
 

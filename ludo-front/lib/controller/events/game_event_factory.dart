@@ -1,3 +1,4 @@
+import 'package:ludo/controller/events/daily_reward_claimed_event.dart';
 import 'package:ludo/controller/events/dice_rolled_event.dart';
 import 'package:ludo/controller/events/disconnect_event.dart';
 import 'package:ludo/controller/events/fast_ping_gets_event.dart';
@@ -54,6 +55,8 @@ class GameEventFactory {
         return ReconnectionFailedEvent();
       case 'insufficient_coin':
         return InsufficientCoinEvent();
+      case 'daily_reward_claimed':
+        return DailyRewardClaimedEvent.fromJson(data);
       default:
         return null;
     }

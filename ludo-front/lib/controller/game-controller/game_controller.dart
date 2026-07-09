@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ludo/controller/handler/game_animation_manager.dart';
@@ -33,7 +34,6 @@ class GameController extends _$GameController {
   VoidCallback? onGameReady;
   VoidCallback? onGameStarted;
   VoidCallback? onInsufficientCoin;
-  VoidCallback? onHasDailyReward;
 
   @override
   GameState? build() {
@@ -65,6 +65,14 @@ class GameController extends _$GameController {
 
   void updateState(GameState? newState) {
     state = newState;
+  }
+
+  void clearAllLoadings() {
+    ref.read(globalLoadingProvider.notifier).clearAll();
+  }
+
+  void stopLoading(String key) {
+    ref.read(globalLoadingProvider.notifier).stop(key);
   }
 
   // -------------------------------------------------
@@ -102,6 +110,10 @@ class GameController extends _$GameController {
   // -------------------------------------------------
   void startGame({required int numberOfPlayers}) {
     gameRepository.startGame(numberOfPlayers);
+  }
+
+  void claimDailyReward() {
+    gameRepository.claimDailyReward();
   }
 
   void getFastPing() {
@@ -166,7 +178,6 @@ class GameController extends _$GameController {
     // 🟢 ۲. کالبک‌های مربوط به لیسنرهای بورد قبلی را کاملاً پاک می‌کنیم
     onGameFinished = null;
     onInsufficientCoin = null; // 👈 اضافه شد
-    onHasDailyReward = null;
     onReconnectionFailed = null;
     onPlayerExit = null;
     onFastPingGets = null;

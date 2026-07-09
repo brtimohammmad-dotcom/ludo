@@ -109,4 +109,8 @@ class SocketDataSource {
       _socket!.io.reconnect();
     }
   }
+
+  void claimDailyReward() {
+    if (isConnected) _socket!.emit("claim_daily_reward");
+  }
 }

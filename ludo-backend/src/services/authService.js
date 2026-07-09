@@ -2,7 +2,6 @@ const { getOrCreatePlayer } = require("../database/players");
 
 const initialState = require("../models/initialState");
 
-
 async function handleAuth(initData, socket) {
   const isLocal = process.env.RENDER !== "true";
 
@@ -39,7 +38,32 @@ async function handleAuth(initData, socket) {
     socket.data.telegramId = player.telegram_id;
     socket.data.firstName = player.username;
     socket.data.coin = player.coin;
+    socket.data.rewardStreak = player.reward_streak;
+    socket.data.lastClaimDate = player.last_claim_date;
+    // فرض می‌کنیم socket.data.lastClaimDate یک شیء Date یا رشته ISO معتبر از دیتابیس است
+    const lastClaim = socket.data.lastClaimDate
+      ? new Date(socket.data.lastClaimDate)
+      : null;
+    const now = new Date();
 
+    let canClaimDailyReward = false;
+
+    if (!lastClaim) {
+      // اگر تا به حال جایزه‌ای نگرفته، همین الان می‌تونه بگیره
+      canClaimDailyReward = true;
+    } else {
+      // بررسی اینکه آیا تاریخ روز، ماه یا سال امروز با آخرین دریافت فرق داره یا نه
+      const isSameDay =
+        now.getDate() === lastClaim.getDate() &&
+        now.getMonth() === lastClaim.getMonth() &&
+        now.getFullYear() === lastClaim.getFullYear();
+
+      // اگر امروزِ تقویمی نیست، پس می‌تونه هدیه جدید رو بگیره
+      canClaimDailyReward = !isSameDay;
+    }
+    player = { ...player, can_claim_daily_reward: canClaimDailyReward };
+    // ذخیره وضعیت در دیتای سوکت برای فرستادن به کلینت (Flutter)
+    socket.data.canClaimDailyReward = canClaimDailyReward;
     // ارسال پلیر به فرانت
     socket.emit("initial_player", player);
   } catch (err) {

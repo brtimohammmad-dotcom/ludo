@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 
-class DailyRewardDialog extends StatelessWidget {
-  final int currentStreak;
-  final bool canClaim;
+class DailyRewardDialog extends ConsumerWidget {
   final double boardSize;
-  final VoidCallback onClaimPressed;
 
-  const DailyRewardDialog({
-    super.key,
-    required this.currentStreak,
-    required this.canClaim,
-    required this.boardSize,
-    required this.onClaimPressed,
-  });
+  const DailyRewardDialog({super.key, required this.boardSize});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final livePlayer = ref.watch(
+      gameControllerProvider.select((state) => state?.livePlayer),
+    );
+    final isLoading = ref.watch(globalLoadingProvider).contains('daily_reward');
+    final canClaim = livePlayer?.canClaimDailyReward;
     final List<int> rewards = [100, 150, 200, 250, 300, 350, 500];
-    final double base = boardSize * 0.85; // محدود کردن عرض دیالوگ متناسب با برد بازی
+    final double base =
+        boardSize * 0.85; // محدود کردن عرض دیالوگ متناسب با برد بازی
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -27,7 +27,10 @@ class DailyRewardDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B), // تم تاریک بازی
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.amber.withValues(alpha: 0.5), width: 1.5),
+          border: Border.all(
+            color: Colors.amber.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
           boxShadow: const [
             BoxShadow(
               color: Colors.black54,
@@ -69,10 +72,10 @@ class DailyRewardDialog extends StatelessWidget {
             ),
             SizedBox(height: base * 0.05),
 
-            // 🔲 نمایش روزها به صورت گرید ثابت و بدون اسکرول (۴ در ۲)
             GridView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(), // کاملاً ثابت
+              physics: const NeverScrollableScrollPhysics(),
+              // کاملاً ثابت
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4, // ۴ ستون در هر ردیف
                 crossAxisSpacing: base * 0.02,
@@ -81,9 +84,10 @@ class DailyRewardDialog extends StatelessWidget {
               ),
               itemCount: 7,
               itemBuilder: (context, index) {
-                final dayNumber = index + 1;
-                final isClaimed = dayNumber < currentStreak;
-                final isCurrent = dayNumber == currentStreak && canClaim;
+                final int dayNumber = index + 1;
+                final isClaimed = dayNumber < livePlayer!.rewardStreak;
+                final isCurrent =
+                    dayNumber == livePlayer.rewardStreak && canClaim!;
 
                 return Container(
                   decoration: BoxDecoration(
@@ -103,7 +107,10 @@ class DailyRewardDialog extends StatelessWidget {
                     children: [
                       Text(
                         "Day $dayNumber",
-                        style: TextStyle(color: Colors.grey.shade400, fontSize: base * 0.028),
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: base * 0.028,
+                        ),
                       ),
                       SizedBox(height: base * 0.01),
                       Icon(
@@ -129,25 +136,48 @@ class DailyRewardDialog extends StatelessWidget {
 
             // دکمه کلیم جایزه
             GestureDetector(
-              onTap: canClaim ? onClaimPressed : null,
+              onTap: (canClaim! && !isLoading)
+                  ? () {
+                ref.read(globalLoadingProvider.notifier).start('daily_reward');
+                      ref
+                          .read(gameControllerProvider.notifier)
+                          .claimDailyReward();
+                    }
+                  : null,
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: base * 0.035),
                 decoration: BoxDecoration(
-                  gradient: canClaim
-                      ? LinearGradient(colors: [Colors.amber.shade600, Colors.orange.shade700])
-                      : const LinearGradient(colors: [Colors.grey, Colors.blueGrey]),
+                  gradient: (canClaim && !isLoading)
+                      ? LinearGradient(
+                          colors: [
+                            Colors.amber.shade600,
+                            Colors.orange.shade700,
+                          ],
+                        )
+                      : const LinearGradient(
+                          colors: [Colors.grey, Colors.blueGrey],
+                        ),
                   borderRadius: BorderRadius.circular(base * 0.035),
                 ),
                 child: Center(
-                  child: Text(
-                    canClaim ? "Claim Reward" : "Already Claimed",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: base * 0.04,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: isLoading
+                      ? SizedBox(
+                          width: base * 0.05,
+                          height: base * 0.05,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          canClaim ? "Claim Reward" : "Already Claimed",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: base * 0.04,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -163,7 +193,7 @@ class DailyRewardDialog extends StatelessWidget {
                   fontSize: base * 0.035,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -43,7 +43,11 @@ extension GameStateX on GameState? {
 
   int winPrice() {
     final s = this!.serverState;
-    return s==null?0: s.numberOfPlayers == 2 ? 180 : 300;
+    return s == null
+        ? 0
+        : s.numberOfPlayers == 2
+        ? 180
+        : 300;
   }
 }
 
@@ -57,8 +61,7 @@ class GameState {
   GameState({
     required this.serverState,
     required this.livePlayer,
-    this.gameStage = GameStage.connectionStage,
-  });
+    this.gameStage = GameStage.connectionStage,});
 
   GameState copyWith({
     Player? livePlayer,
