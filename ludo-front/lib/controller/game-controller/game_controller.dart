@@ -90,9 +90,7 @@ class GameController extends _$GameController {
       animationController?.stop();
       await _animationManager.moveTokenStepByStep(
         tokenId: tokenId,
-        hasKick: hasKick,
         targetPosition: targetPosition,
-        kickedTokenId: kickedTokenId,
       );
       animationController?.reset();
       animationController?.forward();

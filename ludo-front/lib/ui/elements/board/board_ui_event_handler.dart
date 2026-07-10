@@ -17,8 +17,7 @@ class BoardUiEventHandler {
     // --- رویداد پایان بازی ---
     gameController.onGameFinished = () {
       if (!context.mounted) return;
-      final currentState = gameController.currentGameState;
-      final winner = currentState?.serverState?.winner;
+      final winner = gameController.currentGameState?.serverState?.winner;
       if (winner != null) {
         showAnimatedDialog(
           context: context,

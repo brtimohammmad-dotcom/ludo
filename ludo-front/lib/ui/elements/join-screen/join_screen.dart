@@ -36,7 +36,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(gameControllerProvider.select((state) => state?.livePlayer));
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final boardSize = (screenWidth < screenHeight

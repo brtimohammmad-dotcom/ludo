@@ -243,7 +243,7 @@ function handleMoveToken(socket, token, io) {
         //finish game
         await finishGame(
           socket.data.gameId,
-          winnerPlayer,
+          player,
           currentGameState.game_mode,
           io,
         );

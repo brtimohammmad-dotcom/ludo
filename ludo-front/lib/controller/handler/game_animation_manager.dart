@@ -12,8 +12,6 @@ class GameAnimationManager {
   Future<void> moveTokenStepByStep({
     required int tokenId,
     required int targetPosition,
-    required bool hasKick,
-    int? kickedTokenId,
   }) async {
     if (controller.currentGameState?.serverState == null) return;
 
@@ -60,32 +58,6 @@ class GameAnimationManager {
       // صدا و تاخیر برای حس حرکت مهره
       controller.playSfx("assets/audio/sound-effect/move_token.wav");
       await Future.delayed(const Duration(milliseconds: 300));
-    }
-
-    // ۳. مدیریت انیمیشن کیک (Kicked) یا زدن مهره حریف
-    if (hasKick && kickedTokenId != null) {
-      final kickedTokenIndex = controller.currentGameState!.serverState!.tokens
-          .indexWhere((t) => t.id == kickedTokenId.toString());
-
-      if (kickedTokenIndex != -1) {
-        // پخش افکت صدای زدن مهره
-        controller.playSfx("assets/audio/sound-effect/kick_token.wav");
-
-        final updatedTokens = List<Token>.from(
-          controller.currentGameState!.serverState!.tokens,
-        );
-        // برگرداندن مهره خورده شده به خانه ابتدا (پوزیشن ۱-)
-        updatedTokens[kickedTokenIndex] = updatedTokens[kickedTokenIndex]
-            .copyWith(pathIndex: -1);
-
-        controller.updateState(
-          controller.currentGameState!.copyWith(
-            serverState: controller.currentGameState!.serverState!.copyWith(
-              tokens: updatedTokens,
-            ),
-          ),
-        );
-      }
     }
   }
 

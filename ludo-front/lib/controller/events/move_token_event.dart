@@ -72,6 +72,8 @@ class MoveTokenEvent implements GameEvent {
           pathIndex: -1, // برگشت به بیس
         );
       }
+      controller.playSfx("assets/audio/sound-effect/kick_token.wav");
+
     }
 
     // ۴. ساختن استیت نهایی با استفاده از داده‌های جدید سرور و توکن‌های اصلاح‌شده

@@ -25,9 +25,13 @@ class PlayerBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isFriendly = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.mode == GameMode.friendly,
+            (s) => s?.serverState?.mode == GameMode.friendly,
       ),
     );
+
+    // آیا این نوار مربوط به سطر بالایی (رقیب‌ها) است؟
+    final bool isTopBar = leftPlayerIndex != 0;
+
     return Container(
       width: boardSize,
       height: barHeight,
@@ -43,20 +47,24 @@ class PlayerBar extends ConsumerWidget {
               barHeight: barHeight,
             ),
 
-            if ((leftPlayerIndex == 1 || leftPlayerIndex == -1)&&isFriendly)
-              ExitIcon(boardSize: boardSize),
-            if ((leftPlayerIndex == -1 || leftPlayerIndex == -1)&&!isFriendly)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(width: boardSize * 0.075),
-                  WinPrize(boardSize: boardSize),
-                  SizedBox(width: boardSize * 0.02),
-                  ExitIcon(boardSize: boardSize),
-                ],
-              ),
+            // مدیریت تمیز دکمه خروج و جایزه بدون کدهای تکراری و باگ شرطی
+            if (isTopBar) ...[
+              if (isFriendly)
+                ExitIcon(boardSize: boardSize)
+              else
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: boardSize * 0.075),
+                    WinPrize(boardSize: boardSize),
+                    SizedBox(width: boardSize * 0.02),
+                    ExitIcon(boardSize: boardSize),
+                  ],
+                ),
+            ],
 
-            if (leftPlayerIndex == 0) RollButton(boardSize: boardSize),
+            if (leftPlayerIndex == 0)
+              RollButton(boardSize: boardSize),
 
             PlayerBarUsernameContainer(
               boardSize: boardSize,

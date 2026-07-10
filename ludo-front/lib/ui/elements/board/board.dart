@@ -17,6 +17,7 @@ class Board extends ConsumerStatefulWidget {
 class _BoardState extends ConsumerState<Board>
     with SingleTickerProviderStateMixin {
   late BoardUiEventHandler _uiEventHandler;
+  late final GameController _gameController;
 
   @override
   void initState() {
@@ -26,7 +27,6 @@ class _BoardState extends ConsumerState<Board>
     _uiEventHandler = BoardUiEventHandler(
       context: context,
       gameController: gameController,
-
     );
     _uiEventHandler.init();
     _uiEventHandler.checkAndShowWaitingDialog();
@@ -40,11 +40,15 @@ class _BoardState extends ConsumerState<Board>
               gameController.animationController!.forward();
             }
           });
+    _gameController = ref.read(gameControllerProvider.notifier);
   }
 
   @override
   void dispose() {
     debugPrint("🧹 Board dispose called");
+    // آزادسازی انیمیشن کنترلر متصل به گیم کنترلر جهت جلوگیری از نشت رم
+    _gameController.animationController?.dispose();
+    _gameController.animationController = null;
     super.dispose();
   }
 
@@ -90,7 +94,7 @@ class _BoardState extends ConsumerState<Board>
                 leftPlayerIndex: gameMode == 2 ? -1 : 1,
                 rightPlayerIndex: gameMode == 2 ? 1 : 2,
               ),
-              MainBoard( boardSize: boardSize),
+              MainBoard(boardSize: boardSize),
               PlayerBar(
                 boardSize: boardSize,
                 barHeight: barHeight,
