@@ -2,7 +2,7 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
-enum GameStatus { start, finished, waitingForPlayer }
+enum GameStatus { start, finished, waitingForPlayer, exit }
 
 enum TurnStatus {
   waitingForRoll,

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ludo/domain/model/token.dart';
 
-enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
 
 enum PlayerStatus { online, offline }
 
@@ -10,7 +9,6 @@ class Player {
   final String username;
   final int coin;
   final PlayerColor? color;
-  final ConnectionStatus? connectionStatus;
   final PlayerStatus? playerStatus;
   final int? numberOfAbsences;
   final int rewardStreak;
@@ -22,7 +20,6 @@ class Player {
     required this.userId,
     required this.username,
     required this.color,
-    required this.connectionStatus,
     required this.playerStatus,
     this.rewardStreak = 1,          // مقدار پیش‌فرض ۱
     this.canClaimDailyReward = false, // مقدار پیش‌فرض غیرفعال
@@ -41,9 +38,6 @@ class Player {
       playerStatus: json['player_status'] == null
           ? null
           : PlayerStatus.values.byName(json['player_status']),
-      connectionStatus: json['connection_status'] == null
-          ? null
-          : ConnectionStatus.values.byName(json['connection_status']),
 
       rewardStreak: json['reward_streak'] ?? 1,
       canClaimDailyReward: json['can_claim_daily_reward'] ?? false,
@@ -63,7 +57,6 @@ class Player {
     String? username,
     int? coin,
     PlayerColor? color,
-    ConnectionStatus? connectionStatus,
     PlayerStatus? playerStatus,
     int? numberOfAbsences,
     int? rewardStreak,
@@ -73,7 +66,6 @@ class Player {
       coin: coin ?? this.coin,
       numberOfAbsences: numberOfAbsences ?? this.numberOfAbsences,
       playerStatus: playerStatus ?? this.playerStatus,
-      connectionStatus: connectionStatus ?? this.connectionStatus,
       userId: userId ?? this.userId,
       username: username ?? this.username,
       color: color ?? this.color,

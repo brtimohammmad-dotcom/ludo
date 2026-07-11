@@ -49,6 +49,7 @@ class SocketDataSource {
 
     // اتصال اولیه و فرستادن رکوئست استیت
     _socket!.onConnect((_) {
+      onGameEventReceived?.call('connected',{});
       _isConnecting = false;
       _socket!.emit("request_game_state", {
         "gameMode": mode.name,

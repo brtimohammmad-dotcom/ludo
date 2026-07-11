@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/ui/elements/board/main_board.dart';
 import 'package:ludo/ui/mappers/player-bar-mapper/player_bar.dart';
+import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
+import 'package:ludo/ui/utils/alerts/winner_alert.dart';
 
 import 'board_ui_event_handler.dart';
 
@@ -28,9 +31,7 @@ class _BoardState extends ConsumerState<Board>
       context: context,
       gameController: gameController,
     );
-    _uiEventHandler.init();
     _uiEventHandler.checkAndShowWaitingDialog();
-
     // انیمیشن کنترلر محلی بورد
     gameController.animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 10))
@@ -46,9 +47,9 @@ class _BoardState extends ConsumerState<Board>
   @override
   void dispose() {
     debugPrint("🧹 Board dispose called");
-    // آزادسازی انیمیشن کنترلر متصل به گیم کنترلر جهت جلوگیری از نشت رم
     _gameController.animationController?.dispose();
     _gameController.animationController = null;
+
     super.dispose();
   }
 
@@ -65,13 +66,39 @@ class _BoardState extends ConsumerState<Board>
         (state) => state?.serverState?.numberOfPlayers ?? 2,
       ),
     );
+
     ref.listen<GameStatus?>(
       gameControllerProvider.select((state) => state?.serverState?.gameStatus),
       (previous, next) {
         debugPrint("🔄 [UI Event] Game Status Changed: $next");
 
-        // اگر وضعیت تغییر کرد و دیگر منتظر بازیکن نبودیم، آلرت را ببند
-        if (next != GameStatus.waitingForPlayer) {
+        if (previous == GameStatus.waitingForPlayer &&
+            next == GameStatus.start) {
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
+        } else if (
+            next == GameStatus.finished) {
+          if (!context.mounted) return;
+
+          final winner = _gameController.currentGameState?.serverState?.winner;
+          if (winner != null) {
+            showAnimatedDialog(
+              context: context,
+              barrierDismissible: false,
+              child: WinnerAlert(
+                winner: winner,
+                gameController: _gameController,
+              ),
+            );
+          }
+        } else if (next == GameStatus.exit) {
+          _gameController.resetGame();
+          _gameController.updateState(
+            _gameController.currentGameState?.copyWith(
+              gameStage: GameStage.joinStage,
+            ),
+          );
           if (Navigator.canPop(context)) {
             Navigator.of(context).pop();
           }

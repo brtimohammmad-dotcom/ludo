@@ -23,6 +23,7 @@ class GameStateUpdateEvent implements GameEvent {
       (p) => p.userId == controller.currentGameState?.livePlayer?.userId,
       orElse: () => updatedState.players.first,
     );
+    controller.stopLoading("waiting_for_game");
 
     controller.updateState(
       GameState(

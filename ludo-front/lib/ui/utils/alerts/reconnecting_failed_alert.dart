@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ReconnectingFailedAlert extends StatelessWidget {
-  final VoidCallback onHomePressed;
-  final String textButton;
-  const ReconnectingFailedAlert({super.key, required this.onHomePressed,required this.textButton});
+  final VoidCallback onReconnectPressed;
+  const ReconnectingFailedAlert({super.key, required this.onReconnectPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -76,10 +75,10 @@ class ReconnectingFailedAlert extends StatelessWidget {
                 ),
                 elevation: 2,
               ),
-              onPressed: onHomePressed,
+              onPressed: onReconnectPressed,
               icon: const Icon(Icons.home_rounded, size: 20),
               label:  Text(
-                textButton,
+                'Reconnect',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             )

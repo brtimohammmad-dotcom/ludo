@@ -33,4 +33,7 @@ class GameRepository {
   void claimDailyReward() {
     dataSource.claimDailyReward();
   }
+  void resumeReconnection(){
+    dataSource.resumeReconnection();
+  }
 }

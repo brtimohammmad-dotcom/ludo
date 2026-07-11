@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/controller/events/game_event_factory.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ludo/controller/handler/game_animation_manager.dart';
-import 'package:ludo/controller/handler/game_socket_handler.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
 import 'package:ludo/data/repository/game_repository.dart';
 import 'package:ludo/domain/model/player.dart';
@@ -17,8 +17,7 @@ part 'game_controller.g.dart';
 @riverpod
 class GameController extends _$GameController {
   // Repositories & Handlers
-  late final GameRepository gameRepository;
-  late final GameSocketHandler _socketHandler;
+  late final GameRepository _gameRepository;
   late final GameAnimationManager _animationManager;
   AnimationController? animationController;
 
@@ -26,26 +25,28 @@ class GameController extends _$GameController {
   bool isGameFinishedHandled = false;
   bool isMovingToken = false;
 
-  // UI Callbacks
-  VoidCallback? onGameFinished;
-  VoidCallback? onReconnectionFailed;
-  VoidCallback? onPlayerExit;
   VoidCallback? onFastPingGets;
   VoidCallback? onGameReady;
   VoidCallback? onGameStarted;
   VoidCallback? onInsufficientCoin;
+  VoidCallback? onReconnectionFailed;
+  VoidCallback? onConnect;
 
   @override
   GameState? build() {
     final ds = SocketDataSource();
-    gameRepository = GameRepository(ds);
+    _gameRepository = GameRepository(ds);
 
     // مقداردهی هندلرها با پاس دادن instance فعلی
-    _socketHandler = GameSocketHandler(this);
     _animationManager = GameAnimationManager(this);
 
-    _socketHandler.init();
-
+    _gameRepository.dataSource;
+    ds.onGameEventReceived = (String eventName, Map<String, dynamic> data) {
+      final event = GameEventFactory.create(eventName, data);
+      if (event != null) {
+        event.execute(this);
+      }
+    };
     // 🧹 مدیریت Dispose خودکار در ریورپاد
     ref.onDispose(() {
       debugPrint('🧹 GameController Provider Disposed');
@@ -73,6 +74,10 @@ class GameController extends _$GameController {
 
   void stopLoading(String key) {
     ref.read(globalLoadingProvider.notifier).stop(key);
+  }
+
+  void startLoading(String key) {
+    ref.read(globalLoadingProvider.notifier).start(key);
   }
 
   // -------------------------------------------------
@@ -107,19 +112,23 @@ class GameController extends _$GameController {
   // PUBLIC API
   // -------------------------------------------------
   void startGame({required int numberOfPlayers}) {
-    gameRepository.startGame(numberOfPlayers);
+    _gameRepository.startGame(numberOfPlayers);
+  }
+
+  void resumeReconnection() {
+    _gameRepository.resumeReconnection();
   }
 
   void claimDailyReward() {
-    gameRepository.claimDailyReward();
+    _gameRepository.claimDailyReward();
   }
 
   void getFastPing() {
-    gameRepository.getFastPing();
+    _gameRepository.getFastPing();
   }
 
   void connect(GameMode mode, String? gameId) {
-    gameRepository.connect(mode, gameId);
+    _gameRepository.connect(mode, gameId);
   }
 
   void moveToken(Token liveToken) {
@@ -131,7 +140,7 @@ class GameController extends _$GameController {
           turnStatus: TurnStatus.moveTokenRequestInFlight,
         ),
       );
-      gameRepository.moveToken(liveToken);
+      _gameRepository.moveToken(liveToken);
       final diceValue = state!.serverState!.lastDiceValue;
 
       // اجرای انیمیشن به صورت Async و موازی با درخواست سرور
@@ -148,7 +157,7 @@ class GameController extends _$GameController {
           turnStatus: TurnStatus.rollDiceRequestInFlight,
         ),
       );
-      gameRepository.rollDice();
+      _gameRepository.rollDice();
     }
   }
 
@@ -169,15 +178,12 @@ class GameController extends _$GameController {
   // RESET / DISPOSE
   // -------------------------------------------------
   void exitGame() {
-    gameRepository.exitGame();
+    _gameRepository.exitGame();
   }
 
   void resetGame() {
     // 🟢 ۲. کالبک‌های مربوط به لیسنرهای بورد قبلی را کاملاً پاک می‌کنیم
-    onGameFinished = null;
     onInsufficientCoin = null; // 👈 اضافه شد
-    onReconnectionFailed = null;
-    onPlayerExit = null;
     onFastPingGets = null;
     onGameReady = null;
     onGameStarted = null;
@@ -198,7 +204,6 @@ class GameController extends _$GameController {
         username: state!.livePlayer!.username,
         coin: state!.livePlayer!.coin,
         color: null,
-        connectionStatus: null,
         playerStatus: null,
         numberOfAbsences: 0,
       );

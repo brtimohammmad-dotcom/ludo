@@ -2,6 +2,7 @@ import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 
 class GameFinishedEvent implements GameEvent {
   final Player newPlayer;
@@ -38,14 +39,9 @@ class GameFinishedEvent implements GameEvent {
         ),
         serverState: controller.currentGameState!.serverState!.copyWith(
           winner: newPlayer,
+          gameStatus: GameStatus.finished
         ),
       ),
     );
-
-    if (!controller.isGameFinishedHandled &&
-        controller.onGameFinished != null) {
-      controller.isGameFinishedHandled = true;
-      controller.onGameFinished!();
-    }
   }
 }

@@ -53,7 +53,10 @@ extension GameStateX on GameState? {
 
 enum GameStage { connectionStage, joinStage, boardStage }
 
+enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
+
 class GameState {
+  final ConnectionStatus connectionStatus;
   final Player? livePlayer;
   final ServerState? serverState;
   final GameStage gameStage;
@@ -61,14 +64,18 @@ class GameState {
   GameState({
     required this.serverState,
     required this.livePlayer,
-    this.gameStage = GameStage.connectionStage,});
+    this.gameStage = GameStage.connectionStage,
+    this.connectionStatus = ConnectionStatus.connecting,
+  });
 
   GameState copyWith({
     Player? livePlayer,
     ServerState? serverState,
     GameStage? gameStage,
+    ConnectionStatus? connectionStatus,
   }) {
     return GameState(
+      connectionStatus: connectionStatus ?? this.connectionStatus,
       serverState: serverState ?? this.serverState,
       livePlayer: livePlayer ?? this.livePlayer,
       gameStage: gameStage ?? this.gameStage,
