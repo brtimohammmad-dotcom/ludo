@@ -19,50 +19,42 @@ class DiceWidgetMapper extends ConsumerWidget {
     final gameController = ref.read(gameControllerProvider.notifier);
     final centralController = gameController.animationController;
 
-    // ⚡ لایه اصلی و تخت تاس (بدون سایه و گرادینت‌های سنگین در پینتر)
-    final Widget staticDiceCanvas = CustomPaint(
-      size: Size.square(size),
-      painter: PremiumDicePainter(value),
+    // ⚡ لایه کاملاً ثابت پینتر تاس را به عنوان یک متغیر کش می‌کنیم
+    final Widget staticDiceCanvas = RepaintBoundary(
+      child: CustomPaint(
+        size: Size.square(size),
+        painter: PremiumDicePainter(value),
+      ),
     );
 
-    // اگر نوبت ما نیست یا کنترلر مرکزی نال است، مستقیماً لایه تخت رندر شود
     if (!isMyTurn || centralController == null) {
       return staticDiceCanvas;
     }
 
-    // 🟢 استفاده از انیمیشن مرکزی برای شبیه‌سازی پالس با افکت Scale برداری (فوق‌العاده چابک و بدون لگ)
     return AnimatedBuilder(
       animation: centralController,
-      child: staticDiceCanvas, // پاس دادن تاس به عنوان child ثابت تا پینتر دوباره اجرا نشود
+      child: staticDiceCanvas, // 🟢 پاس دادن به عنوان child ثابت تا پینتر هرگز دوباره نیفتد
       builder: (_, child) {
-        final double centralValue = centralController.value;
-        final double cycle = (centralValue * 10) / 1.2;
-        final double animationProgress = (cycle - cycle.floor());
-
-        final double pingPongValue = (animationProgress - 0.5).abs() * 2;
-
-        // ایجاد یک پالس اندازه تخت و بدون سایه چشمی
-        final double pulseScale = 1.0 + (pingPongValue * 0.08);
+        // ایجاد یک فرمول سینوسی فوق‌العاده سبک و روان به جای محاسبات پیچیده ریاضی
+        final double pulseScale = 1.0 + (Curves.easeInOut.transform((centralController.value * 5) % 1.0) * 0.06);
 
         return Transform.scale(
           scale: pulseScale,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(size * .18),
-              // یک بوردر زرد نئون تخت، شیک و کاملاً Solid بجای سایه متحرک سفید
               border: Border.all(
-                color:  Colors.white,
+                color: Colors.white70,
                 width: 2.0,
               ),
             ),
-            child: child,
+            child: child, // لایه ثابت نقاشی شده بدون تغییر فراخوانی می‌شود
           ),
         );
       },
     );
   }
 }
-
 class PremiumDicePainter extends CustomPainter {
   final int value;
 

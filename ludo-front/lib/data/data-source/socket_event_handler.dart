@@ -15,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "امیرمحمد براتی", "id": 52};
+        initData = {"first_name": "امیرمحمد براتی", "id": 11};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();

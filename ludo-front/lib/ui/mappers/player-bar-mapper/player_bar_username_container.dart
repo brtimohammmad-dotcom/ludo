@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
@@ -26,9 +25,7 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       return SizedBox(width: fullWidth, height: boardSize * 0.06);
     }
 
-    final gameStatus = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.gameStatus),
-    );
+    final gameStatus = ref.watch(gameControllerProvider.select((s) => s?.serverState?.gameStatus));
     if (gameStatus == null) {
       return SizedBox(width: boardSize * 0.29, height: boardSize * 0.06);
     }
@@ -39,51 +36,25 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         if (players != null && players.length > playerIndex) {
           final p = players[playerIndex];
           return (
-            username: p.username,
-            status: p.playerStatus,
-            absences: p.numberOfAbsences,
-            coin: p.coin,
-            exists: true,
+          username: p.username,
+          status: p.playerStatus,
+          absences: p.numberOfAbsences,
+          coin: p.coin,
+          exists: true,
           );
         }
-        return (
-          username: '',
-          status: PlayerStatus.online,
-          absences: 0,
-          coin: 0,
-          exists: false,
-        );
+        return (username: '', status: PlayerStatus.online, absences: 0, coin: 0, exists: false);
       }),
     );
 
-    final totalPlayers = ref.watch(
-      gameControllerProvider.select(
-        (s) => s?.serverState?.numberOfPlayers ?? 2,
-      ),
-    );
+    final totalPlayers = ref.watch(gameControllerProvider.select((s) => s?.serverState?.numberOfPlayers ?? 2));
     final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
-    final isMyTurn = ref.watch(
-      gameControllerProvider.select(
-        (s) => s?.serverState?.currentTurn == playerColor,
-      ),
-    );
-    final turnStatus = ref.watch(
-      gameControllerProvider.select(
-        (s) => s?.serverState?.currentTurn == playerColor
-            ? s?.serverState?.turnStatus
-            : null,
-      ),
-    );
 
-    final bool isCurrentTurn =
-        isMyTurn &&
-        gameStatus == GameStatus.start &&
-        turnStatus != TurnStatus.waitingForAnimate;
+    final isMyTurn = ref.watch(gameControllerProvider.select((s) => s?.serverState?.currentTurn == playerColor));
+    final turnStatus = ref.watch(gameControllerProvider.select((s) => s?.serverState?.currentTurn == playerColor ? s?.serverState?.turnStatus : null));
 
-    // دسترسی امن به انیمیشن کنترلر برای مانیتور کردن رفرنس آن
-    final animationController = ref
-        .watch(gameControllerProvider.notifier)
-        .animationController;
+    final bool isCurrentTurn = isMyTurn && gameStatus == GameStatus.start && turnStatus != TurnStatus.waitingForAnimate;
+    final animationController = ref.watch(gameControllerProvider.notifier).animationController;
 
     final activeBorderColor = playerColor == PlayerColor.red
         ? Colors.redAccent
@@ -96,12 +67,9 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
     Color usernameTimerBoxColor() {
       if (gameStatus != GameStatus.start) return Colors.transparent;
       switch (playerData.absences) {
-        case 1:
-          return const Color(0x4DFFEB3B);
-        case 2:
-          return const Color(0x4DFFC107);
-        default:
-          return const Color(0x33FFFFFF);
+        case 1: return const Color(0x4DFFEB3B);
+        case 2: return const Color(0x4DFFC107);
+        default: return const Color(0x33FFFFFF);
       }
     }
 
@@ -112,61 +80,36 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       height: boardSize * 0.06,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        boxShadow: isCurrentTurn
-            ? [
-                BoxShadow(
-                  color: activeBorderColor.withValues(alpha: 0.25),
-                  blurRadius: 0,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
+        color: isCurrentTurn ? const Color(0x1FFFFFFF) : const Color(0x8A000000), // سبک‌سازی با حذف بلور داینامیک
+        border: Border.all(
+          color: isCurrentTurn ? activeBorderColor.withValues(alpha: 0.5) : Colors.white10,
+          width: 1.2,
+        ),
       ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            decoration: BoxDecoration(
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          if (isCurrentTurn && animationController != null)
+            _SolidTimerProgressLine(
+              fullWidth: fullWidth,
+              boardSize: boardSize,
+              barColor: usernameTimerBoxColor(),
               borderRadius: borderRadius,
-              color: isCurrentTurn
-                  ? const Color(0x14FFFFFF)
-                  : const Color(0x40000000),
-              border: Border.all(
-                color: isCurrentTurn
-                    ? activeBorderColor.withValues(alpha: 0.4)
-                    : Colors.white10,
-                width: 1.2,
-              ),
+              controller: animationController,
             ),
-            child: Stack(
-              children: [
-                // انیمیشن کنترلر را مستقیم پاس می‌دهیم تا در صورت رفرش یا مقداردهی مجدد، ویجت آن را از دست ندهد
-                if (isCurrentTurn && animationController != null)
-                  _SolidTimerProgressLine(
-                    fullWidth: fullWidth,
-                    boardSize: boardSize,
-                    barColor: usernameTimerBoxColor(),
-                    borderRadius: borderRadius,
-                    controller: animationController,
-                  ),
-
-                Center(
-                  child: _PlayerInfoRow(
-                    playerData: playerData,
-                    barHeight: barHeight,
-                    boardSize: boardSize,
-                    totalPlayers: totalPlayers,
-                    isCurrentTurn: isCurrentTurn,
-                    playerColor: playerColor,
-                    playerIndex: playerIndex,
-                    isMyTurn: isMyTurn,
-                  ),
-                ),
-              ],
+          Center(
+            child: _PlayerInfoRow(
+              playerData: playerData,
+              barHeight: barHeight,
+              boardSize: boardSize,
+              totalPlayers: totalPlayers,
+              isCurrentTurn: isCurrentTurn,
+              playerColor: playerColor,
+              playerIndex: playerIndex,
+              isMyTurn: isMyTurn,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -185,8 +128,7 @@ class _SolidTimerProgressLine extends StatelessWidget {
   final double boardSize;
   final Color barColor;
   final BorderRadius borderRadius;
-  final AnimationController
-  controller; // دریافت مستقیم به جای استفاده از ref.read غیراستاندارد
+  final AnimationController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -195,13 +137,14 @@ class _SolidTimerProgressLine extends StatelessWidget {
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, _) {
-          final double progressWidth = fullWidth * (1 - controller.value);
-          return Container(
-            width: progressWidth,
+          return SizedBox(
+            width: fullWidth * (1 - controller.value),
             height: boardSize * 0.06,
-            decoration: BoxDecoration(
-              color: barColor,
-              borderRadius: borderRadius,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: barColor,
+                borderRadius: borderRadius,
+              ),
             ),
           );
         },
@@ -210,7 +153,6 @@ class _SolidTimerProgressLine extends StatelessWidget {
   }
 }
 
-// ویجت جداگانه و ثابت برای متون و سکه بازیکن جهت جلوگیری از رندرهای بیهوده
 class _PlayerInfoRow extends StatelessWidget {
   const _PlayerInfoRow({
     required this.playerData,
