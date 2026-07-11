@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
@@ -34,7 +35,7 @@ class WaitingForPlayersAlert extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 🟢 انتقال انیمیشن سنگین به یک ویجت ایزوله و مستقل با کلمه کلیدی const
-          OptimizedRotatingLoader(boardSize: boardSize),
+          LoadingAnimationWidget.dotsTriangle(color: Colors.white,size: boardSize*0.25),
 
           SizedBox(height: boardSize * 0.025),
 
@@ -152,57 +153,6 @@ class WaitingForPlayersAlert extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// 🟢 ویجت اختصاصی و بهینه‌سازی شده برای انیمیشن لوپ لودر
-class OptimizedRotatingLoader extends StatefulWidget {
-  final double boardSize;
-  const OptimizedRotatingLoader({super.key, required this.boardSize});
-
-  @override
-  State<OptimizedRotatingLoader> createState() => _OptimizedRotatingLoaderState();
-}
-
-class _OptimizedRotatingLoaderState extends State<OptimizedRotatingLoader>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _rotationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _rotationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _rotationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // استفاده از RepaintBoundary به موتور رندر فلاتر دستور میده که این انیمیشن
-    // رو کاملاً در یک لایه مجزای گرافیکی رندر کنه و به بقیه ویجت‌های صفحه کاری نداشته باشه
-    return RepaintBoundary(
-      child: RotationTransition(
-        turns: _rotationController,
-        child: Container(
-          width: widget.boardSize * 0.18,
-          height: widget.boardSize * 0.18,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: widget.boardSize * 0.012),
-            gradient: const SweepGradient(
-              colors: [Colors.transparent, Colors.white],
-            ),
-          ),
-        ),
       ),
     );
   }

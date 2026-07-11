@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/ui/elements/board/static_board_painter.dart';
 import 'package:ludo/ui/elements/board/static_game_board.dart';
 import 'package:ludo/ui/elements/dice/dice_widget.dart';
 import 'package:ludo/ui/elements/token/create_animated_tokens.dart';
@@ -33,7 +34,8 @@ class MainBoard extends ConsumerWidget {
       child: Stack(
         children: [
           // ۱. بک‌گراند ثابت بازی (جدول و خانه‌ها) درون یک ری‌پینت‌باندری واحد کش شده است
-          StaticGameBoard(cellSize: cellSize, tokenHomeSize: cellSize * 4),
+          // StaticGameBoard(cellSize: cellSize, tokenHomeSize: cellSize * 4),
+          BoardBackground(),
 
           // ۲. لایه پویا و متحرک بازی (مهره‌ها و کانترها)
           Stack(
