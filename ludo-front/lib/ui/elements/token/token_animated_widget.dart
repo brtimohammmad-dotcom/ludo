@@ -82,13 +82,13 @@ class _TokenAnimatedWidgetState extends State<TokenAnimatedWidget>
       top: widget.top,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) {
+        builder: (context, cachedTokenWidget) {
           return Transform.scale(
             scale: _scaleAnimation.value,
-            child: child,
+            child: cachedTokenWidget, // 👈 اینجا به جای ساخت مجدد، از کش استفاده میکند
           );
         },
-        child: TokenWidget(
+        child: TokenWidget( // 👈 این بخش فقط یک بار ساخته می‌شود و حین انیمیشن فقط اسکیل می‌شود
           token: widget.token,
           size: widget.cellSize,
         ),

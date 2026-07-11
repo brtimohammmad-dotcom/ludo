@@ -26,7 +26,6 @@ class Player {
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
-    debugPrint(json.toString());
     return Player(
       coin: json['coin'] ?? 0,
       numberOfAbsences: json['numberOfAbsences'],

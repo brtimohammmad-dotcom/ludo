@@ -21,7 +21,7 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
   late AnimationController _animationController;
   late Animation<double> _rotationAnimation;
   late Animation<double> _scaleAnimation;
-  bool _wasRolling = false; // فلگ کمکی برای جلوگیری از لوپ رندر
+  bool _isAnimationRunning = false;
 
   @override
   void initState() {
@@ -35,7 +35,6 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
       CurvedAnimation(parent: _animationController, curve: Curves.linear),
     );
 
-    // تغییر جزئی برای بهبود پرفورمنس ریپلد
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
@@ -47,18 +46,35 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
     super.dispose();
   }
 
+  // 🟢 بهینه‌سازی اصلی: مدیریت انیمیشن خارج از متد build
+  void _manageAnimation(TurnStatus? turnStatus) {
+    final bool shouldRoll = turnStatus == TurnStatus.rollDiceRequestInFlight;
+
+    if (shouldRoll && !_isAnimationRunning) {
+      _isAnimationRunning = true;
+      _animationController.repeat();
+    } else if (!shouldRoll && _isAnimationRunning) {
+      _isAnimationRunning = false;
+      _animationController.stop();
+      _animationController.reverse(); // برگشت آرام به سایز اصلی
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 🔔 استفاده از listen برای تغییرات انیمیشن تا متد build آلوده نشود
+    ref.listen<TurnStatus?>(
+      gameControllerProvider.select((state) => state?.serverState?.turnStatus),
+          (previous, next) {
+        _manageAnimation(next);
+      },
+    );
+
     final currentTurn = ref.watch(
       gameControllerProvider.select((state) => state?.serverState?.currentTurn),
     );
-    final turnStatus = ref.watch(
-      gameControllerProvider.select((state) => state?.serverState?.turnStatus),
-    );
     final lastDiceValue = ref.watch(
-      gameControllerProvider.select(
-        (state) => state?.serverState?.lastDiceValue ?? 1,
-      ),
+      gameControllerProvider.select((state) => state?.serverState?.lastDiceValue ?? 1),
     );
     final bool isMyTurn = ref.watch(
       gameControllerProvider.select((state) => state.isMyTurnToRoll),
@@ -66,37 +82,16 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
 
     if (currentTurn == null) return const SizedBox.shrink();
 
-    // 🔄 کنترل ساید‌افکت انیمیشن با استفاده از وضعیت پایدار استیت
-    final bool isRolling = turnStatus == TurnStatus.rollDiceRequestInFlight;
-
-    if (isRolling && !_wasRolling) {
-      _wasRolling = true;
-      // استفاده از فرستادن به فریم بعدی برای جلوگیری از تداخل متد بیلد
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _animationController.repeat();
-      });
-    } else if (!isRolling && _wasRolling) {
-      _wasRolling = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _animationController.stop();
-          _animationController.reverse(); // بازگشت امن اسکیل به ۱.۰
-        }
-      });
-    }
-
     return AnimatedPositioned(
       curve: Curves.easeOutCirc,
       duration: const Duration(milliseconds: 400),
-      left:
-          dicePath[currentTurn.index].dy * widget.cellSize +
-          (widget.cellSize / 4),
-      top:
-          dicePath[currentTurn.index].dx * widget.cellSize +
-          (widget.cellSize / 4),
+      left: dicePath[currentTurn.index].dy * widget.cellSize + (widget.cellSize / 4),
+      top: dicePath[currentTurn.index].dx * widget.cellSize + (widget.cellSize / 4),
       child: GestureDetector(
         onTap: () {
-          if (isMyTurn && !isRolling) {
+          // بررسی وضعیت مستقیماً از ترن استاتوس بدون لوپ رندر
+          final status = ref.read(gameControllerProvider)?.serverState?.turnStatus;
+          if (isMyTurn && status != TurnStatus.rollDiceRequestInFlight) {
             ref.read(gameControllerProvider.notifier).rollDice();
           }
         },
@@ -104,13 +99,12 @@ class _DiceWidgetState extends ConsumerState<DiceWidget>
           scale: _scaleAnimation,
           child: RotationTransition(
             turns: _rotationAnimation,
+            // 🟢 استفاده از child ثابت در لوپ برای جلوگیری از ری‌بیلد کل مپر تاس حین چرخش
             child: SizedBox(
               width: widget.cellSize * 1.5,
               height: widget.cellSize * 1.5,
               child: Padding(
-                padding: EdgeInsets.all(
-                  isMyTurn ? widget.cellSize / 8 : widget.cellSize / 5,
-                ),
+                padding: EdgeInsets.all(isMyTurn ? widget.cellSize / 8 : widget.cellSize / 5),
                 child: DiceWidgetMapper(
                   isMyTurn: isMyTurn,
                   value: lastDiceValue,

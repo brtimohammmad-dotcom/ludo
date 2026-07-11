@@ -49,7 +49,6 @@ class GameController extends _$GameController {
     };
     // 🧹 مدیریت Dispose خودکار در ریورپاد
     ref.onDispose(() {
-      debugPrint('🧹 GameController Provider Disposed');
       animationController?.stop();
       animationController?.dispose();
       animationController = null;
