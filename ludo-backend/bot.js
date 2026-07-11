@@ -25,67 +25,76 @@ bot.start((ctx) => {
   });
 });
 
-// مدیریت اینلاین کوئری‌ها (اشتراک‌گذاری)
+// مدیریت اینلاین کوئری‌ها (اشتراک‌گذاری) همراه با مدیریت خطا
 bot.on("inline_query", async (ctx) => {
-  const query = ctx.inlineQuery.query;
+  try {
+    const query = ctx.inlineQuery.query;
 
-  // ۱. اشتراک‌گذاری عمومی ربات با عکس
-  if (query === "share_bot") {
-    return ctx.answerInlineQuery([
+    // ۱. اشتراک‌گذاری عمومی ربات با عکس
+    if (query === "share_bot") {
+      return await ctx.answerInlineQuery([
+        {
+          type: "photo",
+          id: "share_main_bot",
+          photo_file_id: PHOTO_FILE_ID,
+          title: "🎮 Play Ludo Mini App",
+          description: "Invite your friends to play Ludo together!",
+          caption: `🎲 *Let's Play Ludo!* Hey! I'm playing Ludo right inside Telegram. \nClick the button below to join the game and challenge me! 🚀`,
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "🎲 Play Now",
+                  url: "https://t.me/ludo_miniApp_bot?startapp=main",
+                },
+              ],
+            ],
+          },
+        },
+      ]);
+    }
+
+    if (!query.startsWith("game_")) {
+      return await ctx.answerInlineQuery([]);
+    }
+
+    const gameId = query.replace("game_", "");
+    const game = initialState.getGameState(gameId);
+    if (!game) {
+      return await ctx.answerInlineQuery([]);
+    }
+    const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
+
+    // ۲. ارسال پیام دعوت بازی دوستانه (لابی) با عکس
+    return await ctx.answerInlineQuery([
       {
         type: "photo",
-        id: "share_main_bot",
+        id: gameId,
         photo_file_id: PHOTO_FILE_ID,
-        title: "🎮 Play Ludo Mini App",
-        description: "Invite your friends to play Ludo together!",
-        caption: `🎲 *Let's Play Ludo!* Hey! I'm playing Ludo right inside Telegram. \nClick the button below to join the game and challenge me! 🚀`,
-        parse_mode: "Markdown",
+        title: "🎲 Invite Friends",
+        description: "Send this invitation to a friend",
+        caption: `🎲 Ludo Friendly Match\n\nPlayers: ${game.players.length}/${game.number_of_players}\n\n🟢 ${ctx.from.first_name}\n\n⏳ Waiting for ${game.number_of_players - game.players.length} more player${game.number_of_players - game.players.length > 1 ? "s" : ""}...`,
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: "🎲 Play Now",
-                url: "https://t.me/ludo_miniApp_bot?startapp=main",
+                text: `▶️ Play Game (${game.players.length}/${game.number_of_players} joined)`,
+                url: joinUrl,
               },
             ],
           ],
         },
       },
     ]);
+  } catch (error) {
+    // جلوگیری از کرش کردن سرور در صورت منقضی شدن کوئری تلگرام
+    if (error.description && error.description.includes("query is too old")) {
+      console.log(`[Inline Query] Timeout or invalid query ID. Ignored.`);
+    } else {
+      console.error("[Inline Query Error]:", error);
+    }
   }
-
-  if (!query.startsWith("game_")) {
-    return ctx.answerInlineQuery([]);
-  }
-
-  const gameId = query.replace("game_", "");
-  const game = initialState.getGameState(gameId);
-  if (!game) {
-    return ctx.answerInlineQuery([]);
-  }
-  const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
-
-  // ۲. ارسال پیام دعوت بازی دوستانه (لابی) با عکس به جای متن خالی
-  return ctx.answerInlineQuery([
-    {
-      type: "photo",
-      id: gameId,
-      photo_file_id: PHOTO_FILE_ID,
-      title: "🎲 Invite Friends",
-      description: "Send this invitation to a friend",
-      caption: `🎲 Ludo Friendly Match\n\nPlayers: ${game.players.length}/${game.number_of_players}\n\n🟢 ${ctx.from.first_name}\n\n⏳ Waiting for ${game.number_of_players - game.players.length} more player${game.number_of_players - game.players.length > 1 ? "s" : ""}...`,
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: `▶️ Play Game (${game.players.length}/${game.number_of_players} joined)`,
-              url: joinUrl,
-            },
-          ],
-        ],
-      },
-    },
-  ]);
 });
 
 bot.on("chosen_inline_result", async (ctx) => {
