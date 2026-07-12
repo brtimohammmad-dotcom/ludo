@@ -89,6 +89,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  SizedBox(height: screenHeight*0.05,),
                   Image.asset(
                     "assets/webp/happy-dice.webp",
                     width: boardSize * 0.6,
@@ -96,6 +97,8 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                     fit: BoxFit.cover,
                   ),
                   GameSelectionButtons(boardSize: boardSize, handler: _handler),
+                  SizedBox(height: screenHeight*0.2,),
+
                 ],
               ),
             ),
