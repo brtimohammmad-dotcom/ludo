@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/services/audio_service.dart';
+import 'package:ludo/ui/elements/join-screen/floating_bottom_menu.dart';
+import 'package:ludo/ui/elements/join-screen/join_screen_body/coin_box.dart';
+import 'package:ludo/ui/elements/join-screen/join_screen_body/game_selection_buttons.dart';
 import 'package:ludo/ui/elements/join-screen/join_screen_handler.dart';
-import 'package:ludo/ui/elements/join-screen/widgets/coin_box.dart';
-import 'package:ludo/ui/elements/join-screen/widgets/game_selection_buttons.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/waiting_for_game_alert.dart';
 
@@ -65,6 +66,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     );
     return Scaffold(
       body: Stack(
+        clipBehavior: Clip.none,
         children: [
           // پس‌زمینه و محتوای اصلی دکمه‌ها
           Container(
@@ -82,14 +84,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                 end: Alignment.bottomRight,
               ),
             ),
-            child: Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
                     "assets/webp/happy-dice.webp",
-                    width: boardSize * 0.4,
-                    height: boardSize * 0.4,
+                    width: boardSize * 0.6,
+                    height: boardSize * 0.6,
                     fit: BoxFit.cover,
                   ),
                   GameSelectionButtons(boardSize: boardSize, handler: _handler),
@@ -100,6 +103,19 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
           CoinBox(boardSize: boardSize),
         ],
+      ),
+      extendBody: true,
+      bottomNavigationBar: FloatingBottomMenu(
+        boardSize: boardSize,
+        onSettingsTap: () {
+          print("تنظیمات لمس شد");
+        },
+        onLeaderboardTap: () {
+          print("لیدربورد لمس شد");
+        },
+        onShopTap: () {
+          print("فروشگاه لمس شد");
+        },
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
@@ -12,11 +13,16 @@ class WaitingForPlayersAlert extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(
+      globalLoadingProvider.select((state) => state.contains("cancel_game")),
+    );
     final gameController = ref.read(gameControllerProvider.notifier);
     final gameState = gameController.currentGameState;
     final state = gameState?.serverState;
     final size = MediaQuery.of(context).size;
-    final boardSize = size.width < size.height ? size.width : size.height * 0.86;
+    final boardSize = size.width < size.height
+        ? size.width
+        : size.height * 0.86;
 
     final numberOfPlayers = state?.numberOfPlayers ?? 2;
     final requiredPlayers = numberOfPlayers < 0
@@ -24,18 +30,23 @@ class WaitingForPlayersAlert extends ConsumerWidget {
         : (numberOfPlayers == -1 ? 2 : numberOfPlayers);
 
     // 🟢 بهینه‌سازی طلایی: فقط بخش تعداد اعضا واچ می‌شود و بقیه ویجت‌ها ری‌بیلد نمی‌شوند
-    final currentPlayers = ref.watch(
-      gameControllerProvider.select(
+    final currentPlayers =
+        ref.watch(
+          gameControllerProvider.select(
             (state) => state?.serverState?.players.length,
-      ),
-    ) ?? 0;
+          ),
+        ) ??
+        0;
 
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // 🟢 انتقال انیمیشن سنگین به یک ویجت ایزوله و مستقل با کلمه کلیدی const
-          LoadingAnimationWidget.dotsTriangle(color: Colors.white,size: boardSize*0.25),
+          LoadingAnimationWidget.dotsTriangle(
+            color: Colors.white,
+            size: boardSize * 0.25,
+          ),
 
           SizedBox(height: boardSize * 0.025),
 
@@ -54,7 +65,9 @@ class WaitingForPlayersAlert extends ConsumerWidget {
           // بخش وضعیت صندلی‌ها
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal: requiredPlayers == 2 ? boardSize * 0.06 : boardSize * 0.03,
+              horizontal: requiredPlayers == 2
+                  ? boardSize * 0.06
+                  : boardSize * 0.03,
               vertical: boardSize * 0.025,
             ),
             decoration: BoxDecoration(
@@ -67,16 +80,25 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                 final isJoined = index < currentPlayers;
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: requiredPlayers == 2 ? boardSize * 0.015 : boardSize * 0.005,
+                    horizontal: requiredPlayers == 2
+                        ? boardSize * 0.015
+                        : boardSize * 0.005,
                   ),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic, // استفاده از یک کرو سبک‌تر
-                    width: requiredPlayers == 2 ? boardSize * 0.09 : boardSize * 0.08,
-                    height: requiredPlayers == 2 ? boardSize * 0.09 : boardSize * 0.08,
+                    curve: Curves.easeOutCubic,
+                    // استفاده از یک کرو سبک‌تر
+                    width: requiredPlayers == 2
+                        ? boardSize * 0.09
+                        : boardSize * 0.08,
+                    height: requiredPlayers == 2
+                        ? boardSize * 0.09
+                        : boardSize * 0.08,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isJoined ? Colors.green.shade600 : Colors.grey.shade300,
+                      color: isJoined
+                          ? Colors.green.shade600
+                          : Colors.grey.shade300,
                     ),
                     child: Icon(
                       isJoined ? Icons.person : Icons.person_outline,
@@ -150,7 +172,7 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            child: const Text('Cancel'),
+            child: isLoading ?const CircularProgressIndicator(color: Colors.white,) : Text('Cancel'),
           ),
         ],
       ),

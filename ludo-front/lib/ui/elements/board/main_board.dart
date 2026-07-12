@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/elements/board/static_board_painter.dart';
-import 'package:ludo/ui/elements/board/static_game_board.dart';
 import 'package:ludo/ui/elements/dice/dice_widget.dart';
 import 'package:ludo/ui/elements/token/create_animated_tokens.dart';
 import 'package:ludo/ui/elements/board/target_counter_widget.dart';

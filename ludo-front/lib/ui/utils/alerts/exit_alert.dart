@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 
-class ExitButtonAlert extends StatelessWidget {
-  const ExitButtonAlert({super.key, required this.gameController});
-
-  final GameController gameController;
+class ExitButtonAlert extends ConsumerWidget {
+  const ExitButtonAlert({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(
+      globalLoadingProvider.select((state) => state.contains("exit_game")),
+    );
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final maxAvailableWidth = screenWidth; // 90% عرض صفحه
@@ -61,7 +64,8 @@ class ExitButtonAlert extends StatelessWidget {
             SizedBox(width: boardSize * 0.01),
             ElevatedButton(
               onPressed: () {
-                gameController.exitGame();
+                ref.read(gameControllerProvider.notifier).exitGame();
+                ref.read(globalLoadingProvider.notifier).start("exit_game");
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
@@ -71,13 +75,15 @@ class ExitButtonAlert extends StatelessWidget {
                   vertical: boardSize * 0.03,
                 ),
               ),
-              child: Text(
-                'Yes',
-                style: TextStyle(
-                  fontSize: boardSize * 0.03,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              child: isLoading
+                  ? CircularProgressIndicator(color: Colors.white,)
+                  : Text(
+                      'Yes',
+                      style: TextStyle(
+                        fontSize: boardSize * 0.03,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
             ),
           ],
         ),

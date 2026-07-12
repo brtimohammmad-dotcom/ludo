@@ -10,8 +10,6 @@ class BoardUiEventHandler {
 
   BoardUiEventHandler({required this.gameController, required this.context});
 
-
-
   // --- مدیریت نمایش دایالوگ انتظار برای شروع بازی ---
   void checkAndShowWaitingDialog() {
     if (!context.mounted) return;
@@ -28,7 +26,10 @@ class BoardUiEventHandler {
         showAnimatedDialog(
           context: context,
           barrierDismissible: false,
-          child: WaitingForPlayersAlert(onExit: () => gameController.exitGame()),
+          child: WaitingForPlayersAlert(onExit: () {
+            gameController.startLoading("cancel_game");
+            gameController.exitGame();
+          }),
         );
       });
     }
