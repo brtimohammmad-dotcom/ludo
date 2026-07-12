@@ -22,7 +22,9 @@ class GameRepository {
   void moveToken(Token liveToken) {
     dataSource.moveToken(liveToken);
   }
-
+  void getLeaderBoardList() {
+    dataSource.getLeaderBoardList();
+  }
   void exitGame() {
     dataSource.exitGame();
   }

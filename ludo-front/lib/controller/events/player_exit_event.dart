@@ -12,5 +12,7 @@ class PlayerExitEvent implements GameEvent {
         ),
       ),
     );
+    controller.stopLoading('cancel_game');
+    controller.stopLoading('exit_game');
   }
 }

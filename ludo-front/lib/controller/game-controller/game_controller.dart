@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/events/game_event_factory.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
+import 'package:ludo/controller/leader_board/leader_board.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ludo/controller/handler/game_animation_manager.dart';
@@ -66,7 +67,9 @@ class GameController extends _$GameController {
   void updateState(GameState? newState) {
     state = newState;
   }
-
+  void updateLeaderBoard(Map<String,dynamic> jsonData){
+    ref.read(leaderboardDataProvider.notifier).updateData(jsonData);
+  }
   void clearAllLoadings() {
     ref.read(globalLoadingProvider.notifier).clearAll();
   }
@@ -120,6 +123,10 @@ class GameController extends _$GameController {
 
   void claimDailyReward() {
     _gameRepository.claimDailyReward();
+  }
+
+  void getLeaderBoardList() {
+    _gameRepository.getLeaderBoardList();
   }
 
   void getFastPing() {

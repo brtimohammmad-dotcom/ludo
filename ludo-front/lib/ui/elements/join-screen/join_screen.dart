@@ -111,13 +111,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       bottomNavigationBar: FloatingBottomMenu(
         boardSize: boardSize,
         onSettingsTap: () {
-          print("تنظیمات لمس شد");
+          debugPrint("تنظیمات لمس شد");
         },
         onLeaderboardTap: () {
-          print("لیدربورد لمس شد");
+          debugPrint("لیدربورد لمس شد");
+          ref.read(gameControllerProvider.notifier).getLeaderBoardList();
+          ref.read(globalLoadingProvider.notifier).start('leader_board_loading');
         },
         onShopTap: () {
-          print("فروشگاه لمس شد");
+          debugPrint("فروشگاه لمس شد");
         },
       ),
     );

@@ -51,7 +51,7 @@ extension GameStateX on GameState? {
   }
 }
 
-enum GameStage { connectionStage, joinStage, boardStage }
+enum GameStage { connectionStage, joinStage, boardStage, leaderBoard }
 
 enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
 

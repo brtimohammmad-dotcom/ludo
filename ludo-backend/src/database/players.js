@@ -69,7 +69,55 @@ async function getDailyRewardStreak(
 
   if (error) throw error;
 }
+async function getTopTenPlayers() {
+  try {
+const { data, error } = await supabase
+  .from("players")
+  .select("username, coin")
+  .order("coin", { ascending: false }) // شرط اول: سکه بیشتر
+  .order("telegram_id", { ascending: true }) // شرط دوم: بر اساس ID یکتا
+  .limit(10);
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("خطا در دریافت لیست ۱۰ نفر برتر:", error.message);
+    throw error;
+  }
+}
+
+async function getPlayerRank(telegramId) {
+  try {
+    // ۱. ابتدا تعداد سکه‌های بازیکن فعلی را می‌گیریم
+    const { data: player, error: playerError } = await supabase
+      .from("players")
+      .select("coin, username")
+      .eq("telegram_id", telegramId)
+      .single();
+
+    if (playerError) throw playerError;
+
+    // ۲. تعداد بازیکنانی که سکه‌شان از این بازیکن بیشتر است را می‌شماریم
+    // این کار رتبه دقیق کاربر را در کل دیتابیس مشخص می‌کند
+    const { count, error: countError } = await supabase
+      .from("players")
+      .select("*", { count: "exact", head: true }) // فقط تعداد را می‌شمارد و دیتا برنمی‌گرداند تا بهینه باشد
+      .gt("coin", player.coin);
+
+    if (countError) throw countError;
+
+    // رتبه کاربر می‌شود: تعداد افرادی که سکه بیشتری دارند + 1
+    return {
+      rank: (count || 0) + 1,
+    };
+  } catch (error) {
+    console.error("خطا در محاسبه رتبه بازیکن:", error.message);
+    throw error;
+  }
+}
 module.exports = {
+  getTopTenPlayers,
+  getPlayerRank,
   getOrCreatePlayer,
   updateCoin,
   reduceMultiplePlayersCoin,

@@ -69,11 +69,15 @@ class SocketEventHandler {
 
       dataSource.onGameEventReceived?.call("game_state_update", cleanData);
     });
-
     socket.on("game_started", (data) {
       final cleanData = SocketUtils.convertToJSData(data);
 
       dataSource.onGameEventReceived?.call("game_started", cleanData);
+    });
+
+    socket.on("leader_board_list_gets",(data){
+      final cleanData = SocketUtils.convertToJSData(data);
+      dataSource.onGameEventReceived?.call("leader_board_list_gets", cleanData);
     });
 
     socket.on("player_joined", (data) {

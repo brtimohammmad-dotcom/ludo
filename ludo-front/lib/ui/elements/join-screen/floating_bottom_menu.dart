@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 
 class FloatingBottomMenu extends StatelessWidget {
   final double boardSize;
@@ -83,7 +85,8 @@ class FloatingBottomMenu extends StatelessWidget {
             bottom: boardSize * 0.01,
             child: HighlightedCenterItem(
               icon: Icons.emoji_events_rounded,
-              label: 'Leaderboard', // تغییر به انگلیسی (کمی کوتاه‌تر و شیک‌تر از طرح قبلی)
+              label: 'Leaderboard',
+              // تغییر به انگلیسی (کمی کوتاه‌تر و شیک‌تر از طرح قبلی)
               buttonSize: centerButtonSize,
               boardSize: boardSize,
               onTap: onLeaderboardTap,
@@ -128,7 +131,8 @@ class StandardMenuItem extends StatelessWidget {
                 color: Colors.white,
                 fontSize: boardSize * 0.026,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 0.3, // اضافه شدن فاصله جزیی بین حروف انگلیسی برای زیبایی بیشتر
+                letterSpacing:
+                    0.3, // اضافه شدن فاصله جزیی بین حروف انگلیسی برای زیبایی بیشتر
               ),
             ),
           ],
@@ -139,7 +143,7 @@ class StandardMenuItem extends StatelessWidget {
 }
 
 /// ویجت دکمه طلایی و برجسته وسط
-class HighlightedCenterItem extends StatelessWidget {
+class HighlightedCenterItem extends ConsumerWidget {
   final IconData icon;
   final String label;
   final double buttonSize;
@@ -156,7 +160,10 @@ class HighlightedCenterItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref
+        .watch(globalLoadingProvider)
+        .contains('leader_board_loading');
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -168,10 +175,7 @@ class HighlightedCenterItem extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFF146A7C),
-              border: Border.all(
-                color: const Color(0xFF194551),
-                width: 2.5,
-              ),
+              border: Border.all(color: const Color(0xFF194551), width: 2.5),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.4),
@@ -185,11 +189,13 @@ class HighlightedCenterItem extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFFFFD700),
-              size: buttonSize * 0.5,
-            ),
+            child: isLoading
+                ? CircularProgressIndicator(color: Colors.white)
+                : Icon(
+                    icon,
+                    color: const Color(0xFFFFD700),
+                    size: buttonSize * 0.5,
+                  ),
           ),
           SizedBox(height: boardSize * 0.008),
           Text(

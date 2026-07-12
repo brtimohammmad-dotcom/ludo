@@ -2,6 +2,7 @@ import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/services/audio_service.dart';
+import 'package:ludo/ui/elements/leader_board_screen.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
@@ -165,12 +166,11 @@ class _HomeState extends ConsumerState<Home> {
     }
 
     // لیسنر هوشمند وضعیت کانکشن بر اساس Stage بازی
-    ref.listen<
-      ConnectionStatus
-    >(gameControllerProvider.select((state) => state!.connectionStatus), (
-      previous,
-      next,
-    ) {
+    ref.listen<ConnectionStatus>(
+        gameControllerProvider.select((state) => state!.connectionStatus), (
+        previous,
+        next,
+        ) {
       debugPrint(
         "🔄 [Connection Event] Connection Status Changed: From $previous To $next",
       );
@@ -240,10 +240,35 @@ class _HomeState extends ConsumerState<Home> {
       _safeCallOnGameConnected();
     });
 
+    // 🚀 مدیریت هوشمند صفحات با استفاده از ValueKey برای شناسایی توسط AnimatedSwitcher
+    Widget currentWidget;
+
     if (currentStage == GameStage.joinStage) {
-      return const JoinScreen();
+      currentWidget = const JoinScreen(key: ValueKey('join_stage'));
+    } else if (currentStage == GameStage.leaderBoard) {
+      currentWidget = const LeaderboardScreen(key: ValueKey('leaderboard_stage'));
+    } else {
+      currentWidget = const Board(key: ValueKey('board_stage'));
     }
 
-    return const Board();
+    // 🚀 رندر خروجی صفحات داخل لایه انیمیشن ترکیبی Fade & Scale
+    return Scaffold(
+      backgroundColor: const Color(0xFF536E7A),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.96, end: 1.0).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: currentWidget,
+      ),
+    );
   }
 }

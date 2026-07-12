@@ -1,14 +1,18 @@
+// server.js (یا نام فایل اصلی سرور شما)
+require("dotenv").config(); // 🚀 لود کردن متغیرهای محیطی در بالاترین خط برنامه
+
 const http = require("http");
-const { bot } = require("./bot"); // فایل بالا
+const { bot } = require("./bot");
+
+// تشخیص خودکار محیط بر اساس فایل .env
+const isLocal = process.env.NODE_ENV !== "production";
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+const backendUrl = process.env.BACKEND_URL;
 
 const server = http.createServer((req, res) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://ludo-tecb.onrender.com",
-  );
-
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-
+  // استفاده از آدرس فرانت‌ند به صورت داینامیک در CORS
+  res.setHeader("Access-Control-Allow-Origin", frontendUrl);
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
@@ -17,16 +21,12 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.url === "/health") {
-    res.writeHead(200, {
-      "Content-Type": "application/json",
-    });
-
+    res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(
-      JSON.stringify({
-        status: "ok",
-      }),
+      JSON.stringify({ status: "ok", environment: process.env.NODE_ENV }),
     );
   }
+
   if (req.url === "/webhook" && req.method === "POST") {
     let body = "";
     req.on("data", (chunk) => (body += chunk));
@@ -43,16 +43,15 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+
   res.writeHead(404);
   res.end();
 });
-const isLocal = process.env.RENDER !== "true";
 
+// کانفیگ هوشمند سوکت بر اساس محیط
 const io = require("socket.io")(server, {
   cors: {
-    origin: isLocal
-      ? "http://localhost:3000"
-      : "https://ludo-tecb.onrender.com",
+    origin: frontendUrl,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -61,27 +60,29 @@ const io = require("socket.io")(server, {
     maxDisconnectionDuration: 20 * 1000,
     skipMiddlewares: false,
   },
-  pingInterval: 5000, // هر ۵ ثانیه سرور به کلاینت پینگ می‌فرستد
-  pingTimeout: 3000, // اگر کلاینت تا ۳ ثانیه بعد جواب نداد، سرور فرض می‌کند قطع شده است
+  pingInterval: 5000,
+  pingTimeout: 3000,
   transports: ["websocket", "polling"],
 });
 
 const registerGameHandlers = require("./src/sockets/gameHandler");
-
 io.on("connection", registerGameHandlers(io));
 
 const port = process.env.PORT || 3000;
 
 server.listen(port, "0.0.0.0", async () => {
-  console.log(`Server running on port ${port}`);
+  console.log(
+    `🚀 Server running in [${process.env.NODE_ENV}] mode on port ${port}`,
+  );
+  console.log(`🔗 Allowed Frontend CORS: ${frontendUrl}`);
 
-  if (!isLocal) {
-    await bot.telegram.setWebhook(
-      "https://ludo-backend-8ihb.onrender.com/webhook",
-    );
-    console.log("Webhook set!");
+  if (!isLocal && backendUrl) {
+    // ست کردن وبهوک داینامیک روی سرور اصلی
+    await bot.telegram.setWebhook(`${backendUrl}/webhook`);
+    console.log("🌐 Webhook successfully set to:", `${backendUrl}/webhook`);
   } else {
+    // اگر دوست داشتی در حالت لوکال بات کار کند، این را کامنتش را باز کن
     // bot.launch();
-    // console.log("Bot polling (local mode)");
+    console.log("🤖 Bot running in local mode (Webhook bypassed)");
   }
 });

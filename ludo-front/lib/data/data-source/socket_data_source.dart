@@ -90,7 +90,9 @@ class SocketDataSource {
   void rollDice() {
     if (isConnected) _socket!.emit("roll_dice");
   }
-
+  void getLeaderBoardList() {
+    if (isConnected) _socket!.emit("get_leader_board_list");
+  }
   void getFastPing() {
     if (isConnected) _socket!.emit("get_fast_ping");
   }
