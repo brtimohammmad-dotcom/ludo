@@ -9,6 +9,8 @@ const {
 const initialState = require("../models/initialState"); // اضافه شود
 const { resetTimer, pauseTimer, stopTimer } = require("./turnTimerService");
 const { finishGame } = require("../helpers/game_helpers");
+const { generateBalancedDice } = require("../helpers/dice_helper");
+
 function handleRollDice(socket, io) {
   // دریافت state از حافظه سراسری
   const gameState = initialState.getGameState(socket.data.gameId);
@@ -50,7 +52,7 @@ function handleRollDice(socket, io) {
 
     pauseTimer(socket.data.gameId);
     // انداختن تاس
-    const dice = Math.floor(Math.random() * 6) + 1;
+    const dice = generateBalancedDice(gameState, player);
 
     // بررسی توکن‌های فعال
     const isActivePlayer = gameState.tokens.some((t) =>
@@ -82,6 +84,7 @@ function handleRollDice(socket, io) {
     // آپدیت در حافظه سراسری
     initialState.updateGameState(socket.data.gameId, {
       ...updates,
+      players: gameState.players,
     });
 
     // پخش رویداد به همه بازیکنان این بازی

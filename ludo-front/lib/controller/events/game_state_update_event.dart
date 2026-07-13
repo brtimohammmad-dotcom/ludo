@@ -19,7 +19,8 @@ class GameStateUpdateEvent implements GameEvent {
 
   @override
   void execute(GameController controller) {
-    final livePlayer = updatedState.players.firstWhere(
+    final currentLivePlayer = controller.currentGameState!.livePlayer;
+    final livePlayerInGame = updatedState.players.firstWhere(
       (p) => p.userId == controller.currentGameState?.livePlayer?.userId,
       orElse: () => updatedState.players.first,
     );
@@ -28,7 +29,11 @@ class GameStateUpdateEvent implements GameEvent {
     controller.updateState(
       GameState(
         serverState: updatedState,
-        livePlayer: livePlayer,
+        livePlayer: currentLivePlayer?.copyWith(
+          color: livePlayerInGame.color,
+          playerStatus: livePlayerInGame.playerStatus,
+          numberOfAbsences: livePlayerInGame.numberOfAbsences
+        ),
         gameStage: GameStage.boardStage,
       ),
     );

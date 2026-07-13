@@ -67,9 +67,11 @@ class GameController extends _$GameController {
   void updateState(GameState? newState) {
     state = newState;
   }
-  void updateLeaderBoard(Map<String,dynamic> jsonData){
+
+  void updateLeaderBoard(Map<String, dynamic> jsonData) {
     ref.read(leaderboardDataProvider.notifier).updateData(jsonData);
   }
+
   void clearAllLoadings() {
     ref.read(globalLoadingProvider.notifier).clearAll();
   }
@@ -188,13 +190,11 @@ class GameController extends _$GameController {
   }
 
   void resetGame() {
-    // 🟢 ۲. کالبک‌های مربوط به لیسنرهای بورد قبلی را کاملاً پاک می‌کنیم
-    onInsufficientCoin = null; // 👈 اضافه شد
+    onInsufficientCoin = null;
     onFastPingGets = null;
     onGameReady = null;
     onGameStarted = null;
 
-    // 🟢 ۳. انیمیشن کنترلر بورد قبلی را دیسپوز می‌کنیم
     animationController?.stop();
     animationController?.dispose();
     animationController = null;
@@ -202,12 +202,12 @@ class GameController extends _$GameController {
     isGameFinishedHandled = false;
     isMovingToken = false;
 
-    // 🟢 ۴. حالا با خیال راحت استیت را پاک می‌کنیم.
-    // چون isInBoard غیراکتیو شده، ویجت‌های بورد جلوی رندر خود را می‌گیرند.
     if (state?.livePlayer != null) {
       final clearedPlayer = Player(
         userId: state!.livePlayer!.userId,
         username: state!.livePlayer!.username,
+        canClaimDailyReward: state!.livePlayer!.canClaimDailyReward,
+        rewardStreak: state!.livePlayer!.rewardStreak,
         coin: state!.livePlayer!.coin,
         color: null,
         playerStatus: null,
