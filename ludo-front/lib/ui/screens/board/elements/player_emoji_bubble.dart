@@ -42,15 +42,15 @@ class PlayerEmojiBubble extends StatelessWidget {
             ? const SizedBox.shrink(key: ValueKey('emoji_empty'))
             : Container(
           key: ValueKey('emoji_box_$emoji'), // کلید منحصربه‌فرد برای بیدار کردن انیمیشن
-          padding: const EdgeInsets.all(6),
+          padding:  EdgeInsets.all(cellSize*0.1),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(cellSize*0.2),
             boxShadow: const [
               BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))
             ],
-            border: const Border.fromBorderSide(
-              BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+            border:  Border.fromBorderSide(
+              BorderSide(color: Color(0xFFE0E0E0), width: cellSize*0.02),
             ),
           ),
           child: Center(

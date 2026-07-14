@@ -66,6 +66,7 @@ class PlayerBar extends ConsumerWidget {
 
             if (leftPlayerIndex == 0)
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   RollButton(boardSize: boardSize),
                   MessageIcon(),
