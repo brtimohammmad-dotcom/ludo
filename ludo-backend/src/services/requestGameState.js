@@ -24,9 +24,7 @@ async function handleRequestGameState(socket, data, io) {
 
   const existingGame = result.game;
   const currentPlayer = result.player;
-  if (gameMode === "friendly" && gameId !== existingGame.game_id) {
-    socket.emit("in_another_game");
-  }
+
 
   // 2) اگر بازیکن در هیچ بازی‌ای نیست
   if (!existingGame) {
@@ -55,7 +53,9 @@ async function handleRequestGameState(socket, data, io) {
     }
     return;
   }
-
+  if (gameMode === "friendly" && gameId !== existingGame.game_id) {
+    socket.emit("in_another_game");
+  }
   // 4) اگر بازی تمام شده باشد
   if (existingGame.winner) {
     socket.emit("game_finished", existingGame.winner);
