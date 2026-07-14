@@ -5,7 +5,7 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/audio_service.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
+import 'package:ludo/ui/screens//join-screen/join_screen.dart';
 
 class WinnerAlert extends ConsumerStatefulWidget {
   const WinnerAlert({

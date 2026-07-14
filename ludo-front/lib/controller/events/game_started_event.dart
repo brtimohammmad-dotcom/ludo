@@ -2,7 +2,7 @@ import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 
 class GameStartedEvent implements GameEvent {
   @override

@@ -2,7 +2,9 @@ import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/services/audio_service.dart';
-import 'package:ludo/ui/elements/leader_board_screen.dart';
+import 'package:ludo/ui/screens/board/board.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen.dart';
+import 'package:ludo/ui/screens/leader_board_screen.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
@@ -11,8 +13,7 @@ import 'package:telegram_web_app/telegram_web_app.dart';
 
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
-import 'package:ludo/ui/elements/board/board.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
+
 
 @JS('onGameConnected')
 external void onGameConnected();

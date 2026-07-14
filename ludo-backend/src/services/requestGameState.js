@@ -2,7 +2,7 @@ const { hasExistGame } = require("./authService");
 const { handleJoinGameFriendly } = require("./joinGameService");
 const { getGameState } = require("../database/games");
 
-async function handleRequestGameState(socket, data,io) {
+async function handleRequestGameState(socket, data, io) {
   if (!data) {
     console.error("No data received for request_game_state");
     return;
@@ -21,8 +21,12 @@ async function handleRequestGameState(socket, data,io) {
   };
   // 1) بررسی اینکه آیا بازیکن در بازی‌ای وجود دارد یا نه
   const result = await hasExistGame(player, socket.id);
+
   const existingGame = result.game;
   const currentPlayer = result.player;
+  if (gameMode === "friendly" && gameId !== existingGame.game_id) {
+    socket.emit("in_another_game");
+  }
 
   // 2) اگر بازیکن در هیچ بازی‌ای نیست
   if (!existingGame) {
@@ -60,7 +64,9 @@ async function handleRequestGameState(socket, data,io) {
   console.log("game recoverd");
   socket.join(existingGame.game_id);
   socket.data.gameId = existingGame.game_id;
-
+  socket.data.color = existingGame.players.find(
+    (p) => p.telegram_id === currentPlayer.telegram_id,
+  ).color;
   // 5) ارسال state کامل بازی
   socket.emit("game_recovered", existingGame);
 }

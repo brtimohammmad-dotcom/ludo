@@ -39,7 +39,8 @@ class GameFinishedEvent implements GameEvent {
         ),
         serverState: controller.currentGameState!.serverState!.copyWith(
           winner: newPlayer,
-          gameStatus: GameStatus.finished
+          gameStatus: GameStatus.finished,
+          turnStatus: null
         ),
       ),
     );

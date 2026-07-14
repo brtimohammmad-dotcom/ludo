@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/config_service.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
 import 'socket_event_handler.dart';
 
@@ -49,7 +49,7 @@ class SocketDataSource {
 
     // اتصال اولیه و فرستادن رکوئست استیت
     _socket!.onConnect((_) {
-      onGameEventReceived?.call('connected',{});
+      onGameEventReceived?.call('connected', {});
       _isConnecting = false;
       _socket!.emit("request_game_state", {
         "gameMode": mode.name,
@@ -75,7 +75,9 @@ class SocketDataSource {
     );
     _socket!.onReconnectAttempt((a) => debugPrint("🔄 Reconnect attempt #$a"));
     _socket!.onReconnectError((e) => debugPrint("⚠️ Reconnect error: $e"));
-    _socket!.onReconnectFailed((_) => onGameEventReceived?.call('reconnection_failed',{}));
+    _socket!.onReconnectFailed(
+      (_) => onGameEventReceived?.call('reconnection_failed', {}),
+    );
   }
 
   // -------------------------------------------------------
@@ -87,12 +89,18 @@ class SocketDataSource {
     }
   }
 
+  void sendEmoji(String emojiName) {
+    if (isConnected) _socket!.emit("send_emoji", emojiName);
+  }
+
   void rollDice() {
     if (isConnected) _socket!.emit("roll_dice");
   }
+
   void getLeaderBoardList() {
     if (isConnected) _socket!.emit("get_leader_board_list");
   }
+
   void getFastPing() {
     if (isConnected) _socket!.emit("get_fast_ping");
   }

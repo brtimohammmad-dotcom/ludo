@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/controller/active_emoji_notifier/active_emoji_notifier.dart';
 import 'package:ludo/controller/events/game_event_factory.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/controller/leader_board/leader_board.dart';
 import 'package:ludo/services/audio_service.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ludo/controller/handler/game_animation_manager.dart';
 import 'package:ludo/data/data-source/socket_data_source.dart';
@@ -11,7 +13,6 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 
 part 'game_controller.g.dart';
 
@@ -71,7 +72,9 @@ class GameController extends _$GameController {
   void updateLeaderBoard(Map<String, dynamic> jsonData) {
     ref.read(leaderboardDataProvider.notifier).updateData(jsonData);
   }
-
+  void showEmoji(PlayerColor color, String emoji) {
+    ref.read(activeEmojiProvider.notifier).showEmoji(color, emoji);
+  }
   void clearAllLoadings() {
     ref.read(globalLoadingProvider.notifier).clearAll();
   }
@@ -130,6 +133,12 @@ class GameController extends _$GameController {
   void getLeaderBoardList() {
     _gameRepository.getLeaderBoardList();
   }
+
+  void sendEmoji(String emojiName) {
+    _gameRepository.sendEmoji(emojiName);
+  }
+
+
 
   void getFastPing() {
     _gameRepository.getFastPing();

@@ -26,7 +26,17 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
     };
     const result = await hasExistGame(player, socket.id);
     if (result.game) {
+      console.log("hasGame");
       socket.emit("in_another_game");
+      const { handleRequestGameState } = require("./requestGameState.js");
+      await handleRequestGameState(
+        socket,
+        {
+          gameMode: numberOfPlayers < 0 ? "friendly" : "global",
+          gameId: result.game.game_id,
+        },
+        io,
+      );
       return;
     }
     let gameOrRoom;
@@ -55,7 +65,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       }
       const players = initialState.getGameState(game.game_id).players;
 
-      await addPlayerToGame(game, player);
+      await addPlayerToGame(game, player,socket);
       game = initialState.getGameState(game.game_id);
       gameOrRoom = game;
     }
@@ -71,7 +81,7 @@ async function handleJoinGame(numberOfPlayers, socket, io) {
       room = initialState.createGameInGameState(room.room_id, numberOfPlayers);
 
       // ۳. تعیین رنگ اولین بازیکن (سازنده بازی همیشه ایندکس ۰ است)
-      await addPlayerToGame(room, player);
+      await addPlayerToGame(room, player, socket);
       room = initialState.getGameState(room.game_id);
 
       gameOrRoom = room;
@@ -92,7 +102,7 @@ async function handleJoinGameFriendly(socket, io) {
     try {
       const game = initialState.getGameState(socket.data.gameId);
 
-      await addPlayerToGame(game, player);
+      await addPlayerToGame(game, player,socket);
       callFront(socket, io);
     } catch {
       console.log(error);
@@ -178,14 +188,14 @@ async function callFront(socket, io) {
 
   updateLobbyMessage(gameId);
 }
-async function addPlayerToGame(game, player) {
+async function addPlayerToGame(game, player, socket) {
   const players = game.players;
 
   const color =
     game.number_of_players === 2
       ? TWO_PLAYER_COLORS[players.length]
       : FOUR_PLAYER_COLORS[players.length];
-
+  socket.data.color = color;
   const playerInDataBase = await addPlayerToGameOnDatabase(
     player,
     game.game_id,

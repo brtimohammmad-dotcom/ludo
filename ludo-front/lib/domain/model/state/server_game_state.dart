@@ -1,6 +1,6 @@
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 
 enum GameStatus { start, finished, waitingForPlayer, exit }
 

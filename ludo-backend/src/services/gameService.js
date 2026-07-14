@@ -318,6 +318,7 @@ async function handleExitingGame(socket, io) {
     }
 
     socket.data.gameId = null;
+    socket.data.color = null;
   }
 
   // ==========================================
@@ -380,6 +381,7 @@ async function handleExitingGame(socket, io) {
     }
 
     socket.data.gameId = null;
+    socket.data.color = null;
   }
 }
 module.exports = { handleRollDice, handleMoveToken, handleExitingGame };

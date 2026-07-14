@@ -2,6 +2,7 @@ import 'package:ludo/controller/events/connected_event.dart';
 import 'package:ludo/controller/events/daily_reward_claimed_event.dart';
 import 'package:ludo/controller/events/dice_rolled_event.dart';
 import 'package:ludo/controller/events/disconnect_event.dart';
+import 'package:ludo/controller/events/emoji_received_event.dart';
 import 'package:ludo/controller/events/fast_ping_gets_event.dart';
 import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/events/game_finished_event.dart';
@@ -63,6 +64,8 @@ class GameEventFactory {
         return ConnectedEvent();
       case 'leader_board_list_gets':
         return LeaderBoardListGetsEvent(data: data);
+      case 'emoji_received':
+        return EmojiReceivedEvent.fromJson(data);
       default:
         return null;
     }

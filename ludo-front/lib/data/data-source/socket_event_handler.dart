@@ -1,6 +1,6 @@
+import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
-import 'package:ludo/ui/elements/join-screen/join_screen.dart';
 import 'socket_data_source.dart';
 import 'socket_utils.dart';
 
@@ -15,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "امیرمحمد براتی", "id": 18};
+        initData = {"first_name": "امیرمحمد براتی", "id": 23};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -34,7 +34,12 @@ class SocketEventHandler {
 
     socket.on("in_another_game", (_) {
       dataSource.onGameEventReceived?.call('in_another_game', {});
-      _requestGameState(mode, gameId);
+    });
+    socket.on("emoji_received", (data) {
+      final cleanData = SocketUtils.convertToJSData(data);
+
+      dataSource.onGameEventReceived?.call('emoji_received', cleanData);
+
     });
 
     socket.on(
@@ -75,7 +80,7 @@ class SocketEventHandler {
       dataSource.onGameEventReceived?.call("game_started", cleanData);
     });
 
-    socket.on("leader_board_list_gets",(data){
+    socket.on("leader_board_list_gets", (data) {
       final cleanData = SocketUtils.convertToJSData(data);
       dataSource.onGameEventReceived?.call("leader_board_list_gets", cleanData);
     });

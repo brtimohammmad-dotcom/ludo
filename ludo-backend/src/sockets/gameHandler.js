@@ -10,6 +10,7 @@ const {
   handleMoveToken,
   handleExitingGame,
 } = require("../services/gameService");
+const { handleSendingEmoji } = require("../services/sendEmojiService.js");
 
 module.exports = (io) => {
   return async (socket) => {
@@ -49,7 +50,7 @@ module.exports = (io) => {
       if (!socket.data.gameId) {
         return socket.emit("error", "No game found!");
       }
-     await handleRollDice(socket, io);
+      await handleRollDice(socket, io);
     });
 
     socket.on("move_token", async (token) => {
@@ -67,6 +68,9 @@ module.exports = (io) => {
     });
     socket.on("get_leader_board_list", async () => {
       await handleGetLeaderBoardList(socket);
+    });
+    socket.on("send_emoji", (data) => {
+      handleSendingEmoji(socket, data, io);
     });
     // رویداد disconnect
     socket.on("disconnect", (reason) => {
