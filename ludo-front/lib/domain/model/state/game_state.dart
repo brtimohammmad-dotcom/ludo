@@ -37,17 +37,15 @@ extension GameStateX on GameState? {
   }
 
   int reduceCoin() {
-    final s = this!.serverState!;
-    return s.numberOfPlayers == 2 ? 100 : 100;
+    final s = this!.serverState;
+    if (s == null) return 0;
+    return s.level.entryFee;
   }
 
-  int winPrice() {
+  int  winPrice() {
     final s = this!.serverState;
-    return s == null
-        ? 0
-        : s.numberOfPlayers == 2
-        ? 180
-        : 300;
+    if (s == null) return 0;
+    return s.numberOfPlayers == 2 ? s.level.prize2P : s.level.prize4P;
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/utils/alerts/daily_reward_dialog.dart';
 import 'package:ludo/ui/utils/alerts/insufficient_coins_alert.dart';
@@ -17,12 +18,12 @@ class JoinScreenHandler {
     required this.gameController,
     required this.audioService,
     required this.isMounted,
-  }); // سمی‌کالن اصلاح شد
+  });
 
   void setupControllerCallbacks() {
     if (Navigator.canPop(context)) Navigator.pop(context);
     gameController.onGameReady = () {
-      if (!isMounted()) return; // بررسی زنده بودن ویجت
+      if (!isMounted()) return;
       if (Navigator.canPop(context)) Navigator.pop(context);
 
       gameController.updateState(
@@ -37,16 +38,17 @@ class JoinScreenHandler {
           gameController.currentGameState?.livePlayer?.coin ?? 0;
       if (!isMounted()) return;
       if (Navigator.canPop(context)) Navigator.pop(context);
+
       showAnimatedDialog(
         context: context,
         child: InsufficientCoinsAlert(
-          requiredCoins: 100,
+          requiredCoins: gameController.currentGameState!.serverState!.level.entryFee,
           currentCoins: playerCoin,
         ),
       );
     };
-    if (gameController.currentGameState?.livePlayer?.canClaimDailyReward ==
-        true) {
+
+    if (gameController.currentGameState?.livePlayer?.canClaimDailyReward == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!isMounted()) return;
 
@@ -61,18 +63,26 @@ class JoinScreenHandler {
         showDialog(
           context: context,
           barrierDismissible: false,
-          // کاربر حتماً باید دکمه را بزند تا دیالوگ بسته شود
           builder: (context) => DailyRewardDialog(boardSize: boardSize),
         );
       });
     }
   }
 
-  void handleGameSearch(int numberOfPlayers, double boardSize) {
+  // 🚀 تغییر متد: حالا بازی با gameType کنترل می‌شود و نیازی به تعداد بازیکن منفی نیست
+  void handleGameSearch({
+    required int numberOfPlayers,
+    required GameType gameType,
+    required GameLevel gameLevel, // 🚀 دریافت لول بازی به جای مقدار عددی
+    required double boardSize,
+  }) {
     audioService.playSFX('assets/audio/sound-effect/friend_button_sound.wav');
-    final int playerCoin =
-        gameController.currentGameState?.livePlayer?.coin ?? 0;
-    final int coinCost = numberOfPlayers > 0 ? 100 : 0;
+
+    final int playerCoin = gameController.currentGameState?.livePlayer?.coin ?? 0;
+
+    // سرور برای بازی دوستانه هزینه‌ای کسر نمی‌کند، اما برای بررسی اولیه سمت کلاینت:
+    final int coinCost = gameType == GameType.friendly ? 0 : gameLevel.entryFee;
+
     if (playerCoin < coinCost) {
       if (!isMounted()) return;
       showAnimatedDialog(
@@ -84,9 +94,16 @@ class JoinScreenHandler {
       );
       return;
     }
+
     gameController.onFastPingGets = () {
       if (!isMounted()) return;
-      gameController.startGame(numberOfPlayers: numberOfPlayers);
+
+      // 🚀 ارسال لول بازی (مثلا 'bronze' یا 'gold') به همراه نوع بازی به کنترلر
+      gameController.startGame(
+        numberOfPlayers: numberOfPlayers,
+        gameType: gameType,
+        gameLevel: gameLevel, // فرستادن لول به بک‌اند برای کسر سکه امن
+      );
       gameController.startLoading("waiting_for_game");
     };
     gameController.getFastPing();

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
@@ -27,7 +26,7 @@ class SocketDataSource {
   // -------------------------------------------------------
   // CONNECT
   // -------------------------------------------------------
-  void connect(GameMode mode, String? gameId) {
+  void connect(GameType type, String? gameId) {
     final serverUrl = Config.serverUrl;
     Config.printEnvironmentInfo();
 
@@ -52,7 +51,7 @@ class SocketDataSource {
       onGameEventReceived?.call('connected', {});
       _isConnecting = false;
       _socket!.emit("request_game_state", {
-        "gameMode": mode.name,
+        "gameType": type.name,
         "gameId": gameId ?? "",
       });
     });
@@ -61,7 +60,7 @@ class SocketDataSource {
     SocketEventHandler(
       dataSource: this,
       socket: _socket!,
-    ).registerEvents(mode, gameId);
+    ).registerEvents(type, gameId);
 
     // مدیریت وضعیت دیسکانیکت و ریکانکت سوکت
     _setupConnectionLifeCycle();
@@ -83,9 +82,14 @@ class SocketDataSource {
   // -------------------------------------------------------
   // GAME ACTIONS (EMITS)
   // -------------------------------------------------------
-  void joinGame(int numberOfPlayers) {
+  void joinGame(int numberOfPlayers, GameType gameType, GameLevel gameLevel) {
     if (isConnected) {
-      _socket!.emit("join_game", {"numberOfPlayers": numberOfPlayers});
+      debugPrint("sending_joinGame");
+      _socket!.emit("join_game", {
+        "numberOfPlayers": numberOfPlayers,
+        "gameType": gameType.name,
+        "gameLevel": gameLevel.name,
+      });
     }
   }
 

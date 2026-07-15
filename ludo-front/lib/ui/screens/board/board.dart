@@ -61,7 +61,7 @@ class _BoardState extends ConsumerState<Board>
         ? screenWidth
         : screenHeight * 0.86);
 
-    final gameMode = ref.watch(
+    final numberOfPlayers = ref.watch(
       gameControllerProvider.select(
         (state) => state?.serverState?.numberOfPlayers ?? 2,
       ),
@@ -77,8 +77,7 @@ class _BoardState extends ConsumerState<Board>
           if (Navigator.canPop(context)) {
             Navigator.of(context).pop();
           }
-        } else if (
-            next == GameStatus.finished) {
+        } else if (next == GameStatus.finished) {
           if (!context.mounted) return;
 
           final winner = _gameController.currentGameState?.serverState?.winner;
@@ -118,15 +117,15 @@ class _BoardState extends ConsumerState<Board>
               PlayerBar(
                 boardSize: boardSize,
                 barHeight: barHeight,
-                leftPlayerIndex: gameMode == 2 ? -1 : 1,
-                rightPlayerIndex: gameMode == 2 ? 1 : 2,
+                leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
+                rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
               ),
               MainBoard(boardSize: boardSize),
               PlayerBar(
                 boardSize: boardSize,
                 barHeight: barHeight,
                 leftPlayerIndex: 0,
-                rightPlayerIndex: gameMode == 2 ? -1 : 3,
+                rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
               ),
             ],
           ),

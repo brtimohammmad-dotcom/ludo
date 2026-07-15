@@ -1,8 +1,6 @@
 const activeGames = new Map(); // gameId -> gameState
 const gameMessages = new Map(); // gameId -> message info
 
-
-
 // توابع پایه state بازی
 const getGameState = (gameId) => activeGames.get(gameId);
 
@@ -32,12 +30,23 @@ const addPlayerToGameState = (newPlayer, gameId) => {
   }
 };
 
-const createGameInGameState = (gameId, numberOfPlayers) => {
-  let friendlyGameId = null;
+/**
+ * ایجاد وضعیت اولیه یک بازی جدید در حافظه موقت سرور
+ * @param {string} gameId - شناسه بازی
+ * @param {number} numberOfPlayers - تعداد واقعی بازیکنان (۲ یا ۴)
+ * @param {string} gameType - نوع بازی ('global' یا 'friendly')
+ * @param {string} gameLevel - سطح بازی ('free', 'bronze', 'silver', 'gold', 'vip')
+ */
+const createGameInGameState = (
+  gameId,
+  numberOfPlayers,
+  gameType,
+  gameLevel,
+) => {
   let tokens;
 
-
-  if (numberOfPlayers === 2 || numberOfPlayers === -2) {
+  // تعیین توکن‌ها بر اساس تعداد بازیکنان (دیگر خبری از اعداد منفی نیست)
+  if (numberOfPlayers === 2) {
     tokens = [
       { id: 1, position: -1, color: "red" },
       { id: 2, position: -1, color: "red" },
@@ -69,6 +78,7 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
     ];
   }
 
+  // ثبت وضعیت بازی با ساختار جدید و فیلدهای اضافه شده
   setGameState(gameId, {
     game_id: gameId,
     last_dice_value: 1,
@@ -78,8 +88,9 @@ const createGameInGameState = (gameId, numberOfPlayers) => {
     winner: null,
     players: [],
     tokens: tokens,
-    number_of_players: numberOfPlayers > 0 ? numberOfPlayers : -numberOfPlayers,
-    game_mode: numberOfPlayers > 0 ? "global" : "friendly",
+    number_of_players: numberOfPlayers,
+    game_type: gameType,
+    game_level: gameLevel,
   });
 
   return getGameState(gameId);

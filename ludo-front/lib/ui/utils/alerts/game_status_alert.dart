@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
-import 'package:ludo/ui/screens/join-screen/join_screen.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 class WaitingForPlayersAlert extends ConsumerWidget {
@@ -124,7 +124,7 @@ class WaitingForPlayersAlert extends ConsumerWidget {
 
           SizedBox(height: boardSize * 0.04),
 
-          if (state?.mode == GameMode.friendly) ...[
+          if (state?.type == GameType.friendly) ...[
             ElevatedButton.icon(
               onPressed: () {
                 final gameId = state?.gameId;

@@ -247,7 +247,7 @@ function handleMoveToken(socket, token, io) {
         await finishGame(
           socket.data.gameId,
           player,
-          currentGameState.game_mode,
+          currentGameState.game_type,
           io,
         );
       }
@@ -307,7 +307,7 @@ async function handleExitingGame(socket, io) {
           players: currentGame.players,
           end_at: new Date(),
         },
-        currentGame.game_mode,
+        currentGame.game_type,
       );
 
       initialState.deleteGameState(gameId);
@@ -358,7 +358,7 @@ async function handleExitingGame(socket, io) {
       await finishGame(
         currentGame.game_id,
         winnerPlayer,
-        currentGame.game_mode,
+        currentGame.game_type,
         io,
       );
     }

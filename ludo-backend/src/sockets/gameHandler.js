@@ -32,18 +32,14 @@ module.exports = (io) => {
       await handleClaimDailyReward(socket);
     });
 
-    socket.on("join_game", async ({ numberOfPlayers }) => {
-      if (
-        numberOfPlayers !== 2 &&
-        numberOfPlayers !== 4 &&
-        numberOfPlayers !== -2 &&
-        numberOfPlayers !== -4
-      ) {
-        return socket.emit("error", "Invalid game mode");
+    socket.on("join_game", async (data) => {
+        console.log("handle joining game");
+      if (!data) {
+        return socket.emit("error", "Invalid data");
       }
 
       // بازیکن را وارد بازی کن
-      await handleJoinGame(numberOfPlayers, socket, io);
+      await handleJoinGame(data, socket, io);
     });
 
     socket.on("roll_dice", async () => {

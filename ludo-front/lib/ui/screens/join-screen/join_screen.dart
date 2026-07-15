@@ -11,7 +11,6 @@ import 'package:ludo/ui/utils/alerts/freinds_dialog.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/waiting_for_game_alert.dart';
 
-enum GameMode { global, friendly }
 
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({super.key});

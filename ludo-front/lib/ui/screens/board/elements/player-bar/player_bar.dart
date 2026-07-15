@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/exit_icon.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/message_icon.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/player_bar_username_container.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/roll_button.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/win_prize.dart';
-import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 
 
 class PlayerBar extends ConsumerWidget {
@@ -27,7 +27,7 @@ class PlayerBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isFriendly = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.mode == GameMode.friendly,
+        (s) => s?.serverState?.type == GameType.friendly,
       ),
     );
 

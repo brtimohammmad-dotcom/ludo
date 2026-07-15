@@ -7,67 +7,86 @@ async function handleRequestGameState(socket, data, io) {
     console.error("No data received for request_game_state");
     return;
   }
-  const { gameMode, gameId } = data;
+  // 🚀 هماهنگ‌سازی با متغیرهای جدید: استفاده از gameType به جای gameMode
+  const { gameType, gameId } = data;
 
   if (!socket.data.telegramId) {
     socket.emit("player_not_authorized");
     return;
   }
-  console.log(`Received gameMode: ${gameMode}, gameId: ${gameId}`);
+  console.log(`Received gameType: ${gameType}, gameId: ${gameId}`);
 
   const player = {
     telegram_id: socket.data.telegramId,
     username: socket.data.firstName,
   };
-  // 1) بررسی اینکه آیا بازیکن در بازی‌ای وجود دارد یا نه
-  const result = await hasExistGame(player, socket.id);
 
+  // ۱) بررسی اینکه آیا بازیکن در بازی‌ای از قبل وجود دارد یا نه
+  const result = await hasExistGame(player, socket.id);
   const existingGame = result.game;
   const currentPlayer = result.player;
 
-
-  // 2) اگر بازیکن در هیچ بازی‌ای نیست
+  // ۲) اگر بازیکن در حال حاضر در هیچ بازیِ زنده‌ای (در استیت سرور) نیست
   if (!existingGame) {
-    if (gameMode && gameId && gameMode === "friendly") {
+    // اگر درخواست ورود به یک بازی دوستانه از طریق لینک یا آیدی است
+    if (gameType && gameId && gameType === "friendly") {
       socket.data.gameId = gameId;
     }
+
     if (!socket.data.gameId) {
       socket.emit("not_in_game");
       return;
     }
-    // 3) اگر بازی در دیتابیس وجود دارد ولی در حافظه نیست
-    const dbGame = await getGameState(socket.data.gameId, gameMode);
+
+    // ۳) بررسی وضعیت بازی از روی دیتابیس (اگر سرور ریست شده یا بازی در حافظه پاک شده)
+    const dbGame = await getGameState(socket.data.gameId, gameType);
     if (!dbGame) {
       socket.emit("not_in_game");
       return;
     }
 
+    // اگر بازی قبلاً برنده داشته و تمام شده
     if (dbGame.winner) {
       console.log("has winner");
       socket.emit("game_finished", dbGame.winner);
       return;
     }
-    if (gameMode && gameId && gameMode === "friendly") {
+
+    // اگر بازیستانه بود و هنوز پر نشده، بازیکن را به روم دوستانه جوین کن
+    if (gameType && gameId && gameType === "friendly") {
       await handleJoinGameFriendly(socket, io);
       return;
     }
     return;
   }
-  if (gameMode === "friendly" && gameId !== existingGame.game_id) {
+
+  // ۴) اگر بازیکن در یک بازی هست، اما می‌خواهد وارد یک بازی دوستانه دیگر شود!
+  if (gameType === "friendly" && gameId !== existingGame.game_id) {
     socket.emit("in_another_game");
   }
-  // 4) اگر بازی تمام شده باشد
+
+  // ۵) اگر بازی موجود تمام شده باشد
   if (existingGame.winner) {
     socket.emit("game_finished", existingGame.winner);
     return;
   }
-  console.log("game recoverd");
+
+  // ۶) 🚀 ریکاوری موفق بازی (Game Recovered)
+  console.log("game recovered");
   socket.join(existingGame.game_id);
   socket.data.gameId = existingGame.game_id;
-  socket.data.color = existingGame.players.find(
+
+  // پیدا کردن رنگ بازیکن در استیت بازی
+  const matchedPlayer = existingGame.players.find(
     (p) => p.telegram_id === currentPlayer.telegram_id,
-  ).color;
-  // 5) ارسال state کامل بازی
+  );
+
+  if (matchedPlayer) {
+    socket.data.color = matchedPlayer.color;
+  }
+
+  // ارسال وضعیت کامل بازی به فرانت‌اند جهت بازسازی صفحه مسابقه
   socket.emit("game_recovered", existingGame);
 }
+
 module.exports = { handleRequestGameState };

@@ -2,7 +2,6 @@ import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
-import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 
 class GameStartedEvent implements GameEvent {
   @override
@@ -19,7 +18,7 @@ class GameStartedEvent implements GameEvent {
     final newPlayers = state?.players
         .map(
           (p) => p.copyWith(
-            coin: state.mode == GameMode.global ? p.coin - reducedCoin : p.coin,
+            coin: state.type == GameType.global ? p.coin - reducedCoin : p.coin,
           ),
         )
         .toList();

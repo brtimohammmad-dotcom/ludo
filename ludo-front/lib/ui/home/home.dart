@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/screens/board/board.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen.dart';
@@ -134,12 +135,12 @@ class _HomeState extends ConsumerState<Home> {
       final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
       if (startParam != null && startParam.startsWith("game_")) {
         final gameId = startParam.replaceAll("game_", "");
-        gameController.connect(GameMode.friendly, gameId);
+        gameController.connect(GameType.friendly, gameId);
       } else {
-        gameController.connect(GameMode.global, null);
+        gameController.connect(GameType.global, null);
       }
     } else {
-      gameController.connect(GameMode.global, null);
+      gameController.connect(GameType.global, null);
     }
   }
 

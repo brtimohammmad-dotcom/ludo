@@ -1,6 +1,61 @@
+import 'package:flutter/material.dart';
+
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/token.dart';
-import 'package:ludo/ui/screens/join-screen/join_screen.dart';
+
+enum GameType { friendly, global }
+
+enum GameLevel {
+  free(
+    displayName: "friendly",
+    entryFee: 0,
+    prize2P: 0,
+    prize4P: 0,
+    color: Colors.transparent,
+  ),
+  bronze(
+    displayName: "Bronze",
+    entryFee: 50,
+    prize2P: 90,
+    prize4P: 150,
+    color: Color(0xFFCD7F32),
+  ),
+  silver(
+    displayName: "Silver",
+    entryFee: 200,
+    prize2P: 360,
+    prize4P: 600,
+    color: Color(0xFFC0C0C0),
+  ),
+  gold(
+    displayName: "Gold",
+    entryFee: 500,
+    prize2P: 900,
+    prize4P: 1500,
+    color: Color(0xFFFFD700),
+  ),
+  vip(
+    displayName: "VIP",
+    entryFee: 1000,
+    prize2P: 1800,
+    prize4P: 3000,
+    color: Color(0xFFD4AF37),
+  );
+
+  final String displayName;
+  final int entryFee;
+  final int prize2P;
+  final int prize4P;
+  final Color color;
+
+  const GameLevel({
+    required this.displayName,
+    required this.entryFee,
+    required this.prize2P,
+    required this.prize4P,
+    required this.color,
+  });
+}
 
 enum GameStatus { start, finished, waitingForPlayer, exit }
 
@@ -21,12 +76,14 @@ class ServerState {
   final PlayerColor currentTurn;
   final GameStatus gameStatus;
   final List<Player> players;
-  final GameMode mode;
+  final GameLevel level;
+  final GameType type;
   Player? winner;
 
   ServerState({
     this.winner,
-    required this.mode,
+    required this.type,
+    required this.level,
     required this.gameId,
     required this.numberOfPlayers,
     required this.turnStatus,
@@ -45,7 +102,8 @@ class ServerState {
     }
     return ServerState(
       gameId: json['game_id'],
-      mode: GameMode.values.byName(json['game_mode']),
+      type: GameType.values.byName(json['game_type']),
+      level: GameLevel.values.byName(json['game_level']),
       numberOfPlayers: json['number_of_players'],
       turnStatus: TurnStatus.values.byName(json['turn_status']),
       winner: winner,
@@ -61,7 +119,8 @@ class ServerState {
 
   ServerState copyWith({
     String? gameId,
-    GameMode? mode,
+    GameType? type,
+    GameLevel? level,
     List<Token>? tokens,
     int? lastDiceValue,
     PlayerColor? currentTurn,
@@ -73,7 +132,8 @@ class ServerState {
   }) {
     return ServerState(
       gameId: gameId ?? this.gameId,
-      mode: mode ?? this.mode,
+      type: type ?? this.type,
+      level: level ?? this.level,
       winner: winner ?? this.winner,
       numberOfPlayers: numberOfPlayers ?? this.numberOfPlayers,
       turnStatus: turnStatus ?? this.turnStatus,

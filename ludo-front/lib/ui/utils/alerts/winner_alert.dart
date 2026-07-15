@@ -3,9 +3,10 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
+import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/audio_service.dart';
-import 'package:ludo/ui/screens//join-screen/join_screen.dart';
 
 class WinnerAlert extends ConsumerStatefulWidget {
   const WinnerAlert({
@@ -60,10 +61,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
 
     // محاسبه خودکار مبلغ جایزه بر اساس تعداد بازیکنان
     final winPrice =
-        widget.gameController.currentGameState?.serverState?.numberOfPlayers ==
-            2
-        ? 180
-        : 300;
+        widget.gameController.currentGameState?.winPrice();
 
     return Material(
       color: Colors.transparent,
@@ -176,8 +174,8 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                             .gameController
                             .currentGameState
                             ?.serverState
-                            ?.mode ==
-                        GameMode.global)
+                            ?.type ==
+                        GameType.global)
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: boardSize * 0.05,

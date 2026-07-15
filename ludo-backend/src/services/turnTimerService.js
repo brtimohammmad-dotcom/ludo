@@ -92,7 +92,7 @@ function startTimer(socket, io) {
           await finishGame(
             socket.data.gameId,
             onlinePlayer,
-            game.game_mode,
+            game.game_type,
             io,
           );
         }

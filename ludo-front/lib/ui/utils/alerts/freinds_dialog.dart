@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/domain/model/state/server_game_state.dart';
 
 void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handler) {
   showDialog(
@@ -11,7 +12,7 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
         child: Container(
           padding: EdgeInsets.all(boardSize * 0.05),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E2E3D), // هماهنگ با تم تیره بازی
+            color: const Color(0xFF1E2E3D),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFF4A6B8C), width: 2),
             boxShadow: const [
@@ -54,8 +55,13 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
                     color: const Color(0xFF146A7C),
                     boardSize: boardSize,
                     onTap: () {
-                      Navigator.pop(context); // بستن دایالوگ
-                      handler.handleGameSearch(-2, boardSize); // اجرای متد دوستانه ۲ نفره
+                      Navigator.pop(context);
+                      handler.handleGameSearch(
+                        numberOfPlayers: 2,
+                        gameType: GameType.friendly,
+                        gameLevel: GameLevel.free,
+                        boardSize: boardSize,
+                      );
                     },
                   ),
                   // دکمه ۴ نفره دوستانه
@@ -67,7 +73,12 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
                     boardSize: boardSize,
                     onTap: () {
                       Navigator.pop(context);
-                      handler.handleGameSearch(-4, boardSize); // اجرای متد دوستانه ۴ نفره
+                      handler.handleGameSearch(
+                        numberOfPlayers: 4,
+                        gameType: GameType.friendly,
+                        gameLevel: GameLevel.free,
+                        boardSize: boardSize,
+                      );
                     },
                   ),
                 ],

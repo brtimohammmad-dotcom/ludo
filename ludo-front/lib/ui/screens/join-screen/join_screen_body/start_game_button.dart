@@ -6,6 +6,7 @@ class StartGameButton extends StatelessWidget {
   final double boardSize;
   final int entryFee;
   final int prizePool;
+  final Color themeColor; // رنگ تم اختصاصی لول (مثلا طلایی برای گلد)
 
   const StartGameButton({
     super.key,
@@ -14,11 +15,11 @@ class StartGameButton extends StatelessWidget {
     required this.boardSize,
     required this.entryFee,
     required this.prizePool,
+    required this.themeColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isFriendly = numberOfPlayers < 0;
     final isWide = numberOfPlayers == -1;
 
     String modeLabel = "";
@@ -33,7 +34,6 @@ class StartGameButton extends StatelessWidget {
     final buttonWidth = isWide ? boardSize * 0.675 : boardSize * 0.33;
     final buttonHeight = boardSize * 0.20;
     final borderRadius = BorderRadius.circular(boardSize * 0.02);
-    final themeColor = isFriendly ? Colors.greenAccent : Colors.cyanAccent;
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
@@ -42,16 +42,14 @@ class StartGameButton extends StatelessWidget {
         height: buttonHeight,
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          // 🟢 بُوردر را به اینجا (لایه اصلی) آوردیم تا قطعاً و بدون غیب شدن رندر شود
           border: Border.all(
-            color: themeColor.withValues(alpha: 0.35),
+            color: themeColor.withValues(alpha: 0.5),
             width: 1.5,
           ),
-          // سایه فلت ۳بعدیِ کاملاً سبک بدون بلور
           boxShadow: [
             BoxShadow(
-              color: themeColor.withValues(alpha: 0.15),
-              blurRadius: 0,
+              color: themeColor.withValues(alpha: 0.2),
+              blurRadius: 4,
               offset: const Offset(0, 3),
             ),
           ],
@@ -62,7 +60,6 @@ class StartGameButton extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               borderRadius: borderRadius,
-              // شبیه‌سازی شیشه با شیب رنگ آلفادار
               gradient: LinearGradient(
                 colors: [
                   Colors.white.withValues(alpha: 0.12),
@@ -75,7 +72,6 @@ class StartGameButton extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // ۱. عنوان بازی
                 Text(
                   modeLabel,
                   style: TextStyle(
@@ -87,8 +83,6 @@ class StartGameButton extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: boardSize * 0.004),
-
-                // ۲. هزینه ورود
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -104,8 +98,6 @@ class StartGameButton extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                // ۳. مقدار جایزه برد
                 if (prizePool > 0) ...[
                   SizedBox(height: boardSize * 0.002),
                   Text(

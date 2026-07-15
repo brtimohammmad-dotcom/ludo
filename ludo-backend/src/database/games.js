@@ -5,19 +5,37 @@ const initialState = require("../models/initialState");
 /**
  * ایجاد یک بازی جدید در دیتابیس
  */
-async function createNewGameInDatabase(numberOfPlayers) {
-  let isGlobal;
-  if (numberOfPlayers === 2 || numberOfPlayers === 4) {
-    isGlobal = true;
-  } else {
-    false;
-  }
+async function createGlobalGame(numberOfPlayers, gameLevel) {
   try {
     // درج رکورد جدید و دریافت آنی کل اطلاعات رکورد با استفاده از select()
     const { data: newGame, error } = await supabase
-      .from(isGlobal ? "game" : "room")
+      .from("game")
       .insert([
-        { number_of_players: isGlobal ? numberOfPlayers : -numberOfPlayers },
+        {
+          number_of_players: numberOfPlayers,
+          game_level: gameLevel,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return newGame; // شامل game_id تولید شده به همراه مقادیر پیش‌فرض (started_at و ...)
+  } catch (error) {
+    console.error("خطا در ایجاد بازی جدید:", error);
+    throw error;
+  }
+}
+async function createFriendlyGame(numberOfPlayers) {
+  try {
+    // درج رکورد جدید و دریافت آنی کل اطلاعات رکورد با استفاده از select()
+    const { data: newGame, error } = await supabase
+      .from("room")
+      .insert([
+        {
+          number_of_players: numberOfPlayers,
+        },
       ])
       .select()
       .single();
@@ -34,14 +52,14 @@ async function createNewGameInDatabase(numberOfPlayers) {
 /**
  * به‌روزرسانی فیلدهای داینامیک بازی
  */
-async function updateGameState(id, fields,gameMode) {
+async function updateGameState(id, fields, gameType) {
   try {
     // در سوپابیس برای آپدیت داینامیک نیازی به ساختن دستی کلاز SET (مثل نقشه کردن Keys و Values) نیست؛
     // خود پکیج آبجکت fields را می‌گیرد و فیلدهای تغییر یافته را اعمال می‌کند.
     const { data: updatedGame, error } = await supabase
-      .from(gameMode=="global"?"game":"room")
+      .from(gameType == "global" ? "game" : "room")
       .update(fields)
-      .eq(gameMode=="global"?"game_id":"room_id", id)
+      .eq(gameType == "global" ? "game_id" : "room_id", id)
       .select()
       .single();
 
@@ -65,12 +83,12 @@ async function updateGameState(id, fields,gameMode) {
     throw error;
   }
 }
-async function getGameState(gameId,gameMode) {
+async function getGameState(gameId, gameType) {
   // روش 3: بدون single() - همیشه یک آرایه برمی‌گردد
   const { data: games, error } = await supabase
-    .from(gameMode=="global"?"game":"room")
+    .from(gameType == "global" ? "game" : "room")
     .select("*")
-    .eq(gameMode=="global"?"game_id":"room_id", gameId);
+    .eq(gameType == "global" ? "game_id" : "room_id", gameId);
 
   if (error) {
     console.error("خطا:", error);
@@ -82,7 +100,8 @@ async function getGameState(gameId,gameMode) {
   }
 }
 module.exports = {
-  createNewGameInDatabase,
+  createFriendlyGame,
+  createGlobalGame,
   updateGameState,
   getGameState,
 };
