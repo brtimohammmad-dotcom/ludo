@@ -13,66 +13,61 @@ class RollButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🎯 گوش دادن کاملاً مجزا و بهینه به وضعیت نوبت تاس
     final myTurnToRoll = ref.watch(
       gameControllerProvider.select((state) => state?.isMyTurnToRoll ?? false),
     );
 
     final gameControllerNotifier = ref.read(gameControllerProvider.notifier);
-    final borderRadius = BorderRadius.circular(8);
+    final borderRadius = BorderRadius.circular(boardSize * 0.015);
 
-    // استایل‌های ثابت و کاملاً Solid (بدون محاسبات داینامیک گران‌قیمت در متریال دکمه)
+    // 🟢 سبز نئونی گداخته و درخشان برای حالت فعال
     final activeGradient = LinearGradient(
       colors: [
-        const Color(0xFF66BB6A), // سبز زنده و تخت
-        const Color(0xFF43A047), // سبز پررنگ‌تر تخت
+        const Color(0xFF00FF87), // سبز فسفری نئون
+        const Color(0xFF60EFFF), // فیروزه‌ای نئون
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
 
+    // ⚪ حالت غیر فعال شیشه‌ای مات و شیک
     final inactiveGradient = const LinearGradient(
-      colors: [Color(0x33FFFFFF), Color(0x42FFFFFF)],
+      colors: [Color(0x1AFFFFFF), Color(0x0DFFFFFF)],
     );
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: boardSize * 0.01),
-      child: GestureDetector(
-        // اگر نوبت کاربر بود متد اجرا شود، در غیر این صورت تاچ کاملاً خاموش است
-        onTap: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150), // یک انیمیشن بسیار سبک برای تغییر حالت نوبت
-          curve: Curves.easeIn,
-          padding: EdgeInsets.symmetric(
-            horizontal: boardSize * 0.05,
-            vertical: boardSize * 0.015,
+    return GestureDetector(
+      onTap: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(
+          horizontal: boardSize * 0.05,
+          vertical: boardSize * 0.012,
+        ),
+        decoration: BoxDecoration(
+          gradient: myTurnToRoll ? activeGradient : inactiveGradient,
+          borderRadius: borderRadius,
+          boxShadow: myTurnToRoll
+              ? [
+            BoxShadow(
+              color: const Color(0x6600FF87),
+              blurRadius: 10,
+              spreadRadius: 1,
+            )
+          ]
+              : null,
+          border: Border.all(
+            color: myTurnToRoll ? const Color(0xFF00FF87) : Colors.white12,
+            width: 1.2,
           ),
-          decoration: BoxDecoration(
-            gradient: myTurnToRoll ? activeGradient : inactiveGradient,
-            borderRadius: borderRadius,
-            // ⚡ استفاده از سایه تخت بدون بلور (Solid shadow) برای ایجاد عمق ۳ بعدی کاملاً بهینه
-            boxShadow: myTurnToRoll
-                ? [
-              const BoxShadow(
-                color: Color(0x661B5E20),
-                blurRadius: 0,
-                offset: Offset(0, 3),
-              )
-            ]
-                : null,
-            border: Border.all(
-              color: myTurnToRoll ? const Color(0xFF81C784) : Colors.white10,
-              width: 1.2,
-            ),
-          ),
-          child: Text(
-            'ROLL',
-            style: TextStyle(
-              color: myTurnToRoll ? Colors.white : Colors.white54,
-              fontSize: boardSize * 0.025,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
+        ),
+        child: Text(
+          'ROLL',
+          style: TextStyle(
+            color: myTurnToRoll ? const Color(0xFF0A0A12) : Colors.white38, // متن تیره روی دکمه روشن برای کنتراست فوق‌العاده
+            fontSize: boardSize * 0.024,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
           ),
         ),
       ),

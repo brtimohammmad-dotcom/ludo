@@ -16,23 +16,29 @@ class WinPrize extends ConsumerWidget {
         vertical: boardSize * 0.01,
       ),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.amber, Colors.orangeAccent],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        // 🌌 ترکیب طلایی و نارنجی نئونی با پس‌زمینه بسیار تیره شیشه‌ای
+        color: const Color(0x22FFD700),
         borderRadius: BorderRadius.circular(boardSize * 0.015),
+        border: Border.all(
+          color: const Color(0xFFFFD700), // مرز طلایی درخشان
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: const Color(0x33FFD700),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
         ],
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.emoji_events, color: Colors.white, size: boardSize * 0.03),
+          Icon(
+            Icons.emoji_events_rounded,
+            color: const Color(0xFFFFD700), // جام طلایی درخشان
+            size: boardSize * 0.03,
+          ),
           SizedBox(width: boardSize * 0.01),
           Text(
             ref.watch(
@@ -41,9 +47,15 @@ class WinPrize extends ConsumerWidget {
               }),
             ),
             style: TextStyle(
-              color: Colors.white,
+              color: const Color(0xFFFFE082),
               fontWeight: FontWeight.bold,
               fontSize: boardSize * 0.02,
+              shadows: [
+                Shadow(
+                  color: const Color(0x8AFFD700),
+                  blurRadius: 4,
+                ),
+              ],
             ),
           ),
         ],

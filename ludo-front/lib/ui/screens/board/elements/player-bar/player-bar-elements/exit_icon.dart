@@ -24,24 +24,25 @@ class ExitIcon extends ConsumerWidget {
         width: buttonSize,
         height: buttonSize,
         decoration: BoxDecoration(
-          color: Colors.blueGrey,
+          // 🌌 شیشه‌ای تیره با تم بنفش/صورتیِ نئونی ملایم مخصوص دکمه‌های خطر/خروج
+          color: const Color(0x33FF3B30),
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.4),
-            width: 1.5,
+            color: const Color(0xAAFF3B30), // مرز نئونی قرمز
+            width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 5,
-              offset: const Offset(0, 3),
+              color: const Color(0x33FF3B30),
+              blurRadius: 6,
+              spreadRadius: 1,
             ),
           ],
         ),
         child: Center(
           child: Icon(
             Icons.logout_rounded,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: const Color(0xFFFF8A80), // رنگ آیکون روشن و هماهنگ
             size: buttonSize * 0.55,
           ),
         ),

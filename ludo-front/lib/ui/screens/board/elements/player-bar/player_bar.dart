@@ -8,7 +8,6 @@ import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/pl
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/roll_button.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/win_prize.dart';
 
-
 class PlayerBar extends ConsumerWidget {
   const PlayerBar({
     super.key,
@@ -27,17 +26,17 @@ class PlayerBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isFriendly = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.type == GameType.friendly,
+            (s) => s?.serverState?.type == GameType.friendly,
       ),
     );
 
-    // آیا این نوار مربوط به سطر بالایی (رقیب‌ها) است؟
     final bool isTopBar = leftPlayerIndex != 0;
 
     return Container(
       width: boardSize,
       height: barHeight,
-      color: Colors.blueGrey,
+      // 🌌 تغییر به یک سرمه‌ای بسیار تیره و نیمه‌شفاف برای هماهنگی با تم فضا
+      color: const Color(0x990A0A12),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: boardSize * 0.037),
         child: Row(
@@ -69,7 +68,8 @@ class PlayerBar extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   RollButton(boardSize: boardSize),
-                  MessageIcon(),
+                  SizedBox(width: boardSize * 0.02), // کمی فاصله برای چسبیده نبودن دکمه‌ها
+                  MessageIcon(boardSize: boardSize),
                 ],
               ),
 

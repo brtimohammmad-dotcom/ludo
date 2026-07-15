@@ -7,6 +7,7 @@ import 'package:ludo/ui/screens/board/elements/player-bar/player_bar.dart';
 import 'package:ludo/ui/screens/board/main_board.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/winner_alert.dart';
+import 'package:ludo/ui/utils/painter.dart';
 
 import 'board_ui_event_handler.dart';
 
@@ -106,31 +107,63 @@ class _BoardState extends ConsumerState<Board>
     );
     final barHeight = boardSize * 0.1;
 
-    return Center(
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Container(
-          color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              PlayerBar(
-                boardSize: boardSize,
-                barHeight: barHeight,
-                leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
-                rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
-              ),
-              MainBoard(boardSize: boardSize),
-              PlayerBar(
-                boardSize: boardSize,
-                barHeight: barHeight,
-                leftPlayerIndex: 0,
-                rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
-              ),
-            ],
+    return Scaffold(
+      // 🌌 استفاده از رنگ پایه مشابه کهکشان برای هماهنگی کامل
+      backgroundColor: const Color(0xFF07070B),
+      body: Stack(
+        children: [
+          // ۱. پس‌زمینه کهکشانی (همان نقاش قبلی)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: LudoBackgroundPainter(),
+            ),
           ),
-        ),
+
+          // ۲. برد بازی اصلی
+          Center(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Container(
+                // حالا اینجا می‌تونی به کانتینر اصلی برد، یه افکت شیشه‌ای یا حاشیه نئونی بدی
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05), // شفافیت ملایم برای نمایش کهکشان پشت برد
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PlayerBar(
+                      boardSize: boardSize,
+                      barHeight: barHeight,
+                      leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
+                      rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
+                    ),
+                    MainBoard(boardSize: boardSize),
+                    PlayerBar(
+                      boardSize: boardSize,
+                      barHeight: barHeight,
+                      leftPlayerIndex: 0,
+                      rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
+
   }
 }

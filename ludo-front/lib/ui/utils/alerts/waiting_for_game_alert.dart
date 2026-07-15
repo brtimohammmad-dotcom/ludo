@@ -9,75 +9,59 @@ class WaitingForGameAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // رنگ سبز نئونی تم بازی
-    const accentColor = Colors.lightGreenAccent;
+    final double base = boardSize * 0.85;
+    const accentColor = Colors.amberAccent;
 
     return Center(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          // ایجاد افکت شیشه مات (بلور) روی صفحه پشت دیالوگ
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Container(
-            width: boardSize * 0.75,
+            width: base,
             padding: EdgeInsets.symmetric(
-              vertical: boardSize * 0.06,
-              horizontal: boardSize * 0.04,
+              vertical: base * 0.08,
+              horizontal: base * 0.06,
             ),
             decoration: BoxDecoration(
-              // پس‌زمینه تیره و نیمه‌شفاف برای کنتراست عالی با انیمیشن سفید
-              color: Colors.black.withValues(alpha: 0.65),
+              color: const Color(0xFF1E293B).withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: accentColor.withValues(alpha: 0.3),
                 width: 1.5,
               ),
-              // سایه ملایم نئونی اطراف باکس
               boxShadow: [
                 BoxShadow(
-                  color: accentColor.withValues(alpha: 0.1),
-                  blurRadius: 15,
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 20,
                   spreadRadius: 2,
                 ),
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // باکس فقط به اندازه محتوا فضا می‌گیرد
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // لودینگ موجی شما
-                LoadingAnimationWidget.waveDots(
-                  color: Colors.white,
-                  size: boardSize * 0.16,
+                LoadingAnimationWidget.halfTriangleDot(
+                  color: accentColor,
+                  size: base * 0.16,
                 ),
-                SizedBox(height: boardSize * 0.04),
-                // متن اصلاح شده با استایل گیمینگ
+                SizedBox(height: base * 0.05),
                 Text(
-                  'WAITING FOR game',
-                  textAlign: TextAlign.center,
+                  "Finding Opponents...",
                   style: TextStyle(
-                    fontSize: boardSize * 0.04,
+                    color: Colors.white,
+                    fontSize: base * 0.048,
                     fontWeight: FontWeight.bold,
-                    color: accentColor,
-                    letterSpacing: 1.2,
-                    decoration: TextDecoration.none,
-                    // سایه متن برای خوانایی بیشتر و افکت Glow
-                    shadows: [
-                      Shadow(
-                        color: accentColor.withValues(alpha: 0.6),
-                        blurRadius: 8,
-                      ),
-                    ],
+                    letterSpacing: 0.5,
                   ),
                 ),
-                SizedBox(height: boardSize * 0.02),
+                SizedBox(height: base * 0.02),
                 Text(
-                  'initial your game...',
+                  "Please keep the app open.",
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: boardSize * 0.03,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w400,
-                    decoration: TextDecoration.none,
+                    color: Colors.grey.shade400,
+                    fontSize: base * 0.032,
                   ),
                 ),
               ],

@@ -10,7 +10,7 @@ import 'package:ludo/ui/screens/join-screen/join_screen_handler.dart';
 import 'package:ludo/ui/utils/alerts/freinds_dialog.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/waiting_for_game_alert.dart';
-
+import 'package:ludo/ui/utils/painter.dart';
 
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({super.key});
@@ -56,7 +56,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
     ref.listen<bool>(
       globalLoadingProvider.select((s) => s.contains("waiting_for_game")),
-      (previous, next) {
+          (previous, next) {
         if (next == true) {
           showWaitingDialog(boardSize);
         } else if (previous == true && next == false) {
@@ -64,46 +64,60 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
         }
       },
     );
+
     return Scaffold(
       body: Stack(
         clipBehavior: Clip.none,
         children: [
-          // پس‌زمینه و محتوای اصلی دکمه‌ها
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blueGrey.shade500,
-                  Colors.blueGrey,
-                  Colors.blueGrey,
-                  Colors.blueGrey.shade600,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+          // 🎨 پس‌زمینه اختصاصی طراحی شده با Canvas
+          Positioned.fill(
+            child: CustomPaint(
+              painter: LudoBackgroundPainter(),
             ),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: screenHeight*0.05,),
-                  Image.asset(
-                    "assets/webp/happy-dice.webp",
-                    width: boardSize * 0.6,
-                    height: boardSize * 0.6,
-                    fit: BoxFit.cover,
-                  ),
-                  GameSelectionButtons(boardSize: boardSize, handler: _handler),
-                  SizedBox(height: screenHeight*0.2,),
+          ),
 
-                ],
+          // محتوای اصلی روی بک‌گراند
+          SafeArea(
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: screenHeight * 0.03),
+
+                    // آیکون اصلی با سایه ملایم طلایی متناسب با تم جدید
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.amber.withValues(alpha: 0.1),
+                            blurRadius: 40,
+                            spreadRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        "assets/webp/happy-dice.webp",
+                        width: boardSize * 0.55,
+                        height: boardSize * 0.55,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.02),
+                    GameSelectionButtons(boardSize: boardSize, handler: _handler),
+                    SizedBox(height: screenHeight * 0.15),
+                  ],
+                ),
               ),
             ),
           ),
 
+          // نمایش جعبه سکه بالا سمت چپ/راست
           CoinBox(boardSize: boardSize),
         ],
       ),

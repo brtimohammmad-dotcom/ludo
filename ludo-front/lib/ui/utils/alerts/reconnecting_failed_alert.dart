@@ -15,71 +15,105 @@ class ReconnectingFailedAlert extends StatelessWidget {
         ? maxAvailableWidth
         : maxAvailableHeight * 0.86);
 
-    return Center(
+    final double base = boardSize * 0.85; // پایه مقیاس‌دهی منسجم با سایر دیالوگ‌ها
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
       child: Container(
-        width: boardSize * 0.8,
-        padding: const EdgeInsets.all(24),
+        width: base,
+        padding: EdgeInsets.all(base * 0.06),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF1E293B), // تم تاریک منسجم بازی
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
+          border: Border.all(
+            color: Colors.redAccent.withValues(alpha: 0.5), // مرز قرمز نئونی به نشانه خطا
+            width: 1.5,
+          ),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black38,
+              color: Colors.black54,
               blurRadius: 15,
-              offset: const Offset(0, 5),
+              offset: Offset(0, 5),
             ),
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // جمع شدن کارت به اندازه محتوا
+          mainAxisSize: MainAxisSize.min, // جمع شدن کارت متناسب با محتوا
           children: [
-            // آیکون با رنگ هشدار ملایم
+            // آیکون خطا با رنگ قرمز نئونی ملایم
             Icon(
               Icons.signal_wifi_connected_no_internet_4_outlined,
-              size: boardSize * 0.18,
+              size: base * 0.15,
               color: Colors.redAccent.shade400,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: base * 0.04),
 
-            // متن اصلی خطا
-            const Text(
+            // عنوان خطا
+            Text(
               "Connection Failed",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: base * 0.02),
 
-            // متن توضیحات تکمیلی
+            // توضیحات خطا
             Text(
               "Connection Timeout. Please check your Internet.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade600,
+                fontSize: base * 0.032,
+                color: Colors.grey.shade400,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: base * 0.06),
 
-            // دکمه شیک برای بازگشت به خانه
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey.shade700,
-                foregroundColor: Colors.white,
-                minimumSize: Size(boardSize * 0.5, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            // دکمه شیک و مدرن تلاش مجدد (تغییر ElevatedButton به GestureDetector با استایل اختصاصی)
+            GestureDetector(
+              onTap: onReconnectPressed,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: base * 0.035),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blueGrey.shade700,
+                      Colors.blueGrey.shade900,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(base * 0.03),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 8,
+                      offset: Offset(0, 3),
+                    )
+                  ],
                 ),
-                elevation: 2,
-              ),
-              onPressed: onReconnectPressed,
-              icon: const Icon(Icons.home_rounded, size: 20),
-              label:  Text(
-                'Reconnect',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                        size: base * 0.045,
+                      ),
+                      SizedBox(width: base * 0.02),
+                      Text(
+                        'Reconnect',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: base * 0.035,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             )
           ],

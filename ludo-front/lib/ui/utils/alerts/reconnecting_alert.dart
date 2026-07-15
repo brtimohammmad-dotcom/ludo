@@ -9,68 +9,56 @@ class ReconnectingAlert extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // انتخاب بعد کوچک‌تر برای واکنش‌گرایی بر اساس سایز بورد بازی
-    final boardSize = (screenWidth < screenHeight
-        ? screenWidth
-        : screenHeight * 0.86);
+    final boardSize = (screenWidth < screenHeight ? screenWidth : screenHeight * 0.86);
+    final double base = boardSize * 0.85;
 
-    // مقیاس‌دهی داینامیک ابعاد آلرت بر اساس برد بازی
-    final double dialogWidth = boardSize * 0.75;
-    final double loadingSize = boardSize * 0.14;
-    final double titleFontSize = boardSize * 0.048;
-    final double detailFontSize = boardSize * 0.034;
-
-    return Center(
+    return Dialog(
+      backgroundColor: Colors.transparent,
       child: Container(
-        width: dialogWidth,
+        width: base,
         padding: EdgeInsets.symmetric(
-          horizontal: boardSize * 0.06,
-          vertical: boardSize * 0.07,
+          horizontal: base * 0.06,
+          vertical: base * 0.08,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF161522), // تِم تاریک و منسجم بازی
-          borderRadius: BorderRadius.circular(boardSize * 0.05),
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: Colors.amber.withValues(alpha: 0.4),
             width: 1.5,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: Colors.black54,
+              blurRadius: 15,
+              offset: Offset(0, 5),
             ),
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // جمع شدن کارت متناسب با محتوا
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // انیمیشن لودینگ ضربان با ابعاد واکنش‌گرا
             LoadingAnimationWidget.beat(
-              color: Colors.white,
-              size: loadingSize,
+              color: Colors.amberAccent,
+              size: base * 0.15,
             ),
-            SizedBox(height: boardSize * 0.04),
-
-            // متن وضعیت اتصال مجدد
+            SizedBox(height: base * 0.05),
             Text(
               "Reconnecting...",
               style: TextStyle(
-                fontSize: titleFontSize,
+                fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 letterSpacing: 0.5,
               ),
             ),
-            SizedBox(height: boardSize * 0.015),
-
-            // متن توضیحات فرعی
+            SizedBox(height: base * 0.02),
             Text(
               "Connecting to server, please wait.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: detailFontSize,
-                color: Colors.white.withValues(alpha: 0.5),
+                fontSize: base * 0.032,
+                color: Colors.grey.shade400,
               ),
             ),
           ],

@@ -5,8 +5,8 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
-import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/services/audio_service.dart';
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 class WinnerAlert extends ConsumerStatefulWidget {
   const WinnerAlert({
@@ -59,9 +59,9 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
         ? screenWidth
         : screenHeight * 0.86);
 
-    // محاسبه خودکار مبلغ جایزه بر اساس تعداد بازیکنان
-    final winPrice =
-        widget.gameController.currentGameState?.winPrice();
+    final double base =
+        boardSize * 0.85; // پایه مقیاس‌دهی هماهنگ با بقیه دیالوگ‌ها
+    final winPrice = widget.gameController.currentGameState?.winPrice();
 
     return Material(
       color: Colors.transparent,
@@ -86,24 +86,20 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
             child: FadeTransition(
               opacity: _anim,
               child: Container(
-                width: boardSize * 0.8,
-                padding: const EdgeInsets.all(22),
+                width: base,
+                padding: EdgeInsets.all(base * 0.06),
                 decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B), // تم تاریک منسجم بازی
                   borderRadius: BorderRadius.circular(22),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xff0f172a), // deep navy
-                      Color(0xff1e293b), // slate
-                      Color(0xff0b1320), // darker edge
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  border: Border.all(
+                    color: Colors.amber.withValues(alpha: 0.5),
+                    width: 1.5,
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withAlpha(120),
-                      blurRadius: 35,
-                      spreadRadius: 3,
+                      color: Colors.black54,
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
                     ),
                   ],
                 ),
@@ -112,80 +108,72 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                   children: [
                     /// 👑 ICON
                     Container(
-                      padding: EdgeInsets.all(boardSize * 0.01),
+                      padding: EdgeInsets.all(base * 0.02),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.amber.withAlpha(200),
-                            Colors.amber.withAlpha(60),
-                            Colors.transparent,
-                          ],
-                        ),
+                        color: Colors.amber.withValues(alpha: 0.1),
                       ),
                       child: Icon(
                         Icons.emoji_events,
-                        size: boardSize * 0.3,
-                        color: const Color(0xfffbbf24), // gold
+                        size: base * 0.2,
+                        color: Colors.amberAccent,
                       ),
                     ),
-
-                    SizedBox(height: boardSize * 0.12),
+                    SizedBox(height: base * 0.04),
 
                     /// TITLE
                     Text(
                       "WINNER",
                       style: TextStyle(
-                        fontSize: boardSize * 0.06,
+                        fontSize: base * 0.07,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        letterSpacing: 3,
+                        letterSpacing: 2,
                       ),
                     ),
+                    SizedBox(height: base * 0.04),
 
-                    SizedBox(height: boardSize * 0.1),
-
-                    /// PLAYER NAME (glass effect)
+                    /// PLAYER NAME
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: boardSize * 0.041,
-                        vertical: boardSize * 0.022,
+                        horizontal: base * 0.05,
+                        vertical: base * 0.025,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(20),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white.withAlpha(40)),
+                        border: Border.all(color: Colors.white12),
                       ),
                       child: Text(
                         widget.winner.username,
                         style: TextStyle(
-                          fontSize: boardSize * 0.03,
+                          fontSize: base * 0.04,
                           fontWeight: FontWeight.bold,
-                          color: widget.winner.color?.toColor() ?? Colors.white,
+                          color:
+                              widget.winner.color?.name.toColor() ??
+                              Colors.white,
                         ),
                       ),
                     ),
-
-                    SizedBox(height: boardSize * 0.05),
+                    SizedBox(height: base * 0.05),
 
                     /// 💰 PRIZE AMOUNT SECTION
-                    // تغییر این خط: استفاده امن از Collection-If بدون کلوش اضافی
                     if (widget
                             .gameController
                             .currentGameState
                             ?.serverState
                             ?.type ==
-                        GameType.global)
+                        GameType.global) ...[
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: boardSize * 0.05,
-                          vertical: boardSize * 0.02,
+                          horizontal: base * 0.05,
+                          vertical: base * 0.025,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.amber.withAlpha(30),
+                          color: Colors.amber.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.amber.withAlpha(100),
+                            color: Colors.amber.withValues(alpha: 0.4),
                             width: 1.5,
                           ),
                         ),
@@ -194,56 +182,54 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                           children: [
                             Icon(
                               Icons.monetization_on,
-                              color: const Color(0xfffbbf24),
-                              size: boardSize * 0.05,
+                              color: Colors.amber,
+                              size: base * 0.05,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               "+$winPrice",
                               style: TextStyle(
-                                fontSize: boardSize * 0.035,
+                                fontSize: base * 0.04,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xfffbbf24),
+                                color: Colors.white,
                               ),
                             ),
                           ],
                         ),
                       ),
+                      SizedBox(height: base * 0.06),
+                    ],
 
-                    const SizedBox(height: 28),
-
-                    /// BUTTON (gradient)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xff22c55e), Color(0xff16a34a)],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withAlpha(80),
-                            blurRadius: 20,
-                            offset: const Offset(0, 6),
+                    /// BUTTON
+                    GestureDetector(
+                      onTap: widget.gameController.exitGame,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: base * 0.035),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFF22C55E), // سبز نئونی شیک و جذاب
+                              Color(0xFF15803D),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: boardSize * 0.04,
-                            vertical: boardSize * 0.012,
-                          ),
+                          borderRadius: BorderRadius.circular(base * 0.03),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        onPressed: widget.gameController.exitGame,
-                        child: Text(
-                          "Back to Home",
-                          style: TextStyle(
-                            fontSize: boardSize * 0.02,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 1,
+                        child: Center(
+                          child: Text(
+                            "Back to Home",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: base * 0.038,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ludo/controller/emoji-box-controller/emoji_box_notifier.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/ui/screens/board/elements/dice/dice_widget.dart';
 import 'package:ludo/ui/screens/board/elements/emoji_box.dart';
@@ -17,7 +16,6 @@ class MainBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isEmojiBoxOpen = ref.watch(emojiBoxProvider);
     final cellSize = boardSize / 11;
 
     // لود کردن آی‌دی‌های واقعی مهره‌ها از سرور
@@ -61,7 +59,6 @@ class MainBoard extends ConsumerWidget {
           BoardEmojiBubbles(cellSize: cellSize),
 
           // ۵. باکس انتخاب ایموجی
-          if (isEmojiBoxOpen)
             EmojiBox(boardSize: boardSize, cellSize: cellSize),
         ],
       ),

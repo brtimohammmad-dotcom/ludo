@@ -20,13 +20,14 @@ Color playerUserNameBoxColor({
 
   if (currentPlayerColor == currentTurn) {
     switch (playerIndex) {
-      case 0: return Colors.red.shade900;
-      case 1: return numberOfPlayers == 2 ? Colors.yellow.shade700 : Colors.blue.shade300;
-      case 2: return Colors.yellow.shade700;
-      case 3: return Colors.green.shade400;
-      default: return Colors.red;
+      case 0: return const Color(0xFFFF5252); // قرمز نئونی روشن
+      case 1: return numberOfPlayers == 2 ? const Color(0xFFFFD740) : const Color(0xFF40C4FF); // زرد یا آبی روشن
+      case 2: return const Color(0xFFFFD740); // زرد روشن
+      case 3: return const Color(0xFF69F0AE); // سبز روشن
+      default: return Colors.white;
     }
   } else {
-    return Colors.black45;
+    // ❄️ تغییر از مشکی مرده به سفید یخی ملایم برای خوانایی در پس‌زمینه تاریک
+    return const Color(0xB3FFFFFF);
   }
 }

@@ -12,109 +12,106 @@ class InsufficientCoinsAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.8,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E), // تم تیره بازی
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.amber.shade700, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.amber.withValues(alpha: 0.15),
-                blurRadius: 15,
-                spreadRadius: 2,
-              ),
-            ],
+    final double base = MediaQuery.of(context).size.width * 0.85;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: base,
+        padding: EdgeInsets.all(base * 0.06),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.amber.withValues(alpha: 0.5),
+            width: 1.5,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // آیکون سکه افکت‌دار
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.amber.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.monetization_on,
-                    size: 45,
-                    color: Colors.amber,
-                  ),
-                  const Positioned(
-                    right: 2,
-                    top: 2,
-                    child: Icon(Icons.close, size: 18, color: Colors.redAccent),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // عنوان
-              const Text(
-                "Not Enough Coins",
-                style: TextStyle(
-                  color: Colors.amberAccent,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // متن توضیحات فارسی یا انگلیسی بنا به سلیقه خودت
-              Text(
-                "You need $requiredCoins coins to join this game.\nYour current balance: $currentCoins",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey.shade300,
-                  fontSize: 14,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // دکمه تایید / متوجه شدم
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black54,
+              blurRadius: 15,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // آیکون سکه افکت‌دار
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: base * 0.16,
+                  height: base * 0.16,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.amber.shade700, Colors.orange.shade800],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.orange.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    shape: BoxShape.circle,
+                    color: Colors.amber.withValues(alpha: 0.1),
                   ),
-                  child: const Center(
-                    child: Text(
-                      "OK",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+                Icon(
+                  Icons.monetization_on,
+                  size: base * 0.12,
+                  color: Colors.amberAccent,
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Icon(Icons.close, size: base * 0.045, color: Colors.redAccent),
+                ),
+              ],
+            ),
+            SizedBox(height: base * 0.04),
+            Text(
+              "Not Enough Coins",
+              style: TextStyle(
+                color: Colors.amberAccent,
+                fontSize: base * 0.05,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: base * 0.03),
+            Text(
+              "You need $requiredCoins coins to join this game.\nYour current balance: $currentCoins",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: base * 0.035,
+                height: 1.4,
+              ),
+            ),
+            SizedBox(height: base * 0.06),
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: base * 0.035),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.amber.shade600, Colors.orange.shade700],
+                  ),
+                  borderRadius: BorderRadius.circular(base * 0.03),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orange.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    "OK",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: base * 0.038,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
