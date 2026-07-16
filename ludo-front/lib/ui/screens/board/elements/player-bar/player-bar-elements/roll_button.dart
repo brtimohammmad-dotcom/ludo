@@ -35,39 +35,41 @@ class RollButton extends ConsumerWidget {
       colors: [Color(0x1AFFFFFF), Color(0x0DFFFFFF)],
     );
 
-    return GestureDetector(
-      onTap: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: boardSize * 0.05,
-          vertical: boardSize * 0.012,
-        ),
-        decoration: BoxDecoration(
-          gradient: myTurnToRoll ? activeGradient : inactiveGradient,
-          borderRadius: borderRadius,
-          boxShadow: myTurnToRoll
-              ? [
-            BoxShadow(
-              color: const Color(0x6600FF87),
-              blurRadius: 10,
-              spreadRadius: 1,
-            )
-          ]
-              : null,
-          border: Border.all(
-            color: myTurnToRoll ? const Color(0xFF00FF87) : Colors.white12,
-            width: 1.2,
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeInOut,
+          padding: EdgeInsets.symmetric(
+            horizontal: boardSize * 0.05,
+            vertical: boardSize * 0.012,
           ),
-        ),
-        child: Text(
-          'ROLL',
-          style: TextStyle(
-            color: myTurnToRoll ? const Color(0xFF0A0A12) : Colors.white38, // متن تیره روی دکمه روشن برای کنتراست فوق‌العاده
-            fontSize: boardSize * 0.024,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
+          decoration: BoxDecoration(
+            gradient: myTurnToRoll ? activeGradient : inactiveGradient,
+            borderRadius: borderRadius,
+            boxShadow: myTurnToRoll
+                ? [
+              BoxShadow(
+                color: const Color(0x5500FF87),
+                blurRadius: 10,
+                spreadRadius: 1,
+              )
+            ]
+                : null,
+            border: Border.all(
+              color: myTurnToRoll ? const Color(0xFF00FF87) : Colors.white12,
+              width: 1.2,
+            ),
+          ),
+          child: Text(
+            'ROLL',
+            style: TextStyle(
+              color: myTurnToRoll ? const Color(0xFF0A0A12) : Colors.white38, // متن تیره روی دکمه روشن برای کنتراست فوق‌العاده
+              fontSize: boardSize * 0.024,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
       ),

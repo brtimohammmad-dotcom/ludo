@@ -114,8 +114,10 @@ class _BoardState extends ConsumerState<Board>
         children: [
           // ۱. پس‌زمینه کهکشانی (همان نقاش قبلی)
           Positioned.fill(
-            child: CustomPaint(
-              painter: LudoBackgroundPainter(),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: LudoBackgroundPainter(),
+              ),
             ),
           ),
 
@@ -143,18 +145,22 @@ class _BoardState extends ConsumerState<Board>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    PlayerBar(
-                      boardSize: boardSize,
-                      barHeight: barHeight,
-                      leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
-                      rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
+                    RepaintBoundary(
+                      child: PlayerBar(
+                        boardSize: boardSize,
+                        barHeight: barHeight,
+                        leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
+                        rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
+                      ),
                     ),
-                    MainBoard(boardSize: boardSize),
-                    PlayerBar(
-                      boardSize: boardSize,
-                      barHeight: barHeight,
-                      leftPlayerIndex: 0,
-                      rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
+                    RepaintBoundary(child: MainBoard(boardSize: boardSize)),
+                    RepaintBoundary(
+                      child: PlayerBar(
+                        boardSize: boardSize,
+                        barHeight: barHeight,
+                        leftPlayerIndex: 0,
+                        rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
+                      ),
                     ),
                   ],
                 ),

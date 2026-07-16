@@ -126,12 +126,14 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         clipBehavior: Clip.hardEdge,
         children: [
           if (isCurrentTurn && animationController != null)
-            _SolidTimerProgressLine(
-              fullWidth: fullWidth,
-              boardSize: boardSize,
-              barColor: usernameTimerBoxColor(),
-              borderRadius: borderRadius,
-              controller: animationController,
+            RepaintBoundary(
+              child: _SolidTimerProgressLine(
+                fullWidth: fullWidth,
+                boardSize: boardSize,
+                barColor: usernameTimerBoxColor(),
+                borderRadius: borderRadius,
+                controller: animationController,
+              ),
             ),
           Center(
             child: _PlayerInfoRow(
