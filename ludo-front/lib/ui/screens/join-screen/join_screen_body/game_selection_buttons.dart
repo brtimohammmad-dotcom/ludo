@@ -18,19 +18,17 @@ class GameSelectionButtons extends ConsumerWidget {
     final levels = GameLevel.values
         .where((level) => level != GameLevel.free)
         .toList();
-    return Container(
-      constraints: BoxConstraints(maxHeight: boardSize * 0.65),
-      // مدیریت فضا در صفحه
+
+    // ⚡ قرار دادن کل مجموعه دکمه‌ها در یک مرز رندرینگ جهت حذف لگ اسکرول وب
+    return RepaintBoundary(
       child: ListView.separated(
-        shrinkWrap: true,
-        physics: const BouncingScrollPhysics(),
+        shrinkWrap: true, // 🟢 به اندازه کل محتوای لول‌ها باز می‌شود
+        physics: const NeverScrollableScrollPhysics(), // 🟢 اسکرول داخلی را قطع می‌کند تا با صفحه اصلی اسکرول شود
         itemCount: levels.length,
         separatorBuilder: (context, index) =>
-            SizedBox(height: boardSize * 0.02),
+            SizedBox(height: boardSize * 0.04), // فاصله زیباتر بین لول‌ها
         itemBuilder: (context, index) {
-          // درون متد itemBuilder در کلاس GameSelectionButtons:
           final level = levels[index];
-
           final isFourPlayerDisabled = (level == GameLevel.gold || level == GameLevel.vip);
 
           return Column(
@@ -42,12 +40,18 @@ class GameSelectionButtons extends ConsumerWidget {
                 "${level.displayName} Table",
                 style: TextStyle(
                   color: level.color,
-                  fontSize: boardSize * 0.035,
+                  fontSize: boardSize * 0.045, // کمی بزرگتر و خواناتر
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
+                  shadows: [
+                    Shadow(
+                      color: level.color.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: boardSize * 0.01),
+              SizedBox(height: boardSize * 0.02),
 
               if (isFourPlayerDisabled)
                 StartGameButton(
@@ -81,7 +85,7 @@ class GameSelectionButtons extends ConsumerWidget {
                       ),
                       boardSize: boardSize,
                     ),
-                    SizedBox(width: boardSize * 0.03),
+                    SizedBox(width: boardSize * 0.04), // فاصله بازتر و نئونی‌تر
                     // دکمه ۴ نفره
                     StartGameButton(
                       numberOfPlayers: 4,

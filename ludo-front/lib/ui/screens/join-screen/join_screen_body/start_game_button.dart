@@ -31,9 +31,10 @@ class StartGameButton extends StatelessWidget {
       modeLabel = "4 Players";
     }
 
-    final buttonWidth = isWide ? boardSize * 0.675 : boardSize * 0.33;
-    final buttonHeight = boardSize * 0.20;
-    final borderRadius = BorderRadius.circular(boardSize * 0.02);
+    // سایزبندی دقیق‌تر متناسب با صفحه نمایش گوشی و تبلت
+    final buttonWidth = isWide ? boardSize * 0.675 : boardSize * 0.38;
+    final buttonHeight = boardSize * 0.22;
+    final borderRadius = BorderRadius.circular(boardSize * 0.03);
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
@@ -43,73 +44,82 @@ class StartGameButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: borderRadius,
           border: Border.all(
-            color: themeColor.withValues(alpha: 0.5),
+            color: themeColor.withValues(alpha: 0.4),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: themeColor.withValues(alpha: 0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 3),
+              color: themeColor.withValues(alpha: 0.15),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: InkWell(
-          onTap: onPressed,
+        child: ClipRRect(
           borderRadius: borderRadius,
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withValues(alpha: 0.12),
-                  Colors.white.withValues(alpha: 0.04),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  modeLabel,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: boardSize * 0.04,
-                    letterSpacing: 0.5,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              child: Ink(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withValues(alpha: 0.08),
+                      Colors.white.withValues(alpha: 0.02),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                SizedBox(height: boardSize * 0.004),
-                Row(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.monetization_on, color: Colors.amberAccent, size: boardSize * 0.04),
-                    SizedBox(width: boardSize * 0.005),
                     Text(
-                      entryFee == 0 ? "Free" : "$entryFee",
+                      modeLabel,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: boardSize * 0.029,
-                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: boardSize * 0.042,
+                        letterSpacing: 0.5,
                       ),
+                      textAlign: TextAlign.center,
                     ),
+                    SizedBox(height: boardSize * 0.008),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                            Icons.monetization_on,
+                            color: Colors.amberAccent,
+                            size: boardSize * 0.045
+                        ),
+                        SizedBox(width: boardSize * 0.01),
+                        Text(
+                          entryFee == 0 ? "Free" : "$entryFee",
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: boardSize * 0.032,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (prizePool > 0) ...[
+                      SizedBox(height: boardSize * 0.005),
+                      Text(
+                        "Win: +$prizePool",
+                        style: TextStyle(
+                          color: Colors.amberAccent.shade100,
+                          fontWeight: FontWeight.bold,
+                          fontSize: boardSize * 0.032,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                if (prizePool > 0) ...[
-                  SizedBox(height: boardSize * 0.002),
-                  Text(
-                    "Win: +$prizePool",
-                    style: TextStyle(
-                      color: Colors.amberAccent.shade100,
-                      fontWeight: FontWeight.bold,
-                      fontSize: boardSize * 0.030,
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
         ),
