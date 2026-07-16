@@ -7,7 +7,7 @@ function generateBalancedDice(gameState, player) {
 
   // بررسی وضعیت مهره‌های فعال بازیکن در زمین
   const hasActiveTokens = gameState.tokens.some(
-    (t) => t.player_id === player.telegram_id && t.position > 0,
+    (t) => t.color === player.color && t.position > 0,
   );
 
   let dice;
