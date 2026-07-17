@@ -10,7 +10,6 @@ const bot = new Telegraf(
 );
 
 const WEB_APP_URL = "https://ludo-tecb.onrender.com";
-// شناسه ثابت عکس بنر لودو
 const PHOTO_FILE_ID =
   "AgACAgQAAxkBAANWaj7CJA8BUAYAAa-OFtVJ7M4hjQ4qAAMOaxthRfBR1YyGsvn7DdkBAAMCAAN4AAM8BA";
 
@@ -25,22 +24,24 @@ bot.start((ctx) => {
   });
 });
 
-// مدیریت اینلاین کوئری‌ها (اشتراک‌گذاری) همراه با مدیریت خطا
+// مدیریت اینلاین کوئری‌ها (اصلاح شده به حالت Article برای ارسال تک‌کلیکه)
 bot.on("inline_query", async (ctx) => {
   try {
     const query = ctx.inlineQuery.query;
 
-    // ۱. اشتراک‌گذاری عمومی ربات با عکس
+    // ۱. اشتراک‌گذاری عمومی ربات (به صورت متنی و سریع)
     if (query === "share_bot") {
       return await ctx.answerInlineQuery([
         {
-          type: "photo",
+          type: "article",
           id: "share_main_bot",
-          photo_file_id: PHOTO_FILE_ID,
           title: "🎮 Play Ludo Mini App",
           description: "Invite your friends to play Ludo together!",
-          caption: `🎲 *Let's Play Ludo!* Hey! I'm playing Ludo right inside Telegram. \nClick the button below to join the game and challenge me! 🚀`,
-          parse_mode: "Markdown",
+          input_message_content: {
+            message_text: `🎲 *Let's Play Ludo!*\n\nHey! I'm playing Ludo right inside Telegram. \nClick the button below to join the game and challenge me! 🚀`,
+            parse_mode: "Markdown",
+            disable_web_page_preview: false, // اگر لینک عکسی داری می‌توانی اینجا اضافه کنی
+          },
           reply_markup: {
             inline_keyboard: [
               [
@@ -66,15 +67,17 @@ bot.on("inline_query", async (ctx) => {
     }
     const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
 
-    // ۲. ارسال پیام دعوت بازی دوستانه (لابی) با عکس
+    // ۲. ارسال پیام دعوت بازی دوستانه (اصلاح شده به Article)
     return await ctx.answerInlineQuery([
       {
-        type: "photo",
+        type: "article",
         id: gameId,
-        photo_file_id: PHOTO_FILE_ID,
-        title: "🎲 Invite Friends",
-        description: "Send this invitation to a friend",
-        caption: `🎲 Ludo Friendly Match\n\nPlayers: ${game.players.length}/${game.number_of_players}\n\n🟢 ${ctx.from.first_name}\n\n⏳ Waiting for ${game.number_of_players - game.players.length} more player${game.number_of_players - game.players.length > 1 ? "s" : ""}...`,
+        title: "🎲 Invite Friends to Ludo",
+        description: `Click here to send invitation (${game.players.length}/${game.number_of_players} joined)`,
+        input_message_content: {
+          message_text: `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${game.players.length}/${game.number_of_players}\n\n🟢 ${ctx.from.first_name}\n\n⏳ Waiting for ${game.number_of_players - game.players.length} more player${game.number_of_players - game.players.length > 1 ? "s" : ""}...`,
+          parse_mode: "Markdown",
+        },
         reply_markup: {
           inline_keyboard: [
             [
@@ -88,7 +91,6 @@ bot.on("inline_query", async (ctx) => {
       },
     ]);
   } catch (error) {
-    // جلوگیری از کرش کردن سرور در صورت منقضی شدن کوئری تلگرام
     if (error.description && error.description.includes("query is too old")) {
       console.log(`[Inline Query] Timeout or invalid query ID. Ignored.`);
     } else {
@@ -110,7 +112,7 @@ bot.on("chosen_inline_result", async (ctx) => {
   });
 });
 
-// تابع بروزرسانی وضعیت لابی مسابقه همراه با هندل کردن ارور تلگرام
+// تابع بروزرسانی وضعیت لابی مسابقه (اصلاح شده از editMessageCaption به editMessageText)
 const updateLobbyMessage = async (gameId) => {
   try {
     const game = initialState.getGameState(gameId);
@@ -125,15 +127,14 @@ const updateLobbyMessage = async (gameId) => {
     const playersCount = game.players.length;
     const maxPlayers = game.number_of_players;
 
-    // متن جدید که قرار است به عنوان کپشن زیر عکس قرار بگیرد
     const text =
       game.game_status === "start"
-        ? `🎲 Ludo Friendly Match\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🔥 All players are ready!\n\n🚀 The match is now in progress.`
+        ? `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🔥 *All players are ready!*\n\n🚀 The match is now in progress.`
         : game.game_status === "finished"
-          ? `🏆 Match Complete\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 ${game.winner ? game.winner.username : "Someone"} is winner!\n\nThanks for joining the game.`
+          ? `🏆 *Match Complete*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 *${game.winner ? game.winner.username : "Someone"}* is the winner!\n\nThanks for joining the game.`
           : game.game_status === "cancel"
-            ? `⚠️ Match Cancelled\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\nThe lobby has been closed.`
-            : `🎲 Ludo Friendly Match\n\nPlayers: ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎯 Waiting for ${maxPlayers - playersCount} more player${maxPlayers - playersCount > 1 ? "s" : ""} to join...`;
+            ? `⚠️ *Match Cancelled*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\nThe lobby has been closed.`
+            : `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎯 Waiting for ${maxPlayers - playersCount} more player${maxPlayers - playersCount > 1 ? "s" : ""} to join...`;
 
     const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
 
@@ -145,7 +146,7 @@ const updateLobbyMessage = async (gameId) => {
             inline_keyboard: [
               [
                 {
-                  text: `play ludo`,
+                  text: `Play Ludo`,
                   url: "https://t.me/ludo_miniApp_bot?startapp",
                 },
               ],
@@ -162,17 +163,13 @@ const updateLobbyMessage = async (gameId) => {
             ],
           };
 
-    // اجرای درخواست تلگرام به صورت امن
+    // تغییر متد از editMessageCaption به editMessageText چون دیگر عکسی در کار نیست
     await bot.telegram
-      .editMessageCaption(
-        undefined,
-        undefined,
-        message.inline_message_id,
-        text,
-        { reply_markup: replyMarkup },
-      )
+      .editMessageText(undefined, undefined, message.inline_message_id, text, {
+        reply_markup: replyMarkup,
+        parse_mode: "Markdown",
+      })
       .catch((tgError) => {
-        // اگر پیام دقیقاً کپی وضعیت قبل بود، نادیده بگیر و سرور رو کرش نکن
         if (
           tgError.description &&
           tgError.description.includes("message is not modified")
@@ -181,7 +178,6 @@ const updateLobbyMessage = async (gameId) => {
             `[Lobby Sync] Message unchanged for game ${gameId}. Update skipped.`,
           );
         } else {
-          // برای بقیه ارورهای متفرقه تلگرام
           console.error(
             "[Telegram API Error]:",
             tgError.description || tgError,
