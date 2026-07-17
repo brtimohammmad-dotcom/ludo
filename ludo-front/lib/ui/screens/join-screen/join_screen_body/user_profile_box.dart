@@ -72,13 +72,12 @@ class UserProfileBox extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(size / 2),
+        // داخل متد _buildAvatar فایل user_profile_box.dart این بخش رو ساده‌تر کن:
         child: safeUrl != null && safeUrl.isNotEmpty
             ? Image.network(
           safeUrl,
           fit: BoxFit.cover,
-          headers: const {
-            'Accept': 'image/*',
-          },
+          // 🌟 هدر حذف شد تا مرورگر درخواست اضافی OPTIONS ارسال نکند
           errorBuilder: (_, _, _) => _buildDefaultAvatar(size),
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;

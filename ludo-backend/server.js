@@ -43,22 +43,27 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ status: "ok" }));
   }
 
-  // 4️⃣ روت پروکسی آواتار (حالا با pathname دقیق کار میکنه)
+
   if (pathname === "/proxy-avatar" && req.method === "GET") {
     try {
-      const fileUrl = parsedUrl.searchParams.get("url");
+      const rawUrl = parsedUrl.searchParams.get("url");
 
-      if (!fileUrl) {
+      if (!rawUrl) {
         res.writeHead(400, { "Content-Type": "text/plain" });
         return res.end("URL is required");
       }
+
+      // 🌟 دیکود کردن آدرس برای تبدیل %2F و %3A به کاراکترهای واقعی وب
+      const fileUrl = decodeURIComponent(rawUrl);
 
       // دانلود مستقیم عکس از تلگرام توسط سرور
       const response = await fetch(fileUrl);
 
       if (!response.ok) {
         res.writeHead(response.status, { "Content-Type": "text/plain" });
-        return res.end("Failed to fetch image from Telegram");
+        return res.end(
+          `Failed to fetch image from Telegram: ${response.statusText}`,
+        );
       }
 
       const arrayBuffer = await response.arrayBuffer();
@@ -85,7 +90,7 @@ const server = http.createServer(async (req, res) => {
   // اگر هیچکدام نبود -> 404 واقعی
   res.writeHead(404);
   res.end();
-});
+};);
 
 // کانفیگ هوشمند سوکت بر اساس محیط
 const io = require("socket.io")(server, {
