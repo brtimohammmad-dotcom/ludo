@@ -59,7 +59,7 @@ class AudioService {
         final howl = Howl(HowlOptions(
           src: [webPath.toJS].toJS,
           loop: false,
-          volume: 1.0,
+          volume: 0.3,
           preload: true,
         ));
         _cachedHowls[asset] = howl;
@@ -71,7 +71,7 @@ class AudioService {
         _bgmHowl = Howl(HowlOptions(
           src: [webBgmPath.toJS].toJS,
           loop: true,
-          volume: 0.2,
+          volume: 0.12,
           preload: true,
         ));
         _cachedHowls[bgmAsset] = _bgmHowl!;

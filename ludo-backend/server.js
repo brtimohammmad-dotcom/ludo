@@ -1,5 +1,14 @@
-// server.js (یا نام فایل اصلی سرور شما)
+// server.js
 require("dotenv").config(); // 🚀 لود کردن متغیرهای محیطی در بالاترین خط برنامه
+
+// 🛑 جلوگیری از کرش کردن سرور در صورت بروز خطای غیرمنتظره
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+});
 
 const http = require("http");
 const { bot } = require("./bot");
@@ -9,8 +18,12 @@ const isLocal = process.env.NODE_ENV !== "production";
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 const backendUrl = process.env.BACKEND_URL;
 
-const server = http.createServer((req, res) => {
-  // استفاده از آدرس فرانت‌ند به صورت داینامیک در CORS
+const server = http.createServer(async (req, res) => {
+  // گرفتن دامنه‌ها و پارامترها از روی آدرس درخواست (بخش Query Params)
+  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = parsedUrl.pathname;
+
+  // تنظیم هدرهای پایه CORS برای پاسخ‌ها
   res.setHeader("Access-Control-Allow-Origin", frontendUrl);
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -20,16 +33,67 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
 
-  if (req.url === "/health") {
+  // 1️⃣ روت سلامت سرور
+  if (pathname === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(
       JSON.stringify({ status: "ok", environment: process.env.NODE_ENV }),
     );
   }
 
-  if (req.url === "/webhook" && req.method === "POST") {
+  // 2️⃣ 🔄 روت جدید: پروکسی آواتار تلگرام (حل مشکل CORS فرانت‌اند)
+  if (pathname === "/proxy-avatar" && req.method === "GET") {
+    try {
+      const fileUrl = parsedUrl.searchParams.get("url");
+
+      if (!fileUrl) {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        return res.end("URL is required");
+      }
+
+      // امنیت: فقط درخواست به دامنه‌ی رسمی تلگرام مجاز است
+      if (!fileUrl.startsWith("https://api.telegram.org")) {
+        res.writeHead(403, { "Content-Type": "text/plain" });
+        return res.end("Only Telegram API URLs are allowed");
+      }
+
+      // دانلود عکس از تلگرام
+      const response = await fetch(fileUrl);
+
+      if (!response.ok) {
+        res.writeHead(response.status, { "Content-Type": "text/plain" });
+        return res.end("Failed to fetch image from Telegram");
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // آزاد کردن کامل CORS برای این عکس تا فلاتر وب بتونه راحت رندرش کنه
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.writeHead(200, {
+        "Content-Type": response.headers.get("content-type") || "image/jpeg",
+      });
+      return res.end(buffer);
+    } catch (error) {
+      console.error("Avatar proxy error:", error);
+      res.writeHead(500, { "Content-Type": "text/plain" });
+      return res.end("Error fetching image");
+    }
+  }
+
+  // 3️⃣ روت وبهوک تلگرام
+  if (pathname === "/webhook" && req.method === "POST") {
     let body = "";
-    req.on("data", (chunk) => (body += chunk));
+    req.on("data", (chunk) => {
+      body += chunk;
+      // جلوگیری از پر شدن حافظه رم سرور توسط ریکوئست‌های حجیم
+      if (body.length > 1e6) {
+        res.writeHead(413, { "Content-Type": "text/plain" });
+        res.end("Request Entity Too Large");
+        return req.destroy();
+      }
+    });
+
     req.on("end", () => {
       try {
         const update = JSON.parse(body);
@@ -44,6 +108,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // روت‌های ناشناخته
   res.writeHead(404);
   res.end();
 });
@@ -77,12 +142,9 @@ server.listen(port, "0.0.0.0", async () => {
   console.log(`🔗 Allowed Frontend CORS: ${frontendUrl}`);
 
   if (!isLocal && backendUrl) {
-    // ست کردن وبهوک داینامیک روی سرور اصلی
     await bot.telegram.setWebhook(`${backendUrl}/webhook`);
     console.log("🌐 Webhook successfully set to:", `${backendUrl}/webhook`);
   } else {
-    // اگر دوست داشتی در حالت لوکال بات کار کند، این را کامنتش را باز کن
-    // bot.launch();
     console.log("🤖 Bot running in local mode (Webhook bypassed)");
   }
 });

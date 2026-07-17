@@ -24,7 +24,10 @@ class UserProfileBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF13131A),
         borderRadius: BorderRadius.circular(boxHeight / 2),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.15), width: 1),
+        border: Border.all(
+          color: Colors.amber.withValues(alpha: 0.15),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.4),
@@ -52,19 +55,30 @@ class UserProfileBox extends StatelessWidget {
   }
 
   Widget _buildAvatar(String? url, double size) {
+    // اگر آدرس آواتار برای تلگرام بود، آن را از پروکسی سرور خودت عبور بده
+    final String? safeUrl = (url != null && url.startsWith('https://api.telegram.org'))
+        ? "https://ludo-tecb.onrender.com/proxy-avatar?url=${Uri.encodeComponent(url)}"
+        : url;
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.4), width: 1.5),
+        border: Border.all(
+          color: Colors.amber.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(size / 2),
-        child: url != null && url.isNotEmpty
+        child: safeUrl != null && safeUrl.isNotEmpty
             ? Image.network(
-          url,
+          safeUrl,
           fit: BoxFit.cover,
+          headers: const {
+            'Accept': 'image/*',
+          },
           errorBuilder: (_, _, _) => _buildDefaultAvatar(size),
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
