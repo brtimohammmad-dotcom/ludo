@@ -141,6 +141,7 @@ async function getPlayerRank(telegramId) {
   }
 }
 module.exports = {
+  updatePlayerAvatar,
   getTopTenPlayers,
   getPlayerRank,
   getOrCreatePlayer,

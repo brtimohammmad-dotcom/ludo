@@ -1,6 +1,7 @@
 const { getOrCreatePlayer } = require("../database/players");
 const initialState = require("../models/initialState");
 const { getUserAvatarUrl } = require("../../bot");
+const { updatePlayerAvatar } = require("../database/players");
 
 async function handleAuth(initData, socket) {
   const isLocal = process.env.RENDER !== "true";
