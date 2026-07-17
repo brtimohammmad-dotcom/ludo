@@ -6,6 +6,7 @@ async function getOrCreatePlayer(telegramId, username) {
   try {
     // استفاده از ویژگی قدرتمند upsert
     // این دستور اگر رکورد وجود داشته باشد آپدیت می‌کند و اگر نباشد اینسرت می‌کند.
+    // فیلدهای avatar_url و last_avatar_update را هم به ستون‌های پیش‌فرض اضافه کردیم تا در اولین ورود نال بمانند یا دیتا بگیرند.
     const { data: player, error } = await supabase
       .from("players")
       .upsert(
@@ -20,6 +21,30 @@ async function getOrCreatePlayer(telegramId, username) {
     return player; // بازگرداندن دیتای نهایی بازیکن ساخته یا آپدیت شده
   } catch (error) {
     console.error("خطا در دریافت یا ایجاد بازیکن:", error);
+    throw error;
+  }
+}
+
+// تابع جدید: برای مواقعی که عکس کاربر منقضی شده و لینک جدید را در دیتابیس ذخیره می‌کنیم
+async function updatePlayerAvatar(telegramId, avatarUrl, lastUpdate) {
+  try {
+    const { data, error } = await supabase
+      .from("players")
+      .update({
+        avatar_url: avatarUrl,
+        last_avatar_update: lastUpdate.toISOString(), // تبدیل تاریخ جی‌اس به فرمت پستگرس
+      })
+      .eq("telegram_id", telegramId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error(
+      `خطا در به‌روزرسانی آواتار بازیکن ${telegramId}:`,
+      error.message,
+    );
     throw error;
   }
 }

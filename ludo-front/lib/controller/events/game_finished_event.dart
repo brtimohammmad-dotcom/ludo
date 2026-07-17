@@ -18,12 +18,15 @@ class GameFinishedEvent implements GameEvent {
   void execute(GameController controller) {
     if (controller.currentGameState == null) return;
     final livePlayer = controller.currentGameState?.livePlayer;
+    final isWinner = livePlayer?.userId == newPlayer.userId;
     if (controller.currentGameState!.gameStage != GameStage.boardStage) {
       controller.updateState(
         controller.currentGameState!.copyWith(
           gameStage: GameStage.joinStage,
           livePlayer: livePlayer?.copyWith(
-            coin: livePlayer.coin + controller.currentGameState.winPrice(),
+            coin: isWinner
+                ? livePlayer.coin + controller.currentGameState.winPrice()
+                : livePlayer.coin,
           ),
         ),
       );
@@ -33,14 +36,14 @@ class GameFinishedEvent implements GameEvent {
     controller.updateState(
       controller.currentGameState!.copyWith(
         livePlayer: livePlayer?.copyWith(
-          coin: livePlayer.userId == newPlayer.userId
+          coin: isWinner
               ? livePlayer.coin + controller.currentGameState.winPrice()
               : livePlayer.coin,
         ),
         serverState: controller.currentGameState!.serverState!.copyWith(
           winner: newPlayer,
           gameStatus: GameStatus.finished,
-          turnStatus: null
+          turnStatus: null,
         ),
       ),
     );

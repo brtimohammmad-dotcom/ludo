@@ -188,5 +188,33 @@ const updateLobbyMessage = async (gameId) => {
     console.error("[Global Lobby Update Error]:", globalError);
   }
 };
+// تابع کمکی برای گرفتن لینک مستقیم عکس پروفایل کاربر از تلگرام
+const getUserAvatarUrl = async (userId) => {
+  try {
+    // ۱. گرفتن لیست عکس‌های پروفایل (فقط آخرین آلبوم عکس)
+    const photos = await bot.telegram.getUserProfilePhotos(userId, {
+      limit: 1,
+    });
 
-module.exports = { bot, updateLobbyMessage };
+    if (!photos || photos.total_count === 0) {
+      return null; // کاربر عکس پروفایل ندارد
+    }
+
+    // ۲. انتخاب بالاترین کیفیت (آخرین سایز در آرایه)
+    const photoSizes = photos.photos[0];
+    const fileId = photoSizes[photoSizes.length - 1].file_id;
+
+    // ۳. گرفتن لینک مستقیم و زنده فایل از سرورهای تلگرام
+    const fileLink = await bot.telegram.getFileLink(fileId);
+
+    // خروجی متد getFileLink در نسخه‌های مختلف تله‌گراف ممکنه شیء URL باشه، پس href رو می‌گیریم
+    return fileLink.href || fileLink;
+  } catch (error) {
+    console.error(
+      `[Avatar Fetch Error] Failed for user ${userId}:`,
+      error.message,
+    );
+    return null;
+  }
+};
+module.exports = { bot, updateLobbyMessage, getUserAvatarUrl };

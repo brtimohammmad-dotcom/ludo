@@ -14,6 +14,7 @@ class DailyRewardClaimedEvent implements GameEvent {
   void execute(GameController controller) {
     final livePlayer = controller.currentGameState?.livePlayer;
     controller.stopLoading('daily_reward');
+    controller.playSfx("assets/audio/sound-effect/claim_daily_reward_sound.wav");
     controller.updateState(
       controller.currentGameState?.copyWith(
         livePlayer: livePlayer?.copyWith(

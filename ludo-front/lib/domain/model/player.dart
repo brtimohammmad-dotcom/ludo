@@ -1,6 +1,5 @@
 import 'package:ludo/domain/model/token.dart';
 
-
 enum PlayerStatus { online, offline }
 
 class Player {
@@ -12,6 +11,7 @@ class Player {
   final int? numberOfAbsences;
   final int rewardStreak;
   final bool canClaimDailyReward;
+  String? avatarUrl;
 
   Player({
     required this.coin,
@@ -20,12 +20,14 @@ class Player {
     required this.username,
     required this.color,
     required this.playerStatus,
-    this.rewardStreak = 1,          // مقدار پیش‌فرض ۱
-    this.canClaimDailyReward = false, // مقدار پیش‌فرض غیرفعال
+    this.rewardStreak = 1,
+    this.canClaimDailyReward = false,
+    this.avatarUrl,
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
+      avatarUrl: json['avatar_url'],
       coin: json['coin'] ?? 0,
       numberOfAbsences: json['numberOfAbsences'],
       username: json['username'] ?? '',
@@ -48,6 +50,7 @@ class Player {
     'coin': coin,
     'reward_streak': rewardStreak,
     'can_claim_daily_reward': canClaimDailyReward,
+    'avatar_url':avatarUrl
   };
 
   Player copyWith({
@@ -59,8 +62,10 @@ class Player {
     int? numberOfAbsences,
     int? rewardStreak,
     bool? canClaimDailyReward,
+    String? avatarUrl
   }) {
     return Player(
+      avatarUrl: avatarUrl ?? this.avatarUrl,
       coin: coin ?? this.coin,
       numberOfAbsences: numberOfAbsences ?? this.numberOfAbsences,
       playerStatus: playerStatus ?? this.playerStatus,
