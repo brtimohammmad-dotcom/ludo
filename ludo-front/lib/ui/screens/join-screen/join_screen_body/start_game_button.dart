@@ -6,7 +6,7 @@ class StartGameButton extends StatelessWidget {
   final double boardSize;
   final int entryFee;
   final int prizePool;
-  final Color themeColor; // رنگ تم اختصاصی لول (مثلا طلایی برای گلد)
+  final Color themeColor;
 
   const StartGameButton({
     super.key,
@@ -18,23 +18,18 @@ class StartGameButton extends StatelessWidget {
     required this.themeColor,
   });
 
+  // حذف شرط -1 (Friends) و ساده‌سازی کامل متد متنی
+  String _getModeLabel() {
+    if (numberOfPlayers == 2 || numberOfPlayers == -2) return "2 Players";
+    return "4 Players";
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isWide = numberOfPlayers == -1;
-
-    String modeLabel = "";
-    if (numberOfPlayers == -1) {
-      modeLabel = "Friends";
-    } else if (numberOfPlayers == 2 || numberOfPlayers == -2) {
-      modeLabel = "2 Players";
-    } else {
-      modeLabel = "4 Players";
-    }
-
-    // سایزبندی دقیق‌تر متناسب با صفحه نمایش گوشی و تبلت
-    final buttonWidth = isWide ? boardSize * 0.675 : boardSize * 0.38;
-    final buttonHeight = boardSize * 0.22;
-    final borderRadius = BorderRadius.circular(boardSize * 0.03);
+    final double buttonWidth = boardSize * 0.32;
+    final double buttonHeight = boardSize * 0.22;
+    final double radiusValue = boardSize * 0.03;
+    final borderRadius = BorderRadius.circular(radiusValue);
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
@@ -44,14 +39,13 @@ class StartGameButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: borderRadius,
           border: Border.all(
-            color: themeColor.withValues(alpha: 0.4),
-            width: 1.5,
+            color: themeColor.withValues(alpha: 0.35),
+            width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: themeColor.withValues(alpha: 0.15),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: themeColor.withValues(alpha: 0.1),
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -66,8 +60,8 @@ class StartGameButton extends StatelessWidget {
                   borderRadius: borderRadius,
                   gradient: LinearGradient(
                     colors: [
-                      Colors.white.withValues(alpha: 0.08),
-                      Colors.white.withValues(alpha: 0.02),
+                      Colors.white.withValues(alpha: 0.07),
+                      Colors.white.withValues(alpha: 0.01),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -77,43 +71,43 @@ class StartGameButton extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      modeLabel,
+                      _getModeLabel(),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: boardSize * 0.042,
+                        fontSize: (boardSize * 0.040).clamp(11.0, 16.0), // کنترل فونت برای عدم اورفلو در رزولوشن‌های مختلف
                         letterSpacing: 0.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: boardSize * 0.008),
+                    SizedBox(height: boardSize * 0.006),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                            Icons.monetization_on,
-                            color: Colors.amberAccent,
-                            size: boardSize * 0.045
+                          Icons.monetization_on,
+                          color: Colors.amberAccent,
+                          size: boardSize * 0.042,
                         ),
-                        SizedBox(width: boardSize * 0.01),
+                        SizedBox(width: boardSize * 0.008),
                         Text(
                           entryFee == 0 ? "Free" : "$entryFee",
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: boardSize * 0.032,
+                            color: const Color(0xE6FFFFFF),
+                            fontSize: (boardSize * 0.030).clamp(9.0, 14.0),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                     if (prizePool > 0) ...[
-                      SizedBox(height: boardSize * 0.005),
+                      SizedBox(height: boardSize * 0.004),
                       Text(
                         "Win: +$prizePool",
                         style: TextStyle(
                           color: Colors.amberAccent.shade100,
                           fontWeight: FontWeight.bold,
-                          fontSize: boardSize * 0.032,
+                          fontSize: (boardSize * 0.030).clamp(9.0, 14.0),
                         ),
                       ),
                     ],

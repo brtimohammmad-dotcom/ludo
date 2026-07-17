@@ -114,10 +114,10 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         borderRadius: borderRadius,
         color: isCurrentTurn
             ? const Color(0x1FFFFFFF)
-            : const Color(0x8A000000), // سبک‌سازی با حذف بلور داینامیک
+            : const Color(0x8A000000),
         border: Border.all(
           color: isCurrentTurn
-              ? activeBorderColor.withValues(alpha: 0.5)
+              ? activeBorderColor.withValues(alpha: 0.4)
               : Colors.white10,
           width: 1.2,
         ),
@@ -125,14 +125,17 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
+          // خط زمان ثابت و بدون تاثیرگذاری روی لایه بالایی متن
           if (isCurrentTurn && animationController != null)
-            RepaintBoundary(
-              child: _SolidTimerProgressLine(
-                fullWidth: fullWidth,
-                boardSize: boardSize,
-                barColor: usernameTimerBoxColor(),
-                borderRadius: borderRadius,
-                controller: animationController,
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: _SolidTimerProgressLine(
+                  fullWidth: fullWidth,
+                  boardSize: boardSize,
+                  barColor: usernameTimerBoxColor(),
+                  borderRadius: borderRadius,
+                  controller: animationController,
+                ),
               ),
             ),
           Center(
@@ -174,23 +177,24 @@ class _SolidTimerProgressLine extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: AnimatedBuilder(
         animation: controller,
-        builder: (context, _) {
+        // با پاس دادن یک دکوریشن باکس فیکس به پارامتر child، فلاتر آبجکت گرافیکی را فریم به فریم مجدد نمی‌سازد
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: barColor,
+            borderRadius: borderRadius,
+          ),
+        ),
+        builder: (context, cachedChild) {
           return SizedBox(
             width: fullWidth * (1 - controller.value),
             height: boardSize * 0.06,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: barColor,
-                borderRadius: borderRadius,
-              ),
-            ),
+            child: cachedChild,
           );
         },
       ),
     );
   }
 }
-
 class _PlayerInfoRow extends StatelessWidget {
   const _PlayerInfoRow({
     required this.playerData,

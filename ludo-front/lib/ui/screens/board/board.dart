@@ -11,6 +11,8 @@ import 'package:ludo/ui/utils/painter.dart';
 
 import 'board_ui_event_handler.dart';
 
+// ... بخش ایمپورت‌ها بدون تغییر باقی می‌ماند ...
+
 class Board extends ConsumerStatefulWidget {
   const Board({super.key});
 
@@ -18,8 +20,7 @@ class Board extends ConsumerStatefulWidget {
   ConsumerState<Board> createState() => _BoardState();
 }
 
-class _BoardState extends ConsumerState<Board>
-    with SingleTickerProviderStateMixin {
+class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMixin {
   late BoardUiEventHandler _uiEventHandler;
   late final GameController _gameController;
 
@@ -27,21 +28,20 @@ class _BoardState extends ConsumerState<Board>
   void initState() {
     super.initState();
     final gameController = ref.read(gameControllerProvider.notifier);
-    // مقداردهی و ثبت کالبک‌ها از طریق هندلر اختصاصی UI
     _uiEventHandler = BoardUiEventHandler(
       context: context,
       gameController: gameController,
     );
     _uiEventHandler.checkAndShowWaitingDialog();
-    // انیمیشن کنترلر محلی بورد
+
     gameController.animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 10))
-          ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              gameController.animationController!.reset();
-              gameController.animationController!.forward();
-            }
-          });
+    AnimationController(vsync: this, duration: const Duration(seconds: 10))
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          gameController.animationController!.reset();
+          gameController.animationController!.forward();
+        }
+      });
     _gameController = ref.read(gameControllerProvider.notifier);
   }
 
@@ -50,7 +50,6 @@ class _BoardState extends ConsumerState<Board>
     debugPrint("🧹 Board dispose called");
     _gameController.animationController?.dispose();
     _gameController.animationController = null;
-
     super.dispose();
   }
 
@@ -58,61 +57,43 @@ class _BoardState extends ConsumerState<Board>
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final boardSize = (screenWidth < screenHeight
-        ? screenWidth
-        : screenHeight * 0.86);
+    final boardSize = (screenWidth < screenHeight ? screenWidth : screenHeight * 0.86);
 
     final numberOfPlayers = ref.watch(
-      gameControllerProvider.select(
-        (state) => state?.serverState?.numberOfPlayers ?? 2,
-      ),
+      gameControllerProvider.select((state) => state?.serverState?.numberOfPlayers ?? 2),
     );
 
     ref.listen<GameStatus?>(
       gameControllerProvider.select((state) => state?.serverState?.gameStatus),
-      (previous, next) {
-        debugPrint("🔄 [UI Event] Game Status Changed: $next");
-
-        if (previous == GameStatus.waitingForPlayer &&
-            next == GameStatus.start) {
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
+          (previous, next) {
+        if (previous == GameStatus.waitingForPlayer && next == GameStatus.start) {
+          if (Navigator.canPop(context)) Navigator.of(context).pop();
         } else if (next == GameStatus.finished) {
           if (!context.mounted) return;
-
           final winner = _gameController.currentGameState?.serverState?.winner;
           if (winner != null) {
             showAnimatedDialog(
               context: context,
               barrierDismissible: false,
-              child: WinnerAlert(
-                winner: winner,
-                gameController: _gameController,
-              ),
+              child: WinnerAlert(winner: winner, gameController: _gameController),
             );
           }
         } else if (next == GameStatus.exit) {
           _gameController.resetGame();
           _gameController.updateState(
-            _gameController.currentGameState?.copyWith(
-              gameStage: GameStage.joinStage,
-            ),
+            _gameController.currentGameState?.copyWith(gameStage: GameStage.joinStage),
           );
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
+          if (Navigator.canPop(context)) Navigator.of(context).pop();
         }
       },
     );
     final barHeight = boardSize * 0.1;
 
     return Scaffold(
-      // 🌌 استفاده از رنگ پایه مشابه کهکشان برای هماهنگی کامل
       backgroundColor: const Color(0xFF07070B),
       body: Stack(
         children: [
-          // ۱. پس‌زمینه کهکشانی (همان نقاش قبلی)
+          // ۱. پس‌زمینه ایزوله
           Positioned.fill(
             child: RepaintBoundary(
               child: CustomPaint(
@@ -121,30 +102,24 @@ class _BoardState extends ConsumerState<Board>
             ),
           ),
 
-          // ۲. برد بازی اصلی
+          // ۲. برد بازی اصلی با حذف دکوراسیون‌های محاسباتی سنگین
           Center(
             child: FittedBox(
               fit: BoxFit.contain,
               child: Container(
-                // حالا اینجا می‌تونی به کانتینر اصلی برد، یه افکت شیشه‌ای یا حاشیه نئونی بدی
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05), // شفافیت ملایم برای نمایش کهکشان پشت برد
+                  color: const Color(0x0DFFFFFF), // جایگزین معادل با با شفافیت ۵٪ بدون محاسبات رنگی داینامیک
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    width: 2,
+                    color: const Color(0x1AFFFFFF), // مرز شیشه‌ای ثابت بدون فشار گرافیکی
+                    width: 1.5,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                    ),
-                  ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // نوار بازیکن بالا (کاملاً مستقل در مرز رندرینگ)
                     RepaintBoundary(
                       child: PlayerBar(
                         boardSize: boardSize,
@@ -153,7 +128,9 @@ class _BoardState extends ConsumerState<Board>
                         rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
                       ),
                     ),
+                    // برد اصلی لودو
                     RepaintBoundary(child: MainBoard(boardSize: boardSize)),
+                    // نوار بازیکن پایین
                     RepaintBoundary(
                       child: PlayerBar(
                         boardSize: boardSize,
@@ -170,6 +147,5 @@ class _BoardState extends ConsumerState<Board>
         ],
       ),
     );
-
   }
 }

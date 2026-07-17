@@ -46,13 +46,19 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     });
   }
 
+// ... کدهای قبلی و ایمپورت‌ها بدون تغییر باقی می‌مانند ...
+
+// ... کدهای قبلی و ایمپورت‌ها بدون تغییر باقی می‌مانند ...
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+
+    // محاسبه منعطف‌تر سایز پایه
     final boardSize = (screenWidth < screenHeight
         ? screenWidth
-        : screenHeight * 0.86);
+        : screenHeight * 0.8);
 
     ref.listen<bool>(
       globalLoadingProvider.select((s) => s.contains("waiting_for_game")),
@@ -65,75 +71,100 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       },
     );
 
+    // محاسبه سایز تاس با در نظر گرفتن یک سقف حداکثری (تا در وب خیلی بزرگ نشود)
+    final diceSize = (boardSize * 0.4).clamp(120.0, 220.0);
+
     return Scaffold(
       backgroundColor: const Color(0xFF07070B),
+      resizeToAvoidBottomInset: false,
       body: Stack(
         clipBehavior: Clip.none,
         children: [
-          // ⚡ ۱. ایزوله کردن کامل پس‌زمینه Canvas با RepaintBoundary
+          // ۱. پس‌زمینه
           Positioned.fill(
-            child:  RepaintBoundary(
+            child: RepaintBoundary(
               child: CustomPaint(
                 painter: LudoBackgroundPainter(),
               ),
             ),
           ),
 
-          // محتوای اصلی روی بک‌گراند
+          // ۲. محتوای اصلی
           SafeArea(
             child: SizedBox(
               width: double.infinity,
               height: double.infinity,
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: screenHeight * 0.03),
+              child: Column(
+                children: [
+                  // ایجاد فاصله منعطف از بالا متناسب با ارتفاع صفحه
+                  SizedBox(height: screenHeight * 0.08),
 
-                    // ⚡ ۲. ایزوله کردن افکت پالس تاس
-                    RepaintBoundary(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.amber.withValues(alpha: 0.1),
-                              blurRadius: 40,
-                              spreadRadius: 10,
+                  // بخش وسط به صورت کاملاً ریسپانسیو و منعطف
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min, // اشغال حداقل فضای ممکن
+                      children: [
+                        // بخش تاس
+                        Flexible(
+                          flex: 3,
+                          child: Center(
+                            child: RepaintBoundary(
+                              child: SizedBox(
+                                width: diceSize,
+                                height: diceSize,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      width: diceSize,
+                                      height: diceSize,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: RadialGradient(
+                                          colors: [
+                                            Colors.amber.withValues(alpha: 0.15),
+                                            Colors.amber.withValues(alpha: 0.0),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Image.asset(
+                                      "assets/webp/happy-dice.webp",
+                                      width: diceSize * 0.8,
+                                      height: diceSize * 0.8,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ],
+                          ),
                         ),
-                        child: Image.asset(
-                          "assets/webp/happy-dice.webp",
-                          width: boardSize * 0.55,
-                          height: boardSize * 0.55,
-                          fit: BoxFit.cover,
+
+                        // فاصله متناسب و منعطف
+                        const Spacer(flex: 1),
+
+                        // بخش دکمه‌های افقی
+                        Flexible(
+                          flex: 5,
+                          child: GameSelectionButtons(
+                            boardSize: boardSize,
+                            handler: _handler,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
+                  ),
 
-                    SizedBox(height: screenHeight * 0.02),
-
-                    // ⚡ ۳. بخش دکمه‌های انتخاب لول بازی
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: GameSelectionButtons(
-                        boardSize: boardSize,
-                        handler: _handler,
-                      ),
-                    ),
-
-                    // فاصله انتهایی کافی برای اینکه دکمه‌ها زیر منوی معلق پایین پنهان نشوند
-                    SizedBox(height: screenHeight * 0.18),
-                  ],
-                ),
+                  // ایجاد فضای خالی پایین صفحه متناسب با منوی شناور
+                  SizedBox(height: screenHeight * 0.14),
+                ],
               ),
             ),
           ),
 
-          // ✅ حل مشکل کرش: دیگر پیچیدن درون Positioned اضافی لازم نیست؛
-          // چون CoinBox خودش در سطح اول کدهایش با Positioned پیاده‌سازی شده است.
+          // باکس سکه بالا سمت چپ
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
@@ -151,15 +182,13 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             showFriendsPlayDialog(context, boardSize, _handler);
           },
           onLeaderboardTap: () {
-            debugPrint("لیدربورد لمس شد");
             ref.read(gameControllerProvider.notifier).getLeaderBoardList();
             ref.read(globalLoadingProvider.notifier).start('leader_board_loading');
           },
-          onShopTap: () {
-            debugPrint("فروشگاه لمس شد");
-          },
+          onShopTap: () {},
         ),
       ),
     );
   }
+// ...
 }
