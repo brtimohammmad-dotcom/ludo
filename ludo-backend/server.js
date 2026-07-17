@@ -47,49 +47,7 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ status: "ok" }));
   }
 
-  // 4️⃣ روت پروکسی آواتار (مقاوم در برابر انکود دوگانه مرورگر)
-  if (pathname === "/proxy-avatar" && req.method === "GET") {
-    try {
-      const rawUrl = parsedUrl.searchParams.get("url");
 
-      if (!rawUrl) {
-        res.writeHead(400, { "Content-Type": "text/plain" });
-        return res.end("URL is required");
-      }
-
-      // 🌟 دیکود کردن آدرس برای تبدیل %2F و %3A به کاراکترهای واقعی وب
-      const fileUrl = decodeURIComponent(rawUrl);
-
-      // جلوگیری از سوءاستفاده از پروکسی سرور
-      if (!fileUrl.startsWith("https://api.telegram.org")) {
-        res.writeHead(403, { "Content-Type": "text/plain" });
-        return res.end("Only Telegram API URLs are allowed");
-      }
-
-      // دانلود مستقیم عکس از تلگرام توسط سرور
-      const response = await fetch(fileUrl);
-
-      if (!response.ok) {
-        res.writeHead(response.status, { "Content-Type": "text/plain" });
-        return res.end(
-          `Failed to fetch image from Telegram: ${response.statusText}`,
-        );
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      res.writeHead(200, {
-        "Content-Type": response.headers.get("content-type") || "image/jpeg",
-        "Content-Length": buffer.length,
-      });
-      return res.end(buffer);
-    } catch (error) {
-      console.error("Proxy error:", error);
-      res.writeHead(500, { "Content-Type": "text/plain" });
-      return res.end("Internal Server Error");
-    }
-  }
 
   // 5️⃣ روت وبهوک تلگرام
   if (pathname === "/webhook" && req.method === "POST") {

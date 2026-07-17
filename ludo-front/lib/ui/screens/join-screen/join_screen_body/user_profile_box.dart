@@ -56,9 +56,7 @@ class UserProfileBox extends StatelessWidget {
 
   Widget _buildAvatar(String? url, double size) {
     // اگر آدرس آواتار برای تلگرام بود، آن را از پروکسی سرور خودت عبور بده
-    final String? safeUrl = (url != null && url.startsWith('https://api.telegram.org'))
-        ? "https://ludo-tecb.onrender.com/proxy-avatar?url=${Uri.encodeComponent(url)}"
-        : url;
+    final String? safeUrl = _getSafeAvatarUrl(url);
 
     return Container(
       width: size,
@@ -108,4 +106,14 @@ class UserProfileBox extends StatelessWidget {
       ),
     );
   }
+}
+String? _getSafeAvatarUrl(String? originalUrl) {
+  if (originalUrl == null || originalUrl.isEmpty) return null;
+
+  if (originalUrl.startsWith("https://api.telegram.org")) {
+    final encodedUrl = Uri.encodeComponent(originalUrl);
+    return "https://api.allorigins.win/raw?url=$encodedUrl";
+  }
+
+  return originalUrl;
 }
