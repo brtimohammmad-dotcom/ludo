@@ -1,5 +1,5 @@
-// lib/ui/screens/join-screen/join_screen_body/user_profile_box.dart
 import 'package:flutter/material.dart';
+import 'package:ludo/ui/utils/avatar.dart';
 
 class UserProfileBox extends StatelessWidget {
   final dynamic player;
@@ -48,72 +48,9 @@ class UserProfileBox extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          _buildAvatar(avatarUrl, avatarSize),
+          UserAvatar(url: avatarUrl, size: avatarSize)
         ],
       ),
     );
   }
-
-  Widget _buildAvatar(String? url, double size) {
-    // اگر آدرس آواتار برای تلگرام بود، آن را از پروکسی سرور خودت عبور بده
-    final String? safeUrl = _getSafeAvatarUrl(url);
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.amber.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size / 2),
-        // داخل متد _buildAvatar فایل user_profile_box.dart این بخش رو ساده‌تر کن:
-        child: safeUrl != null && safeUrl.isNotEmpty
-            ? Image.network(
-          safeUrl,
-          fit: BoxFit.cover,
-          // 🌟 هدر حذف شد تا مرورگر درخواست اضافی OPTIONS ارسال نکند
-          errorBuilder: (_, _, _) => _buildDefaultAvatar(size),
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: SizedBox(
-                width: size * 0.5,
-                height: size * 0.5,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 1.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
-                ),
-              ),
-            );
-          },
-        )
-            : _buildDefaultAvatar(size),
-      ),
-    );
-  }
-
-  Widget _buildDefaultAvatar(double size) {
-    return Container(
-      color: const Color(0xFF22222E),
-      child: Icon(
-        Icons.person_rounded,
-        color: Colors.amber.withValues(alpha: 0.7),
-        size: size * 0.6,
-      ),
-    );
-  }
-}
-String? _getSafeAvatarUrl(String? originalUrl) {
-  if (originalUrl == null || originalUrl.isEmpty) return null;
-
-  if (originalUrl.startsWith("https://api.telegram.org")) {
-    final encodedUrl = Uri.encodeComponent(originalUrl);
-    return "https://api.allorigins.win/raw?url=$encodedUrl";
-  }
-
-  return originalUrl;
 }

@@ -41,32 +41,45 @@ async function handleAuth(initData, socket) {
     let avatarUrl = player.avatar_url;
     const now = new Date();
 
- if (!isLocal) {
-   const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+    if (!isLocal) {
+      const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
 
-   // اگر آواتار ندارد یا بیشتر از ۲۴ ساعت از آخرین آپدیت گذشته است
-   if (
-     !player.avatar_url ||
-     !player.last_avatar_update ||
-     new Date(player.last_avatar_update) < oneDayAgo
-   ) {
-     console.log(`[Avatar Sync] Fetching fresh avatar for ${user.id}...`);
-     const freshAvatar = await getUserAvatarUrl(user.id);
+      // اگر آواتار ندارد یا بیشتر از ۲۴ ساعت از آخرین آپدیت گذشته است
+      if (
+        !player.avatar_url ||
+        !player.last_avatar_update ||
+        new Date(player.last_avatar_update) < oneDayAgo
+      ) {
+        console.log(
+          `[Avatar Sync] Fetching fresh avatar from Telegram for ${user.id}...`,
+        );
+        const telegramFileLink = await getUserAvatarUrl(user.id);
 
-     if (freshAvatar) {
-       avatarUrl = freshAvatar;
-       player.avatar_url = avatarUrl;
-       player.last_avatar_update = now;
+        if (telegramFileLink) {
+          const supabaseAvatarUrl = await uploadAvatarToSupabase(
+            user.id,
+            telegramFileLink,
+          );
+          if (supabaseAvatarUrl) {
+            avatarUrl = supabaseAvatarUrl;
+            player.avatar_url = avatarUrl;
+            player.last_avatar_update = now;
 
-       // آپدیت آنی دیتابیس سوپابیس با لینک زنده تلگرام
-       await updatePlayerAvatar(user.id, avatarUrl, now).catch((err) => {
-         console.error("[Database Avatar Sync Error]:", err.message);
-       });
-     }
-   }
- } else {
-   avatarUrl = player.avatar_url || "https://placeholder.com/avatar.png";
- }
+            // آپدیت دیتابیس با لینک دائمی استوریج خودت
+            await updatePlayerAvatar(user.id, avatarUrl, now).catch((err) => {
+              console.error("[Database Avatar Sync Error]:", err.message);
+            });
+          }
+
+          // آپدیت آنی دیتابیس سوپابیس با لینک زنده تلگرام
+          await updatePlayerAvatar(user.id, avatarUrl, now).catch((err) => {
+            console.error("[Database Avatar Sync Error]:", err.message);
+          });
+        }
+      }
+    } else {
+      avatarUrl = player.avatar_url || "https://placeholder.com/avatar.png";
+    }
 
     // ذخیره در دیتای سوکت
     socket.data.telegramId = player.telegram_id;
