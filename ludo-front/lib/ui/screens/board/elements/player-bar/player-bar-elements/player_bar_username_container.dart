@@ -25,7 +25,6 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final double fullWidth = boardSize * 0.22;
 
-    // 🌟 ۱. اگر ایندکس منفی باشد (مثلاً در بازی ۲ نفره)، کلاً هیچ‌چیز (حتی آواتار) نشان داده نمی‌شود
     if (playerIndex == -1) {
       return SizedBox(width: fullWidth, height: boardSize * 0.06);
     }
@@ -47,7 +46,7 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
           status: p.playerStatus,
           absences: p.numberOfAbsences,
           coin: p.coin,
-          avatarUrl: p.avatarUrl, // 🌟 اضافه شدن آواتار به رکورد داده‌ها
+          avatarUrl: p.avatarUrl,
           exists: true,
           );
         }
@@ -61,7 +60,7 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         );
       }),
     );
-
+    debugPrint(playerData.avatarUrl);
     final totalPlayers = ref.watch(
       gameControllerProvider.select(
             (s) => s?.serverState?.numberOfPlayers ?? 2,
