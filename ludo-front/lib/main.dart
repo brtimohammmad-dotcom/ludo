@@ -2,10 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/ui/app_body.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
+  if (TelegramWebApp.instance.isSupported) {
+    TelegramWebApp.instance.ready();
+    TelegramWebApp.instance.enableClosingConfirmation();
+  }
   // ۲. مدیریت و خنثی‌سازی ارورهای زامبی فلاتر وب در حالت Hot Restart
   if (kIsWeb && kDebugMode) {
     final originalOnError = FlutterError.onError;
@@ -38,7 +42,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-   return MaterialApp(
+    return MaterialApp(
       title: 'Ludo',
       debugShowCheckedModeBanner: false,
       // 🟢 شفاف کردن کامل پس‌زمینه تم اصلی اپلیکیشن وب
