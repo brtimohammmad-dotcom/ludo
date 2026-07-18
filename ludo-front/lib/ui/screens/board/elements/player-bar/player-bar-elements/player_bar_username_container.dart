@@ -6,6 +6,9 @@ import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/player_bar_utils.dart';
 
+import 'package:ludo/ui/utils/avatar.dart';
+
+
 class PlayerBarUsernameContainer extends ConsumerWidget {
   const PlayerBarUsernameContainer({
     super.key,
@@ -21,6 +24,8 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final double fullWidth = boardSize * 0.22;
+
+    // 🌟 ۱. اگر ایندکس منفی باشد (مثلاً در بازی ۲ نفره)، کلاً هیچ‌چیز (حتی آواتار) نشان داده نمی‌شود
     if (playerIndex == -1) {
       return SizedBox(width: fullWidth, height: boardSize * 0.06);
     }
@@ -38,38 +43,40 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         if (players != null && players.length > playerIndex) {
           final p = players[playerIndex];
           return (
-            username: p.username,
-            status: p.playerStatus,
-            absences: p.numberOfAbsences,
-            coin: p.coin,
-            exists: true,
+          username: p.username,
+          status: p.playerStatus,
+          absences: p.numberOfAbsences,
+          coin: p.coin,
+          avatarUrl: p.avatarUrl, // 🌟 اضافه شدن آواتار به رکورد داده‌ها
+          exists: true,
           );
         }
         return (
-          username: '',
-          status: PlayerStatus.online,
-          absences: 0,
-          coin: 0,
-          exists: false,
+        username: '',
+        status: PlayerStatus.online,
+        absences: 0,
+        coin: 0,
+        avatarUrl: null,
+        exists: false,
         );
       }),
     );
 
     final totalPlayers = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.numberOfPlayers ?? 2,
+            (s) => s?.serverState?.numberOfPlayers ?? 2,
       ),
     );
     final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
 
     final isMyTurn = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.currentTurn == playerColor,
+            (s) => s?.serverState?.currentTurn == playerColor,
       ),
     );
     final turnStatus = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.currentTurn == playerColor
+            (s) => s?.serverState?.currentTurn == playerColor
             ? s?.serverState?.turnStatus
             : null,
       ),
@@ -77,8 +84,8 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
 
     final bool isCurrentTurn =
         isMyTurn &&
-        gameStatus == GameStatus.start &&
-        turnStatus != TurnStatus.waitingForAnimate;
+            gameStatus == GameStatus.start &&
+            turnStatus != TurnStatus.waitingForAnimate;
     final animationController = ref
         .watch(gameControllerProvider.notifier)
         .animationController;
@@ -95,67 +102,83 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       if (gameStatus != GameStatus.start) return Colors.transparent;
       switch (playerData.absences) {
         case 1:
-        // زرد لیمویی نئونی با ۳۰٪ شفافیت (شفاف و جذاب)
           return const Color(0x4DCCFF00);
         case 2:
-        // نارنجی-قرمز نئونی با ۴۰٪ شفافیت (حس خطر و غیبت دوم)
           return const Color(0x66FF3B30);
         default:
-        // سفید یخی/شیشه‌ای بسیار ملایم با ۱۵٪ شفافیت برای حالت عادی
           return const Color(0x26FFFFFF);
       }
     }
     final borderRadius = BorderRadius.circular(boardSize * 0.1);
 
-    return Container(
-      width: fullWidth,
-      height: boardSize * 0.06,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        color: isCurrentTurn
-            ? const Color(0x1FFFFFFF)
-            : const Color(0x8A000000),
-        border: Border.all(
-          color: isCurrentTurn
-              ? activeBorderColor.withValues(alpha: 0.4)
-              : Colors.white10,
-          width: 1.2,
-        ),
-      ),
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          // خط زمان ثابت و بدون تاثیرگذاری روی لایه بالایی متن
-          if (isCurrentTurn && animationController != null)
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: _SolidTimerProgressLine(
-                  fullWidth: fullWidth,
-                  boardSize: boardSize,
-                  barColor: usernameTimerBoxColor(),
-                  borderRadius: borderRadius,
-                  controller: animationController,
-                ),
-              ),
-            ),
-          Center(
-            child: _PlayerInfoRow(
-              playerData: playerData,
-              barHeight: barHeight,
-              boardSize: boardSize,
-              totalPlayers: totalPlayers,
-              isCurrentTurn: isCurrentTurn,
-              playerColor: playerColor,
-              playerIndex: playerIndex,
-              isMyTurn: isMyTurn,
+    // 🌟 ۲. ترکیب آواتار با باکس نام کاربر
+    final avatarSize = boardSize * 0.06; // سایزی هم‌اندازه با ارتفاع باکس نام
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // نمایش آواتار در سمت چپ باکس نام
+        if (playerData.exists && playerData.status == PlayerStatus.online)
+          UserAvatar(
+            url: playerData.avatarUrl,
+            size: avatarSize,
+            borderColor: isCurrentTurn ? activeBorderColor : Colors.amber,
+          ),
+
+        SizedBox(width: boardSize * 0.015), // فاصله بین آواتار و باکس نام
+
+        // باکس اصلی نام و تایمر
+        Container(
+          width: fullWidth,
+          height: boardSize * 0.06,
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            color: isCurrentTurn
+                ? const Color(0x1FFFFFFF)
+                : const Color(0x8A000000),
+            border: Border.all(
+              color: isCurrentTurn
+                  ? activeBorderColor.withValues(alpha: 0.4)
+                  : Colors.white10,
+              width: 1.2,
             ),
           ),
-        ],
-      ),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              if (isCurrentTurn && animationController != null)
+                Positioned.fill(
+                  child: RepaintBoundary(
+                    child: _SolidTimerProgressLine(
+                      fullWidth: fullWidth,
+                      boardSize: boardSize,
+                      barColor: usernameTimerBoxColor(),
+                      borderRadius: borderRadius,
+                      controller: animationController,
+                    ),
+                  ),
+                ),
+              Center(
+                child: _PlayerInfoRow(
+                  playerData: playerData,
+                  barHeight: barHeight,
+                  boardSize: boardSize,
+                  totalPlayers: totalPlayers,
+                  isCurrentTurn: isCurrentTurn,
+                  playerColor: playerColor,
+                  playerIndex: playerIndex,
+                  isMyTurn: isMyTurn,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
+// کلاس‌های _SolidTimerProgressLine و _PlayerInfoRow بدون تغییر باقی می‌مانند...
 class _SolidTimerProgressLine extends StatelessWidget {
   const _SolidTimerProgressLine({
     required this.fullWidth,

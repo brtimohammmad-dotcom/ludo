@@ -251,6 +251,7 @@ async function addPlayerToGame(game, player, socket) {
     player_status: "online",
     numberOfAbsences: 0,
     connection_status: "connected",
+    avatarUrl:socket.data.avatarUrl
   };
 
   initialState.addPlayerToGameState(correctPlayer, game.game_id);

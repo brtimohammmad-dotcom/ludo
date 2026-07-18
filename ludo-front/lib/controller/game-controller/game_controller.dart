@@ -221,6 +221,7 @@ class GameController extends _$GameController {
         canClaimDailyReward: state!.livePlayer!.canClaimDailyReward,
         rewardStreak: state!.livePlayer!.rewardStreak,
         coin: state!.livePlayer!.coin,
+        avatarUrl: state!.livePlayer!.avatarUrl,
         color: null,
         playerStatus: null,
         numberOfAbsences: 0,
