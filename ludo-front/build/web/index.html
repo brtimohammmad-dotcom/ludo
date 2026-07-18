@@ -22,14 +22,21 @@
     <!-- دانلود موازی فونت ایموجی گوگل -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
     <script>
-        // مقداردهی اولیه تلگرام
+        // ۱. اعلام آمادگی به تلگرام
         window.Telegram.WebApp.ready();
-        // منبسط کردن کامل صفحه
+
+        // ۲. بزرگ کردن مینی‌اپ تا حداکثر ارتفاع ممکن
         window.Telegram.WebApp.expand();
-        // قفل کردن قابلیت بسته شدن با کشیدن انگشت
+
+        // ۳. قفل کردن حرکت کشویی و غیرفعال کردن Swipe to Close (ویژگی اصلی که می‌خواهی)
+        if (window.Telegram.WebApp.isVersionAtLeast('7.7')) {
+          window.Telegram.WebApp.disableVerticalSwipe();
+        }
+
+        // ۴. جهت اطمینان برای نسخه‌های قدیمی‌تر
         window.Telegram.WebApp.enableClosingConfirmation();
 
-        // هماهنگ کردن رنگ هدر با پس‌زمینه فلت بازی (مثلاً هدر تیره)
+        // ۵. هماهنگ کردن رنگ هدر با بازی فلت شما
         window.Telegram.WebApp.setHeaderColor('#0F172A');
     </script>
     <title>ludo</title>
