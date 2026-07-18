@@ -251,11 +251,10 @@ async function addPlayerToGame(game, player, socket) {
     player_status: "online",
     numberOfAbsences: 0,
     connection_status: "connected",
-    avatarUrl: socket.data.avatarUrl,
+    avatar_url: socket.data.avatarUrl,
   };
 
   initialState.addPlayerToGameState(correctPlayer, game.game_id);
-  console.log(initialState.getGameState(game.game_id));
 }
 
 module.exports = { handleJoinGame, handleJoinGameFriendly };

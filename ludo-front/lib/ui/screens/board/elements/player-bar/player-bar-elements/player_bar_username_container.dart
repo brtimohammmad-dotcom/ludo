@@ -111,67 +111,77 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
     final borderRadius = BorderRadius.circular(boardSize * 0.1);
 
     // 🌟 ۲. ترکیب آواتار با باکس نام کاربر
-    final avatarSize = boardSize * 0.06; // سایزی هم‌اندازه با ارتفاع باکس نام
+    // 🌟 ۲. محاسبه سایز آواتار
+    final avatarSize = boardSize * 0.06;
+
+    // 🌟 تشخیص جهت قرارگیری آواتار بر اساس رنگ بازیکن
+    final bool isAvatarOnLeft = playerColor == PlayerColor.red || playerColor == PlayerColor.blue;
+
+    // باکس اصلی نام و تایمر را در یک متغیر جدا می‌گذاریم تا خوانایی کد بالا برود
+    final nameAndTimerBox = Container(
+      width: fullWidth,
+      height: boardSize * 0.06,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        color: isCurrentTurn ? const Color(0x1FFFFFFF) : const Color(0x8A000000),
+        border: Border.all(
+          color: isCurrentTurn ? activeBorderColor.withValues(alpha: 0.4) : Colors.white10,
+          width: 1.2,
+        ),
+      ),
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          if (isCurrentTurn && animationController != null)
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: _SolidTimerProgressLine(
+                  fullWidth: fullWidth,
+                  boardSize: boardSize,
+                  barColor: usernameTimerBoxColor(),
+                  borderRadius: borderRadius,
+                  controller: animationController,
+                ),
+              ),
+            ),
+          Center(
+            child: _PlayerInfoRow(
+              playerData: playerData,
+              barHeight: barHeight,
+              boardSize: boardSize,
+              totalPlayers: totalPlayers,
+              isCurrentTurn: isCurrentTurn,
+              playerColor: playerColor,
+              playerIndex: playerIndex,
+              isMyTurn: isMyTurn,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final avatarWidget = (playerData.exists && playerData.status == PlayerStatus.online)
+        ? UserAvatar(
+      url: playerData.avatarUrl,
+      size: avatarSize,
+      borderColor: isCurrentTurn ? activeBorderColor : Colors.amber,
+    )
+        : const SizedBox.shrink();
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // نمایش آواتار در سمت چپ باکس نام
-        if (playerData.exists && playerData.status == PlayerStatus.online)
-          UserAvatar(
-            url: playerData.avatarUrl,
-            size: avatarSize,
-            borderColor: isCurrentTurn ? activeBorderColor : Colors.amber,
-          ),
-
-        SizedBox(width: boardSize * 0.015), // فاصله بین آواتار و باکس نام
-
-        // باکس اصلی نام و تایمر
-        Container(
-          width: fullWidth,
-          height: boardSize * 0.06,
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            color: isCurrentTurn
-                ? const Color(0x1FFFFFFF)
-                : const Color(0x8A000000),
-            border: Border.all(
-              color: isCurrentTurn
-                  ? activeBorderColor.withValues(alpha: 0.4)
-                  : Colors.white10,
-              width: 1.2,
-            ),
-          ),
-          child: Stack(
-            clipBehavior: Clip.hardEdge,
-            children: [
-              if (isCurrentTurn && animationController != null)
-                Positioned.fill(
-                  child: RepaintBoundary(
-                    child: _SolidTimerProgressLine(
-                      fullWidth: fullWidth,
-                      boardSize: boardSize,
-                      barColor: usernameTimerBoxColor(),
-                      borderRadius: borderRadius,
-                      controller: animationController,
-                    ),
-                  ),
-                ),
-              Center(
-                child: _PlayerInfoRow(
-                  playerData: playerData,
-                  barHeight: barHeight,
-                  boardSize: boardSize,
-                  totalPlayers: totalPlayers,
-                  isCurrentTurn: isCurrentTurn,
-                  playerColor: playerColor,
-                  playerIndex: playerIndex,
-                  isMyTurn: isMyTurn,
-                ),
-              ),
-            ],
-          ),
-        ),
+        if (isAvatarOnLeft) ...[
+          avatarWidget,
+          if (playerData.exists && playerData.status == PlayerStatus.online)
+            SizedBox(width: boardSize * 0.015),
+          nameAndTimerBox,
+        ] else ...[
+          nameAndTimerBox,
+          if (playerData.exists && playerData.status == PlayerStatus.online)
+            SizedBox(width: boardSize * 0.015),
+          avatarWidget,
+        ],
       ],
     );
   }
