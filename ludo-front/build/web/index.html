@@ -21,6 +21,17 @@
 
     <!-- دانلود موازی فونت ایموجی گوگل -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script>
+        // مقداردهی اولیه تلگرام
+        window.Telegram.WebApp.ready();
+        // منبسط کردن کامل صفحه
+        window.Telegram.WebApp.expand();
+        // قفل کردن قابلیت بسته شدن با کشیدن انگشت
+        window.Telegram.WebApp.enableClosingConfirmation();
+
+        // هماهنگ کردن رنگ هدر با پس‌زمینه فلت بازی (مثلاً هدر تیره)
+        window.Telegram.WebApp.setHeaderColor('#0F172A');
+    </script>
     <title>ludo</title>
     <style>
         /* 🟢 بدنه اصلی مرورگر را بدون رنگ نگه می‌داریم */
