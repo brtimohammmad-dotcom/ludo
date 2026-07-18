@@ -39,6 +39,5 @@ class GameStateUpdateEvent implements GameEvent {
     );
     controller.onGameReady?.call();
     onGameConnected();
-    controller.playMenuMusic();
   }
 }

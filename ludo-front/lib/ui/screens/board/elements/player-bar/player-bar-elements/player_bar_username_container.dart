@@ -60,73 +60,54 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         );
       }),
     );
-    debugPrint(playerData.avatarUrl);
+
     final totalPlayers = ref.watch(
-      gameControllerProvider.select(
-            (s) => s?.serverState?.numberOfPlayers ?? 2,
-      ),
+      gameControllerProvider.select((s) => s?.serverState?.numberOfPlayers ?? 2),
     );
     final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
 
     final isMyTurn = ref.watch(
-      gameControllerProvider.select(
-            (s) => s?.serverState?.currentTurn == playerColor,
-      ),
+      gameControllerProvider.select((s) => s?.serverState?.currentTurn == playerColor),
     );
     final turnStatus = ref.watch(
-      gameControllerProvider.select(
-            (s) => s?.serverState?.currentTurn == playerColor
-            ? s?.serverState?.turnStatus
-            : null,
-      ),
+      gameControllerProvider.select((s) => s?.serverState?.currentTurn == playerColor ? s?.serverState?.turnStatus : null),
     );
 
-    final bool isCurrentTurn =
-        isMyTurn &&
-            gameStatus == GameStatus.start &&
-            turnStatus != TurnStatus.waitingForAnimate;
-    final animationController = ref
-        .watch(gameControllerProvider.notifier)
-        .animationController;
+    final bool isCurrentTurn = isMyTurn && gameStatus == GameStatus.start && turnStatus != TurnStatus.waitingForAnimate;
+    final animationController = ref.watch(gameControllerProvider.notifier).animationController;
 
     final activeBorderColor = playerColor == PlayerColor.red
-        ? Colors.redAccent
+        ? Colors.red
         : playerColor == PlayerColor.green
-        ? Colors.greenAccent
+        ? Colors.green
         : playerColor == PlayerColor.yellow
-        ? Colors.amberAccent
-        : Colors.cyanAccent;
+        ? Colors.amber
+        : Colors.cyan;
 
     Color usernameTimerBoxColor() {
       if (gameStatus != GameStatus.start) return Colors.transparent;
       switch (playerData.absences) {
         case 1:
-          return const Color(0x4DCCFF00);
+          return const Color(0xFFEAB308); // زرد مات فلت
         case 2:
-          return const Color(0x66FF3B30);
+          return const Color(0xFFEF4444); // قرمز مات فلت
         default:
-          return const Color(0x26FFFFFF);
+          return const Color(0xFF475569); // خاکستری بهینه
       }
     }
     final borderRadius = BorderRadius.circular(boardSize * 0.1);
-
-    // 🌟 ۲. ترکیب آواتار با باکس نام کاربر
-    // 🌟 ۲. محاسبه سایز آواتار
     final avatarSize = boardSize * 0.06;
-
-    // 🌟 تشخیص جهت قرارگیری آواتار بر اساس رنگ بازیکن
     final bool isAvatarOnLeft = playerColor == PlayerColor.red || playerColor == PlayerColor.blue;
 
-    // باکس اصلی نام و تایمر را در یک متغیر جدا می‌گذاریم تا خوانایی کد بالا برود
     final nameAndTimerBox = Container(
       width: fullWidth,
       height: boardSize * 0.06,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        color: isCurrentTurn ? const Color(0x1FFFFFFF) : const Color(0x8A000000),
+        color: isCurrentTurn ? const Color(0xFF334155) : const Color(0xFF1E293B), // رنگ فلت مات به جای شیشه‌ای مشکی سنگین
         border: Border.all(
-          color: isCurrentTurn ? activeBorderColor.withValues(alpha: 0.4) : Colors.white10,
-          width: 1.2,
+          color: isCurrentTurn ? activeBorderColor : const Color(0xFF475569),
+          width: 1.0,
         ),
       ),
       child: Stack(
@@ -164,7 +145,7 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
         ? UserAvatar(
       url: playerData.avatarUrl,
       size: avatarSize,
-      borderColor: isCurrentTurn ? activeBorderColor : Colors.amber,
+      borderColor: isCurrentTurn ? activeBorderColor : Colors.grey,
     )
         : const SizedBox.shrink();
 
@@ -186,7 +167,6 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
     );
   }
 }
-
 // کلاس‌های _SolidTimerProgressLine و _PlayerInfoRow بدون تغییر باقی می‌مانند...
 class _SolidTimerProgressLine extends StatelessWidget {
   const _SolidTimerProgressLine({

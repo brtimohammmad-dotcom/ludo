@@ -16,24 +16,15 @@ class CoinBox extends ConsumerWidget {
     final int coins = livePlayer?.coin ?? 0;
     final bool canClaim = livePlayer?.canClaimDailyReward ?? false;
 
-    // ✅ ویجت Positioned از این جا حذف شد تا CoinBox یک ویجت مستقل باشد
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // ۱. باکس نمایش سکه‌ها
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: const Color(0xFF1E293B), // رنگ سالید مات
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white24, width: 1.5),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: const Color(0xFF334155), width: 1.0),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -56,9 +47,7 @@ class CoinBox extends ConsumerWidget {
             ],
           ),
         ),
-
-        const SizedBox(width: 8), // فاصله بین باکس سکه و دکمه جایزه
-        // ۲. دکمه باز کردن دستی وضعیت جایزه روزانه
+        const SizedBox(width: 8),
         GestureDetector(
           onTap: () {
             showDialog(
@@ -72,23 +61,16 @@ class CoinBox extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.4),
+              color: const Color(0xFF1E293B),
               shape: BoxShape.circle,
               border: Border.all(
-                color: canClaim ? Colors.amber : Colors.white24,
-                width: 1.5,
+                color: canClaim ? Colors.amber : const Color(0xFF334155),
+                width: 1.0,
               ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
             ),
             child: Icon(
               Icons.card_giftcard,
-              color: canClaim ? Colors.amberAccent : Colors.grey.shade400,
+              color: canClaim ? Colors.amberAccent : Colors.grey,
               size: 20,
             ),
           ),

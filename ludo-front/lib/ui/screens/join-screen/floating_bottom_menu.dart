@@ -4,7 +4,7 @@ import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 
 class FloatingBottomMenu extends StatelessWidget {
   final double boardSize;
-  final VoidCallback onFriendsTap; // تغییر نام کلیک از تنظیمات به دوستان
+  final VoidCallback onFriendsTap;
   final VoidCallback onLeaderboardTap;
   final VoidCallback onShopTap;
 
@@ -36,23 +36,15 @@ class FloatingBottomMenu extends StatelessWidget {
           Container(
             height: innerBarHeight,
             decoration: BoxDecoration(
-              color: const Color(0xFF2C435A).withValues(alpha: 0.9),
+              color: const Color(0xFF1E293B), // رنگ مات فلت بجای نیمه شفاف
               borderRadius: BorderRadius.circular(boardSize * 0.04),
               border: Border.all(
-                color: const Color(0xFF4A6B8C).withValues(alpha: 0.5),
-                width: 1.5,
+                color: const Color(0xFF334155),
+                width: 1.0,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
             ),
             child: Row(
               children: [
-                // 👥 دکمه جدید دوستان (به جای تنظیمات)
                 Expanded(
                   child: StandardMenuItem(
                     icon: Icons.people_alt_rounded,
@@ -61,9 +53,7 @@ class FloatingBottomMenu extends StatelessWidget {
                     onTap: onFriendsTap,
                   ),
                 ),
-
                 SizedBox(width: centerButtonSize * 1.1),
-
                 Expanded(
                   child: StandardMenuItem(
                     icon: Icons.storefront_rounded,
@@ -75,7 +65,6 @@ class FloatingBottomMenu extends StatelessWidget {
               ],
             ),
           ),
-
           Positioned(
             bottom: boardSize * 0.01,
             child: HighlightedCenterItem(
@@ -92,7 +81,6 @@ class FloatingBottomMenu extends StatelessWidget {
   }
 }
 
-/// ویجت آیتم‌های استاندارد کناری
 class StandardMenuItem extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -112,31 +100,25 @@ class StandardMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(boardSize * 0.03),
-      child: Opacity(
-        opacity: 0.65,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: boardSize * 0.055),
-            SizedBox(height: boardSize * 0.008),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: boardSize * 0.026,
-                fontWeight: FontWeight.w600,
-                letterSpacing:
-                    0.3, // اضافه شدن فاصله جزیی بین حروف انگلیسی برای زیبایی بیشتر
-              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white70, size: boardSize * 0.055),
+          SizedBox(height: boardSize * 0.008),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: boardSize * 0.026,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// ویجت دکمه طلایی و برجسته وسط
 class HighlightedCenterItem extends ConsumerWidget {
   final IconData icon;
   final String label;
@@ -168,28 +150,19 @@ class HighlightedCenterItem extends ConsumerWidget {
             height: buttonSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF146A7C),
-              border: Border.all(color: const Color(0xFF194551), width: 2.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF146A7C).withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  spreadRadius: 1,
-                ),
-              ],
+              color: const Color(0xFF0EA5E9), // رنگ فلت آبی روشن نئونی بجای تیره
+              border: Border.all(color: const Color(0xFF38BDF8), width: 2.0),
             ),
             child: isLoading
-                ? CircularProgressIndicator(color: Colors.white)
+                ? const Padding(
+              padding: EdgeInsets.all(12.0),
+              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+            )
                 : Icon(
-                    icon,
-                    color: const Color(0xFFFFD700),
-                    size: buttonSize * 0.5,
-                  ),
+              icon,
+              color: Colors.white,
+              size: buttonSize * 0.5,
+            ),
           ),
           SizedBox(height: boardSize * 0.008),
           Text(
@@ -198,14 +171,6 @@ class HighlightedCenterItem extends ConsumerWidget {
               color: Colors.white,
               fontSize: boardSize * 0.028,
               fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-              shadows: const [
-                Shadow(
-                  color: Colors.black54,
-                  offset: Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
             ),
           ),
         ],

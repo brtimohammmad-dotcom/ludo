@@ -22,33 +22,31 @@ class UserProfileBox extends StatelessWidget {
       height: boxHeight,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF13131A),
+        color: const Color(0xFF1E293B), // فلت و هماهنگ با بقیه بخش‌ها
         borderRadius: BorderRadius.circular(boxHeight / 2),
         border: Border.all(
-          color: Colors.amber.withValues(alpha: 0.15),
-          width: 1,
+          color: Colors.amber,
+          width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            name,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: (boxHeight * 0.32).clamp(12.0, 15.0),
-              fontWeight: FontWeight.w600,
-            ),
+          UserAvatar(
+            url: avatarUrl,
+            size: avatarSize,
+            borderColor: Colors.amber,
+            borderWidth: 1.0,
           ),
           const SizedBox(width: 8),
-          UserAvatar(url: avatarUrl, size: avatarSize)
+          Text(
+            name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     );

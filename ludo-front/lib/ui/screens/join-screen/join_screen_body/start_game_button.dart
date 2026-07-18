@@ -18,7 +18,6 @@ class StartGameButton extends StatelessWidget {
     required this.themeColor,
   });
 
-  // حذف شرط -1 (Friends) و ساده‌سازی کامل متد متنی
   String _getModeLabel() {
     if (numberOfPlayers == 2 || numberOfPlayers == -2) return "2 Players";
     return "4 Players";
@@ -37,83 +36,62 @@ class StartGameButton extends StatelessWidget {
         width: buttonWidth,
         height: buttonHeight,
         decoration: BoxDecoration(
+          color: const Color(0xFF334155), // دکمه‌های کاملاً سالید و روان
           borderRadius: borderRadius,
           border: Border.all(
-            color: themeColor.withValues(alpha: 0.35),
-            width: 1.2,
+            color: themeColor.withValues(alpha: 0.5),
+            width: 1.0,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: themeColor.withValues(alpha: 0.1),
-              offset: const Offset(0, 1),
-            ),
-          ],
         ),
         child: ClipRRect(
           borderRadius: borderRadius,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onPressed,
-              child: Ink(
-                decoration: BoxDecoration(
-                  borderRadius: borderRadius,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withValues(alpha: 0.07),
-                      Colors.white.withValues(alpha: 0.01),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+          child: InkWell(
+            onTap: onPressed,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _getModeLabel(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: (boardSize * 0.040).clamp(11.0, 16.0),
+                    letterSpacing: 0.5,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                child: Column(
+                SizedBox(height: boardSize * 0.006),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Icon(
+                      Icons.monetization_on,
+                      color: Colors.amberAccent,
+                      size: boardSize * 0.042,
+                    ),
+                    SizedBox(width: boardSize * 0.008),
                     Text(
-                      _getModeLabel(),
-                      style: TextStyle(
-                        color: Colors.white,
+                      entryFee == 0 ? "Free" : "$entryFee",
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        fontSize: (boardSize * 0.040).clamp(11.0, 16.0), // کنترل فونت برای عدم اورفلو در رزولوشن‌های مختلف
-                        letterSpacing: 0.5,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: boardSize * 0.006),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.monetization_on,
-                          color: Colors.amberAccent,
-                          size: boardSize * 0.042,
-                        ),
-                        SizedBox(width: boardSize * 0.008),
-                        Text(
-                          entryFee == 0 ? "Free" : "$entryFee",
-                          style: TextStyle(
-                            color: const Color(0xE6FFFFFF),
-                            fontSize: (boardSize * 0.030).clamp(9.0, 14.0),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (prizePool > 0) ...[
-                      SizedBox(height: boardSize * 0.004),
-                      Text(
-                        "Win: +$prizePool",
-                        style: TextStyle(
-                          color: Colors.amberAccent.shade100,
-                          fontWeight: FontWeight.bold,
-                          fontSize: (boardSize * 0.030).clamp(9.0, 14.0),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
-              ),
+                if (prizePool > 0) ...[
+                  SizedBox(height: boardSize * 0.004),
+                  Text(
+                    "Win: +$prizePool",
+                    style: TextStyle(
+                      color: Colors.amberAccent.shade100,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ),

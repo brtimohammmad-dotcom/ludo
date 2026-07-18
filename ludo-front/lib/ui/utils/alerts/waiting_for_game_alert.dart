@@ -47,7 +47,7 @@ class WaitingForGameAlert extends StatelessWidget {
                 ),
                 SizedBox(height: base * 0.05),
                 Text(
-                  "Finding Opponents...",
+                  "preparing your game...",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: base * 0.048,

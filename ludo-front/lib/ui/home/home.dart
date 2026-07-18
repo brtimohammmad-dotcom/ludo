@@ -246,10 +246,13 @@ class _HomeState extends ConsumerState<Home> {
     Widget currentWidget;
 
     if (currentStage == GameStage.joinStage) {
+
       currentWidget = const JoinScreen(key: ValueKey('join_stage'));
     } else if (currentStage == GameStage.leaderBoard) {
       currentWidget = const LeaderboardScreen(key: ValueKey('leaderboard_stage'));
     } else {
+      ref.read(gameControllerProvider.notifier).stopMenuMusic();
+
       currentWidget = const Board(key: ValueKey('board_stage'));
     }
 

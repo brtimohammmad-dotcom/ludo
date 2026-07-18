@@ -20,14 +20,14 @@ class ExitIcon extends ConsumerWidget {
         width: buttonSize,
         height: buttonSize,
         decoration: BoxDecoration(
-          color: const Color(0x26FF3B30), // ۱۵٪ شفافیت قرمز ثابت
+          color: const Color(0xFF2D1F24), // رنگ قرمز مات تیره بجای آلفا
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0x88FF3B30), width: 1.0),
+          border: Border.all(color: const Color(0xFFEF4444), width: 1.0),
         ),
         child: Center(
           child: Icon(
             Icons.logout_rounded,
-            color: const Color(0xFFFF8A80),
+            color: const Color(0xFFFCA5A5),
             size: buttonSize * 0.55,
           ),
         ),

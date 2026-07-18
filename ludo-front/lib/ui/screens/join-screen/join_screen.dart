@@ -27,6 +27,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   @override
   void initState() {
     super.initState();
+    ref.read(gameControllerProvider.notifier).playMenuMusic();
     _handler = JoinScreenHandler(
       context: context,
       gameController: ref.read(gameControllerProvider.notifier),
@@ -38,7 +39,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       _handler.setupControllerCallbacks();
     });
   }
-
   void _showWaitingDialog(double boardSize) {
     showAnimatedDialog(
       context: context,
@@ -53,7 +53,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final gameState = ref.watch(gameControllerProvider);
     final currentPlayer = gameState?.livePlayer;
 
-    // شنود وضعیت لودینگ برای نمایش دایالوگ انتظار
     ref.listen<bool>(
       globalLoadingProvider.select((s) => s.contains("waiting_for_game")),
           (previous, next) {
@@ -66,35 +65,33 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF07070B),
+      backgroundColor: const Color(0xFF0F172A), // رنگ پس‌زمینه ثابت و فلت
       resizeToAvoidBottomInset: false,
       extendBody: true,
-
-      // ۱. منوی پایین صفحه
       bottomNavigationBar: RepaintBoundary(
         child: FloatingBottomMenu(
+
           boardSize: layout.boardSize,
-          onFriendsTap: () => showFriendsPlayDialog(context, layout.boardSize, _handler),
+          onFriendsTap: () =>
+              showFriendsPlayDialog(context, layout.boardSize, _handler),
           onLeaderboardTap: () {
             ref.read(gameControllerProvider.notifier).getLeaderBoardList();
-            ref.read(globalLoadingProvider.notifier).start('leader_board_loading');
+            ref
+                .read(globalLoadingProvider.notifier)
+                .start('leader_board_loading');
           },
           onShopTap: () {},
         ),
       ),
-
-      // ۲. بدنه اصلی و المان‌های شناور
       body: Stack(
         clipBehavior: Clip.none,
         children: [
-          // پس‌زمینه گرافیکی بازی
+          // نقاش بهینه‌شده بدون محاسبات سنگین
           Positioned.fill(
             child: RepaintBoundary(
               child: CustomPaint(painter: LudoBackgroundPainter()),
             ),
           ),
-
-          // محتوای مرکزی (تاس و دکمه‌های انتخاب مود بازی)
           SafeArea(
             child: SizedBox.expand(
               child: Column(
@@ -122,20 +119,19 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               ),
             ),
           ),
-
-          // هدر سمت چپ: باکس سکه
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             left: 16,
             child: RepaintBoundary(child: CoinBox(boardSize: layout.boardSize)),
           ),
-
-          // هدر سمت راست: مشخصات کاربر
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             right: 16,
             child: RepaintBoundary(
-              child: UserProfileBox(player: currentPlayer, boardSize: layout.boardSize),
+              child: UserProfileBox(
+                player: currentPlayer,
+                boardSize: layout.boardSize,
+              ),
             ),
           ),
         ],
@@ -143,7 +139,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     );
   }
 
-  // بخش متحرک یا ثابت تاس در مرکز صفحه
   Widget _buildDiceSection(double diceSize) {
     return Flexible(
       flex: 3,
@@ -152,29 +147,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           child: SizedBox(
             width: diceSize,
             height: diceSize,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: diceSize,
-                  height: diceSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.amber.withValues(alpha: 0.15),
-                        Colors.amber.withValues(alpha: 0.0),
-                      ],
-                    ),
-                  ),
-                ),
-                Image.asset(
-                  "assets/webp/happy-dice.webp",
-                  width: diceSize * 0.8,
-                  height: diceSize * 0.8,
-                  fit: BoxFit.contain,
-                ),
-              ],
+            child: Image.asset(
+              "assets/webp/happy-dice.webp",
+              width: diceSize * 0.7,
+              height: diceSize * 0.7,
+              fit: BoxFit.contain,
             ),
           ),
         ),

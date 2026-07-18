@@ -19,7 +19,6 @@ class GameSelectionButtons extends ConsumerWidget {
         .where((level) => level != GameLevel.free)
         .toList();
 
-    // کنترل حداکثر و حداقل ارتفاع کارت‌ها برای جلوگیری از رندر نامتقارن یا خطای اورفلو
     final containerHeight = (boardSize * 0.44).clamp(160.0, 240.0);
     final cardWidth = (boardSize * 0.72).clamp(240.0, 340.0);
 
@@ -36,29 +35,21 @@ class GameSelectionButtons extends ConsumerWidget {
           itemBuilder: (context, index) {
             final level = levels[index];
             final isFourPlayerDisabled =
-                (level == GameLevel.gold || level == GameLevel.vip);
+            (level == GameLevel.gold || level == GameLevel.vip);
 
             return Container(
               width: cardWidth,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF13141F).withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFF1E293B), // تغییر به استایل فلت تیره
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: level.color.withValues(alpha: 0.25),
+                  color: level.color,
                   width: 1.5,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: level.color.withValues(alpha: 0.05),
-                    blurRadius: 15,
-                    spreadRadius: 2,
-                  ),
-                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                // تقسیم فضا به صورت کاملاً ریسپانسیو داخلی
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
@@ -66,18 +57,10 @@ class GameSelectionButtons extends ConsumerWidget {
                     style: TextStyle(
                       color: level.color,
                       fontSize: (boardSize * 0.045).clamp(14.0, 20.0),
-                      // محدود کردن سایز فونت لول
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
-                      shadows: [
-                        Shadow(
-                          color: level.color.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                        ),
-                      ],
                     ),
                   ),
-
                   if (isFourPlayerDisabled)
                     StartGameButton(
                       numberOfPlayers: 2,

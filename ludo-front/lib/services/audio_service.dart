@@ -96,7 +96,7 @@ class AudioService {
       final newHowl = Howl(HowlOptions(
         src: [webPath.toJS].toJS,
         loop: false,
-        volume: 1.0,
+        volume: 0.3,
       ));
       _cachedHowls[assetPath] = newHowl;
       newHowl.play();
@@ -119,12 +119,12 @@ class AudioService {
         _bgmHowl = Howl(HowlOptions(
           src: [webPath.toJS].toJS,
           loop: true,
-          volume: _isMuted ? 0.0 : 0.2,
+          volume: _isMuted ? 0.0 : 0.13,
         ));
         _cachedHowls[assetPath] = _bgmHowl!;
       }
 
-      _bgmHowl!.volume(_isMuted ? 0.0 : 0.2);
+      _bgmHowl!.volume(_isMuted ? 0.0 : 0.13);
       _bgmHowl!.play();
     } catch (e) {
       debugPrint("🎵 Web Audio BGM Error: $e");

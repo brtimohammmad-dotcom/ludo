@@ -15,14 +15,14 @@ class MessageIcon extends ConsumerWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: const Color(0x1F9C27B0),
+          color: const Color(0xFF2A1B3D), // رنگ بنفش مات فلت
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0x669C27B0), width: 1.0),
+          border: Border.all(color: const Color(0xFFA855F7), width: 1.0),
         ),
         child: Center(
           child: Icon(
             Icons.chat_bubble_outline_rounded,
-            color: const Color(0xFFE040FB),
+            color: const Color(0xFFE9D5FF),
             size: size * 0.55,
           ),
         ),

@@ -34,7 +34,6 @@ class GameRecoveredEvent implements GameEvent {
       ),
     );
     onGameConnected();
-    controller.playMenuMusic();
     final isMyTurn =
         controller.currentGameState?.serverState?.currentTurn ==
             controller.currentGameState!.livePlayer!.color &&

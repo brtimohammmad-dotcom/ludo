@@ -13,12 +13,14 @@ const { startTimer } = require("../services/turnTimerService");
 const { updateLobbyMessage } = require("../../bot.js");
 const { hasExistGame } = require("./authService.js");
 
+const roomTimers = new Map();
+
 async function handleJoinGame(data, socket, io) {
   console.log("handle joining game");
   const { numberOfPlayers, gameType, gameLevel } = data;
   const telegramId = socket.data.telegramId;
 
-  // ۱. قفل اول: انحصار بر اساس آیدی بازیکن (جلوگیری از درخواست همزمان خود کاربر)
+  // ۱. قفل اول: انحصار بر اساس آیدی بازیکن
   return await joinGameQueue(telegramId, async () => {
     const player = {
       username: socket.data.firstName,
@@ -57,19 +59,19 @@ async function handleJoinGame(data, socket, io) {
       let game;
       let isJoined = false;
 
-      // یک حلقه برای پیدا کردن یا ساخت اتاق، تا اگر قفل اتاقی آزاد شد و پر بود، شانسش را از دست ندهد
       while (!isJoined) {
-        game = initialState.getAllGames().find(
-          (g) =>
-            g.game_status === "waitingForPlayer" &&
-            g.number_of_players === numberOfPlayers &&
-            g.game_type === "global" &&
-            g.game_level === gameLevel &&
-            g.players.length < numberOfPlayers, // مطمئن شویم پر نیست
-        );
+        game = initialState
+          .getAllGames()
+          .find(
+            (g) =>
+              g.game_status === "waitingForPlayer" &&
+              g.number_of_players === numberOfPlayers &&
+              g.game_type === "global" &&
+              g.game_level === gameLevel &&
+              g.players.length < numberOfPlayers,
+          );
 
         if (!game) {
-          // اگر بازی نبود، یکی می‌سازیم
           const dbGame = await createGlobalGame(numberOfPlayers, gameLevel);
           game = initialState.createGameInGameState(
             dbGame.game_id,
@@ -79,20 +81,17 @@ async function handleJoinGame(data, socket, io) {
           );
         }
 
-        // ۲. قفل دوم: انحصار بر اساس آیدی بازی (جلوگیری از تداخل بازیکنان مختلف در این اتاق)
+        // ۲. قفل دوم: انحصار بر اساس آیدی بازی
         isJoined = await acquireGameLock(game.game_id, async () => {
-          // استیت به‌روز شده بازی را داخل قفل مجدد می‌گیریم
           const currentRoomState = initialState.getGameState(game.game_id);
 
-          // چک امنیتی: آیا در حین معطل شدن پشت قفل، ظرفیت پر شده؟
           if (
             currentRoomState.players.length >=
             currentRoomState.number_of_players
           ) {
-            return false; // شکست در ورود، حلقه در دور بعدی یک اتاق دیگر پیدا می‌کند
+            return false;
           }
 
-          // اضافه کردن بازیکن با رنگ و صندلی کاملاً امن
           await addPlayerToGame(currentRoomState, player, socket);
           return true;
         });
@@ -114,12 +113,32 @@ async function handleJoinGame(data, socket, io) {
         "free",
       );
 
+      const friendlyGameId = room.game_id;
+
       // بازی‌های دوستانه تازه ساخته شده‌اند اما برای رعایت ساختار استاندارد قفل آن را می‌گیریم
-      await acquireGameLock(room.game_id, async () => {
+      await acquireGameLock(friendlyGameId, async () => {
         await addPlayerToGame(room, player, socket);
       });
 
-      socket.data.gameId = room.game_id;
+      // 🌟 ثبت تایمر انقضای ۱۰ دقیقه‌ای برای پاکسازی رم سرور رندر در صورت رها شدن اتاق دوستانه
+      const timeoutTimer = setTimeout(
+        () => {
+          const currentRoom = initialState.getGameState(friendlyGameId);
+          // اگر اتاق هنوز در رم بود و بازی استارت نخورده بود، آن را حذف کن
+          if (currentRoom && currentRoom.game_status === "waitingForPlayer") {
+            console.log(
+              `[Room Expired Cleanup] Friendly room ${friendlyGameId} deleted from RAM.`,
+            );
+            initialState.deleteGameState(friendlyGameId)
+            roomTimers.delete(friendlyGameId);
+          }
+        },
+        10 * 60 * 1000,
+      ); // ۱۰ دقیقه
+
+      roomTimers.set(friendlyGameId, timeoutTimer);
+
+      socket.data.gameId = friendlyGameId;
       await callFront(socket, io);
     }
   });
@@ -137,7 +156,6 @@ async function handleJoinGameFriendly(socket, io) {
       coin: socket.data.coin,
     };
     try {
-      // استفاده از قفل بازی برای ورود به اتاق دوستانه موجود
       await acquireGameLock(gameId, async () => {
         const game = initialState.getGameState(gameId);
         if (!game || game.players.length >= game.number_of_players) {
@@ -177,6 +195,18 @@ async function callFront(socket, io) {
     currentGameState.game_status === "waitingForPlayer"
   ) {
     currentGameState.game_status = "start";
+
+    // 🌟 ابطال و پاک کردن تایمر انقضا به محض کامل شدن اتاق و شروع شدن بازی دوستانه
+    if (currentGameState.game_type === "friendly") {
+      const activeTimer = roomTimers.get(gameId);
+      if (activeTimer) {
+        clearTimeout(activeTimer);
+        roomTimers.delete(gameId);
+        console.log(
+          `[Room Timer Cleared] Game ${gameId} started successfully.`,
+        );
+      }
+    }
 
     if (currentGameState.game_type === "global") {
       const coinCost = LEVEL_COSTS[currentGameState.game_level] || 0;
@@ -229,8 +259,6 @@ async function callFront(socket, io) {
 async function addPlayerToGame(game, player, socket) {
   const players = game.players;
 
-  // با توجه به اینکه این تابع حالا همواره درون فرآیند انحصاری acquireGameLock اجرا می‌شود،
-  // مقدار players.length کاملاً دقیق و بدون تداخل خواهد بود.
   const color =
     game.number_of_players === 2
       ? TWO_PLAYER_COLORS[players.length]
@@ -251,7 +279,7 @@ async function addPlayerToGame(game, player, socket) {
     player_status: "online",
     numberOfAbsences: 0,
     connection_status: "connected",
-    avatar_url: socket.data.avatarUrl,
+    avatar_url: socket.data.avatarUrl, // 🌟 اینجا هم به درستی هماهنگ شده است
   };
 
   initialState.addPlayerToGameState(correctPlayer, game.game_id);

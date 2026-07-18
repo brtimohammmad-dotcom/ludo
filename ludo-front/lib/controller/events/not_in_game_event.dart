@@ -14,6 +14,5 @@ class NotInGameEvent implements GameEvent {
     );
     onGameConnected();
 
-    controller.playMenuMusic();
   }
 }

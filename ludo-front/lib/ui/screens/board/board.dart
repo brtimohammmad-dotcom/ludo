@@ -8,10 +8,7 @@ import 'package:ludo/ui/screens/board/main_board.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/winner_alert.dart';
 import 'package:ludo/ui/utils/painter.dart';
-
 import 'board_ui_event_handler.dart';
-
-// ... بخش ایمپورت‌ها بدون تغییر باقی می‌ماند ...
 
 class Board extends ConsumerStatefulWidget {
   const Board({super.key});
@@ -90,10 +87,9 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
     final barHeight = boardSize * 0.1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF07070B),
+      backgroundColor: const Color(0xFF0F172A), // رنگ تیره فلت و بهینه
       body: Stack(
         children: [
-          // ۱. پس‌زمینه ایزوله
           Positioned.fill(
             child: RepaintBoundary(
               child: CustomPaint(
@@ -101,25 +97,22 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
               ),
             ),
           ),
-
-          // ۲. برد بازی اصلی با حذف دکوراسیون‌های محاسباتی سنگین
           Center(
             child: FittedBox(
               fit: BoxFit.contain,
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: const Color(0x0DFFFFFF), // جایگزین معادل با با شفافیت ۵٪ بدون محاسبات رنگی داینامیک
+                  color: const Color(0xFF1E293B), // حذف شفافیت شیشه‌ای و جایگزینی با رنگ مات سالید
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0x1AFFFFFF), // مرز شیشه‌ای ثابت بدون فشار گرافیکی
-                    width: 1.5,
+                    color: const Color(0xFF334155), // مرز فلت و ثابت
+                    width: 1.0,
                   ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // نوار بازیکن بالا (کاملاً مستقل در مرز رندرینگ)
                     RepaintBoundary(
                       child: PlayerBar(
                         boardSize: boardSize,
@@ -128,9 +121,7 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
                         rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
                       ),
                     ),
-                    // برد اصلی لودو
                     RepaintBoundary(child: MainBoard(boardSize: boardSize)),
-                    // نوار بازیکن پایین
                     RepaintBoundary(
                       child: PlayerBar(
                         boardSize: boardSize,

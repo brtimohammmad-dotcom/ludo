@@ -190,6 +190,10 @@ class GameController extends _$GameController {
         .playBackgroundMusic('assets/audio/music/join-screen-bg-music.mp3');
   }
 
+  void stopMenuMusic() {
+    ref.read(audioServiceProvider).stopBackgroundMusic();
+  }
+
   void playSfx(String assetName) {
     ref.read(audioServiceProvider).playSFX(assetName);
   }
