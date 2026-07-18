@@ -10,15 +10,26 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        // 🌌 اجرای بلافاصله و بدون شرط برای قفل کردن سوییپ
         (function() {
           if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
+
+            // قفل کردن اصلی سوییپ عمودی
             if (window.Telegram.WebApp.disableVerticalSwipe) {
               window.Telegram.WebApp.disableVerticalSwipe();
             }
+            window.Telegram.WebApp.enableClosingConfirmation();
           }
         })();
+
+        // ⛔ جلوگیری دستی از اسکرول کشسانی مرورگر روی موبایل
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -43,6 +54,8 @@
             font-family: sans-serif;
             color: white;
             background-color: #07070b; /* رنگ پایه تیره برای جلوگیری از فلش سفید */
+            position: fixed;
+            width: 100%;
         }
 
         /* 🟢 روت‌های فلاتر را شیشه‌ای نگه می‌داریم */

@@ -2,13 +2,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ludo/ui/app_body.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:telegram_web_app/telegram_web_app.dart';
+import 'dart:js_interop';
 
+// تعریف نوع شیء تلگرام به صورت یک Extension Type روی JSObject
+@JS('Telegram.WebApp')
+extension type TelegramWebApp._(JSObject _) implements JSObject {
+
+  // تعریف متدها به صورت external
+  external static void ready();
+  external static void expand();
+  external static void disableVerticalSwipe();
+  external static void enableClosingConfirmation();
+}
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  if (TelegramWebApp.instance.isSupported) {
-    TelegramWebApp.instance.ready();
-    TelegramWebApp.instance.enableClosingConfirmation();
+  if (kIsWeb) {
+    try {
+      TelegramWebApp.ready();
+      TelegramWebApp.expand();
+      TelegramWebApp.disableVerticalSwipe();
+      TelegramWebApp.enableClosingConfirmation();
+      debugPrint('🚀 Telegram WebApp successfully locked via JS Interop.');
+    } catch (e) {
+      debugPrint('⚠️ JS Interop failed (probably not running inside Telegram): $e');
+    }
   }
   // ۲. مدیریت و خنثی‌سازی ارورهای زامبی فلاتر وب در حالت Hot Restart
   if (kIsWeb && kDebugMode) {
