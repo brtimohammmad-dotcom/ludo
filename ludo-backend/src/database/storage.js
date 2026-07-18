@@ -1,4 +1,5 @@
 const axios = require("axios");
+const supabase = require("../../postgresql");
 
 const uploadAvatarToSupabase = async (userId, telegramFileLink) => {
   try {
