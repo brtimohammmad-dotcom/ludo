@@ -13,6 +13,7 @@ import 'package:ludo/ui/utils/alerts/freinds_dialog.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/waiting_for_game_alert.dart';
 import 'package:ludo/ui/utils/painter.dart';
+import 'package:lottie/lottie.dart';
 
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({super.key});
@@ -139,6 +140,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     );
   }
 
+
   Widget _buildDiceSection(double diceSize) {
     return Flexible(
       flex: 3,
@@ -147,8 +149,8 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           child: SizedBox(
             width: diceSize,
             height: diceSize,
-            child: Image.asset(
-              "assets/webp/happy-dice.webp",
+            child: Lottie.asset(
+              "assets/lotties/happy-dice.lottie", // 🎲 آدرس فایل لاتی جدید شما
               width: diceSize * 0.7,
               height: diceSize * 0.7,
               fit: BoxFit.contain,

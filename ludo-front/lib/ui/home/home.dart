@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/screens/board/board.dart';
@@ -14,7 +15,6 @@ import 'package:telegram_web_app/telegram_web_app.dart';
 
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
-
 
 @JS('onGameConnected')
 external void onGameConnected();
@@ -60,10 +60,8 @@ class _HomeState extends ConsumerState<Home> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       try {
-        await precacheImage(
-          const AssetImage("assets/webp/happy-dice.webp"),
-          context,
-        );
+        final assetLottie = AssetLottie("assets/lotties/happy-dice.lottie");
+        await assetLottie.load();
       } catch (e) {
         debugPrint("🖼️ Error caching image: $e");
       }
@@ -168,11 +166,12 @@ class _HomeState extends ConsumerState<Home> {
     }
 
     // لیسنر هوشمند وضعیت کانکشن بر اساس Stage بازی
-    ref.listen<ConnectionStatus>(
-        gameControllerProvider.select((state) => state!.connectionStatus), (
-        previous,
-        next,
-        ) {
+    ref.listen<
+      ConnectionStatus
+    >(gameControllerProvider.select((state) => state!.connectionStatus), (
+      previous,
+      next,
+    ) {
       debugPrint(
         "🔄 [Connection Event] Connection Status Changed: From $previous To $next",
       );
@@ -246,10 +245,11 @@ class _HomeState extends ConsumerState<Home> {
     Widget currentWidget;
 
     if (currentStage == GameStage.joinStage) {
-
       currentWidget = const JoinScreen(key: ValueKey('join_stage'));
     } else if (currentStage == GameStage.leaderBoard) {
-      currentWidget = const LeaderboardScreen(key: ValueKey('leaderboard_stage'));
+      currentWidget = const LeaderboardScreen(
+        key: ValueKey('leaderboard_stage'),
+      );
     } else {
       ref.read(gameControllerProvider.notifier).stopMenuMusic();
 
