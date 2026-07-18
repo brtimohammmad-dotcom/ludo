@@ -9,6 +9,17 @@
     <base href="/">
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        (function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            if (window.Telegram.WebApp.disableVerticalSwipe) {
+              window.Telegram.WebApp.disableVerticalSwipe();
+            }
+          }
+        })();
+    </script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="ludo">
@@ -21,24 +32,7 @@
 
     <!-- دانلود موازی فونت ایموجی گوگل -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
-    <script>
-        // ۱. اعلام آمادگی به تلگرام
-        window.Telegram.WebApp.ready();
 
-        // ۲. بزرگ کردن مینی‌اپ تا حداکثر ارتفاع ممکن
-        window.Telegram.WebApp.expand();
-
-        // ۳. قفل کردن حرکت کشویی و غیرفعال کردن Swipe to Close (ویژگی اصلی که می‌خواهی)
-        if (window.Telegram.WebApp.isVersionAtLeast('7.7')) {
-          window.Telegram.WebApp.disableVerticalSwipe();
-        }
-
-        // ۴. جهت اطمینان برای نسخه‌های قدیمی‌تر
-        window.Telegram.WebApp.enableClosingConfirmation();
-
-        // ۵. هماهنگ کردن رنگ هدر با بازی فلت شما
-        window.Telegram.WebApp.setHeaderColor('#0F172A');
-    </script>
     <title>ludo</title>
     <style>
         /* 🟢 بدنه اصلی مرورگر را بدون رنگ نگه می‌داریم */
