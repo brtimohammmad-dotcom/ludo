@@ -19,8 +19,9 @@ class GameSelectionButtons extends ConsumerWidget {
         .where((level) => level != GameLevel.free)
         .toList();
 
-    final containerHeight = (boardSize * 0.44).clamp(160.0, 240.0);
-    final cardWidth = (boardSize * 0.72).clamp(240.0, 340.0);
+    // تنظیم ارتفاع و عرض کارت متناسب با فضای جدید
+    final containerHeight = (boardSize * 0.48).clamp(175.0, 220.0);
+    final cardWidth = (boardSize * 0.75).clamp(250.0, 340.0);
 
     return RepaintBoundary(
       child: SizedBox(
@@ -39,9 +40,9 @@ class GameSelectionButtons extends ConsumerWidget {
 
             return Container(
               width: cardWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B), // تغییر به استایل فلت تیره
+                color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: level.color,
@@ -56,26 +57,31 @@ class GameSelectionButtons extends ConsumerWidget {
                     "${level.displayName} Table",
                     style: TextStyle(
                       color: level.color,
-                      fontSize: (boardSize * 0.045).clamp(14.0, 20.0),
+                      fontSize: (boardSize * 0.045).clamp(14.0, 18.0),
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
                     ),
                   ),
                   if (isFourPlayerDisabled)
-                    StartGameButton(
-                      numberOfPlayers: 2,
-                      entryFee: level.entryFee,
-                      prizePool: level.prize2P,
-                      themeColor: level.color,
-                      onPressed: () => handler.handleGameSearch(
+                  // برای حالت تک دکمه، محدود کردن عرض جهت حفظ زیبایی ظاهری
+                    SizedBox(
+                      width: cardWidth * 0.65,
+                      child: StartGameButton(
                         numberOfPlayers: 2,
-                        gameType: GameType.global,
-                        gameLevel: level,
+                        entryFee: level.entryFee,
+                        prizePool: level.prize2P,
+                        themeColor: level.color,
+                        onPressed: () => handler.handleGameSearch(
+                          numberOfPlayers: 2,
+                          gameType: GameType.global,
+                          gameLevel: level,
+                          boardSize: boardSize,
+                        ),
                         boardSize: boardSize,
                       ),
-                      boardSize: boardSize * 1.1,
                     )
                   else
+                  // حالت دو دکمه در کنار هم بدون تداخل با عرض ثابت
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -94,7 +100,7 @@ class GameSelectionButtons extends ConsumerWidget {
                             boardSize: boardSize,
                           ),
                         ),
-                        SizedBox(width: boardSize * 0.02),
+                        SizedBox(width: boardSize * 0.015),
                         Expanded(
                           child: StartGameButton(
                             numberOfPlayers: 4,

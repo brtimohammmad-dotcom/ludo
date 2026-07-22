@@ -143,18 +143,14 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
   Widget _buildDiceSection(double diceSize) {
     return Flexible(
-      flex: 3,
+      flex: 6,
       child: Center(
         child: RepaintBoundary(
-          child: SizedBox(
-            width: diceSize,
-            height: diceSize,
-            child: Lottie.asset(
-              "assets/lotties/happy-dice.lottie", // 🎲 آدرس فایل لاتی جدید شما
-              width: diceSize * 0.7,
-              height: diceSize * 0.7,
-              fit: BoxFit.contain,
-            ),
+          child: Lottie.asset(
+            "assets/lotties/happy-dice.lottie",
+            width: diceSize *2,
+            height: diceSize*2,
+            fit: BoxFit.contain,
           ),
         ),
       ),

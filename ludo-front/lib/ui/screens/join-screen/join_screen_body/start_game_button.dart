@@ -25,18 +25,17 @@ class StartGameButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double buttonWidth = boardSize * 0.32;
-    final double buttonHeight = boardSize * 0.22;
+    // حذف عرض ثابت دکمه برای ریسپانسیو شدن کامل در Row
+    final double buttonHeight = (boardSize * 0.18).clamp(50.0, 100.0);
     final double radiusValue = boardSize * 0.03;
     final borderRadius = BorderRadius.circular(radiusValue);
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Container(
-        width: buttonWidth,
         height: buttonHeight,
         decoration: BoxDecoration(
-          color: const Color(0xFF334155), // دکمه‌های کاملاً سالید و روان
+          color: const Color(0xFF334155),
           borderRadius: borderRadius,
           border: Border.all(
             color: themeColor.withValues(alpha: 0.5),
@@ -49,46 +48,55 @@ class StartGameButton extends StatelessWidget {
             onTap: onPressed,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // جلوگیری از اشغال فضای اضافی عمودی
               children: [
                 Text(
                   _getModeLabel(),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: (boardSize * 0.040).clamp(11.0, 16.0),
+                    fontSize: (boardSize * 0.038).clamp(11.0, 14.0),
                     letterSpacing: 0.5,
                   ),
                   textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: boardSize * 0.006),
+                SizedBox(height: boardSize * 0.004),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.monetization_on,
                       color: Colors.amberAccent,
-                      size: boardSize * 0.042,
+                      size: (boardSize * 0.038).clamp(12.0, 16.0),
                     ),
-                    SizedBox(width: boardSize * 0.008),
-                    Text(
-                      entryFee == 0 ? "Free" : "$entryFee",
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        entryFee == 0 ? "Free" : "$entryFee",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: (boardSize * 0.034).clamp(10.0, 12.0),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
                 if (prizePool > 0) ...[
-                  SizedBox(height: boardSize * 0.004),
+                  SizedBox(height: boardSize * 0.002),
                   Text(
                     "Win: +$prizePool",
                     style: TextStyle(
                       color: Colors.amberAccent.shade100,
                       fontWeight: FontWeight.bold,
-                      fontSize: 11,
+                      fontSize: (boardSize * 0.032).clamp(9.0, 11.0),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],

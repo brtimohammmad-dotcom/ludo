@@ -30,7 +30,6 @@ class _HomeState extends ConsumerState<Home> {
   bool _isLocalAssetsCached = false;
   bool _hasConnectionError = false;
 
-  // 🟢 فلگ برای مدیریت وضعیت دیالوگ فعال و جلوگیری از تداخل آلرت‌ها
   bool _isAlertOpen = false;
 
   @override

@@ -20,16 +20,21 @@ class GameRecoveredEvent implements GameEvent {
   @override
   void execute(GameController controller) {
     // پیدا کردن لایو پلیر (خود بازیکن) در استیت جدید
-    final livePlayer = recoveredState.players.firstWhere(
+    final livePlayerInGame = recoveredState.players.firstWhere(
       (p) => p.userId == controller.currentGameState?.livePlayer?.userId,
       orElse: () => recoveredState.players.first,
     );
-
+    final currentLivePlayer = controller.currentGameState?.livePlayer;
     // جایگزینی آنی و بدون انیمیشن کل استیت بازی برای هماهنگی با سرور
     controller.updateState(
       GameState(
         serverState: recoveredState,
-        livePlayer: livePlayer,
+        livePlayer: livePlayerInGame.copyWith(
+          rewardStreak: currentLivePlayer?.rewardStreak,
+          canClaimDailyReward: currentLivePlayer?.canClaimDailyReward,
+          userId: currentLivePlayer?.userId,
+
+        ),
         gameStage: GameStage.boardStage,
       ),
     );
@@ -37,8 +42,8 @@ class GameRecoveredEvent implements GameEvent {
     final isMyTurn =
         controller.currentGameState?.serverState?.currentTurn ==
             controller.currentGameState!.livePlayer!.color &&
-            controller.currentGameState?.serverState?.gameStatus ==
-                GameStatus.start;
+        controller.currentGameState?.serverState?.gameStatus ==
+            GameStatus.start;
     if (isMyTurn) {
       controller.playSfx("assets/audio/sound-effect/current_turn_sound.wav");
     }

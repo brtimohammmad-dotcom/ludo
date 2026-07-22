@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
@@ -10,6 +11,7 @@ class PlayerUpdateEvent implements GameEvent {
 
   // ۱. تبدیل دیتای خام بک‌آند به مدل Player
   factory PlayerUpdateEvent.fromJson(Map<String, dynamic> data) {
+    debugPrint(data.toString());
     return PlayerUpdateEvent(newPlayer: Player.fromJson(data));
   }
 
@@ -21,5 +23,6 @@ class PlayerUpdateEvent implements GameEvent {
         livePlayer: newPlayer,
       ),
     );
+
   }
 }

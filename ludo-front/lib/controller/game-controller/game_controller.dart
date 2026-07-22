@@ -235,6 +235,7 @@ class GameController extends _$GameController {
         livePlayer: clearedPlayer,
         gameStage: GameStage.joinStage,
       );
+
     } else {
       state = null;
     }
