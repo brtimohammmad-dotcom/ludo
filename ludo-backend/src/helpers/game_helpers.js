@@ -25,6 +25,7 @@ async function finishGame(gameId, winnerPlayer, gameType, io) {
     },
     gameType,
   );
+
   if (gameType === "global") {
     const finishedGame = initialState.getGameState(gameId);
     const addCoinValue =
@@ -35,13 +36,54 @@ async function finishGame(gameId, winnerPlayer, gameType, io) {
       const targetSocket = allSockets.find(
         (s) => s.data.telegramId === winnerPlayer.telegram_id,
       );
-      targetSocket.data.coin = targetSocket.data.coin + addCoinValue;
+      if (targetSocket) {
+        targetSocket.data.coin = (targetSocket.data.coin || 0) + addCoinValue;
+      }
     } catch {
       console.log("error in increase winner coin");
     }
   }
+
   stopTimer(gameId);
   io.to(gameId).emit("game_finished", winnerPlayer);
   initialState.deleteGameState(gameId);
 }
-module.exports = { finishGame };
+
+// 🎯 تابع اصلاح‌شده ارسال خطا
+const sendError = (socket, callback, message) => {
+  if (typeof callback === "function") {
+    callback({ success: true });
+  }
+  socket.emit("error", { message });
+};
+
+function validateGameAndPlayer(socket, callback) {
+  const gameId = socket.data?.gameId;
+  const telegramId = socket.data?.telegramId;
+
+  if (!gameId) {
+    sendError(socket, callback, "No game found!");
+    return { isValid: false };
+  }
+
+  const gameState = initialState.getGameState(gameId);
+  if (!gameState) {
+    sendError(socket, callback, "Game not found!");
+    return { isValid: false };
+  }
+
+  if (gameState.game_status !== "start") {
+    sendError(socket, callback, "The game hasn't started yet!");
+    return { isValid: false };
+  }
+
+  const player = gameState.players.find((p) => p.telegram_id === telegramId);
+  if (!player) {
+    sendError(socket, callback, "Player not found!");
+    return { isValid: false };
+  }
+
+  return { isValid: true, gameState, player };
+}
+
+module.exports = { finishGame, sendError, validateGameAndPlayer };

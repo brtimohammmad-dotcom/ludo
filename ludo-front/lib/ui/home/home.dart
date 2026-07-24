@@ -2,7 +2,6 @@ import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/screens/board/board.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen.dart';
@@ -11,7 +10,6 @@ import 'package:ludo/ui/utils/alerts/reconnecting_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 
-import 'package:telegram_web_app/telegram_web_app.dart';
 
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
@@ -125,20 +123,7 @@ class _HomeState extends ConsumerState<Home> {
   void _establishConnection(GameController gameController) {
     if (!mounted) return;
 
-    if (TelegramWebApp.instance.isSupported) {
-      TelegramWebApp.instance.ready();
-      TelegramWebApp.instance.expand();
-
-      final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
-      if (startParam != null && startParam.startsWith("game_")) {
-        final gameId = startParam.replaceAll("game_", "");
-        gameController.connect(GameType.friendly, gameId);
-      } else {
-        gameController.connect(GameType.global, null);
-      }
-    } else {
-      gameController.connect(GameType.global, null);
-    }
+    gameController.connect();
   }
 
   // 🟢 متد کمکی برای فراخوانی امن جاوااسکریپت تلگرام

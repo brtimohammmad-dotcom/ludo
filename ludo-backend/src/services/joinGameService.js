@@ -15,8 +15,11 @@ const { hasExistGame } = require("./authService.js");
 
 const roomTimers = new Map();
 
-async function handleJoinGame(data, socket, io) {
-  console.log("handle joining game");
+async function handleJoinGame(data, socket, io, callback) {
+
+  if (typeof callback === "function") {
+    callback({ success: true });
+  }
   const { numberOfPlayers, gameType, gameLevel } = data;
   const telegramId = socket.data.telegramId;
 
@@ -31,7 +34,6 @@ async function handleJoinGame(data, socket, io) {
     // بررسی بازی فعال و رها شده
     const result = await hasExistGame(player, socket.id);
     if (result.game) {
-      console.log("hasGame");
       socket.emit("in_another_game");
       const { handleRequestGameState } = require("./requestGameState.js");
       await handleRequestGameState(
@@ -129,7 +131,7 @@ async function handleJoinGame(data, socket, io) {
             console.log(
               `[Room Expired Cleanup] Friendly room ${friendlyGameId} deleted from RAM.`,
             );
-            initialState.deleteGameState(friendlyGameId)
+            initialState.deleteGameState(friendlyGameId);
             roomTimers.delete(friendlyGameId);
           }
         },
@@ -145,7 +147,6 @@ async function handleJoinGame(data, socket, io) {
 }
 
 async function handleJoinGameFriendly(socket, io) {
-  console.log("joining game friendly");
   const telegramId = socket.data.telegramId;
   const gameId = socket.data.gameId;
 

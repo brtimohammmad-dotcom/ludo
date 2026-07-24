@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:ludo/data/data-source/socket_utils.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
@@ -13,6 +14,10 @@ typedef OnGameEventCallback =
 class SocketDataSource {
   io.Socket? _socket;
   bool _isConnecting = false;
+  final GameType gameType;
+  final String? gameId;
+
+  SocketDataSource({required this.gameType, this.gameId});
 
   // --- کالبک‌ها ---
   OnGameEventCallback? onGameEventReceived;
@@ -26,7 +31,7 @@ class SocketDataSource {
   // -------------------------------------------------------
   // CONNECT
   // -------------------------------------------------------
-  void connect(GameType type, String? gameId) {
+  void connect() {
     final serverUrl = Config.serverUrl;
     Config.printEnvironmentInfo();
 
@@ -43,24 +48,17 @@ class SocketDataSource {
           .setReconnectionDelay(2000)
           .setReconnectionDelayMax(5000)
           .setTimeout(3500)
+          .setAckTimeout(3000)
           .build(),
     );
-
     // اتصال اولیه و فرستادن رکوئست استیت
     _socket!.onConnect((_) {
       onGameEventReceived?.call('connected', {});
       _isConnecting = false;
-      _socket!.emit("request_game_state", {
-        "gameType": type.name,
-        "gameId": gameId ?? "",
-      });
+      requestGameState();
     });
-
     // ثبت رویدادها از طریق هندلر اختصاصی
-    SocketEventHandler(
-      dataSource: this,
-      socket: _socket!,
-    ).registerEvents(type, gameId);
+    SocketEventHandler(dataSource: this, socket: _socket!).registerEvents();
 
     // مدیریت وضعیت دیسکانیکت و ریکانکت سوکت
     _setupConnectionLifeCycle();
@@ -80,41 +78,172 @@ class SocketDataSource {
   }
 
   // -------------------------------------------------------
-  // GAME ACTIONS (EMITS)
+  // GAME ACTIONS (EMITS WITH ACK)
   // -------------------------------------------------------
-  void joinGame(int numberOfPlayers, GameType gameType, GameLevel gameLevel) {
-    if (isConnected) {
-      debugPrint("sending_joinGame");
-      _socket!.emit("join_game", {
+
+  /// ورود به بازی / لابی
+  void joinGame({
+    required int numberOfPlayers,
+    required GameType gameType,
+    required GameLevel gameLevel,
+    Function(dynamic response)? onAck,
+  }) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "join_game",
+      {
         "numberOfPlayers": numberOfPlayers,
         "gameType": gameType.name,
         "gameLevel": gameLevel.name,
-      });
-    }
+      },
+      ack: (dynamic err, [dynamic response]) {
+        debugPrint(err.toString());
+        debugPrint(response.toString());
+        if(err!=null){
+          debugPrint(err.toString());
+          return;
+        }
+        if (response == null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
+  /// ریختن تاس
+  void rollDice({Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "roll_dice",
+      {},
+      ack: (dynamic err, [dynamic response]) {
+        debugPrint(err.toString());
+        debugPrint(response.toString());
+        if(err!=null){
+          debugPrint(err.toString());
+          return;
+        }
+        if (response == null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
+  /// حرکت مهره
+  void moveToken(Token t, {Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "move_token",
+      t.toJson(),
+      ack: (dynamic err, [dynamic response]) {
+        debugPrint(err.toString());
+        debugPrint(response.toString());
+        if (err != null) {
+          debugPrint(err.toString());
+          return;
+        }
+        if (response == null&&err==null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
+  /// خروج از بازی
+  void exitGame({Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "exit_game",
+      {},
+      ack: (dynamic err, [dynamic response]) {
+        debugPrint(err.toString());
+        debugPrint(response.toString());
+        if(err!=null){
+          debugPrint(err.toString());
+          return;
+        }
+        if (response == null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
+  /// دریافت پاداش روزانه
+  void claimDailyReward({Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "claim_daily_reward",
+      {},
+      ack: (dynamic err, [dynamic response]) {
+        debugPrint(err.toString());
+        debugPrint(response.toString());
+        if(err!=null){
+          debugPrint(err.toString());
+          return;
+        }
+        if (response == null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
+  void getLeaderBoardList({Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "get_leader_board_list",
+      {},
+      ack: (dynamic err, [dynamic response]) {
+        debugPrint(err.toString());
+        debugPrint(response.toString());
+        if(err!=null){
+          debugPrint(err.toString());
+          return;
+        }
+        if (response == null) {
+          // تایم‌اوت شد (سرور جواب نداد)
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
+  // -------------------------------------------------------
+  // FIRE AND FORGET EMITS (WITHOUT ACK)
+  // -------------------------------------------------------
+  void requestGameState() {
+    _socket!.emit("request_game_state", {
+      "gameType": gameType.name.toString(),
+      "gameId": gameId ?? "",
+    });
   }
 
   void sendEmoji(String emojiName) {
     if (isConnected) _socket!.emit("send_emoji", emojiName);
   }
 
-  void rollDice() {
-    if (isConnected) _socket!.emit("roll_dice");
-  }
-
-  void getLeaderBoardList() {
-    if (isConnected) _socket!.emit("get_leader_board_list");
-  }
-
   void getFastPing() {
     if (isConnected) _socket!.emit("get_fast_ping");
-  }
-
-  void moveToken(Token t) {
-    if (isConnected) _socket!.emit("move_token", t.toJson());
-  }
-
-  void exitGame() {
-    if (isConnected) _socket!.emit("exit_game");
   }
 
   void resumeReconnection() {
@@ -123,9 +252,5 @@ class SocketDataSource {
       _socket!.io.skipReconnect = false;
       _socket!.io.reconnect();
     }
-  }
-
-  void claimDailyReward() {
-    if (isConnected) _socket!.emit("claim_daily_reward");
   }
 }

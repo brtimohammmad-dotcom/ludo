@@ -5,6 +5,7 @@ const { updatePlayerAvatar } = require("../database/players");
 const { uploadAvatarToSupabase } = require("../database/storage");
 
 async function handleAuth(initData, socket) {
+  console.log(initData)
   const isLocal = process.env.RENDER !== "true";
 
   try {
@@ -117,6 +118,7 @@ async function handleAuth(initData, socket) {
     socket.data.canClaimDailyReward = canClaimDailyReward;
 
     // ارسال اطلاعات کامل (شامل لینک عکس جدید) به فلاتر
+    console.log(player)
     socket.emit("initial_player", player);
   } catch (err) {
     console.error("Auth error:", err.message || err);

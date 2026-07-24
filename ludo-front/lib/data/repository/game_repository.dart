@@ -7,40 +7,54 @@ class GameRepository {
 
   GameRepository(this.dataSource);
 
-  void connect(GameType type, String? gameId) {
-    dataSource.connect(type, gameId);
+  void connect() {
+    dataSource.connect();
   }
 
-  void startGame(int numberOfPlayers, GameType gameType, GameLevel gameLevel) {
-    dataSource.joinGame(numberOfPlayers,gameType,gameLevel);
+  void requestGameState() {
+    dataSource.requestGameState();
+  }
+
+  void startGame(
+    int numberOfPlayers,
+    GameType gameType,
+    GameLevel gameLevel,
+    Function(dynamic response)? onAck,
+  ) {
+    dataSource.joinGame(
+      numberOfPlayers: numberOfPlayers,
+      gameType: gameType,
+      gameLevel: gameLevel,
+      onAck: onAck,
+    );
   }
 
   void sendEmoji(String emojiName) {
     dataSource.sendEmoji(emojiName);
   }
 
-  void rollDice() {
-    dataSource.rollDice();
+  void rollDice(Function(dynamic response)? onAck) {
+    dataSource.rollDice(onAck: onAck);
   }
 
-  void moveToken(Token liveToken) {
-    dataSource.moveToken(liveToken);
+  void moveToken(Token liveToken, Function(dynamic response)? onAck) {
+    dataSource.moveToken(liveToken, onAck: onAck);
   }
 
-  void getLeaderBoardList() {
-    dataSource.getLeaderBoardList();
+  void getLeaderBoardList(Function(dynamic response)? onAck) {
+    dataSource.getLeaderBoardList(onAck: onAck);
   }
 
-  void exitGame() {
-    dataSource.exitGame();
+  void exitGame(Function(dynamic response)? onAck) {
+    dataSource.exitGame(onAck: onAck);
   }
 
   void getFastPing() {
     dataSource.getFastPing();
   }
 
-  void claimDailyReward() {
-    dataSource.claimDailyReward();
+  void claimDailyReward(Function(dynamic response)? onAck) {
+    dataSource.claimDailyReward(onAck: onAck);
   }
 
   void resumeReconnection() {

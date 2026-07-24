@@ -1,4 +1,3 @@
-import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
 import 'socket_data_source.dart';
@@ -10,12 +9,12 @@ class SocketEventHandler {
 
   SocketEventHandler({required this.dataSource, required this.socket});
 
-  void registerEvents(GameType type, String? gameId) {
+  void registerEvents() {
     // --- احراز هویت تلگرام ---
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-          initData = {"first_name": "Kiana", "id": 4};
+          initData = {"first_name": "Kiana", "id": 5};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -63,7 +62,7 @@ class SocketEventHandler {
       if (!dataSource.playerInitialized.isCompleted) {
         dataSource.playerInitialized.complete();
       }
-      _requestGameState(type, gameId);
+      dataSource.requestGameState();
     });
 
     // --- رویدادهای اصلی گیم‌پلی ---
@@ -141,10 +140,5 @@ class SocketEventHandler {
     });
   }
 
-  void _requestGameState(GameType type, String? gameId) {
-    socket.emit("request_game_state", {
-      "gameType": type.name,
-      "gameId": gameId ?? "",
-    });
-  }
+
 }

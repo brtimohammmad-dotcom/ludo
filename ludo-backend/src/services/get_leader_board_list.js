@@ -1,16 +1,18 @@
 const { getTopTenPlayers, getPlayerRank } = require("../database/players");
-// نکته: به جای "اسم_فایل_دیتابیست" مسیر واقعی فایلی که متدهای بالا در آن قرار دارند را بنویس
+const { sendError } = require("../helpers/game_helpers");
 
-async function handleGetLeaderBoardList(socket) {
+async function handleGetLeaderBoardList(socket, callback) {
   try {
-    // ۱. گرفتن تلگرام‌آیدی کاربر از روی دیتای سوکت (که در مرحله auth ذخیره کرده‌ای)
     const telegramId = socket.data.telegramId;
 
     if (!telegramId) {
-      return socket.emit("error", "کاربر احراز هویت نشده است.");
+      sendError(socket, callback, "player not authorized");
+      return;
     }
 
-    // ۲. اجرای موازی هر دو کوئری برای سرعت بالاتر سرور
+    if (typeof callback === "function") {
+      callback({ success: true });
+    }
     const [topPlayers, userRankResult] = await Promise.all([
       getTopTenPlayers(),
       getPlayerRank(telegramId),
@@ -23,6 +25,7 @@ async function handleGetLeaderBoardList(socket) {
     });
   } catch (error) {
     console.error("خطا در پاسخ به درخواست لیدربرد:", error.message);
+
     socket.emit("error", "خطا در دریافت اطلاعات لیدربرد");
   }
 }

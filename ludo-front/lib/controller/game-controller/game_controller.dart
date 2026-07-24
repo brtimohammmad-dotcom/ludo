@@ -12,6 +12,7 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:telegram_web_app/telegram_web_app.dart';
 
 part 'game_controller.g.dart';
 
@@ -20,6 +21,8 @@ class GameController extends _$GameController {
   // Repositories & Handlers
   late final GameRepository _gameRepository;
   late final GameAnimationManager _animationManager;
+  late final GameType gameType;
+  String? gameId;
   AnimationController? animationController;
 
   // Flags & Internal States
@@ -35,7 +38,20 @@ class GameController extends _$GameController {
 
   @override
   GameState? build() {
-    final ds = SocketDataSource();
+    if (TelegramWebApp.instance.isSupported) {
+      TelegramWebApp.instance.ready();
+      TelegramWebApp.instance.expand();
+
+      final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
+      if (startParam != null && startParam.startsWith("game_")) {
+        gameId = startParam.replaceAll("game_", "");
+      } else {
+        gameType = GameType.global;
+      }
+    } else {
+      gameType = GameType.global;
+    }
+    final ds = SocketDataSource(gameType: gameType, gameId: gameId);
     _gameRepository = GameRepository(ds);
 
     // مقداردهی هندلرها با پاس دادن instance فعلی
@@ -124,7 +140,11 @@ class GameController extends _$GameController {
     required GameType gameType,
     required GameLevel gameLevel,
   }) {
-    _gameRepository.startGame(numberOfPlayers, gameType, gameLevel);
+    _gameRepository.startGame(numberOfPlayers, gameType, gameLevel, (_) {});
+  }
+
+  void requestGameState() {
+    _gameRepository.requestGameState();
   }
 
   void resumeReconnection() {
@@ -132,11 +152,19 @@ class GameController extends _$GameController {
   }
 
   void claimDailyReward() {
-    _gameRepository.claimDailyReward();
+    _gameRepository.claimDailyReward((response) {
+      if (response['success'] == false) {
+        stopLoading("daily_reward");
+      }
+    });
   }
 
   void getLeaderBoardList() {
-    _gameRepository.getLeaderBoardList();
+    _gameRepository.getLeaderBoardList((response) {
+      if (response['success'] == false) {
+        stopLoading("leader_board_loading");
+      }
+    });
   }
 
   void sendEmoji(String emojiName) {
@@ -147,8 +175,8 @@ class GameController extends _$GameController {
     _gameRepository.getFastPing();
   }
 
-  void connect(GameType type, String? gameId) {
-    _gameRepository.connect(type, gameId);
+  void connect() {
+    _gameRepository.connect();
   }
 
   void moveToken(Token liveToken) {
@@ -160,7 +188,11 @@ class GameController extends _$GameController {
           turnStatus: TurnStatus.moveTokenRequestInFlight,
         ),
       );
-      _gameRepository.moveToken(liveToken);
+      _gameRepository.moveToken(liveToken, (response) {
+        if (response['success'] == false) {
+          requestGameState();
+        }
+      });
       final diceValue = state!.serverState!.lastDiceValue;
 
       // اجرای انیمیشن به صورت Async و موازی با درخواست سرور
@@ -177,7 +209,11 @@ class GameController extends _$GameController {
           turnStatus: TurnStatus.rollDiceRequestInFlight,
         ),
       );
-      _gameRepository.rollDice();
+      _gameRepository.rollDice((response) {
+        if (response['success'] == false) {
+          requestGameState();
+        }
+      });
     }
   }
 
@@ -202,7 +238,11 @@ class GameController extends _$GameController {
   // RESET / DISPOSE
   // -------------------------------------------------
   void exitGame() {
-    _gameRepository.exitGame();
+    _gameRepository.exitGame((response) {
+      if (response['success'] == false) {
+        stopLoading("exit_game");
+      }
+    });
   }
 
   void resetGame() {
@@ -235,7 +275,6 @@ class GameController extends _$GameController {
         livePlayer: clearedPlayer,
         gameStage: GameStage.joinStage,
       );
-
     } else {
       state = null;
     }
