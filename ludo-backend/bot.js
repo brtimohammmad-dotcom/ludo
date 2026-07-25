@@ -46,7 +46,7 @@ bot.on("inline_query", async (ctx) => {
               [
                 {
                   text: "🎲 Play Now",
-                  url: "https://t.me/ludo_miniApp_bot?startapp=main",
+                  url: "https://t.me/LudoRushBot?startapp=main",
                 },
               ],
             ],
@@ -64,7 +64,7 @@ bot.on("inline_query", async (ctx) => {
     if (!game) {
       return await ctx.answerInlineQuery([]);
     }
-    const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
+    const joinUrl = `https://t.me/LudoRushBot?startapp=game_${gameId}`;
 
     // ۲. ارسال پیام دعوت بازی دوستانه (اصلاح شده به Article)
     return await ctx.answerInlineQuery([
@@ -111,7 +111,6 @@ bot.on("chosen_inline_result", async (ctx) => {
   });
 });
 
-// تابع بروزرسانی وضعیت لابی مسابقه (اصلاح شده از editMessageCaption به editMessageText)
 const updateLobbyMessage = async (gameId) => {
   try {
     const game = initialState.getGameState(gameId);
@@ -135,7 +134,7 @@ const updateLobbyMessage = async (gameId) => {
             ? `⚠️ *Match Cancelled*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\nThe lobby has been closed.`
             : `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎯 Waiting for ${maxPlayers - playersCount} more player${maxPlayers - playersCount > 1 ? "s" : ""} to join...`;
 
-    const joinUrl = `https://t.me/ludo_miniApp_bot?startapp=game_${gameId}`;
+    const joinUrl = `https://t.me/LudoRushBot?startapp=game_${gameId}`;
 
     const replyMarkup =
       game.game_status === "finished" ||
@@ -146,7 +145,7 @@ const updateLobbyMessage = async (gameId) => {
               [
                 {
                   text: `Play Ludo`,
-                  url: "https://t.me/ludo_miniApp_bot?startapp",
+                  url: "https://t.me/LudoRushBot?startapp",
                 },
               ],
             ],
