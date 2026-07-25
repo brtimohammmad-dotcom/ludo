@@ -319,9 +319,9 @@ async function handleExitingGame(socket, io, callback) {
         },
         currentGame.game_type,
       );
-
-      initialState.deleteGameState(gameId);
+      initialState.updateGameState(gameId, { game_status: "cancel" });
       updateLobbyMessage(gameId);
+      initialState.deleteGameState(gameId);
     } else {
       updateLobbyMessage(gameId);
     }
