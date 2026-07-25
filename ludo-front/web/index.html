@@ -4,7 +4,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     <meta charset="UTF-8">
     <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-    <meta name="description" content="A new Game named Ludo for Bale.">
+    <meta name="description" content="A new Game named Ludo for Telegram.">
 
     <base href="/">
 
@@ -17,15 +17,29 @@
             webapp.ready();
             webapp.expand();
 
-            // 🔒 قفل کردن سوییپ
+            // 🔒 قفل کردن سوییپ عمودی
             if (webapp.disableVerticalSwipe) {
               webapp.disableVerticalSwipe();
             }
             webapp.enableClosingConfirmation();
 
-            // 🎨 تغییر تم هدر به مشکی سالید (این سوییچ ظاهری هدر را تغییر می‌دهد)
+            // 🎨 تنظیم تم هدر و بک‌گراند
             webapp.setHeaderColor('#07070b');
             webapp.setBackgroundColor('#07070b');
+
+            // 📱 خواندن داینامیک Safe Area و تزریق آن به CSS
+            function applySafeArea() {
+              var topInset = (webapp.safeAreaInset && webapp.safeAreaInset.top)
+                ? webapp.safeAreaInset.top
+                : (webapp.contentSafeAreaInset && webapp.contentSafeAreaInset.top)
+                  ? webapp.contentSafeAreaInset.top
+                  : 0;
+
+              document.documentElement.style.setProperty('--tg-safe-top', topInset + 'px');
+            }
+
+            applySafeArea();
+            webapp.onEvent('safeAreaChanged', applySafeArea);
           }
         })();
 
@@ -36,6 +50,7 @@
             }
         }, { passive: false });
     </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -52,16 +67,24 @@
 
     <title>ludo</title>
     <style>
-        /* 🟢 بدنه اصلی مرورگر را بدون رنگ نگه می‌داریم */
+        :root {
+            /* مقدار پیش‌فرض Safe Area برای مرورگرهایی که تلگرام نیستند */
+            --tg-safe-top: env(safe-area-inset-top, 0px);
+        }
+
+        /* 🟢 بدنه اصلی مرورگر با اعمال پدینگ امن داینامیک */
         body {
             margin: 0;
             height: 100vh;
             overflow: hidden;
             font-family: sans-serif;
             color: white;
-            background-color: #07070b; /* رنگ پایه تیره برای جلوگیری از فلش سفید */
+            background-color: #07070b;
             position: fixed;
             width: 100%;
+            /* 📱 اعمال فاصله از بالا برای خروج المان‌ها از زیر نوار تلگرام */
+            padding-top: var(--tg-safe-top);
+            box-sizing: border-box;
         }
 
         /* 🟢 روت‌های فلاتر را شیشه‌ای نگه می‌داریم */
@@ -75,18 +98,17 @@
             background-color: transparent !important;
         }
 
-        /* 🟢 انتقال بک‌گراند اصلی و اتمسفر کهکشان به داخل کانتینر لودر */
+        /* 🟢 کانتینر لودر اولویه */
         #loader {
             position: absolute;
             inset: 0;
-            z-index: 99999; /* بالاتر از همه چیز، حتی فریم‌های سفید فلاتر وب */
+            z-index: 99999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             width: 100vw;
-            /* 🌌 همان بک‌گراند بنفش و تیره جذابی که داشتی، این‌بار در امن‌ترین لایه وب */
             background: radial-gradient(circle at center, #2a1455, #07070b);
             transition: opacity 0.5s ease;
             pointer-events: none;
@@ -282,7 +304,7 @@
         if (loader) {
             loader.style.opacity = "0";
             setTimeout(() => {
-                loader.remove(); // به همراه لودر، بک‌گراند تیره هم در ثانیه آخر حذف شده و اسکرین اصلی باز می‌شود
+                loader.remove();
             }, 500);
         }
     };
