@@ -112,8 +112,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             child: SizedBox.expand(
               child: Column(
                 children: [
-                  // 🎯 فاصله بالا فقط در سیستم‌عامل‌های موبایل
-                  // SizedBox(height: telegramTopPadding),
+                  SizedBox(height: telegramTopPadding),
                   SizedBox(height: layout.screenHeight * 0.08),
                   Expanded(
                     child: Column(
