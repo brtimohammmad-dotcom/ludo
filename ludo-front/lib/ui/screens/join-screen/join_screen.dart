@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
@@ -15,6 +16,7 @@ import 'package:ludo/ui/utils/alerts/waiting_for_game_alert.dart';
 import 'package:ludo/ui/utils/painter.dart';
 import 'package:lottie/lottie.dart';
 
+import 'package:web/web.dart' as web;
 
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({super.key});
@@ -26,6 +28,14 @@ class JoinScreen extends ConsumerStatefulWidget {
 class _JoinScreenState extends ConsumerState<JoinScreen> {
   late JoinScreenHandler _handler;
 
+  /// 🎯 بررسی اینکه کاربر روی دستگاه موبایل (iOS / Android) است یا خیر
+  bool get _isMobileDevice {
+    if (!kIsWeb) return false;
+    final userAgent = web.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('android') ||
+        userAgent.contains('iphone') ||
+        userAgent.contains('ipad');
+  }
 
   @override
   void initState() {
@@ -57,6 +67,8 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final gameState = ref.watch(gameControllerProvider);
     final currentPlayer = gameState?.livePlayer;
 
+    // 📱 اعمال ۳۵ پیکسل پدینگ فقط در صورتی که سیستم‌عامل گوشی موبایل باشد
+    final double telegramTopPadding = _isMobileDevice ? 50.0 : 0.0;
 
     ref.listen<bool>(
       globalLoadingProvider.select((s) => s.contains("waiting_for_game")),
@@ -100,7 +112,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             child: SizedBox.expand(
               child: Column(
                 children: [
-                  SizedBox(height: 35),
+                  // 🎯 فاصله بالا فقط در سیستم‌عامل‌های موبایل
+                  SizedBox(height: telegramTopPadding),
+                  SizedBox(height: layout.screenHeight * 0.08),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -125,13 +139,13 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           ),
           // 🪙 موقعیت سکه
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
+            top: MediaQuery.of(context).padding.top + 16 + telegramTopPadding,
             left: 16,
             child: RepaintBoundary(child: CoinBox(boardSize: layout.boardSize)),
           ),
           // 👤 موقعیت پروفایل
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16 ,
+            top: MediaQuery.of(context).padding.top + 16 + telegramTopPadding,
             right: 16,
             child: RepaintBoundary(
               child: UserProfileBox(
