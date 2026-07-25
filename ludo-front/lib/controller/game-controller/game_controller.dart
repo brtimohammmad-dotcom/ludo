@@ -45,6 +45,7 @@ class GameController extends _$GameController {
       final startParam = TelegramWebApp.instance.initDataUnsafe?.startParam;
       if (startParam != null && startParam.startsWith("game_")) {
         gameId = startParam.replaceAll("game_", "");
+        gameType = GameType.friendly;
       } else {
         gameType = GameType.global;
       }
