@@ -6,7 +6,7 @@ const {
 } = require("./src/models/gameMessageStore");
 
 const bot = new Telegraf(
-  process.env.BOT_TOKEN || "8780116886:AAEkCv3L3WVnHIhI7fvOPMmj1mSe2QWz9Ho",
+  process.env.BOT_TOKEN
 );
 
 const WEB_APP_URL = "https://ludo-tecb.onrender.com";
