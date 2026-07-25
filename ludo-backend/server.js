@@ -1,6 +1,5 @@
-require("dotenv").config(); // 🚀 لود کردن متغیرهای محیطی در بالاترین خط برنامه
+require("dotenv").config();
 
-// 🛑 جلوگیری از کرش کردن سرور در صورت بروز خطای غیرمنتظره
 process.on("uncaughtException", (err) => {
   console.error("❌ Uncaught Exception:", err);
 });
@@ -12,19 +11,20 @@ process.on("unhandledRejection", (reason, promise) => {
 const http = require("http");
 const { bot } = require("./bot");
 
-// تشخیص خودکار محیط بر اساس فایل .env
 const isLocal = process.env.NODE_ENV !== "production";
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 const backendUrl = process.env.BACKEND_URL;
 
+// 🟢 ساخت میدل‌ور استاندارد وبهوک تلگرام
+const handleTelegramWebhook = bot.webhookCallback("/webhook");
+
 const server = http.createServer(async (req, res) => {
-  // 1️⃣ تفکیک دقیق آدرس از پارامترها (Query Params)
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
 
-  // 2️⃣ تنظیم هوشمند هدرهای CORS برای فلاتر وب
+  // تنظیم CORS
   if (pathname === "/proxy-avatar") {
-    res.setHeader("Access-Control-Allow-Origin", "*"); // کاملاً آزاد برای لود عکس در مرورگر مینی‌اپ
+    res.setHeader("Access-Control-Allow-Origin", "*");
   } else {
     res.setHeader("Access-Control-Allow-Origin", frontendUrl);
   }
@@ -35,53 +35,26 @@ const server = http.createServer(async (req, res) => {
     "Content-Type, Accept, Authorization",
   );
 
-  // پاسخ سریع به درخواست‌های OPTIONS مرورگر
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     return res.end();
   }
 
-  // 3️⃣ روت سلامت سرور
   if (pathname === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({ status: "ok" }));
   }
 
-
-
-  // 5️⃣ روت وبهوک تلگرام
+  // 5️⃣ روت وبهوک تلگرام (اصلاح شده و تمیز)
   if (pathname === "/webhook" && req.method === "POST") {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk;
-      if (body.length > 1e6) {
-        res.writeHead(413, { "Content-Type": "text/plain" });
-        res.end("Request Entity Too Large");
-        return req.destroy();
-      }
-    });
-
-    req.on("end", () => {
-      try {
-        const update = JSON.parse(body);
-        bot.handleUpdate(update);
-        res.writeHead(200);
-        res.end();
-      } catch (err) {
-        console.error("Webhook processing error:", err);
-        res.writeHead(400);
-        res.end();
-      }
-    });
-    return;
+    // سپردن کامل مدیریت ریسپانس و async به خود Telegraf
+    return handleTelegramWebhook(req, res);
   }
 
-  // اگر هیچکدام نبود -> 404 واقعی
   res.writeHead(404);
   res.end();
 });
 
-// کانفیگ هوشمند سوکت بر اساس محیط
 const io = require("socket.io")(server, {
   cors: {
     origin: frontendUrl,
@@ -111,12 +84,20 @@ server.listen(port, "0.0.0.0", async () => {
 
   if (!isLocal && backendUrl) {
     try {
+      // پاکسازی وبهوک قبلی و ست کردن وبهوک جدید
+      await bot.telegram.deleteWebhook({ drop_pending_updates: true });
       await bot.telegram.setWebhook(`${backendUrl}/webhook`);
       console.log("🌐 Webhook successfully set to:", `${backendUrl}/webhook`);
     } catch (webhookError) {
       console.error("❌ Failed to set Telegram Webhook:", webhookError);
     }
   } else {
-    console.log("🤖 Bot running in local mode (Webhook bypassed)");
+    // 🟢 اگر روی لوکال بودی، ربات رو با Polling روشن کن!
+    await bot.telegram.deleteWebhook({ drop_pending_updates: true });
+    bot.launch();
+    console.log("🤖 Bot running in LOCAL mode using Polling!");
   }
 });
+
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
