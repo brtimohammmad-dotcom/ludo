@@ -8,12 +8,9 @@ const {
 const bot = new Telegraf(
   process.env.BOT_TOKEN
 );
-bot.on("photo", (ctx) => {
-  console.log(ctx.message.photo);
-});
 const WEB_APP_URL = "https://ludo-tecb.onrender.com";
 const PHOTO_FILE_ID =
-  "AgACAgQAAxkBAANWaj7CJA8BUAYAAa-OFtVJ7M4hjQ4qAAMOaxthRfBR1YyGsvn7DdkBAAMCAAN4AAM8BA";
+  "AgACAgIAAxkBAAMJamTPuwINIBC30twypUjsgBSFbDgAAmkgaxvCqylL-GzRmOLntngBAAMCAANzAAM9BA";
 
 // دستور استارت ربات در چت خصوصی
 bot.start((ctx) => {
