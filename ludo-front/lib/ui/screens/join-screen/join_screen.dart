@@ -65,77 +65,79 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       },
     );
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // رنگ پس‌زمینه ثابت و فلت
-      resizeToAvoidBottomInset: false,
-      extendBody: true,
-      bottomNavigationBar: RepaintBoundary(
-        child: FloatingBottomMenu(
-
-          boardSize: layout.boardSize,
-          onFriendsTap: () =>
-              showFriendsPlayDialog(context, layout.boardSize, _handler),
-          onLeaderboardTap: () {
-            ref.read(gameControllerProvider.notifier).getLeaderBoardList();
-            ref
-                .read(globalLoadingProvider.notifier)
-                .start('leader_board_loading');
-          },
-          onShopTap: () {},
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0F172A), // رنگ پس‌زمینه ثابت و فلت
+        resizeToAvoidBottomInset: false,
+        extendBody: true,
+        bottomNavigationBar: RepaintBoundary(
+          child: FloatingBottomMenu(
+      
+            boardSize: layout.boardSize,
+            onFriendsTap: () =>
+                showFriendsPlayDialog(context, layout.boardSize, _handler),
+            onLeaderboardTap: () {
+              ref.read(gameControllerProvider.notifier).getLeaderBoardList();
+              ref
+                  .read(globalLoadingProvider.notifier)
+                  .start('leader_board_loading');
+            },
+            onShopTap: () {},
+          ),
         ),
-      ),
-      body: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // نقاش بهینه‌شده بدون محاسبات سنگین
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(painter: LudoBackgroundPainter()),
+        body: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // نقاش بهینه‌شده بدون محاسبات سنگین
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: CustomPaint(painter: LudoBackgroundPainter()),
+              ),
             ),
-          ),
-          SafeArea(
-            child: SizedBox.expand(
-              child: Column(
-                children: [
-                  SizedBox(height: layout.screenHeight * 0.08),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildDiceSection(layout.diceSize),
-                        const Spacer(flex: 1),
-                        Flexible(
-                          flex: 5,
-                          child: GameSelectionButtons(
-                            boardSize: layout.boardSize,
-                            handler: _handler,
+            SafeArea(
+              child: SizedBox.expand(
+                child: Column(
+                  children: [
+                    SizedBox(height: layout.screenHeight * 0.08),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildDiceSection(layout.diceSize),
+                          const Spacer(flex: 1),
+                          Flexible(
+                            flex: 5,
+                            child: GameSelectionButtons(
+                              boardSize: layout.boardSize,
+                              handler: _handler,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: layout.screenHeight * 0.14),
-                ],
+                    SizedBox(height: layout.screenHeight * 0.14),
+                  ],
+                ),
               ),
             ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            left: 16,
-            child: RepaintBoundary(child: CoinBox(boardSize: layout.boardSize)),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            right: 16,
-            child: RepaintBoundary(
-              child: UserProfileBox(
-                player: currentPlayer,
-                boardSize: layout.boardSize,
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 16,
+              child: RepaintBoundary(child: CoinBox(boardSize: layout.boardSize)),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              right: 16,
+              child: RepaintBoundary(
+                child: UserProfileBox(
+                  player: currentPlayer,
+                  boardSize: layout.boardSize,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
