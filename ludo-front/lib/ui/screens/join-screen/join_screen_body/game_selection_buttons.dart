@@ -20,7 +20,7 @@ class GameSelectionButtons extends ConsumerWidget {
         .toList();
 
     return RepaintBoundary(
-      // 🎭 ایجاد ماسک محوشدگی (Fade Mask) در بالا و پایین اسکرول
+      // 🎭 ایجاد ماسک محوشدگی (Fade Mask) نرم در بالا و انتهای لیست اسکرول
       child: ShaderMask(
         shaderCallback: (Rect bounds) {
           return const LinearGradient(
@@ -30,16 +30,21 @@ class GameSelectionButtons extends ConsumerWidget {
               Colors.transparent, // محو شدن از بالا
               Colors.black,       // شفافیت کامل در مرکز
               Colors.black,       // شفافیت کامل در مرکز
-              Colors.transparent, // محو و تاریک شدن در پایین (Fade Out)
+              Colors.transparent, // محو و تاریک شدن قبل از رسیدن به منوی پایین
             ],
-            stops: [0.0, 0.08, 0.85, 1.0], // تنظیم میزان تاریک شدن انتهای اسکرول
+            stops: [0.0, 0.04, 0.88, 1.0], // تنظیم نرم‌تر شدن انتهای لیست
           ).createShader(bounds);
         },
         blendMode: BlendMode.dstIn,
         child: ListView.separated(
-          shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          // ⚠️ افزودن فاصله ۱۰۰ تایی در پایین تا کارت آخر کاملاً بالای منوی شناور دیده شود
+          padding: const EdgeInsets.only(
+            left: 20.0,
+            right: 20.0,
+            top: 12.0,
+            bottom: 100.0,
+          ),
           itemCount: levels.length,
           separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
@@ -140,7 +145,7 @@ class GameSelectionButtons extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // دکمه‌های بازی
+                  // دکمه‌های شروع بازی
                   if (isFourPlayerDisabled)
                     StartGameButton(
                       numberOfPlayers: 2,

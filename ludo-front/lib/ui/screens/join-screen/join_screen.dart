@@ -14,7 +14,6 @@ import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 import 'package:ludo/ui/utils/alerts/waiting_for_game_alert.dart';
 import 'package:ludo/ui/utils/painter.dart';
 
-
 class JoinScreen extends ConsumerStatefulWidget {
   const JoinScreen({super.key});
 
@@ -24,8 +23,6 @@ class JoinScreen extends ConsumerStatefulWidget {
 
 class _JoinScreenState extends ConsumerState<JoinScreen> {
   late JoinScreenHandler _handler;
-
-
 
   @override
   void initState() {
@@ -72,20 +69,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       backgroundColor: const Color(0xFF0F172A),
       resizeToAvoidBottomInset: false,
       extendBody: true,
-      bottomNavigationBar: RepaintBoundary(
-        child: FloatingBottomMenu(
-          boardSize: layout.boardSize,
-          onFriendsTap: () =>
-              showFriendsPlayDialog(context, layout.boardSize, _handler),
-          onLeaderboardTap: () {
-            ref.read(gameControllerProvider.notifier).getLeaderBoardList();
-            ref
-                .read(globalLoadingProvider.notifier)
-                .start('leader_board_loading');
-          },
-          onShopTap: () {},
-        ),
-      ),
       body: Stack(
         children: [
           // ۱. پس‌زمینه
@@ -95,14 +78,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             ),
           ),
 
-          // ۲. ساختار اصلی UI با SafeArea
+          // ۲. محتوای اصلی (هدر + کارت‌های لول)
           SafeArea(
-            top: true, // فاصله اضافی بالای گوشی حذف شده و تحت کنترل دقیق SafeArea قرار گرفته است
+            top: true,
+            bottom: false, // اجازه میده لیست تا پایین‌ترین نقطه بره
             child: Column(
               children: [
                 const SizedBox(height: 8),
 
-                // 👑 عنوان بازی LUDO RUSH در بالای صفحه
+                // 👑 عنوان بازی LUDO RUSH
                 Center(
                   child: ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
@@ -143,19 +127,18 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
                 const SizedBox(height: 12),
 
-                // 🪙 👤 ردیف سکه و پروفایل (هر دو در یک ردیف)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // سکه‌باکس در سمت چپ
+                      // سکه‌باکس
                       RepaintBoundary(
                         child: CoinBox(boardSize: layout.boardSize),
                       ),
 
-                      // پروفایل در سمت راست
+                      // پروفایل
                       RepaintBoundary(
                         child: UserProfileBox(
                           player: currentPlayer,
@@ -168,17 +151,37 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
                 const SizedBox(height: 10),
 
-                // 🎮 ۳. منطقه انتخاب لول‌ها (تمام فضای باقی‌مانده را تا بالای منوی پایین پر می‌کند)
+                // 🎮 ۳. لیست لول‌ها (پرکننده کامل تمام فضای عمودی تا انتهای صفحه)
                 Expanded(
                   child: GameSelectionButtons(
                     boardSize: layout.boardSize,
                     handler: _handler,
                   ),
                 ),
-
-                // فاصله رزرو شده تا روی FloatingBottomMenu نیافتد
-                SizedBox(height: layout.screenHeight * 0.09),
               ],
+            ),
+          ),
+
+          // ۳. منوی شناور پایین روی کل محتوا (Floating Overlay)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: RepaintBoundary(
+              child: FloatingBottomMenu(
+                boardSize: layout.boardSize,
+                onFriendsTap: () =>
+                    showFriendsPlayDialog(context, layout.boardSize, _handler),
+                onLeaderboardTap: () {
+                  ref
+                      .read(gameControllerProvider.notifier)
+                      .getLeaderBoardList();
+                  ref
+                      .read(globalLoadingProvider.notifier)
+                      .start('leader_board_loading');
+                },
+                onShopTap: () {},
+              ),
             ),
           ),
         ],
