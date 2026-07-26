@@ -13,38 +13,52 @@ class UserProfileBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boxHeight = (boardSize * 0.11).clamp(40.0, 52.0);
-    final avatarSize = boxHeight * 0.75;
     final String name = player?.username ?? "Player";
     final String? avatarUrl = player?.avatarUrl;
 
     return Container(
-      height: boxHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      height: 38,
+      padding: const EdgeInsets.only(left: 4, right: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B), // فلت و هماهنگ با بقیه بخش‌ها
-        borderRadius: BorderRadius.circular(boxHeight / 2),
-        border: Border.all(
-          color: Colors.amber,
-          width: 1.0,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(
+          color: const Color(0xFF334155),
+          width: 1.5,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black38,
+            offset: Offset(0, 3),
+            blurRadius: 6,
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           UserAvatar(
             url: avatarUrl,
-            size: avatarSize,
-            borderColor: Colors.amber,
-            borderWidth: 1.0,
+            size: 28,
+            borderColor: const Color(0xFFFFB703),
+            borderWidth: 1.5,
           ),
           const SizedBox(width: 8),
-          Text(
-            name,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 80),
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
           ),
         ],

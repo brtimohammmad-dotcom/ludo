@@ -19,76 +19,146 @@ class GameSelectionButtons extends ConsumerWidget {
         .where((level) => level != GameLevel.free)
         .toList();
 
-    // تنظیم ارتفاع و عرض کارت متناسب با فضای جدید
-    final containerHeight = (boardSize * 0.48).clamp(175.0, 220.0);
-    final cardWidth = (boardSize * 0.75).clamp(250.0, 340.0);
-
     return RepaintBoundary(
-      child: SizedBox(
-        height: containerHeight,
+      // 🎭 ایجاد ماسک محوشدگی (Fade Mask) در بالا و پایین اسکرول
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent, // محو شدن از بالا
+              Colors.black,       // شفافیت کامل در مرکز
+              Colors.black,       // شفافیت کامل در مرکز
+              Colors.transparent, // محو و تاریک شدن در پایین (Fade Out)
+            ],
+            stops: [0.0, 0.08, 0.85, 1.0], // تنظیم میزان تاریک شدن انتهای اسکرول
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
         child: ListView.separated(
-          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           itemCount: levels.length,
-          separatorBuilder: (context, index) =>
-              SizedBox(width: boardSize * 0.04),
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final level = levels[index];
             final isFourPlayerDisabled =
             (level == GameLevel.gold || level == GameLevel.vip);
 
             return Container(
-              width: cardWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: level.color,
-                  width: 1.5,
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    level.color.withValues(alpha: 0.12),
+                    const Color(0xFF1E293B).withValues(alpha: 0.85),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                border: Border.all(
+                  color: level.color.withValues(alpha: 0.4),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: level.color.withValues(alpha: 0.08),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    "${level.displayName} Table",
-                    style: TextStyle(
-                      color: level.color,
-                      fontSize: (boardSize * 0.045).clamp(14.0, 18.0),
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  if (isFourPlayerDisabled)
-                  // برای حالت تک دکمه، محدود کردن عرض جهت حفظ زیبایی ظاهری
-                    SizedBox(
-                      width: cardWidth * 0.65,
-                      child: StartGameButton(
-                        numberOfPlayers: 2,
-                        entryFee: level.entryFee,
-                        prizePool: level.prize2P,
-                        themeColor: level.color,
-                        onPressed: () => handler.handleGameSearch(
-                          numberOfPlayers: 2,
-                          gameType: GameType.global,
-                          gameLevel: level,
-                          boardSize: boardSize,
+                  // Header کارت
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: level.color,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: level.color,
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "${level.displayName} Table",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: (boardSize * 0.042).clamp(14.0, 17.0),
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.amber.withValues(alpha: 0.3),
+                            width: 0.8,
+                          ),
                         ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.monetization_on,
+                              color: Colors.amberAccent,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              level.entryFee == 0 ? "Free" : "${level.entryFee}",
+                              style: const TextStyle(
+                                color: Colors.amberAccent,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // دکمه‌های بازی
+                  if (isFourPlayerDisabled)
+                    StartGameButton(
+                      numberOfPlayers: 2,
+                      prizePool: level.prize2P,
+                      themeColor: level.color,
+                      onPressed: () => handler.handleGameSearch(
+                        numberOfPlayers: 2,
+                        gameType: GameType.global,
+                        gameLevel: level,
                         boardSize: boardSize,
                       ),
                     )
                   else
-                  // حالت دو دکمه در کنار هم بدون تداخل با عرض ثابت
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
                           child: StartGameButton(
                             numberOfPlayers: 2,
-                            entryFee: level.entryFee,
                             prizePool: level.prize2P,
                             themeColor: level.color,
                             onPressed: () => handler.handleGameSearch(
@@ -97,14 +167,12 @@ class GameSelectionButtons extends ConsumerWidget {
                               gameLevel: level,
                               boardSize: boardSize,
                             ),
-                            boardSize: boardSize,
                           ),
                         ),
-                        SizedBox(width: boardSize * 0.015),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: StartGameButton(
                             numberOfPlayers: 4,
-                            entryFee: level.entryFee,
                             prizePool: level.prize4P,
                             themeColor: level.color,
                             onPressed: () => handler.handleGameSearch(
@@ -113,7 +181,6 @@ class GameSelectionButtons extends ConsumerWidget {
                               gameLevel: level,
                               boardSize: boardSize,
                             ),
-                            boardSize: boardSize,
                           ),
                         ),
                       ],

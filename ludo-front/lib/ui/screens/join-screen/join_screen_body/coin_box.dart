@@ -19,35 +19,66 @@ class CoinBox extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // 🪙 کپسول نمایش سکه
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B), // رنگ سالید مات
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF334155), width: 1.0),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(19),
+            border: Border.all(
+              color: const Color(0xFF334155),
+              width: 1.5,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black38,
+                offset: Offset(0, 3),
+                blurRadius: 6,
+              ),
+            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.monetization_on,
-                color: Colors.amber,
-                size: 20,
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFFFB703),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFFFB703),
+                      blurRadius: 6,
+                      spreadRadius: -1,
+                    )
+                  ],
+                ),
+                child: const Icon(
+                  Icons.monetization_on_rounded,
+                  color: Color(0xFF522800),
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 6),
               Text(
                 '$coins',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
+        // 🎁 دکمه پاداش روزانه
         GestureDetector(
           onTap: () {
             showDialog(
@@ -58,20 +89,39 @@ class CoinBox extends ConsumerWidget {
               ),
             );
           },
-          child: Container(
-            padding: const EdgeInsets.all(8),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: 38,
+            width: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              gradient: LinearGradient(
+                colors: canClaim
+                    ? [const Color(0xFFFFD700), const Color(0xFFFF8C00)]
+                    : [const Color(0xFF1E293B), const Color(0xFF0F172A)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
               shape: BoxShape.circle,
               border: Border.all(
-                color: canClaim ? Colors.amber : const Color(0xFF334155),
-                width: 1.0,
+                color: canClaim
+                    ? Colors.white
+                    : const Color(0xFF334155),
+                width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: canClaim
+                      ? const Color(0xFFFF8C00).withValues(alpha: 0.5)
+                      : Colors.black26,
+                  blurRadius: canClaim ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(
-              Icons.card_giftcard,
-              color: canClaim ? Colors.amberAccent : Colors.grey,
-              size: 20,
+              Icons.card_giftcard_rounded,
+              color: canClaim ? Colors.white : Colors.grey.shade400,
+              size: 18,
             ),
           ),
         ),
