@@ -15,12 +15,27 @@
             var webapp = window.Telegram.WebApp;
 
             webapp.ready();
-            webapp.expand();
 
-            // 🔒 قفل کردن سوییپ عمودی
-            if (webapp.disableVerticalSwipe) {
-              webapp.disableVerticalSwipe();
+            // 📱 شرط تفکیک موبایل و دسکتاپ
+            var platform = webapp.platform;
+            var isMobile = platform === 'android' || platform === 'android_x' || platform === 'ios';
+
+            if (isMobile) {
+              // درخواست فول‌اسکرین / اکسپند فقط روی موبایل
+              if (webapp.requestFullscreen) {
+                webapp.requestFullscreen();
+              } else {
+                webapp.expand();
+              }
+
+              if (webapp.disableVerticalSwipe) {
+                webapp.disableVerticalSwipe();
+              }
+            } else {
+              // در دسکتاپ نیازی به اکسپند اجباری نیست
+              webapp.expand();
             }
+
             webapp.enableClosingConfirmation();
 
             // 🎨 تنظیم تم هدر و بک‌گراند
@@ -72,19 +87,28 @@
             --tg-safe-top: env(safe-area-inset-top, 0px);
         }
 
-        /* 🟢 بدنه اصلی مرورگر با اعمال پدینگ امن داینامیک */
+        /* 🟢 پس‌زمینه کلی مرورگر/دسکتاپ */
+        html {
+            background-color: #07070b;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 🟢 بدنه اصلی برنامه با محدودیت عرض در دسکتاپ و وسط‌چین شدن */
         body {
-            margin: 0;
+            margin: 0 auto;
             height: 100vh;
+            max-width: 480px; /* 👈 محدودسازی عرض در دسکتاپ مشابه موبایل */
+            width: 100%;
             overflow: hidden;
             font-family: sans-serif;
             color: white;
             background-color: #07070b;
-            position: fixed;
-            width: 100%;
+            position: relative;
             /* 📱 اعمال فاصله از بالا برای خروج المان‌ها از زیر نوار تلگرام */
             padding-top: var(--tg-safe-top);
             box-sizing: border-box;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); /* سایه شیک اطراف برنامه در دسکتاپ */
         }
 
         /* 🟢 روت‌های فلاتر را شیشه‌ای نگه می‌داریم */
@@ -96,9 +120,11 @@
         flt-scene-host {
             background: transparent !important;
             background-color: transparent !important;
+            max-width: 480px !important;
+            margin: 0 auto !important;
         }
 
-        /* 🟢 کانتینر لودر اولویه */
+        /* 🟢 کانتینر لودر اولیه */
         #loader {
             position: absolute;
             inset: 0;
@@ -107,8 +133,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            width: 100vw;
+            height: 100%;
+            width: 100%;
             background: radial-gradient(circle at center, #2a1455, #07070b);
             transition: opacity 0.5s ease;
             pointer-events: none;
@@ -145,6 +171,8 @@
             left: 50%;
             width: 80vmin;
             height: 80vmin;
+            max-width: 380px;
+            max-height: 380px;
             transform: translate(-50%, -50%);
             animation: rotate 18s linear infinite;
         }
