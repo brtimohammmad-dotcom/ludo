@@ -62,12 +62,17 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Ludo',
       debugShowCheckedModeBanner: false,
-      // 🟢 شفاف کردن کامل پس‌زمینه تم اصلی اپلیکیشن وب
+
       theme: ThemeData(
+        fontFamily: 'Fredoka',
         scaffoldBackgroundColor: Colors.transparent,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
+        ),
+        textTheme: ThemeData.dark().textTheme.apply(
+          fontFamily: 'Fredoka',
+          letterSpacingDelta: 0,
         ),
       ),
       home: const AppBody(),

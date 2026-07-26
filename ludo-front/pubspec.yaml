@@ -61,10 +61,34 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   fonts:
-    - family: Roboto
+    - family: Fredoka
       fonts:
-        - asset: assets/fonts/Roboto-Italic-VariableFont_wdth,wght.ttf
-        - asset: assets/fonts/Roboto-VariableFont_wdth,wght.ttf
+        - asset: assets/fonts/Fredoka-Bold.ttf
+        - asset: assets/fonts/Fredoka-Light.ttf
+        - asset: assets/fonts/Fredoka-Medium.ttf
+        - asset: assets/fonts/Fredoka-Regular.ttf
+        - asset: assets/fonts/Fredoka-SemiBold.ttf
+        - asset: assets/fonts/Fredoka_Condensed-Bold.ttf
+        - asset: assets/fonts/Fredoka_Condensed-Light.ttf
+        - asset: assets/fonts/Fredoka_Condensed-Medium.ttf
+        - asset: assets/fonts/Fredoka_Condensed-Regular.ttf
+        - asset: assets/fonts/Fredoka_Condensed-SemiBold.ttf
+        - asset: assets/fonts/Fredoka_Expanded-Bold.ttf
+        - asset: assets/fonts/Fredoka_Expanded-Light.ttf
+        - asset: assets/fonts/Fredoka_Expanded-Medium.ttf
+        - asset: assets/fonts/Fredoka_Expanded-Regular.ttf
+        - asset: assets/fonts/Fredoka_Expanded-SemiBold.ttf
+        - asset: assets/fonts/Fredoka_SemiCondensed-Bold.ttf
+        - asset: assets/fonts/Fredoka_SemiCondensed-Light.ttf
+        - asset: assets/fonts/Fredoka_SemiCondensed-Medium.ttf
+        - asset: assets/fonts/Fredoka_SemiCondensed-Regular.ttf
+        - asset: assets/fonts/Fredoka_SemiCondensed-SemiBold.ttf
+        - asset: assets/fonts/Fredoka_SemiExpanded-Bold.ttf
+        - asset: assets/fonts/Fredoka_SemiExpanded-Light.ttf
+        - asset: assets/fonts/Fredoka_SemiExpanded-Medium.ttf
+        - asset: assets/fonts/Fredoka_SemiExpanded-Regular.ttf
+        - asset: assets/fonts/Fredoka_SemiExpanded-SemiBold.ttf
+
   assets:
     - assets/lotties/
     - assets/audio/music/join-screen-bg-music.mp3

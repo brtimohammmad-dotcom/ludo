@@ -7,6 +7,7 @@ import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/screens/join-screen/floating_bottom_menu.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/coin_box.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/game_selection_buttons.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen_body/ludo_rush_box.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/user_profile_box.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_handler.dart';
 import 'package:ludo/ui/screens/join-screen/utils.dart';
@@ -67,12 +68,16 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final gameState = ref.watch(gameControllerProvider);
     final currentPlayer = gameState?.livePlayer;
 
-    // 📱 اعمال ۳۵ پیکسل پدینگ فقط در صورتی که سیستم‌عامل گوشی موبایل باشد
-    final double telegramTopPadding = _isMobileDevice ? 50.0 : 0.0;
+    // 📱 فاصله بالای تلگرام فقط برای سیستم‌عامل‌های موبایل
+    final double telegramTopPadding = _isMobileDevice ? 35.0 : 0.0;
+
+    // 📍 فاصله مشترک برای سکه و پروفایل جهت هدایت به زیر عنوان
+    final double boxesTopPadding =
+        MediaQuery.of(context).padding.top + 48 + telegramTopPadding;
 
     ref.listen<bool>(
       globalLoadingProvider.select((s) => s.contains("waiting_for_game")),
-          (previous, next) {
+      (previous, next) {
         if (next == true) {
           _showWaitingDialog(layout.boardSize);
         } else if (previous == true && next == false) {
@@ -102,18 +107,19 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
       body: Stack(
         clipBehavior: Clip.none,
         children: [
-          // پس‌زمینه
+          // ۱. پس‌زمینه
           Positioned.fill(
             child: RepaintBoundary(
               child: CustomPaint(painter: LudoBackgroundPainter()),
             ),
           ),
+
+          // ۲. بدنه محتوا (با کمی فاصله بیشتر از بالا برای عدم تداخل با باکس‌ها)
           SafeArea(
             child: SizedBox.expand(
               child: Column(
                 children: [
-                  // 🎯 فاصله بالا فقط در سیستم‌عامل‌های موبایل
-                  SizedBox(height: telegramTopPadding),
+                  SizedBox(height: telegramTopPadding + 20),
                   SizedBox(height: layout.screenHeight * 0.08),
                   Expanded(
                     child: Column(
@@ -137,15 +143,18 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
               ),
             ),
           ),
-          // 🪙 موقعیت سکه
+
+          LudoRushBox(telegramTopPadding: telegramTopPadding),
+          // 🪙 ۴. موقعیت سکه (پایین‌تر از عنوان - سمت چپ)
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16 + telegramTopPadding,
+            top: boxesTopPadding,
             left: 16,
             child: RepaintBoundary(child: CoinBox(boardSize: layout.boardSize)),
           ),
-          // 👤 موقعیت پروفایل
+
+          // 👤 ۵. موقعیت پروفایل (پایین‌تر از عنوان - سمت راست)
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16 + telegramTopPadding,
+            top: boxesTopPadding,
             right: 16,
             child: RepaintBoundary(
               child: UserProfileBox(
