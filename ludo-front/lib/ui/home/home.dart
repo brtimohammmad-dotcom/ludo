@@ -49,7 +49,7 @@ class _HomeState extends ConsumerState<Home> {
   void _setupControllerCallbacks(GameController controller) {
     controller.onConnect = () {
       if (!mounted) return;
-      ConnectionDialogManager.closeConnectionDialogs(context);
+      ConnectionDialogManager.closeConnectionDialogs();
     };
 
     controller.onReconnectionFailed = () {
