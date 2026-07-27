@@ -82,7 +82,6 @@ class _HomeState extends ConsumerState<Home> {
 
         if (next == ConnectionStatus.reconnecting) {
           ConnectionDialogManager.showReconnecting(context);
-          return;
         }
         if (next == ConnectionStatus.connected) {
           ConnectionDialogManager.closeConnectionDialogs(context);
