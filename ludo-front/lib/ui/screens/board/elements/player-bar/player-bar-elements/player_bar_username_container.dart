@@ -27,23 +27,19 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       return SizedBox(width: fullWidth, height: boardSize * 0.06);
     }
 
-    // ۱. فقط چک می‌کنیم بازیکن هست و آنلاینه یا نه (یک boolean ساده)
     final bool isPlayerActive = ref.watch(
       gameControllerProvider.select((s) {
         final players = s?.serverState?.players;
-        if (players != null && players.length > playerIndex) {
-          return players[playerIndex].playerStatus == PlayerStatus.online;
-        }
-        return false;
+        return (players != null && players.length > playerIndex)
+            ? players[playerIndex].playerStatus == PlayerStatus.online
+            : false;
       }),
     );
 
-    // اگر بازیکن آنلاین نباشه یا وجود نداشته باشه، مستقیم خالی برمی‌گردونیم
     if (!isPlayerActive) {
       return SizedBox(width: boardSize * 0.29, height: boardSize * 0.06);
     }
 
-    // ۲. محاسبه رنگ بازیکن بر اساس تعداد کل بازیکنان
     final totalPlayers = ref.watch(
       gameControllerProvider.select((s) => s?.serverState?.numberOfPlayers ?? 2),
     );
@@ -105,10 +101,9 @@ class _PlayerAvatar extends ConsumerWidget {
     );
 
     final isCurrentTurn = ref.watch(
-      gameControllerProvider.select((s) {
-        return s?.serverState?.currentTurn == playerColor &&
-            s?.serverState?.gameStatus == GameStatus.start;
-      }),
+      gameControllerProvider.select((s) =>
+      s?.serverState?.currentTurn == playerColor &&
+          s?.serverState?.gameStatus == GameStatus.start),
     );
 
     final activeBorderColor = switch (playerColor) {
@@ -146,7 +141,6 @@ class _PlayerCardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // اطلاعات بازیکن برای نمایش متون
     final (username, coin, absences) = ref.watch(
       gameControllerProvider.select((s) {
         final players = s?.serverState?.players;
@@ -158,7 +152,6 @@ class _PlayerCardContent extends ConsumerWidget {
       }),
     );
 
-    // وضعیت نوبت
     final (gameStatus, totalPlayers, isCurrentTurn) = ref.watch(
       gameControllerProvider.select((s) {
         final gStatus = s?.serverState?.gameStatus;
@@ -174,26 +167,12 @@ class _PlayerCardContent extends ConsumerWidget {
       }),
     );
 
-    final animationController = ref.watch(gameControllerProvider.notifier).animationController;
-
     final activeBorderColor = switch (playerColor) {
       PlayerColor.red => Colors.red,
       PlayerColor.green => Colors.green,
       PlayerColor.yellow => Colors.amber,
       PlayerColor.blue => Colors.cyan,
     };
-
-    Color timerBoxColor() {
-      if (gameStatus != GameStatus.start) return Colors.transparent;
-      switch (absences) {
-        case 1:
-          return const Color(0xFFEAB308);
-        case 2:
-          return const Color(0xFFEF4444);
-        default:
-          return const Color(0xFF475569);
-      }
-    }
 
     final borderRadius = BorderRadius.circular(boardSize * 0.1);
 
@@ -208,85 +187,137 @@ class _PlayerCardContent extends ConsumerWidget {
           width: 1.0,
         ),
       ),
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          if (isCurrentTurn && animationController != null)
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: AnimatedBuilder(
-                  animation: animationController,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: timerBoxColor(),
-                      borderRadius: borderRadius,
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Stack(
+          children: [
+            // ⚡ ویجت انیمیشن تایمر مجزا شده جهت جلوگیری از رندر مجدد لایوت متنی
+            if (isCurrentTurn && gameStatus == GameStatus.start)
+              _TimerProgressBar(
+                absences: absences!,
+              ),
+
+            Center(
+              child: Padding(
+                padding: EdgeInsets.all(boardSize * 0.01),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        username,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: playerUserNameBoxColor(
+                            playerIndex: playerIndex,
+                            numberOfPlayers: totalPlayers,
+                            currentTurn: isCurrentTurn ? playerColor : null,
+                          ),
+                          fontSize: barHeight * 0.26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                  builder: (context, cachedChild) {
-                    return SizedBox(
-                      width: fullWidth * (1 - animationController.value),
-                      height: boardSize * 0.06,
-                      child: cachedChild,
-                    );
-                  },
+                    SizedBox(width: boardSize * 0.005),
+                    _CoinBadge(boardSize: boardSize, coin: coin),
+                  ],
                 ),
               ),
             ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(boardSize * 0.01),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      username,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: playerUserNameBoxColor(
-                          playerIndex: playerIndex,
-                          numberOfPlayers: totalPlayers,
-                          currentTurn: isCurrentTurn ? playerColor : null,
-                        ),
-                        fontSize: barHeight * 0.26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: boardSize * 0.005),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: boardSize * 0.01,
-                      vertical: boardSize * 0.005,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0x33000000),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.monetization_on,
-                          color: Colors.amber,
-                          size: boardSize * 0.02,
-                        ),
-                        SizedBox(width: boardSize * 0.005),
-                        Text(
-                          coin.toString(),
-                          style: TextStyle(
-                            color: Colors.amberAccent,
-                            fontSize: boardSize * 0.02,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// ⚡ ویجت اختصاصی نوار تایمر (ایزوله از نظر Performance)
+// -----------------------------------------------------------------------------
+class _TimerProgressBar extends ConsumerWidget {
+  const _TimerProgressBar({
+    required this.absences,
+  });
+
+  final int absences;
+
+  Color _getTimerColor() {
+    switch (absences) {
+      case 1:
+        return const Color(0xFFEAB308);
+      case 2:
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFF475569);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(gameControllerProvider.notifier).animationController;
+
+    if (controller == null) return const SizedBox.shrink();
+
+    final timerColor = _getTimerColor();
+
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (context, _) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: (1.0 - controller.value).clamp(0.0, 1.0),
+              heightFactor: 1.0,
+              child: ColoredBox(color: timerColor), // 💡 ColoredBox سبک‌تر از Container است
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// ⚡ ویجت کوچک نمایش سکه
+// -----------------------------------------------------------------------------
+class _CoinBadge extends StatelessWidget {
+  const _CoinBadge({
+    required this.boardSize,
+    required this.coin,
+  });
+
+  final double boardSize;
+  final int coin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: boardSize * 0.01,
+        vertical: boardSize * 0.005,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0x33000000),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.monetization_on,
+            color: Colors.amber,
+            size: boardSize * 0.02,
+          ),
+          SizedBox(width: boardSize * 0.005),
+          Text(
+            '$coin',
+            style: TextStyle(
+              color: Colors.amberAccent,
+              fontSize: boardSize * 0.02,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

@@ -77,12 +77,15 @@ class _HomeState extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     ref.listen<ConnectionStatus?>(
       gameControllerProvider.select((state) => state?.connectionStatus),
-          (previous, next) {
+      (previous, next) {
         if (next == null || previous == next) return;
 
         if (next == ConnectionStatus.reconnecting) {
-          _safeCallOnGameConnected();
           ConnectionDialogManager.showReconnecting(context);
+          return;
+        }
+        if (next == ConnectionStatus.connected) {
+          ConnectionDialogManager.closeConnectionDialogs(context);
         }
       },
     );
@@ -90,8 +93,10 @@ class _HomeState extends ConsumerState<Home> {
     // 🎵 ۲. مدیریت قطع موزیک منو
     ref.listen<GameStage?>(
       gameControllerProvider.select((state) => state?.gameStage),
-          (previous, next) {
-        if (next != null && next != GameStage.joinStage && next != GameStage.leaderBoard) {
+      (previous, next) {
+        if (next != null &&
+            next != GameStage.joinStage &&
+            next != GameStage.leaderBoard) {
           ref.read(gameControllerProvider.notifier).stopMenuMusic();
         }
       },
@@ -139,7 +144,6 @@ class _HomeState extends ConsumerState<Home> {
   Widget _buildStageScreen(GameStage stage) {
     switch (stage) {
       case GameStage.joinStage:
-
         return const JoinScreen(key: ValueKey('join_stage'));
       case GameStage.leaderBoard:
         return const LeaderboardScreen(key: ValueKey('leaderboard_stage'));
