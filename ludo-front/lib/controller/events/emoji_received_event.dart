@@ -10,7 +10,6 @@ class EmojiReceivedEvent implements GameEvent {
   EmojiReceivedEvent({required this.emoji, required this.playerColor});
 
   factory EmojiReceivedEvent.fromJson(Map<String, dynamic> data) {
-    debugPrint(data.toString());
     final playerColor = PlayerColor.values.byName(data['playerColor']);
     return EmojiReceivedEvent(
         emoji: data['emoji'] as String, playerColor: playerColor);
@@ -18,7 +17,6 @@ class EmojiReceivedEvent implements GameEvent {
 
   @override
   void execute(GameController controller) {
-    debugPrint('emoji show');
     controller.showEmoji(playerColor, emoji);
   }
 }

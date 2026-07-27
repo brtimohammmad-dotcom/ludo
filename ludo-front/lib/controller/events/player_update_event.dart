@@ -11,7 +11,6 @@ class PlayerUpdateEvent implements GameEvent {
 
   // ۱. تبدیل دیتای خام بک‌آند به مدل Player
   factory PlayerUpdateEvent.fromJson(Map<String, dynamic> data) {
-    debugPrint(data.toString());
     return PlayerUpdateEvent(newPlayer: Player.fromJson(data));
   }
 
