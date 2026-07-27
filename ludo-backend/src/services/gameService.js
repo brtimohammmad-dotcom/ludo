@@ -241,9 +241,7 @@ function handleMoveToken(socket, token, io, callback) {
       if (hasNotWon) {
         resetTimer(socket, io);
       } else {
-        console.log(
-          `Game ${socket.data.gameId} finished, winner: ${player.username}`,
-        );
+
         await finishGame(
           socket.data.gameId,
           player,
@@ -359,9 +357,6 @@ async function handleExitingGame(socket, io, callback) {
     if (numberOfOnlines === 1) {
       const winnerPlayer = onlinesList[0];
 
-      console.log(
-        `Game ${gameId} finished, winner: ${winnerPlayer.username || winnerPlayer.telegram_id}`,
-      );
 
       await finishGame(
         currentGame.game_id,
@@ -370,7 +365,6 @@ async function handleExitingGame(socket, io, callback) {
         io,
       );
     } else if (numberOfOnlines === 0) {
-      console.log(`Game ${gameId} finished with no online players. Canceling.`);
 
       await updateGameState(
         gameId,

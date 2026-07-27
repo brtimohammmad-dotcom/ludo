@@ -14,7 +14,6 @@ async function handleRequestGameState(socket, data, io) {
     socket.emit("player_not_authorized");
     return;
   }
-  console.log(`Received gameType: ${gameType}, gameId: ${gameId}`);
 
   const player = {
     telegram_id: socket.data.telegramId,
@@ -47,7 +46,6 @@ async function handleRequestGameState(socket, data, io) {
 
     // اگر بازی قبلاً برنده داشته و تمام شده
     if (dbGame.winner) {
-      console.log("has winner");
       socket.emit("game_finished", dbGame.winner);
       return;
     }
@@ -72,7 +70,6 @@ async function handleRequestGameState(socket, data, io) {
   }
 
   // ۶) 🚀 ریکاوری موفق بازی (Game Recovered)
-  console.log("game recovered");
   socket.join(existingGame.game_id);
   socket.data.gameId = existingGame.game_id;
 

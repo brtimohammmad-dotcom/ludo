@@ -128,9 +128,7 @@ async function handleJoinGame(data, socket, io, callback) {
           const currentRoom = initialState.getGameState(friendlyGameId);
           // اگر اتاق هنوز در رم بود و بازی استارت نخورده بود، آن را حذف کن
           if (currentRoom && currentRoom.game_status === "waitingForPlayer") {
-            console.log(
-              `[Room Expired Cleanup] Friendly room ${friendlyGameId} deleted from RAM.`,
-            );
+
             initialState.deleteGameState(friendlyGameId);
             roomTimers.delete(friendlyGameId);
           }
@@ -203,9 +201,7 @@ async function callFront(socket, io) {
       if (activeTimer) {
         clearTimeout(activeTimer);
         roomTimers.delete(gameId);
-        console.log(
-          `[Room Timer Cleared] Game ${gameId} started successfully.`,
-        );
+
       }
     }
 

@@ -18,8 +18,7 @@ module.exports = (io) => {
       socket.emit("fast_ping_gets");
     });
     socket.on("auth", async ({ initData }) => {
-      console.log("...authorize...");
-      console.log("Received initData:", initData);
+
 
       await handleAuth(initData, socket);
     });
@@ -63,7 +62,6 @@ module.exports = (io) => {
     });
     // رویداد disconnect
     socket.on("disconnect", (reason) => {
-      console.log(`🚨 Socket disconnected: ${socket.id} | Reason: ${reason}`);
     });
   };
 };

@@ -5,7 +5,6 @@ const { updatePlayerAvatar } = require("../database/players");
 const { uploadAvatarToSupabase } = require("../database/storage");
 
 async function handleAuth(initData, socket) {
-  console.log(initData)
   const isLocal = process.env.RENDER !== "true";
 
   try {
@@ -26,9 +25,6 @@ async function handleAuth(initData, socket) {
       user = initData;
     }
 
-    console.log(
-      `User authorized successfully: ${user.first_name} (${user.id})`,
-    );
 
     // ۱. گرفتن یا ساخت بازیکن در دیتابیس
     let player = await getOrCreatePlayer(user.id, user.first_name);
@@ -52,9 +48,7 @@ async function handleAuth(initData, socket) {
         !player.last_avatar_update ||
         new Date(player.last_avatar_update) < oneDayAgo
       ) {
-        console.log(
-          `[Avatar Sync] Fetching fresh avatar from Telegram for ${user.id}...`,
-        );
+
         const telegramFileLink = await getUserAvatarUrl(user.id);
 
         if (telegramFileLink) {
@@ -118,7 +112,6 @@ async function handleAuth(initData, socket) {
     socket.data.canClaimDailyReward = canClaimDailyReward;
 
     // ارسال اطلاعات کامل (شامل لینک عکس جدید) به فلاتر
-    console.log(player)
     socket.emit("initial_player", player);
   } catch (err) {
     console.error("Auth error:", err.message || err);

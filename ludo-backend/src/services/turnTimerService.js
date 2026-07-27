@@ -10,7 +10,6 @@ const time = 10;
 const activeTimers = new Map();
 
 function startTimer(socket, io) {
-  console.log("timer started for game:", socket.data.gameId);
 
   // اگر تایمر قبلی وجود داره، اول پاکش کن
   if (activeTimers.has(socket.data.gameId)) {
@@ -26,9 +25,7 @@ function startTimer(socket, io) {
 
     // ⭐ بررسی کن بازی تموم شده یا نه
     if (game.game_status === "finished") {
-      console.log(
-        `Game ${socket.data.gameId} already finished, stopping timer`,
-      );
+
       const activeTimer = activeTimers.get(socket.data.gameId);
       if (activeTimer && typeof activeTimer.clear === "function") {
         activeTimer.clear();
@@ -55,9 +52,7 @@ function startTimer(socket, io) {
     game = initialState.getGameState(socket.data.gameId);
     // ⭐ اصلاح: تعداد缺席 باید === 2 باشه (چون یک بار缺席 شده، الان دفعۀ دوم)
     if (delayedPlayer && delayedPlayer.numberOfAbsences === 3) {
-      console.log(
-        `Player ${game.current_turn} became offline after 2 absences`,
-      );
+
 
       updatedPlayers = game.players.map((p) => {
         if (p.color === game.current_turn) {
@@ -83,9 +78,7 @@ function startTimer(socket, io) {
         );
 
         if (onlinePlayer) {
-          console.log(
-            `Game ${socket.data.gameId} finished, winner: ${onlinePlayer.username}`,
-          );
+
           const { finishGame } = require("../helpers/game_helpers");
 
           // اتمام بازی
@@ -147,23 +140,14 @@ function startTimer(socket, io) {
     };
     game = initialState.getGameState(socket.data.gameId);
     io.to(socket.data.gameId).emit("times_up", cleanTurnData);
-    console.log(
-      `Turn changed to ${
-        game.number_of_players === 4
-          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
-          : TWO_PLAYER_COLORS[(colorIdx + 1) % game.number_of_players]
-      } for game ${socket.data.gameId}`,
-    );
+
   }, time * 1000);
 
   activeTimers.set(socket.data.gameId, timer);
-  console.log(
-    `Timer set for game ${socket.data.gameId}, active timers: ${activeTimers.size}`,
-  );
+
 }
 
 function resetTimer(socket, io) {
-  console.log(`Resetting timer for game ${socket.data.gameId}`);
 
   const timer = activeTimers.get(socket.data.gameId);
   if (timer) {
@@ -182,7 +166,6 @@ function pauseTimer(gameId) {
   const timer = activeTimers.get(gameId);
   if (timer && typeof timer.pause === "function") {
     timer.pause();
-    console.log(`Timer paused for game ${gameId}`);
   }
 }
 
@@ -190,12 +173,10 @@ function resumeTimer(gameId) {
   const timer = activeTimers.get(gameId);
   if (timer && typeof timer.resume === "function") {
     timer.resume();
-    console.log(`Timer resumed for game ${gameId}`);
   }
 }
 
 function stopTimer(gameId) {
-  console.log(`Stopping timer for game ${gameId}`);
 
   const timer = activeTimers.get(gameId);
   if (timer) {
