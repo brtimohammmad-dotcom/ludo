@@ -68,7 +68,7 @@ class PlayerBar extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   RollButton(boardSize: boardSize),
-                  SizedBox(width: boardSize * 0.02), // کمی فاصله برای چسبیده نبودن دکمه‌ها
+                  SizedBox(width: boardSize * 0.02),
                   MessageIcon(boardSize: boardSize),
                 ],
               ),

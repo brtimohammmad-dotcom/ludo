@@ -5,9 +5,7 @@ import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/player_bar_utils.dart';
-
 import 'package:ludo/ui/utils/avatar.dart';
-
 
 class PlayerBarUsernameContainer extends ConsumerWidget {
   const PlayerBarUsernameContainer({
@@ -29,82 +27,182 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
       return SizedBox(width: fullWidth, height: boardSize * 0.06);
     }
 
-    final gameStatus = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.gameStatus),
-    );
-    if (gameStatus == null) {
-      return SizedBox(width: boardSize * 0.29, height: boardSize * 0.06);
-    }
-
-    final playerData = ref.watch(
+    // ۱. فقط چک می‌کنیم بازیکن هست و آنلاینه یا نه (یک boolean ساده)
+    final bool isPlayerActive = ref.watch(
       gameControllerProvider.select((s) {
         final players = s?.serverState?.players;
         if (players != null && players.length > playerIndex) {
-          final p = players[playerIndex];
-          return (
-          username: p.username,
-          status: p.playerStatus,
-          absences: p.numberOfAbsences,
-          coin: p.coin,
-          avatarUrl: p.avatarUrl,
-          exists: true,
-          );
+          return players[playerIndex].playerStatus == PlayerStatus.online;
         }
-        return (
-        username: '',
-        status: PlayerStatus.online,
-        absences: 0,
-        coin: 0,
-        avatarUrl: null,
-        exists: false,
-        );
+        return false;
       }),
     );
 
+    // اگر بازیکن آنلاین نباشه یا وجود نداشته باشه، مستقیم خالی برمی‌گردونیم
+    if (!isPlayerActive) {
+      return SizedBox(width: boardSize * 0.29, height: boardSize * 0.06);
+    }
+
+    // ۲. محاسبه رنگ بازیکن بر اساس تعداد کل بازیکنان
     final totalPlayers = ref.watch(
       gameControllerProvider.select((s) => s?.serverState?.numberOfPlayers ?? 2),
     );
     final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
-
-    final isMyTurn = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.currentTurn == playerColor),
-    );
-    final turnStatus = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.currentTurn == playerColor ? s?.serverState?.turnStatus : null),
-    );
-
-    final bool isCurrentTurn = isMyTurn && gameStatus == GameStatus.start && turnStatus != TurnStatus.waitingForAnimate;
-    final animationController = ref.watch(gameControllerProvider.notifier).animationController;
-
-    final activeBorderColor = playerColor == PlayerColor.red
-        ? Colors.red
-        : playerColor == PlayerColor.green
-        ? Colors.green
-        : playerColor == PlayerColor.yellow
-        ? Colors.amber
-        : Colors.cyan;
-
-    Color usernameTimerBoxColor() {
-      if (gameStatus != GameStatus.start) return Colors.transparent;
-      switch (playerData.absences) {
-        case 1:
-          return const Color(0xFFEAB308); // زرد مات فلت
-        case 2:
-          return const Color(0xFFEF4444); // قرمز مات فلت
-        default:
-          return const Color(0xFF475569); // خاکستری بهینه
-      }
-    }
-    final borderRadius = BorderRadius.circular(boardSize * 0.1);
-    final avatarSize = boardSize * 0.06;
     final bool isAvatarOnLeft = playerColor == PlayerColor.red || playerColor == PlayerColor.blue;
 
-    final nameAndTimerBox = Container(
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (isAvatarOnLeft) ...[
+          _PlayerAvatar(playerIndex: playerIndex, boardSize: boardSize, playerColor: playerColor),
+          SizedBox(width: boardSize * 0.015),
+          _PlayerCardContent(
+            fullWidth: fullWidth,
+            boardSize: boardSize,
+            barHeight: barHeight,
+            playerIndex: playerIndex,
+            playerColor: playerColor,
+          ),
+        ] else ...[
+          _PlayerCardContent(
+            fullWidth: fullWidth,
+            boardSize: boardSize,
+            barHeight: barHeight,
+            playerIndex: playerIndex,
+            playerColor: playerColor,
+          ),
+          SizedBox(width: boardSize * 0.015),
+          _PlayerAvatar(playerIndex: playerIndex, boardSize: boardSize, playerColor: playerColor),
+        ],
+      ],
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// آواتار بازیکن
+// -----------------------------------------------------------------------------
+class _PlayerAvatar extends ConsumerWidget {
+  const _PlayerAvatar({
+    required this.playerIndex,
+    required this.boardSize,
+    required this.playerColor,
+  });
+
+  final int playerIndex;
+  final double boardSize;
+  final PlayerColor playerColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final avatarUrl = ref.watch(
+      gameControllerProvider.select((s) {
+        final players = s?.serverState?.players;
+        return (players != null && players.length > playerIndex)
+            ? players[playerIndex].avatarUrl
+            : null;
+      }),
+    );
+
+    final isCurrentTurn = ref.watch(
+      gameControllerProvider.select((s) {
+        return s?.serverState?.currentTurn == playerColor &&
+            s?.serverState?.gameStatus == GameStatus.start;
+      }),
+    );
+
+    final activeBorderColor = switch (playerColor) {
+      PlayerColor.red => Colors.red,
+      PlayerColor.green => Colors.green,
+      PlayerColor.yellow => Colors.amber,
+      PlayerColor.blue => Colors.cyan,
+    };
+
+    return UserAvatar(
+      url: avatarUrl,
+      size: boardSize * 0.06,
+      borderColor: isCurrentTurn ? activeBorderColor : Colors.grey,
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// کادر محتوای بازیکن (تایمر + نام + سکه)
+// -----------------------------------------------------------------------------
+class _PlayerCardContent extends ConsumerWidget {
+  const _PlayerCardContent({
+    required this.fullWidth,
+    required this.boardSize,
+    required this.barHeight,
+    required this.playerIndex,
+    required this.playerColor,
+  });
+
+  final double fullWidth;
+  final double boardSize;
+  final double barHeight;
+  final int playerIndex;
+  final PlayerColor playerColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // اطلاعات بازیکن برای نمایش متون
+    final (username, coin, absences) = ref.watch(
+      gameControllerProvider.select((s) {
+        final players = s?.serverState?.players;
+        if (players != null && players.length > playerIndex) {
+          final p = players[playerIndex];
+          return (p.username, p.coin, p.numberOfAbsences);
+        }
+        return ('', 0, 0);
+      }),
+    );
+
+    // وضعیت نوبت
+    final (gameStatus, totalPlayers, isCurrentTurn) = ref.watch(
+      gameControllerProvider.select((s) {
+        final gStatus = s?.serverState?.gameStatus;
+        final totalP = s?.serverState?.numberOfPlayers ?? 2;
+        final myTurn = s?.serverState?.currentTurn == playerColor;
+        final tStatus = myTurn ? s?.serverState?.turnStatus : null;
+
+        final currentTurn = myTurn &&
+            gStatus == GameStatus.start &&
+            tStatus != TurnStatus.waitingForAnimate;
+
+        return (gStatus, totalP, currentTurn);
+      }),
+    );
+
+    final animationController = ref.watch(gameControllerProvider.notifier).animationController;
+
+    final activeBorderColor = switch (playerColor) {
+      PlayerColor.red => Colors.red,
+      PlayerColor.green => Colors.green,
+      PlayerColor.yellow => Colors.amber,
+      PlayerColor.blue => Colors.cyan,
+    };
+
+    Color timerBoxColor() {
+      if (gameStatus != GameStatus.start) return Colors.transparent;
+      switch (absences) {
+        case 1:
+          return const Color(0xFFEAB308);
+        case 2:
+          return const Color(0xFFEF4444);
+        default:
+          return const Color(0xFF475569);
+      }
+    }
+
+    final borderRadius = BorderRadius.circular(boardSize * 0.1);
+
+    return Container(
       width: fullWidth,
       height: boardSize * 0.06,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        color: isCurrentTurn ? const Color(0xFF334155) : const Color(0xFF1E293B), // رنگ فلت مات به جای شیشه‌ای مشکی سنگین
+        color: isCurrentTurn ? const Color(0xFF334155) : const Color(0xFF1E293B),
         border: Border.all(
           color: isCurrentTurn ? activeBorderColor : const Color(0xFF475569),
           width: 1.0,
@@ -116,190 +214,79 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
           if (isCurrentTurn && animationController != null)
             Positioned.fill(
               child: RepaintBoundary(
-                child: _SolidTimerProgressLine(
-                  fullWidth: fullWidth,
-                  boardSize: boardSize,
-                  barColor: usernameTimerBoxColor(),
-                  borderRadius: borderRadius,
-                  controller: animationController,
+                child: AnimatedBuilder(
+                  animation: animationController,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: timerBoxColor(),
+                      borderRadius: borderRadius,
+                    ),
+                  ),
+                  builder: (context, cachedChild) {
+                    return SizedBox(
+                      width: fullWidth * (1 - animationController.value),
+                      height: boardSize * 0.06,
+                      child: cachedChild,
+                    );
+                  },
                 ),
               ),
             ),
           Center(
-            child: _PlayerInfoRow(
-              playerData: playerData,
-              barHeight: barHeight,
-              boardSize: boardSize,
-              totalPlayers: totalPlayers,
-              isCurrentTurn: isCurrentTurn,
-              playerColor: playerColor,
-              playerIndex: playerIndex,
-              isMyTurn: isMyTurn,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    final avatarWidget = (playerData.exists && playerData.status == PlayerStatus.online)
-        ? UserAvatar(
-      url: playerData.avatarUrl,
-      size: avatarSize,
-      borderColor: isCurrentTurn ? activeBorderColor : Colors.grey,
-    )
-        : const SizedBox.shrink();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (isAvatarOnLeft) ...[
-          avatarWidget,
-          if (playerData.exists && playerData.status == PlayerStatus.online)
-            SizedBox(width: boardSize * 0.015),
-          nameAndTimerBox,
-        ] else ...[
-          nameAndTimerBox,
-          if (playerData.exists && playerData.status == PlayerStatus.online)
-            SizedBox(width: boardSize * 0.015),
-          avatarWidget,
-        ],
-      ],
-    );
-  }
-}
-// کلاس‌های _SolidTimerProgressLine و _PlayerInfoRow بدون تغییر باقی می‌مانند...
-class _SolidTimerProgressLine extends StatelessWidget {
-  const _SolidTimerProgressLine({
-    required this.fullWidth,
-    required this.boardSize,
-    required this.barColor,
-    required this.borderRadius,
-    required this.controller,
-  });
-
-  final double fullWidth;
-  final double boardSize;
-  final Color barColor;
-  final BorderRadius borderRadius;
-  final AnimationController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: AnimatedBuilder(
-        animation: controller,
-        // با پاس دادن یک دکوریشن باکس فیکس به پارامتر child، فلاتر آبجکت گرافیکی را فریم به فریم مجدد نمی‌سازد
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: barColor,
-            borderRadius: borderRadius,
-          ),
-        ),
-        builder: (context, cachedChild) {
-          return SizedBox(
-            width: fullWidth * (1 - controller.value),
-            height: boardSize * 0.06,
-            child: cachedChild,
-          );
-        },
-      ),
-    );
-  }
-}
-class _PlayerInfoRow extends StatelessWidget {
-  const _PlayerInfoRow({
-    required this.playerData,
-    required this.barHeight,
-    required this.boardSize,
-    required this.totalPlayers,
-    required this.isCurrentTurn,
-    required this.playerColor,
-    required this.playerIndex,
-    required this.isMyTurn,
-  });
-
-  final dynamic playerData;
-  final double barHeight;
-  final double boardSize;
-  final int totalPlayers;
-  final bool isCurrentTurn;
-  final PlayerColor playerColor;
-  final int playerIndex;
-  final bool isMyTurn;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!playerData.exists) {
-      return Text(
-        "waiting...",
-        style: TextStyle(
-          color: const Color(0x4DFFFFFF),
-          fontSize: barHeight * 0.2,
-        ),
-      );
-    }
-
-    if (playerData.status != PlayerStatus.online) {
-      return Text(
-        "out",
-        style: TextStyle(
-          color: const Color(0x4DFFFFFF),
-          fontSize: barHeight * 0.36,
-        ),
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.all(boardSize * 0.01),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              playerData.username,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: playerUserNameBoxColor(
-                  playerIndex: playerIndex,
-                  numberOfPlayers: totalPlayers,
-                  currentTurn: isCurrentTurn ? playerColor : null,
-                ),
-                fontSize: barHeight * 0.26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          SizedBox(width: boardSize * 0.005),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: boardSize * 0.01,
-              vertical: boardSize * 0.005,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0x33000000),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.monetization_on,
-                  color: Colors.amber,
-                  size: boardSize * 0.02,
-                ),
-                SizedBox(width: boardSize * 0.005),
-                Text(
-                  playerData.coin.toString(),
-                  style: TextStyle(
-                    color: Colors.amberAccent,
-                    fontSize: boardSize * 0.02,
-                    fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: EdgeInsets.all(boardSize * 0.01),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      username,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: playerUserNameBoxColor(
+                          playerIndex: playerIndex,
+                          numberOfPlayers: totalPlayers,
+                          currentTurn: isCurrentTurn ? playerColor : null,
+                        ),
+                        fontSize: barHeight * 0.26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(width: boardSize * 0.005),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: boardSize * 0.01,
+                      vertical: boardSize * 0.005,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0x33000000),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.monetization_on,
+                          color: Colors.amber,
+                          size: boardSize * 0.02,
+                        ),
+                        SizedBox(width: boardSize * 0.005),
+                        Text(
+                          coin.toString(),
+                          style: TextStyle(
+                            color: Colors.amberAccent,
+                            fontSize: boardSize * 0.02,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

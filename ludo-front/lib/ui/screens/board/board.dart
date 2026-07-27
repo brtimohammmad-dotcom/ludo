@@ -47,6 +47,7 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
     debugPrint("🧹 Board dispose called");
     _gameController.animationController?.dispose();
     _gameController.animationController = null;
+
     super.dispose();
   }
 
@@ -103,10 +104,10 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B), // حذف شفافیت شیشه‌ای و جایگزینی با رنگ مات سالید
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF334155), // مرز فلت و ثابت
+                    color: const Color(0xFF334155),
                     width: 1.0,
                   ),
                 ),

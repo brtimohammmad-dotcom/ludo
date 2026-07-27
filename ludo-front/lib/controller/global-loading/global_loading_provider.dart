@@ -14,8 +14,7 @@ class GlobalLoading extends _$GlobalLoading {
 
   /// خاموش کردن یک لودینگ خاص
   void stop(String key) {
-    state = state.where((k) => k != key).toSet();
-  }
+    state = {for (final k in state) if (k != key) k};  }
 
   /// 🛑 خاموش کردن همه لودینگ‌ها یک‌جا (موقع قطعی اینترنت یا دیسکانکت سوکت)
   void clearAll() {

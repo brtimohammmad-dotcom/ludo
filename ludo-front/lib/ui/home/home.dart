@@ -1,18 +1,13 @@
 import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
-import 'package:ludo/services/audio_service.dart';
+import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/services/asset_loader_service.dart';
+import 'package:ludo/ui/home/connection_dialog_manager.dart';
 import 'package:ludo/ui/screens/board/board.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 import 'package:ludo/ui/screens/leader_board_screen.dart';
-import 'package:ludo/ui/utils/alerts/reconnecting_alert.dart';
-import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
-import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
-
-
-import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/domain/model/state/game_state.dart';
 
 @JS('onGameConnected')
 external void onGameConnected();
@@ -25,229 +20,109 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
-  bool _isLocalAssetsCached = false;
-  bool _hasConnectionError = false;
-
-  bool _isAlertOpen = false;
+  bool _isAssetsLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _initGameAndAssets();
+    _initGameAndCallbacks();
   }
 
-  Future<void> _initGameAndAssets() async {
-    final gameController = ref.read(gameControllerProvider.notifier);
+  Future<void> _initGameAndCallbacks() async {
+    final controller = ref.read(gameControllerProvider.notifier);
 
-    _establishConnection(gameController);
-    _setupControllerCallbacks(gameController);
+    // ۱. تنظیم کالبک‌ها قبل از شروع اتصال (برای زمانی که هنوز توی صفحه HTML هستیم)
+    _setupControllerCallbacks(controller);
 
-    final audio = ref.read(audioServiceProvider);
-    await audio.initAudioCache([
-      'assets/audio/sound-effect/current_turn_sound.wav',
-      'assets/audio/sound-effect/dice_rolling.wav',
-      'assets/audio/sound-effect/exit_button_sound.wav',
-      'assets/audio/sound-effect/friend_button_sound.wav',
-      'assets/audio/sound-effect/kick_token.wav',
-      'assets/audio/sound-effect/move_token.wav',
-      'assets/audio/sound-effect/target_token.wav',
-      'assets/audio/sound-effect/winner_sound.wav',
-    ]);
+    // ۲. شروع اتصال
+    controller.connect();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    // ۳. لود Assetها
+    await ref.read(assetLoaderServiceProvider).preloadAll();
+
+    if (mounted) {
+      setState(() => _isAssetsLoaded = true);
+    }
+  }
+
+  /// 🟢 تنظیم کالبک‌های کنترلر برای زمان قطعی در صفحه HTML
+  void _setupControllerCallbacks(GameController controller) {
+    controller.onConnect = () {
       if (!mounted) return;
-      try {
-        final assetLottie = AssetLottie("assets/lotties/happy-dice.lottie");
-        await assetLottie.load();
-      } catch (e) {
-        debugPrint("🖼️ Error caching image: $e");
-      }
-
-      if (mounted) {
-        setState(() {
-          _isLocalAssetsCached = true;
-        });
-      }
-    });
-  }
-
-  void _setupControllerCallbacks(GameController gameController) {
-    gameController.onConnect = () {
-      if (Navigator.canPop(context)) {
-        Navigator.of(context).pop();
-      }
-      setState(() {
-        _hasConnectionError = false;
-      });
+      ConnectionDialogManager.closeConnectionDialogs(context);
     };
-    gameController.onReconnectionFailed = () {
+
+    controller.onReconnectionFailed = () {
       if (!mounted) return;
 
-      setState(() {
-        _hasConnectionError = true;
-      });
+      // 💥 لودر HTML رد میشه تا دیالوگ فلاتر بالا بیاد
+      _safeCallOnGameConnected();
 
-      try {
-        _safeCallOnGameConnected();
-      } catch (e) {
-        debugPrint("HTML Loader finish event error: $e");
-      }
-      if (Navigator.canPop(context)) {
-        Navigator.of(context).pop();
-      }
-      showAnimatedDialog(
-        context: context,
-        child: ReconnectingFailedAlert(
-          onReconnectPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop();
-            }
-            showAnimatedDialog(
-              context: context,
-              child: ReconnectingAlert(),
-              barrierDismissible: false,
-            );
-
-            gameController.updateState(
-              gameController.currentGameState?.copyWith(
-                connectionStatus: ConnectionStatus.reconnecting,
-              ),
-            );
-            gameController.resumeReconnection();
-          },
-        ),
-      );
+      // نمایش دیالوگ شکست اتصال
+      ConnectionDialogManager.showReconnectingFailed(context, ref);
     };
   }
 
-  void _establishConnection(GameController gameController) {
-    if (!mounted) return;
-
-    gameController.connect();
-  }
-
-  // 🟢 متد کمکی برای فراخوانی امن جاوااسکریپت تلگرام
-  void _safeCallOnGameConnected() {
+  /// 🟢 فراخوانی امن جاوااسکریپت برای رد کردن لودر HTML تلگرام
+  static void _safeCallOnGameConnected() {
     try {
       onGameConnected();
+      debugPrint("📢 Telegram HTML loader dismissed via onGameConnected()");
     } catch (e) {
-      debugPrint("HTML Loader finish event error: $e");
+      debugPrint("⚠️ HTML Loader finish event error: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final gameController = ref.read(gameControllerProvider.notifier);
+    ref.listen<ConnectionStatus?>(
+      gameControllerProvider.select((state) => state?.connectionStatus),
+          (previous, next) {
+        if (next == null || previous == next) return;
+
+        if (next == ConnectionStatus.reconnecting) {
+          _safeCallOnGameConnected();
+          ConnectionDialogManager.showReconnecting(context);
+        }
+      },
+    );
+
+    // 🎵 ۲. مدیریت قطع موزیک منو
+    ref.listen<GameStage?>(
+      gameControllerProvider.select((state) => state?.gameStage),
+          (previous, next) {
+        if (next != null && next != GameStage.joinStage && next != GameStage.leaderBoard) {
+          ref.read(gameControllerProvider.notifier).stopMenuMusic();
+        }
+      },
+    );
+
     final currentStage = ref.watch(
       gameControllerProvider.select((state) => state?.gameStage),
     );
 
-    if (_hasConnectionError) {
-      return const Scaffold(
-        backgroundColor: Color(0x0007070b),
-        body: SizedBox.expand(),
-      );
-    }
-
-    // لیسنر هوشمند وضعیت کانکشن بر اساس Stage بازی
-    ref.listen<
-      ConnectionStatus
-    >(gameControllerProvider.select((state) => state!.connectionStatus), (
-      previous,
-      next,
-    ) {
-      debugPrint(
-        "🔄 [Connection Event] Connection Status Changed: From $previous To $next",
-      );
-
-      // ۱. ورود به وضعیت تلاش برای اتصال مجدد (Reconnecting)
-      if (next == ConnectionStatus.reconnecting) {
-        if (!mounted) return;
-
-        if (_isAlertOpen && Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-          _isAlertOpen = false;
-        }
-        _isAlertOpen = true;
-
-        showAnimatedDialog(
-          context: context,
-          barrierDismissible: false,
-          child: const ReconnectingAlert(),
-        );
-      }
-      // ۲. شکست قطعی تمام تلاش‌ها و رفتن به وضعیت Disconnected
-      else if (next == ConnectionStatus.disconnected) {
-        if (_isAlertOpen && Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-          _isAlertOpen = false;
-        }
-        _isAlertOpen = true;
-
-        showAnimatedDialog(
-          context: context,
-          barrierDismissible: false,
-          child: ReconnectingFailedAlert(
-            onReconnectPressed: () async {
-              if (_isAlertOpen && Navigator.canPop(context)) {
-                Navigator.of(context).pop();
-                _isAlertOpen = false;
-                gameController.updateState(
-                  gameController.currentGameState?.copyWith(
-                    connectionStatus: ConnectionStatus.reconnecting,
-                  ),
-                );
-              }
-              gameController.resumeReconnection();
-            },
-          ),
-        );
-      }
-      // ۳. اتصال با موفقیت برقرار یا بازیابی شد
-      else if (next == ConnectionStatus.connected) {
-        if (_isAlertOpen && Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-          _isAlertOpen = false;
-        }
-      }
-    });
-
+    // ۳. تا زمان آماده‌سازی کامل، صفحه شفاف می‌مونه
     if (currentStage == null ||
         currentStage == GameStage.connectionStage ||
-        !_isLocalAssetsCached) {
+        !_isAssetsLoaded) {
       return const Scaffold(
         backgroundColor: Colors.transparent,
         body: SizedBox.shrink(),
       );
     }
 
+    // ۴. رد کردن لودر HTML پس از ورود موفق به اولین Stage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _safeCallOnGameConnected();
     });
 
-    // 🚀 مدیریت هوشمند صفحات با استفاده از ValueKey برای شناسایی توسط AnimatedSwitcher
-    Widget currentWidget;
-
-    if (currentStage == GameStage.joinStage) {
-      currentWidget = const JoinScreen(key: ValueKey('join_stage'));
-    } else if (currentStage == GameStage.leaderBoard) {
-      currentWidget = const LeaderboardScreen(
-        key: ValueKey('leaderboard_stage'),
-      );
-    } else {
-      ref.read(gameControllerProvider.notifier).stopMenuMusic();
-
-      currentWidget = const Board(key: ValueKey('board_stage'));
-    }
-
-    // 🚀 رندر خروجی صفحات داخل لایه انیمیشن ترکیبی Fade & Scale
     return Scaffold(
       backgroundColor: const Color(0xFF536E7A),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         switchInCurve: Curves.easeInOut,
         switchOutCurve: Curves.easeInOut,
-        transitionBuilder: (Widget child, Animation<double> animation) {
+        transitionBuilder: (child, animation) {
           return FadeTransition(
             opacity: animation,
             child: ScaleTransition(
@@ -256,8 +131,20 @@ class _HomeState extends ConsumerState<Home> {
             ),
           );
         },
-        child: currentWidget,
+        child: _buildStageScreen(currentStage),
       ),
     );
+  }
+
+  Widget _buildStageScreen(GameStage stage) {
+    switch (stage) {
+      case GameStage.joinStage:
+
+        return const JoinScreen(key: ValueKey('join_stage'));
+      case GameStage.leaderBoard:
+        return const LeaderboardScreen(key: ValueKey('leaderboard_stage'));
+      default:
+        return const Board(key: ValueKey('board_stage'));
+    }
   }
 }
