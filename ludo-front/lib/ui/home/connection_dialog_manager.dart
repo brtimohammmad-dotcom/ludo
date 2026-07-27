@@ -26,7 +26,8 @@ class ConnectionDialogManager {
   /// 🟢 بستن هر نوع دیالوگ مربوط به شبکه (Reconnecting یا Failed)
   static void closeConnectionDialogs(BuildContext context) {
     final currentRouteName = ModalRoute.of(context)?.settings.name;
-
+    debugPrint('currentRouteName: ');
+    debugPrint(currentRouteName);
     if (currentRouteName == _reconnectingFailedRouteName ||
         currentRouteName == _reconnectingRouteName) {
       if (Navigator.canPop(context)) {
