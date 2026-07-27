@@ -77405,7 +77405,7 @@ r.bK("daily_reward_claimed",new A.aeg(s))
 r.bK("already_claimed_daily_reward",new A.aeh())}}
 A.ae6.prototype={
 $1(a){var s,r,q,p,o=null,n="last_name",m="chat_instance"
-if(A.n4().giE()==="localhost")s=A.a7(["first_name","Kiana","id",5],t.N,t.K)
+if(A.n4().giE()==="localhost")s=A.a7(["first_name","Kiana","id",8],t.N,t.K)
 else{if($.ej==null)$.ej=new A.io()
 r=v.G
 if(r.Telegram.WebApp.platform.toLowerCase()!=="unknown"){r.Telegram.WebApp.ready()
@@ -77793,8 +77793,8 @@ $1(a){return a==null?null:a.a},
 $S:485}
 A.akL.prototype={
 $2(a,b){if(b==null||a===b)return
-if(b===B.j2){A.avP(this.a)
-return}if(b===B.mR)A.YB(this.a)},
+if(b===B.j2)A.avP(this.a)
+if(b===B.mR)A.YB(this.a)},
 $S:486}
 A.akM.prototype={
 $1(a){return a==null?null:a.d},
