@@ -44,6 +44,11 @@ const Map<String, String> enUS = {
   'Back to Home': 'Back to Home',
   'Wins': 'Wins',
   'Losses': 'Losses',
+  'Settings':'Settings',
+  'Language':'Language',
+  'Sound Effects':'Sound Effects',
+  'On':'On',
+  'Off':'Off',
 
   //----------------------------------------------------
   // UNUSED

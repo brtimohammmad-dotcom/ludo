@@ -6,6 +6,7 @@ import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/floating_bottom_menu.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/coin_box.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/game_selection_buttons.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen_body/setting_icon.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/user_profile_box.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_handler.dart';
 import 'package:ludo/ui/screens/join-screen/utils.dart';
@@ -31,7 +32,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     _handler = JoinScreenHandler(
       context: context,
       gameController: ref.read(gameControllerProvider.notifier),
-      audioService: ref.read(audioServiceProvider),
+      audioService: ref.read(audioServiceProvider.notifier),
       isMounted: () => mounted,
     );
 
@@ -56,7 +57,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
     ref.listen<bool>(
       globalLoadingProvider.select((s) => s.contains("waiting_for_game")),
-          (previous, next) {
+      (previous, next) {
         if (next == true) {
           _showWaitingDialog(layout.boardSize);
         } else if (previous == true && next == false) {
@@ -143,9 +144,15 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
                         // پروفایل
                         RepaintBoundary(
-                          child: UserProfileBox(
-                            player: currentPlayer,
-                            boardSize: layout.boardSize,
+                          child: Row(
+                            children: [
+                              SettingIcon(),
+                              const SizedBox(width: 6),
+                              UserProfileBox(
+                                player: currentPlayer,
+                                boardSize: layout.boardSize,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -176,8 +183,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                 textDirection: TextDirection.ltr,
                 child: FloatingBottomMenu(
                   boardSize: layout.boardSize,
-                  onFriendsTap: () =>
-                      showFriendsPlayDialog(context, layout.boardSize, _handler),
+                  onFriendsTap: () => showFriendsPlayDialog(
+                    context,
+                    layout.boardSize,
+                    _handler,
+                  ),
                   onLeaderboardTap: () {
                     ref
                         .read(gameControllerProvider.notifier)
@@ -196,3 +206,4 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     );
   }
 }
+

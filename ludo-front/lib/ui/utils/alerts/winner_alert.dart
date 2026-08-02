@@ -47,12 +47,12 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
     // پخش افکت صوتی داینامیک بر اساس برد یا باخت
     if (_isMeWinner) {
       ref
-          .read(audioServiceProvider)
+          .read(audioServiceProvider.notifier)
           .playSFX("assets/audio/sound-effect/winner_sound.wav");
       _confetti.play();
     } else {
       ref
-          .read(audioServiceProvider)
+          .read(audioServiceProvider.notifier)
           .playSFX("assets/audio/sound-effect/game_over_sound.wav");
     }
 

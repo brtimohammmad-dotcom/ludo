@@ -5,13 +5,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'audio_service.g.dart';
 
 // -----------------------------------------------------------------------------
-// لایه ارتباط مستقیم و بدون واسطه با جاوااسکریپت (Howler.js) برای سرعت فضایی
+// لایه ارتباط مستقیم و بدون واسطه با جاوااسکریپت (Howler.js)
 // -----------------------------------------------------------------------------
 @JS('Howl')
 extension type Howl._(JSObject _) implements JSObject {
   external Howl(HowlOptions options);
+
   external void play();
+
   external void stop();
+
   external void volume(double vol);
 }
 
@@ -27,83 +30,98 @@ extension type HowlOptions._(JSObject _) implements JSObject {
 }
 // -----------------------------------------------------------------------------
 
-class AudioService {
+@Riverpod(keepAlive: true)
+class AudioService extends _$AudioService {
   final Map<String, Howl> _cachedHowls = {};
   Howl? _bgmHowl;
-
-  bool _isMuted = false;
   String? _lastBgmPath;
 
-  AudioService();
+  // ولوم‌های استاندارد (بازه 0.0 تا 1.0)
+  static const double _defaultSfxVolume = 0.3;
+  static const double _defaultBgmVolume = 0.13;
 
-  /// تابع کمکی برای تصحیح مسیر آستس‌ها متناسب با خروجی وب فلاتر در تلگرام
+  @override
+  bool build() {
+    return false;
+  }
+
+  /// گتر برای دسترسی مستقیم در صورت نیاز
+  bool get isMuted => state;
+
+  /// تابع کمکی برای تصحیح مسیر آستس‌ها متناسب با خروجی وب فلاتر
   String _fixAssetPath(String path) {
-    // حذف اسلش ابتدایی در صورت وجود
     String cleanPath = path.startsWith('/') ? path.substring(1) : path;
-
-    // اگر مسیر از قبل شامل دبل آستس نبود، آن را اصلاح کن
     if (!cleanPath.startsWith('assets/assets/')) {
       cleanPath = cleanPath.replaceFirst('assets/', 'assets/assets/');
     }
     return cleanPath;
   }
 
-  /// ⚡ لود صوتی مستقیم در رم مرورگر با اصلاح خودکار مسیرهای 404 وب
-  Future<void> initAudioCache(List<String> sfxAssets, {String? bgmAsset}) async {
+  /// ⚡ لود صوتی مستقیم در رم مرورگر
+  Future<void> initAudioCache(
+      List<String> sfxAssets, {
+        String? bgmAsset,
+      }) async {
     try {
-      // کش کردن صداهای تک‌ضرب (SFX) با اولویت پرفورمنس بالا
       for (final asset in sfxAssets) {
         if (_cachedHowls.containsKey(asset)) continue;
 
         final webPath = _fixAssetPath(asset);
-        final howl = Howl(HowlOptions(
-          src: [webPath.toJS].toJS,
-          loop: false,
-          volume: 0.3,
-          preload: true,
-        ));
+        final howl = Howl(
+          HowlOptions(
+            src: [webPath.toJS].toJS,
+            loop: false,
+            volume: state ? 0.0 : _defaultSfxVolume,
+            preload: true,
+          ),
+        );
         _cachedHowls[asset] = howl;
       }
 
-      // آماده‌سازی موزیک پس‌زمینه
       if (bgmAsset != null && _bgmHowl == null) {
         final webBgmPath = _fixAssetPath(bgmAsset);
-        _bgmHowl = Howl(HowlOptions(
-          src: [webBgmPath.toJS].toJS,
-          loop: true,
-          volume: 0.12,
-          preload: true,
-        ));
+        _bgmHowl = Howl(
+          HowlOptions(
+            src: [webBgmPath.toJS].toJS,
+            loop: true,
+            volume: state ? 0.0 : _defaultBgmVolume,
+            preload: true,
+          ),
+        );
         _cachedHowls[bgmAsset] = _bgmHowl!;
       }
 
-      debugPrint("🚀 Blazing Fast Web Audio (Howler) initialized with fixed paths!");
+      debugPrint(
+        "🚀 Blazing Fast Web Audio (Howler) initialized with fixed paths!",
+      );
     } catch (e) {
       debugPrint("❌ Web Audio Init Error: $e");
     }
   }
 
-  /// 🔥 شلیک آنی صدا بدون کوچک‌ترین تاخیر (مشابه سیستم صوتی Flame)
+  /// 🔥 شلیک آنی صدا
   void playSFX(String assetPath) {
-    if (_isMuted) return;
+    if (state) return; // اگر میوت است پخش نکن
 
     final howl = _cachedHowls[assetPath];
     if (howl != null) {
+      howl.volume(_defaultSfxVolume);
       howl.play();
     } else {
-      // لود آنی با مسیر اصلاح‌شده در صورت فراموشی کش اولیه
       final webPath = _fixAssetPath(assetPath);
-      final newHowl = Howl(HowlOptions(
-        src: [webPath.toJS].toJS,
-        loop: false,
-        volume: 0.3,
-      ));
+      final newHowl = Howl(
+        HowlOptions(
+          src: [webPath.toJS].toJS,
+          loop: false,
+          volume: _defaultSfxVolume,
+        ),
+      );
       _cachedHowls[assetPath] = newHowl;
       newHowl.play();
     }
   }
 
-  /// پخش و لوپ موزیک پس‌زمینه بدون ایجاد گلوگاه پردازشی
+  /// پخش و لوپ موزیک پس‌زمینه
   Future<void> playBackgroundMusic(String assetPath) async {
     if (_lastBgmPath == assetPath) return;
     _lastBgmPath = assetPath;
@@ -116,15 +134,17 @@ class AudioService {
         _bgmHowl = howl;
       } else {
         final webPath = _fixAssetPath(assetPath);
-        _bgmHowl = Howl(HowlOptions(
-          src: [webPath.toJS].toJS,
-          loop: true,
-          volume: _isMuted ? 0.0 : 0.13,
-        ));
+        _bgmHowl = Howl(
+          HowlOptions(
+            src: [webPath.toJS].toJS,
+            loop: true,
+            volume: state ? 0.0 : _defaultBgmVolume,
+          ),
+        );
         _cachedHowls[assetPath] = _bgmHowl!;
       }
 
-      _bgmHowl!.volume(_isMuted ? 0.0 : 0.13);
+      _bgmHowl!.volume(state ? 0.0 : _defaultBgmVolume);
       _bgmHowl!.play();
     } catch (e) {
       debugPrint("🎵 Web Audio BGM Error: $e");
@@ -139,21 +159,20 @@ class AudioService {
 
   /// میوت و آن‌میوت آنی و سراسری در سطح مرورگر
   void toggleMute() {
-    _isMuted = !_isMuted;
+    // تغییر وضعیت State در Riverpod
+    state = !state;
+
+    final double bgmVol = state ? 0.0 : _defaultBgmVolume;
+    final double sfxVol = state ? 0.0 : _defaultSfxVolume;
 
     // تغییر ولوم موزیک پس‌زمینه
-    _bgmHowl?.volume(_isMuted ? 0.0 : 0.2);
+    _bgmHowl?.volume(bgmVol);
 
-    // تغییر ولوم تمام افکت‌های صوتی موجود در کش
+    // تغییر درست ولوم تمام افکت‌های صوتی موجود در کش به ولوم استاندارد 0.3
     _cachedHowls.forEach((_, howl) {
       if (howl != _bgmHowl) {
-        howl.volume(_isMuted ? 0.0 : 1.0);
+        howl.volume(sfxVol);
       }
     });
   }
-}
-
-@Riverpod(keepAlive: true)
-AudioService audioService(Ref ref) {
-  return AudioService();
 }

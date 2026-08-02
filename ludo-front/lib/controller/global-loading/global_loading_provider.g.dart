@@ -41,7 +41,7 @@ final class GlobalLoadingProvider
   }
 }
 
-String _$globalLoadingHash() => r'd4f0cbdaf347fcf630d727efda573e1b6dd32344';
+String _$globalLoadingHash() => r'0239f4954c5ad4754eb8df60f6033ae7d8330f4c';
 
 abstract class _$GlobalLoading extends $Notifier<Set<String>> {
   Set<String> build();

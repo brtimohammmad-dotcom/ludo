@@ -33,7 +33,7 @@ class TargetCounterWidget extends ConsumerWidget {
     );
     if (targetCount > 0) {
       ref
-          .read(audioServiceProvider)
+          .read(audioServiceProvider.notifier)
           .playSFX("assets/audio/sound-effect/target_token.wav");
     }
     // انیمیشن بر اساس تعداد مهره‌ها (اگر صفر باشد غایب است)

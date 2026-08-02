@@ -13,7 +13,7 @@ class ExitIcon extends ConsumerWidget {
     final buttonSize = boardSize * 0.055;
     return GestureDetector(
       onTap: () {
-        ref.read(audioServiceProvider).playSFX('assets/audio/sound-effect/exit_button_sound.wav');
+        ref.read(audioServiceProvider.notifier).playSFX('assets/audio/sound-effect/exit_button_sound.wav');
         showAnimatedDialog(context: context, child: ExitButtonAlert());
       },
       child: Container(

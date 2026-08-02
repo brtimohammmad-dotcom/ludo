@@ -35,9 +35,7 @@ class UserAvatar extends StatelessWidget {
             ? CachedNetworkImage(
           imageUrl: url!,
           fit: BoxFit.cover,
-          // بهینه‌سازی سایز تصویر در رم بر اساس ابعاد ویجت
-          memCacheWidth: (size * 2).toInt(),
-          memCacheHeight: (size * 2).toInt(),
+
           // لودینگ در حال دریافت تصویر
           placeholder: (context, url) => Center(
             child: SizedBox(

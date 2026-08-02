@@ -18,7 +18,7 @@ class AssetLoaderService {
   }
 
   Future<void> _preloadAudio() async {
-    final audio = _ref.read(audioServiceProvider);
+    final audio = _ref.read(audioServiceProvider.notifier);
     await audio.initAudioCache([
       'assets/audio/sound-effect/current_turn_sound.wav',
       'assets/audio/sound-effect/dice_rolling.wav',

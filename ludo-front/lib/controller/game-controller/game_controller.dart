@@ -223,16 +223,16 @@ class GameController extends _$GameController {
   // -------------------------------------------------
   void playMenuMusic() {
     ref
-        .read(audioServiceProvider)
+        .read(audioServiceProvider.notifier)
         .playBackgroundMusic('assets/audio/music/join-screen-bg-music.mp3');
   }
 
   void stopMenuMusic() {
-    ref.read(audioServiceProvider).stopBackgroundMusic();
+    ref.read(audioServiceProvider.notifier).stopBackgroundMusic();
   }
 
   void playSfx(String assetName) {
-    ref.read(audioServiceProvider).playSFX(assetName);
+    ref.read(audioServiceProvider.notifier).playSFX(assetName);
   }
 
   // -------------------------------------------------
