@@ -12,6 +12,8 @@ class Player {
   final int rewardStreak;
   final bool canClaimDailyReward;
   String? avatarUrl;
+  final int wins;
+  final int losses;
 
   Player({
     required this.coin,
@@ -20,6 +22,8 @@ class Player {
     required this.username,
     required this.color,
     required this.playerStatus,
+    required this.wins,
+    required this.losses,
     this.rewardStreak = 1,
     this.canClaimDailyReward = false,
     this.avatarUrl,
@@ -27,6 +31,8 @@ class Player {
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
+      wins: json['wins'],
+      losses: json['losses'],
       avatarUrl: json['avatar_url'],
       coin: json['coin'] ?? 0,
       numberOfAbsences: json['numberOfAbsences'],
@@ -50,7 +56,7 @@ class Player {
     'coin': coin,
     'reward_streak': rewardStreak,
     'can_claim_daily_reward': canClaimDailyReward,
-    'avatar_url':avatarUrl
+    'avatar_url': avatarUrl,
   };
 
   Player copyWith({
@@ -62,9 +68,13 @@ class Player {
     int? numberOfAbsences,
     int? rewardStreak,
     bool? canClaimDailyReward,
-    String? avatarUrl
+    String? avatarUrl,
+    int? wins,
+    int? losses,
   }) {
     return Player(
+      wins: wins ?? this.wins,
+      losses: losses ?? this.losses,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       coin: coin ?? this.coin,
       numberOfAbsences: numberOfAbsences ?? this.numberOfAbsences,
@@ -72,7 +82,6 @@ class Player {
       userId: userId ?? this.userId,
       username: username ?? this.username,
       color: color ?? this.color,
-      // 🔄 اضافه شدن به کپی‌ویت برای آپدیت راحت در کنترلر
       rewardStreak: rewardStreak ?? this.rewardStreak,
       canClaimDailyReward: canClaimDailyReward ?? this.canClaimDailyReward,
     );

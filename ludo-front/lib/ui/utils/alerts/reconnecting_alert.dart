@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class ReconnectingAlert extends StatelessWidget {
   const ReconnectingAlert({super.key});
@@ -44,7 +45,7 @@ class ReconnectingAlert extends StatelessWidget {
             ),
             SizedBox(height: base * 0.05),
             Text(
-              "Reconnecting...",
+              context.tr('reconnecting alert title'),
               style: TextStyle(
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
@@ -54,7 +55,7 @@ class ReconnectingAlert extends StatelessWidget {
             ),
             SizedBox(height: base * 0.02),
             Text(
-              "Connecting to server, please wait.",
+              context.tr('reconnecting alert text'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: base * 0.032,

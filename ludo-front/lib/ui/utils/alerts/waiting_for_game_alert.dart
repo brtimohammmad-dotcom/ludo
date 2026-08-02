@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class WaitingForGameAlert extends StatelessWidget {
   final double boardSize;
@@ -41,13 +42,16 @@ class WaitingForGameAlert extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                LoadingAnimationWidget.halfTriangleDot(
-                  color: accentColor,
-                  size: base * 0.16,
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: LoadingAnimationWidget.halfTriangleDot(
+                    color: accentColor,
+                    size: base * 0.16,
+                  ),
                 ),
                 SizedBox(height: base * 0.05),
                 Text(
-                  "preparing your game...",
+                  context.tr('waiting for game alert title'),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: base * 0.048,
@@ -57,7 +61,7 @@ class WaitingForGameAlert extends StatelessWidget {
                 ),
                 SizedBox(height: base * 0.02),
                 Text(
-                  "Please keep the app open.",
+                  context.tr('waiting for game alert text'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey.shade400,

@@ -69,18 +69,16 @@ class JoinScreenHandler {
     }
   }
 
-  // 🚀 تغییر متد: حالا بازی با gameType کنترل می‌شود و نیازی به تعداد بازیکن منفی نیست
   void handleGameSearch({
     required int numberOfPlayers,
     required GameType gameType,
-    required GameLevel gameLevel, // 🚀 دریافت لول بازی به جای مقدار عددی
+    required GameLevel gameLevel,
     required double boardSize,
   }) {
     audioService.playSFX('assets/audio/sound-effect/friend_button_sound.wav');
 
     final int playerCoin = gameController.currentGameState?.livePlayer?.coin ?? 0;
 
-    // سرور برای بازی دوستانه هزینه‌ای کسر نمی‌کند، اما برای بررسی اولیه سمت کلاینت:
     final int coinCost = gameType == GameType.friendly ? 0 : gameLevel.entryFee;
 
     if (playerCoin < coinCost) {
@@ -98,11 +96,10 @@ class JoinScreenHandler {
     gameController.onFastPingGets = () {
       if (!isMounted()) return;
 
-      // 🚀 ارسال لول بازی (مثلا 'bronze' یا 'gold') به همراه نوع بازی به کنترلر
       gameController.startGame(
         numberOfPlayers: numberOfPlayers,
         gameType: gameType,
-        gameLevel: gameLevel, // فرستادن لول به بک‌اند برای کسر سکه امن
+        gameLevel: gameLevel,
       );
       gameController.startLoading("waiting_for_game");
     };

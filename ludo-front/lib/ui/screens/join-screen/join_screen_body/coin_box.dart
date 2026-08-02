@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 import 'package:ludo/ui/utils/alerts/daily_reward_dialog.dart';
 
 class CoinBox extends ConsumerWidget {
@@ -66,7 +67,7 @@ class CoinBox extends ConsumerWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                '$coins',
+                context.num(coins),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,

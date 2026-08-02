@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class FloatingBottomMenu extends StatelessWidget {
   final double boardSize;
@@ -48,7 +49,7 @@ class FloatingBottomMenu extends StatelessWidget {
                 Expanded(
                   child: StandardMenuItem(
                     icon: Icons.people_alt_rounded,
-                    label: 'Friends',
+                    label: context.tr('friends'),
                     boardSize: boardSize,
                     onTap: onFriendsTap,
                   ),
@@ -57,7 +58,7 @@ class FloatingBottomMenu extends StatelessWidget {
                 Expanded(
                   child: StandardMenuItem(
                     icon: Icons.storefront_rounded,
-                    label: 'Shop',
+                    label: context.tr('shop'),
                     boardSize: boardSize,
                     onTap: onShopTap,
                   ),
@@ -69,7 +70,7 @@ class FloatingBottomMenu extends StatelessWidget {
             bottom: boardSize * 0.01,
             child: HighlightedCenterItem(
               icon: Icons.emoji_events_rounded,
-              label: 'Leaderboard',
+              label: context.tr('Leaderboard'),
               buttonSize: centerButtonSize,
               boardSize: boardSize,
               onTap: onLeaderboardTap,

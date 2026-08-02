@@ -1,78 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ludo/controller/game-controller/game_controller.dart';
-import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
 
 class ConnectionDialogManager {
-  // نگهداری context متناظر با دیالوگ‌های باز شده
-  static BuildContext? _reconnectingDialogContext;
-  static BuildContext? _failedDialogContext;
+  static bool _isDialogShowing = false;
 
-  /// 🟢 بستن فقط دیالوگ خطای اتصال
-  static void closeFailedDialogOnly() {
-    if (_failedDialogContext != null && _failedDialogContext!.mounted) {
-      if (Navigator.canPop(_failedDialogContext!)) {
-        Navigator.of(_failedDialogContext!).pop();
+  /// 🟢 بستن امن تمام دیالوگ‌های باز شبکه
+  static void closeConnectionDialogs(BuildContext context) {
+    if (_isDialogShowing) {
+      if (Navigator.of(context, rootNavigator: true).canPop()) {
+        Navigator.of(context, rootNavigator: true).pop();
       }
-      _failedDialogContext = null;
+      _isDialogShowing = false;
     }
   }
 
-  /// 🟢 بستن هر دو دیالوگ مربوط به شبکه
-  static void closeConnectionDialogs() {
-    closeFailedDialogOnly();
-
-    if (_reconnectingDialogContext != null && _reconnectingDialogContext!.mounted) {
-      if (Navigator.canPop(_reconnectingDialogContext!)) {
-        Navigator.of(_reconnectingDialogContext!).pop();
-      }
-      _reconnectingDialogContext = null;
-    }
-  }
-
+  /// 🟡 نمایش آلرت در حال اتصال مجدد
   static void showReconnecting(BuildContext context) {
-    closeConnectionDialogs();
+    if (_isDialogShowing) {
+      closeConnectionDialogs(context);
+    }
+    _isDialogShowing = true;
 
     showAnimatedDialog(
       context: context,
       barrierDismissible: false,
-      child: Builder(
-        builder: (dialogCtx) {
-          _reconnectingDialogContext = dialogCtx;
-          return const ReconnectingAlert();
-        },
-      ),
-    );
+      child: const ReconnectingAlert(),
+    ).then((_) {
+      _isDialogShowing = false;
+    });
   }
 
-  static void showReconnectingFailed(BuildContext context, WidgetRef ref) {
-    closeConnectionDialogs();
-    final controller = ref.read(gameControllerProvider.notifier);
+  /// 🔴 نمایش آلرت خطا در اتصال (با اکشن سفارشی بدون نیاز مستقیم به ref)
+  static void showReconnectingFailed(
+      BuildContext context, {
+        required VoidCallback onReconnectPressed,
+      }) {
+    if (_isDialogShowing) {
+      closeConnectionDialogs(context);
+    }
+    _isDialogShowing = true;
 
     showAnimatedDialog(
       context: context,
       barrierDismissible: false,
-      child: Builder(
-        builder: (dialogCtx) {
-          // ذخیره context اختصاصی خود دیالوگ
-          _failedDialogContext = dialogCtx;
-          return ReconnectingFailedAlert(
-            onReconnectPressed: () {
-              showReconnecting(context);
+      child: ReconnectingFailedAlert(
+        onReconnectPressed: () {
+          // ۱. ابتدا دیالوگ فعلی را ببند
+          closeConnectionDialogs(context);
 
-              controller.updateState(
-                controller.currentGameState?.copyWith(
-                  connectionStatus: ConnectionStatus.reconnecting,
-                ),
-              );
-              controller.resumeReconnection();
-            },
-          );
+          // ۲. سپس اکشن ری‌کانکت را اجرا کن
+          onReconnectPressed();
         },
       ),
-    );
+    ).then((_) {
+      _isDialogShowing = false;
+    });
   }
 }

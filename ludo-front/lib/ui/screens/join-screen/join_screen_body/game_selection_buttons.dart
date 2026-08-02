@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 import 'start_game_button.dart';
 
 class GameSelectionButtons extends ConsumerWidget {
@@ -101,7 +102,7 @@ class GameSelectionButtons extends ConsumerWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            "${level.displayName} Table",
+                            context.tr("${level.displayName} Table"),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: (boardSize * 0.042).clamp(14.0, 17.0),
@@ -131,7 +132,7 @@ class GameSelectionButtons extends ConsumerWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              level.entryFee == 0 ? "Free" : "${level.entryFee}",
+                              level.entryFee == 0 ? context.tr('Free') :context.num(level.entryFee),
                               style: const TextStyle(
                                 color: Colors.amberAccent,
                                 fontSize: 12,

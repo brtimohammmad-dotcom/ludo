@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class StartGameButton extends StatelessWidget {
   final int numberOfPlayers;
@@ -17,7 +18,7 @@ class StartGameButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String modeText =
-    (numberOfPlayers == 2 || numberOfPlayers == -2) ? "2 Players" : "4 Players";
+    (numberOfPlayers == 2 || numberOfPlayers == -2) ? context.tr('2 Players') : context.tr('4 Players');
 
     return Material(
       color: Colors.transparent,
@@ -74,7 +75,7 @@ class StartGameButton extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    "+$prizePool",
+                    "+${context.num(prizePool)}",
                     style: const TextStyle(
                       color: Color(0xFF34D399),
                       fontWeight: FontWeight.w800,

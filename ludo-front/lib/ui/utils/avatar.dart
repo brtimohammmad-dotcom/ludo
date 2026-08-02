@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UserAvatar extends StatelessWidget {
   final String? url;
@@ -16,6 +17,8 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasValidUrl = url != null && url!.trim().isNotEmpty;
+
     return Container(
       width: size,
       height: size,
@@ -28,26 +31,26 @@ class UserAvatar extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(size / 2),
-        child: url != null
-            ? Image.network(
-          url!,
+        child: hasValidUrl
+            ? CachedNetworkImage(
+          imageUrl: url!,
           fit: BoxFit.cover,
-          cacheWidth: (size * 2).toInt(),
-          cacheHeight: (size * 2).toInt(),
-          errorBuilder: (_, _, _) => _buildDefaultAvatar(),
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: SizedBox(
-                width: size * 0.5,
-                height: size * 0.5,
-                child: CircularProgressIndicator(
-                  strokeWidth: 1.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(borderColor),
-                ),
+          // بهینه‌سازی سایز تصویر در رم بر اساس ابعاد ویجت
+          memCacheWidth: (size * 2).toInt(),
+          memCacheHeight: (size * 2).toInt(),
+          // لودینگ در حال دریافت تصویر
+          placeholder: (context, url) => Center(
+            child: SizedBox(
+              width: size * 0.4,
+              height: size * 0.4,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                valueColor: AlwaysStoppedAnimation<Color>(borderColor),
               ),
-            );
-          },
+            ),
+          ),
+          // در صورت بروز خطا در دانلود
+          errorWidget: (context, url, error) => _buildDefaultAvatar(),
         )
             : _buildDefaultAvatar(),
       ),

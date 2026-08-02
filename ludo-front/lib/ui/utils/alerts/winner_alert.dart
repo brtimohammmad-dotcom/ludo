@@ -5,6 +5,7 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
@@ -52,9 +53,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
     } else {
       ref
           .read(audioServiceProvider)
-          .playSFX(
-            "assets/audio/sound-effect/game_over_sound.wav",
-          ); // صدا در صورت باخت (اختیاری)
+          .playSFX("assets/audio/sound-effect/game_over_sound.wav");
     }
 
     _anim.forward();
@@ -112,7 +111,6 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                     color: _isMeWinner
                         ? Colors.amber.withValues(alpha: 0.5)
                         : Colors.redAccent.withValues(alpha: 0.5),
-                    // مرز قرمز برای باخت
                     width: 1.5,
                   ),
                   boxShadow: const [
@@ -149,7 +147,9 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
 
                     /// TITLE (تغییر عنوان بر اساس وضعیت بازیکن)
                     Text(
-                      _isMeWinner ? "YOU WIN!" : "GAME OVER",
+                      _isMeWinner
+                          ? context.tr("You Win")
+                          : context.tr("Game Over"),
                       style: TextStyle(
                         fontSize: base * 0.07,
                         fontWeight: FontWeight.w900,
@@ -162,8 +162,8 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                     /// WINNER NAME BOX
                     Text(
                       _isMeWinner
-                          ? "Congratulations!"
-                          : "Winner of this match:",
+                          ? context.tr("Congratulations")
+                          : context.tr("Winner of this match"),
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: base * 0.032,
@@ -186,14 +186,13 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                           fontSize: base * 0.04,
                           fontWeight: FontWeight.bold,
                           color:
-                              widget.winner.color?.name.toColor() ??
+                          widget.winner.color?.name.toColor() ??
                               Colors.white,
                         ),
                       ),
                     ),
                     SizedBox(height: base * 0.05),
 
-                    /// 💰 PRIZE AMOUNT SECTION
                     /// 💰 PRIZE AMOUNT SECTION
                     if (widget
                         .gameController
@@ -230,41 +229,53 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                             ),
                             const SizedBox(width: 8),
 
-                            /// انیمیشن شمارش سکه همراه با افکت Scale داینامیک
+                            /// انیمیشن شمارش سکه همراه با تبدیل اعداد به زبان جاری
                             TweenAnimationBuilder<double>(
                               tween: Tween<double>(
                                 begin: 0.0,
-                                end: (_isMeWinner ? winPrice : coinCost).toDouble(),
+                                end: (_isMeWinner ? winPrice : coinCost)
+                                    .toDouble(),
                               ),
                               duration: Duration(
-                                milliseconds: (_isMeWinner ? winPrice : coinCost) * 20,
+                                milliseconds:
+                                (_isMeWinner ? winPrice : coinCost) * 20,
                               ),
-                              curve: Curves.easeOutCubic, // یک منحنی نرم برای شمارش و اسکیل
+                              curve: Curves.easeOutCubic,
                               builder: (context, value, child) {
                                 final animatedValue = value.toInt();
-                                final targetValue = (_isMeWinner ? winPrice : coinCost).toDouble();
+                                final targetValue =
+                                (_isMeWinner ? winPrice : coinCost)
+                                    .toDouble();
 
-                                // محاسبه درصد پیشرفت انیمیشن (بین 0.0 تا 1.0)
-                                double progress = targetValue > 0 ? value / targetValue : 1.0;
+                                double progress = targetValue > 0
+                                    ? value / targetValue
+                                    : 1.0;
 
-                                // فرمول افکت پاپ‌آپ: در ابتدا بزرگ می‌شود (تا 1.25) و در انتها به سایز نرمال (1.0) برمی‌گردد
-                                double scaleFactor = 1.0 + (progress * (1.0 - progress) * 1.0);
+                                double scaleFactor =
+                                    1.0 + (progress * (1.0 - progress) * 1.0);
+
+                                // تبدیل عدد به عدد فارسی یا انگلیسی بر اساس زبان برنامه
+                                final formattedNumber =
+                                context.num(animatedValue);
 
                                 return Transform.scale(
                                   scale: scaleFactor,
                                   child: Text(
                                     _isMeWinner
-                                        ? "+$animatedValue"
-                                        : "-$animatedValue",
+                                        ? "+$formattedNumber"
+                                        : "-$formattedNumber",
+                                    textDirection: TextDirection.ltr,
                                     style: TextStyle(
                                       fontSize: base * 0.04,
                                       fontWeight: FontWeight.bold,
-                                      // در زمان برد رنگ متن طلایی مایل به سفید و در باخت قرمز روشن می‌شود
-                                      color: _isMeWinner ? Colors.amberAccent : Colors.white,
+                                      color: _isMeWinner
+                                          ? Colors.amberAccent
+                                          : Colors.white,
                                       shadows: [
                                         if (_isMeWinner)
                                           Shadow(
-                                            color: Colors.amber.withValues(alpha: 0.5),
+                                            color: Colors.amber
+                                                .withValues(alpha: 0.5),
                                             blurRadius: 10,
                                           ),
                                       ],
@@ -278,17 +289,20 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                       ),
                       SizedBox(height: base * 0.06),
                     ],
+
                     /// BUTTON
                     GestureDetector(
                       onTap: widget.gameController.exitGame,
                       child: Container(
                         width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: base * 0.035),
+                        padding: EdgeInsets.symmetric(
+                          vertical: base * 0.035,
+                        ),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [
-                              const Color(0xFF22C55E),
-                              const Color(0xFF15803D),
+                              Color(0xFF22C55E),
+                              Color(0xFF15803D),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(base * 0.03),
@@ -302,7 +316,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                         ),
                         child: Center(
                           child: Text(
-                            "Back to Home",
+                            context.tr("Back to Home"),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: base * 0.038,

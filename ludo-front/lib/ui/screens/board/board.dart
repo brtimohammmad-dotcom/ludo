@@ -111,27 +111,30 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
                     width: 1.0,
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    RepaintBoundary(
-                      child: PlayerBar(
-                        boardSize: boardSize,
-                        barHeight: barHeight,
-                        leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
-                        rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RepaintBoundary(
+                        child: PlayerBar(
+                          boardSize: boardSize,
+                          barHeight: barHeight,
+                          leftPlayerIndex: numberOfPlayers == 2 ? -1 : 1,
+                          rightPlayerIndex: numberOfPlayers == 2 ? 1 : 2,
+                        ),
                       ),
-                    ),
-                    RepaintBoundary(child: MainBoard(boardSize: boardSize)),
-                    RepaintBoundary(
-                      child: PlayerBar(
-                        boardSize: boardSize,
-                        barHeight: barHeight,
-                        leftPlayerIndex: 0,
-                        rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
+                      RepaintBoundary(child: MainBoard(boardSize: boardSize)),
+                      RepaintBoundary(
+                        child: PlayerBar(
+                          boardSize: boardSize,
+                          barHeight: barHeight,
+                          leftPlayerIndex: 0,
+                          rightPlayerIndex: numberOfPlayers == 2 ? -1 : 3,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

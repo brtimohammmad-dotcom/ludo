@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class InsufficientCoinsAlert extends StatelessWidget {
   final int requiredCoins;
@@ -57,13 +58,17 @@ class InsufficientCoinsAlert extends StatelessWidget {
                 Positioned(
                   right: 0,
                   top: 0,
-                  child: Icon(Icons.close, size: base * 0.045, color: Colors.redAccent),
+                  child: Icon(
+                    Icons.close,
+                    size: base * 0.045,
+                    color: Colors.redAccent,
+                  ),
                 ),
               ],
             ),
             SizedBox(height: base * 0.04),
             Text(
-              "Not Enough Coins",
+              context.tr('insufficient coins title'),
               style: TextStyle(
                 color: Colors.amberAccent,
                 fontSize: base * 0.05,
@@ -72,7 +77,7 @@ class InsufficientCoinsAlert extends StatelessWidget {
             ),
             SizedBox(height: base * 0.03),
             Text(
-              "You need $requiredCoins coins to join this game.\nYour current balance: $currentCoins",
+              "${context.tr('You need')} ${context.num(requiredCoins)} ${context.tr('insufficient coins text')} ${context.num(currentCoins)}",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey.shade400,
@@ -101,7 +106,7 @@ class InsufficientCoinsAlert extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    "OK",
+                    context.tr('OK'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: base * 0.038,

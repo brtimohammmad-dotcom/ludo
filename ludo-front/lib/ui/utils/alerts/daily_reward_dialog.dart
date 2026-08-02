@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class DailyRewardDialog extends ConsumerWidget {
   final double boardSize;
@@ -16,6 +17,7 @@ class DailyRewardDialog extends ConsumerWidget {
     final isLoading = ref.watch(globalLoadingProvider).contains('daily_reward');
     final canClaim = livePlayer?.canClaimDailyReward;
     final List<int> rewards = [100, 150, 200, 250, 300, 350, 500];
+
     final double base =
         boardSize * 0.85; // محدود کردن عرض دیالوگ متناسب با برد بازی
 
@@ -52,7 +54,7 @@ class DailyRewardDialog extends ConsumerWidget {
 
             // عنوان
             Text(
-              "Daily Rewards",
+              context.tr('Daily Rewards'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: base * 0.055,
@@ -63,7 +65,7 @@ class DailyRewardDialog extends ConsumerWidget {
 
             // توضیحات
             Text(
-              "Log in every day to get awesome rewards!",
+              context.tr('Daily Reward Text'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey.shade400,
@@ -85,6 +87,7 @@ class DailyRewardDialog extends ConsumerWidget {
               itemCount: 7,
               itemBuilder: (context, index) {
                 final int dayNumber = index + 1;
+
                 final isClaimed = dayNumber < livePlayer!.rewardStreak;
                 final isCurrent =
                     dayNumber == livePlayer.rewardStreak && canClaim!;
@@ -106,7 +109,7 @@ class DailyRewardDialog extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Day $dayNumber",
+                        '${context.tr('Day')} ${context.num(dayNumber)}',
                         style: TextStyle(
                           color: Colors.grey.shade400,
                           fontSize: base * 0.028,
@@ -120,7 +123,8 @@ class DailyRewardDialog extends ConsumerWidget {
                       ),
                       SizedBox(height: base * 0.01),
                       Text(
-                        "+${rewards[index]}",
+                        "+${context.num(rewards[index])}",
+                        textDirection: TextDirection.ltr,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: base * 0.028,
@@ -138,7 +142,9 @@ class DailyRewardDialog extends ConsumerWidget {
             GestureDetector(
               onTap: (canClaim! && !isLoading)
                   ? () {
-                ref.read(globalLoadingProvider.notifier).start('daily_reward');
+                      ref
+                          .read(globalLoadingProvider.notifier)
+                          .start('daily_reward');
                       ref
                           .read(gameControllerProvider.notifier)
                           .claimDailyReward();
@@ -171,7 +177,9 @@ class DailyRewardDialog extends ConsumerWidget {
                           ),
                         )
                       : Text(
-                          canClaim ? "Claim Reward" : "Already Claimed",
+                          canClaim
+                              ? context.tr('Claim Reward')
+                              : context.tr('Already Claimed'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: base * 0.04,
@@ -187,7 +195,7 @@ class DailyRewardDialog extends ConsumerWidget {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                "Close",
+                context.tr('Close'),
                 style: TextStyle(
                   color: Colors.grey.shade400,
                   fontSize: base * 0.035,

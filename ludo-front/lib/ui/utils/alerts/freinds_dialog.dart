@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handler) {
   final double base = boardSize * 0.85;
@@ -37,7 +38,7 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
               ),
               SizedBox(height: base * 0.02),
               Text(
-                'Play with Friends',
+                context.tr('friends level dialog title'),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: base * 0.05,
@@ -46,7 +47,7 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
               ),
               SizedBox(height: base * 0.015),
               Text(
-                'Choose your game mode:',
+                context.tr('friends level dialog text'),
                 style: TextStyle(
                   color: Colors.grey.shade400,
                   fontSize: base * 0.032,
@@ -58,7 +59,7 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
                 children: [
                   _buildDialogButton(
                     context: context,
-                    label: '2 Players',
+                    label: context.tr('2 Players'),
                     icon: Icons.person_outline_rounded,
                     base: base,
                     onTap: () {
@@ -73,7 +74,7 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
                   ),
                   _buildDialogButton(
                     context: context,
-                    label: '4 Players',
+                    label: context.tr('4 Players'),
                     icon: Icons.people_outline_rounded,
                     base: base,
                     onTap: () {
@@ -92,7 +93,7 @@ void showFriendsPlayDialog(BuildContext context, double boardSize, dynamic handl
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  "Cancel",
+                  context.tr('Close'),
                   style: TextStyle(
                     color: Colors.grey.shade400,
                     fontSize: base * 0.035,
@@ -146,7 +147,7 @@ Widget _buildDialogButton({
           ),
           SizedBox(height: base * 0.01),
           Text(
-            'Free',
+            context.tr('Free'),
             style: TextStyle(
               color: Colors.greenAccent,
               fontWeight: FontWeight.w600,

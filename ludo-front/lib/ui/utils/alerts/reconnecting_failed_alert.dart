@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class ReconnectingFailedAlert extends StatelessWidget {
   final VoidCallback onReconnectPressed;
@@ -50,7 +51,7 @@ class ReconnectingFailedAlert extends StatelessWidget {
 
             // عنوان خطا
             Text(
-              "Connection Failed",
+              context.tr('reconnecting failed alert title'),
               style: TextStyle(
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
@@ -61,7 +62,7 @@ class ReconnectingFailedAlert extends StatelessWidget {
 
             // توضیحات خطا
             Text(
-              "Connection Timeout. Please check your Internet.",
+              context.tr('reconnecting failed alert text'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: base * 0.032,
@@ -104,7 +105,7 @@ class ReconnectingFailedAlert extends StatelessWidget {
                       ),
                       SizedBox(width: base * 0.02),
                       Text(
-                        'Reconnect',
+                        context.tr('Reconnect'),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: base * 0.035,

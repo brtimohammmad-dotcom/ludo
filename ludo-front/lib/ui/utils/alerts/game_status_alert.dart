@@ -4,6 +4,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 import 'package:telegram_web_app/telegram_web_app.dart';
 
 class WaitingForPlayersAlert extends ConsumerWidget {
@@ -20,7 +21,9 @@ class WaitingForPlayersAlert extends ConsumerWidget {
     final gameState = gameController.currentGameState;
     final state = gameState?.serverState;
     final size = MediaQuery.of(context).size;
-    final boardSize = size.width < size.height ? size.width : size.height * 0.86;
+    final boardSize = size.width < size.height
+        ? size.width
+        : size.height * 0.86;
     final double base = boardSize * 0.85;
 
     final numberOfPlayers = state?.numberOfPlayers ?? 2;
@@ -28,11 +31,13 @@ class WaitingForPlayersAlert extends ConsumerWidget {
         ? -numberOfPlayers
         : (numberOfPlayers == -1 ? 2 : numberOfPlayers);
 
-    final currentPlayers = ref.watch(
-      gameControllerProvider.select(
+    final currentPlayers =
+        ref.watch(
+          gameControllerProvider.select(
             (state) => state?.serverState?.players.length,
-      ),
-    ) ?? 0;
+          ),
+        ) ??
+        0;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -58,13 +63,16 @@ class WaitingForPlayersAlert extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              LoadingAnimationWidget.dotsTriangle(
-                color: Colors.amberAccent,
-                size: base * 0.18,
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: LoadingAnimationWidget.dotsTriangle(
+                  color: Colors.amberAccent,
+                  size: base * 0.18,
+                ),
               ),
               SizedBox(height: base * 0.04),
               Text(
-                'Waiting for Players',
+                context.tr('Game Status Alert Title'),
                 style: TextStyle(
                   fontSize: base * 0.05,
                   fontWeight: FontWeight.bold,
@@ -74,50 +82,56 @@ class WaitingForPlayersAlert extends ConsumerWidget {
               ),
               SizedBox(height: base * 0.04),
               // بخش وضعیت صندلی‌ها با تم تیره شیک
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: base * 0.05,
-                  vertical: base * 0.03,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(base * 0.04),
-                  border: Border.all(color: Colors.white10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(requiredPlayers, (index) {
-                    final isJoined = index < currentPlayers;
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: base * 0.015),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutCubic,
-                        width: base * 0.09,
-                        height: base * 0.09,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isJoined
-                              ? Colors.green.shade600
-                              : Colors.white10,
-                          border: Border.all(
-                            color: isJoined ? Colors.green : Colors.white24,
-                            width: 1.5,
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: base * 0.05,
+                    vertical: base * 0.03,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(base * 0.04),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(requiredPlayers, (index) {
+                      final isJoined = index < currentPlayers;
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: base * 0.015),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                          width: base * 0.09,
+                          height: base * 0.09,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isJoined
+                                ? Colors.green.shade600
+                                : Colors.white10,
+                            border: Border.all(
+                              color: isJoined ? Colors.green : Colors.white24,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            isJoined ? Icons.person : Icons.person_outline,
+                            color: isJoined
+                                ? Colors.white
+                                : Colors.grey.shade600,
+                            size: base * 0.05,
                           ),
                         ),
-                        child: Icon(
-                          isJoined ? Icons.person : Icons.person_outline,
-                          color: isJoined ? Colors.white : Colors.grey.shade600,
-                          size: base * 0.05,
-                        ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
               ),
               SizedBox(height: base * 0.03),
               Text(
-                '$currentPlayers / $requiredPlayers Joined',
+                '${context.num(currentPlayers)} / ${context.num(requiredPlayers)} ${context.tr('Joined')}',
+                textDirection: TextDirection.ltr,
                 style: TextStyle(
                   fontSize: base * 0.035,
                   color: Colors.grey.shade400,
@@ -140,10 +154,7 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(vertical: base * 0.035),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.amber.shade600,
-                          Colors.orange.shade700,
-                        ],
+                        colors: [Colors.amber.shade600, Colors.orange.shade700],
                       ),
                       borderRadius: BorderRadius.circular(base * 0.03),
                     ),
@@ -151,7 +162,11 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.share, color: Colors.white, size: base * 0.045),
+                          Icon(
+                            Icons.share,
+                            color: Colors.white,
+                            size: base * 0.045,
+                          ),
                           SizedBox(width: base * 0.02),
                           Text(
                             'Share Invite Link',
@@ -181,21 +196,21 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                   child: Center(
                     child: isLoading
                         ? SizedBox(
-                      width: base * 0.045,
-                      height: base * 0.045,
-                      child: const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                            width: base * 0.045,
+                            height: base * 0.045,
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
                         : Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: base * 0.035,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                            context.tr('Cancel'),
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: base * 0.035,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ),

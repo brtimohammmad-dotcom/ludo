@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class RollButton extends ConsumerWidget {
   const RollButton({
@@ -38,7 +39,7 @@ class RollButton extends ConsumerWidget {
             ),
           ),
           child: Text(
-            'ROLL',
+            context.tr('ROLL'),
             style: TextStyle(
               color: myTurnToRoll ? Colors.white : Colors.white30,
               fontSize: boardSize * 0.024,

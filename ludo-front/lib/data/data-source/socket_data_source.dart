@@ -97,12 +97,7 @@ class SocketDataSource {
         "gameLevel": gameLevel.name,
       },
       ack: (dynamic err, [dynamic response]) {
-        debugPrint(err.toString());
-        debugPrint(response.toString());
-        if(err!=null){
-          debugPrint(err.toString());
-          return;
-        }
+
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -120,12 +115,7 @@ class SocketDataSource {
       "roll_dice",
       {},
       ack: (dynamic err, [dynamic response]) {
-        debugPrint(err.toString());
-        debugPrint(response.toString());
-        if(err!=null){
-          debugPrint(err.toString());
-          return;
-        }
+
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -143,12 +133,7 @@ class SocketDataSource {
       "move_token",
       t.toJson(),
       ack: (dynamic err, [dynamic response]) {
-        debugPrint(err.toString());
-        debugPrint(response.toString());
-        if (err != null) {
-          debugPrint(err.toString());
-          return;
-        }
+
         if (response == null&&err==null) {
           onAck?.call({'success': false});
         } else {
@@ -166,12 +151,7 @@ class SocketDataSource {
       "exit_game",
       {},
       ack: (dynamic err, [dynamic response]) {
-        debugPrint(err.toString());
-        debugPrint(response.toString());
-        if(err!=null){
-          debugPrint(err.toString());
-          return;
-        }
+
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -189,12 +169,7 @@ class SocketDataSource {
       "claim_daily_reward",
       {},
       ack: (dynamic err, [dynamic response]) {
-        debugPrint(err.toString());
-        debugPrint(response.toString());
-        if(err!=null){
-          debugPrint(err.toString());
-          return;
-        }
+
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -211,12 +186,7 @@ class SocketDataSource {
       "get_leader_board_list",
       {},
       ack: (dynamic err, [dynamic response]) {
-        debugPrint(err.toString());
-        debugPrint(response.toString());
-        if(err!=null){
-          debugPrint(err.toString());
-          return;
-        }
+
         if (response == null) {
           // تایم‌اوت شد (سرور جواب نداد)
           onAck?.call({'success': false});

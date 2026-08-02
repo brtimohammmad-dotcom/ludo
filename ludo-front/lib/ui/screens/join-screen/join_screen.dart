@@ -97,6 +97,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                     child: const Text(
                       'LUDO RUSH',
                       style: TextStyle(
+                        fontFamily: 'Fredoka',
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -129,23 +130,26 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // سکه‌باکس
-                      RepaintBoundary(
-                        child: CoinBox(boardSize: layout.boardSize),
-                      ),
-
-                      // پروفایل
-                      RepaintBoundary(
-                        child: UserProfileBox(
-                          player: currentPlayer,
-                          boardSize: layout.boardSize,
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // سکه‌باکس
+                        RepaintBoundary(
+                          child: CoinBox(boardSize: layout.boardSize),
                         ),
-                      ),
-                    ],
+
+                        // پروفایل
+                        RepaintBoundary(
+                          child: UserProfileBox(
+                            player: currentPlayer,
+                            boardSize: layout.boardSize,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -168,19 +172,22 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             right: 0,
             bottom: 0,
             child: RepaintBoundary(
-              child: FloatingBottomMenu(
-                boardSize: layout.boardSize,
-                onFriendsTap: () =>
-                    showFriendsPlayDialog(context, layout.boardSize, _handler),
-                onLeaderboardTap: () {
-                  ref
-                      .read(gameControllerProvider.notifier)
-                      .getLeaderBoardList();
-                  ref
-                      .read(globalLoadingProvider.notifier)
-                      .start('leader_board_loading');
-                },
-                onShopTap: () {},
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: FloatingBottomMenu(
+                  boardSize: layout.boardSize,
+                  onFriendsTap: () =>
+                      showFriendsPlayDialog(context, layout.boardSize, _handler),
+                  onLeaderboardTap: () {
+                    ref
+                        .read(gameControllerProvider.notifier)
+                        .getLeaderBoardList();
+                    ref
+                        .read(globalLoadingProvider.notifier)
+                        .start('leader_board_loading');
+                  },
+                  onShopTap: () {},
+                ),
               ),
             ),
           ),

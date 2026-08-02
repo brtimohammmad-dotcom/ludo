@@ -4,7 +4,6 @@ Future<T?> showAnimatedDialog<T>({
   required BuildContext context,
   required Widget child,
   bool barrierDismissible = true,
-  RouteSettings? routeSettings,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -12,7 +11,6 @@ Future<T?> showAnimatedDialog<T>({
     barrierLabel: '',
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 250),
-    routeSettings: routeSettings,
     transitionBuilder: (ctx, animation, _, dialogChild) {
       return FadeTransition(
         opacity: animation,

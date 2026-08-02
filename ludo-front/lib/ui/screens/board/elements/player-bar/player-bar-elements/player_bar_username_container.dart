@@ -4,6 +4,7 @@ import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 import 'package:ludo/ui/screens/board/elements/player-bar/player-bar-elements/player_bar_utils.dart';
 import 'package:ludo/ui/utils/avatar.dart';
 
@@ -41,16 +42,23 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
     }
 
     final totalPlayers = ref.watch(
-      gameControllerProvider.select((s) => s?.serverState?.numberOfPlayers ?? 2),
+      gameControllerProvider.select(
+        (s) => s?.serverState?.numberOfPlayers ?? 2,
+      ),
     );
     final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
-    final bool isAvatarOnLeft = playerColor == PlayerColor.red || playerColor == PlayerColor.blue;
+    final bool isAvatarOnLeft =
+        playerColor == PlayerColor.red || playerColor == PlayerColor.blue;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (isAvatarOnLeft) ...[
-          _PlayerAvatar(playerIndex: playerIndex, boardSize: boardSize, playerColor: playerColor),
+          _PlayerAvatar(
+            playerIndex: playerIndex,
+            boardSize: boardSize,
+            playerColor: playerColor,
+          ),
           SizedBox(width: boardSize * 0.015),
           _PlayerCardContent(
             fullWidth: fullWidth,
@@ -68,7 +76,11 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
             playerColor: playerColor,
           ),
           SizedBox(width: boardSize * 0.015),
-          _PlayerAvatar(playerIndex: playerIndex, boardSize: boardSize, playerColor: playerColor),
+          _PlayerAvatar(
+            playerIndex: playerIndex,
+            boardSize: boardSize,
+            playerColor: playerColor,
+          ),
         ],
       ],
     );
@@ -101,9 +113,11 @@ class _PlayerAvatar extends ConsumerWidget {
     );
 
     final isCurrentTurn = ref.watch(
-      gameControllerProvider.select((s) =>
-      s?.serverState?.currentTurn == playerColor &&
-          s?.serverState?.gameStatus == GameStatus.start),
+      gameControllerProvider.select(
+        (s) =>
+            s?.serverState?.currentTurn == playerColor &&
+            s?.serverState?.gameStatus == GameStatus.start,
+      ),
     );
 
     final activeBorderColor = switch (playerColor) {
@@ -159,7 +173,8 @@ class _PlayerCardContent extends ConsumerWidget {
         final myTurn = s?.serverState?.currentTurn == playerColor;
         final tStatus = myTurn ? s?.serverState?.turnStatus : null;
 
-        final currentTurn = myTurn &&
+        final currentTurn =
+            myTurn &&
             gStatus == GameStatus.start &&
             tStatus != TurnStatus.waitingForAnimate;
 
@@ -175,13 +190,16 @@ class _PlayerCardContent extends ConsumerWidget {
     };
 
     final borderRadius = BorderRadius.circular(boardSize * 0.1);
+    final isPersian = Localizations.localeOf(context).languageCode == 'fa';
 
     return Container(
       width: fullWidth,
       height: boardSize * 0.06,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        color: isCurrentTurn ? const Color(0xFF334155) : const Color(0xFF1E293B),
+        color: isCurrentTurn
+            ? const Color(0xFF334155)
+            : const Color(0xFF1E293B),
         border: Border.all(
           color: isCurrentTurn ? activeBorderColor : const Color(0xFF475569),
           width: 1.0,
@@ -191,38 +209,38 @@ class _PlayerCardContent extends ConsumerWidget {
         borderRadius: borderRadius,
         child: Stack(
           children: [
-            // ⚡ ویجت انیمیشن تایمر مجزا شده جهت جلوگیری از رندر مجدد لایوت متنی
             if (isCurrentTurn && gameStatus == GameStatus.start)
-              _TimerProgressBar(
-                absences: absences!,
-              ),
+              _TimerProgressBar(absences: absences!),
 
-            Center(
-              child: Padding(
-                padding: EdgeInsets.all(boardSize * 0.01),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        username,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: playerUserNameBoxColor(
-                            playerIndex: playerIndex,
-                            numberOfPlayers: totalPlayers,
-                            currentTurn: isCurrentTurn ? playerColor : null,
+            Directionality(
+              textDirection: isPersian ? TextDirection.rtl : TextDirection.ltr,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(boardSize * 0.01),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          username,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: playerUserNameBoxColor(
+                              playerIndex: playerIndex,
+                              numberOfPlayers: totalPlayers,
+                              currentTurn: isCurrentTurn ? playerColor : null,
+                            ),
+                            fontSize: barHeight * 0.26,
+                            fontWeight: FontWeight.bold,
                           ),
-                          fontSize: barHeight * 0.26,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    SizedBox(width: boardSize * 0.005),
-                    _CoinBadge(boardSize: boardSize, coin: coin),
-                  ],
+                      SizedBox(width: boardSize * 0.005),
+                      _CoinBadge(boardSize: boardSize, coin: coin),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -237,9 +255,7 @@ class _PlayerCardContent extends ConsumerWidget {
 // ⚡ ویجت اختصاصی نوار تایمر (ایزوله از نظر Performance)
 // -----------------------------------------------------------------------------
 class _TimerProgressBar extends ConsumerWidget {
-  const _TimerProgressBar({
-    required this.absences,
-  });
+  const _TimerProgressBar({required this.absences});
 
   final int absences;
 
@@ -256,7 +272,9 @@ class _TimerProgressBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(gameControllerProvider.notifier).animationController;
+    final controller = ref
+        .watch(gameControllerProvider.notifier)
+        .animationController;
 
     if (controller == null) return const SizedBox.shrink();
 
@@ -271,7 +289,9 @@ class _TimerProgressBar extends ConsumerWidget {
             child: FractionallySizedBox(
               widthFactor: (1.0 - controller.value).clamp(0.0, 1.0),
               heightFactor: 1.0,
-              child: ColoredBox(color: timerColor), // 💡 ColoredBox سبک‌تر از Container است
+              child: ColoredBox(
+                color: timerColor,
+              ), // 💡 ColoredBox سبک‌تر از Container است
             ),
           );
         },
@@ -284,10 +304,7 @@ class _TimerProgressBar extends ConsumerWidget {
 // ⚡ ویجت کوچک نمایش سکه
 // -----------------------------------------------------------------------------
 class _CoinBadge extends StatelessWidget {
-  const _CoinBadge({
-    required this.boardSize,
-    required this.coin,
-  });
+  const _CoinBadge({required this.boardSize, required this.coin});
 
   final double boardSize;
   final int coin;
@@ -313,7 +330,7 @@ class _CoinBadge extends StatelessWidget {
           ),
           SizedBox(width: boardSize * 0.005),
           Text(
-            '$coin',
+            context.num(coin),
             style: TextStyle(
               color: Colors.amberAccent,
               fontSize: boardSize * 0.02,

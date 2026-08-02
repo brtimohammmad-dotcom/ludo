@@ -25,7 +25,6 @@ async function handleAuth(initData, socket) {
       user = initData;
     }
 
-
     // ۱. گرفتن یا ساخت بازیکن در دیتابیس
     let player = await getOrCreatePlayer(user.id, user.first_name);
     if (!player) {
@@ -48,7 +47,6 @@ async function handleAuth(initData, socket) {
         !player.last_avatar_update ||
         new Date(player.last_avatar_update) < oneDayAgo
       ) {
-
         const telegramFileLink = await getUserAvatarUrl(user.id);
 
         if (telegramFileLink) {
@@ -83,7 +81,9 @@ async function handleAuth(initData, socket) {
     socket.data.coin = player.coin;
     socket.data.rewardStreak = player.reward_streak;
     socket.data.lastClaimDate = player.last_claim_date;
-    socket.data.avatarUrl = avatarUrl; // ذخیره در سوکت برای دسترسی‌های بعدی
+    socket.data.avatarUrl = avatarUrl;
+    socket.data.wins = player.wins;
+    socket.data.losses = player.losses;
 
     // ۳. بررسی منطق دیلی ریوارد
     const lastClaim = socket.data.lastClaimDate

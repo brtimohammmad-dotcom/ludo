@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/leader_board/leader_board.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 import 'package:ludo/ui/utils/painter.dart';
-
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -35,14 +35,10 @@ class LeaderboardScreen extends ConsumerWidget {
         body: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: LudoBackgroundPainter(),
-              ),
+              child: CustomPaint(painter: LudoBackgroundPainter()),
             ),
             const Center(
-              child: CircularProgressIndicator(
-                color: Colors.amberAccent,
-              ),
+              child: CircularProgressIndicator(color: Colors.amberAccent),
             ),
           ],
         ),
@@ -56,11 +52,7 @@ class LeaderboardScreen extends ConsumerWidget {
       body: Stack(
         children: [
           // 🌌 ۱. پس‌زمینه عمیق کهکشانی مشترک با صفحه اصلی
-          Positioned.fill(
-            child: CustomPaint(
-              painter: LudoBackgroundPainter(),
-            ),
-          ),
+          Positioned.fill(child: CustomPaint(painter: LudoBackgroundPainter())),
 
           // ۲. محتوا
           SafeArea(
@@ -80,7 +72,7 @@ class LeaderboardScreen extends ConsumerWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'LEADERBOARD',
+                      context.tr('Leaderboard').toUpperCase(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: base * 0.055,
@@ -124,19 +116,33 @@ class LeaderboardScreen extends ConsumerWidget {
 
                       if (rank == 1) {
                         rankColor = goldColor;
-                        rankWidget = Icon(Icons.emoji_events, color: const Color(0xFF0F172A), size: base * 0.05);
+                        rankWidget = Icon(
+                          Icons.emoji_events,
+                          color: const Color(0xFF0F172A),
+                          size: base * 0.05,
+                        );
                       } else if (rank == 2) {
                         rankColor = silverColor;
-                        rankWidget = Icon(Icons.emoji_events, color: const Color(0xFF0F172A), size: base * 0.05);
+                        rankWidget = Icon(
+                          Icons.emoji_events,
+                          color: const Color(0xFF0F172A),
+                          size: base * 0.05,
+                        );
                       } else if (rank == 3) {
                         rankColor = bronzeColor;
-                        rankWidget = Icon(Icons.emoji_events, color: const Color(0xFF0F172A), size: base * 0.05);
+                        rankWidget = Icon(
+                          Icons.emoji_events,
+                          color: const Color(0xFF0F172A),
+                          size: base * 0.05,
+                        );
                       }
 
                       return Container(
                         margin: EdgeInsets.symmetric(vertical: base * 0.015),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B).withValues(alpha: 0.75), // تم تاریک نیمه شفاف شیشه‌ای
+                          color: const Color(0xFF1E293B).withValues(
+                            alpha: 0.75,
+                          ), // تم تاریک نیمه شفاف شیشه‌ای
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: rank <= 3
@@ -146,12 +152,12 @@ class LeaderboardScreen extends ConsumerWidget {
                           ),
                           boxShadow: rank <= 3
                               ? [
-                            BoxShadow(
-                              color: rankColor.withValues(alpha: 0.1),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            )
-                          ]
+                                  BoxShadow(
+                                    color: rankColor.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    spreadRadius: 1,
+                                  ),
+                                ]
                               : null,
                         ),
                         child: ListTile(
@@ -163,15 +169,17 @@ class LeaderboardScreen extends ConsumerWidget {
                             width: base * 0.09,
                             height: base * 0.09,
                             decoration: BoxDecoration(
-                              color: rank <= 3 ? rankColor : Colors.white.withValues(alpha: 0.05),
+                              color: rank <= 3
+                                  ? rankColor
+                                  : Colors.white.withValues(alpha: 0.05),
                               shape: BoxShape.circle,
                               boxShadow: rank <= 3
                                   ? [
-                                BoxShadow(
-                                  color: rankColor.withValues(alpha: 0.3),
-                                  blurRadius: 6,
-                                ),
-                              ]
+                                      BoxShadow(
+                                        color: rankColor.withValues(alpha: 0.3),
+                                        blurRadius: 6,
+                                      ),
+                                    ]
                                   : null,
                             ),
                             alignment: Alignment.center,
@@ -302,11 +310,11 @@ class LeaderboardScreen extends ConsumerWidget {
                 // دکمه بازگشت به منو سبز نئونیِ هماهنگ با دکمه دیالوگ برنده بازی
                 GestureDetector(
                   onTap: () {
-                    ref.read(gameControllerProvider.notifier).updateState(
-                      gameState?.copyWith(
-                        gameStage: GameStage.joinStage,
-                      ),
-                    );
+                    ref
+                        .read(gameControllerProvider.notifier)
+                        .updateState(
+                          gameState?.copyWith(gameStage: GameStage.joinStage),
+                        );
                   },
                   child: Container(
                     width: double.infinity,
@@ -332,10 +340,14 @@ class LeaderboardScreen extends ConsumerWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.home, color: Colors.white, size: base * 0.045),
+                        Icon(
+                          Icons.home,
+                          color: Colors.white,
+                          size: base * 0.045,
+                        ),
                         const SizedBox(width: 8),
                         Text(
-                          'Home',
+                          context.tr(  'Home'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: base * 0.038,

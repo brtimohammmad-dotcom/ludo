@@ -261,6 +261,8 @@ class GameController extends _$GameController {
 
     if (state?.livePlayer != null) {
       final clearedPlayer = Player(
+        wins: state!.livePlayer!.wins,
+        losses: state!.livePlayer!.losses,
         userId: state!.livePlayer!.userId,
         username: state!.livePlayer!.username,
         canClaimDailyReward: state!.livePlayer!.canClaimDailyReward,

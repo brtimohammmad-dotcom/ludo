@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
+import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
 class ExitButtonAlert extends ConsumerWidget {
   const ExitButtonAlert({super.key});
@@ -51,7 +52,7 @@ class ExitButtonAlert extends ConsumerWidget {
             ),
             SizedBox(height: base * 0.03),
             Text(
-              'Do you want to exit?',
+              context.tr('exit alert title'),
               style: TextStyle(
                 fontSize: base * 0.045,
                 fontWeight: FontWeight.bold,
@@ -74,7 +75,7 @@ class ExitButtonAlert extends ConsumerWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'No',
+                          context.tr('No'),
                           style: TextStyle(
                             fontSize: base * 0.035,
                             fontWeight: FontWeight.bold,
@@ -124,7 +125,7 @@ class ExitButtonAlert extends ConsumerWidget {
                           ),
                         )
                             : Text(
-                          'Yes',
+                          context.tr('Yes'),
                           style: TextStyle(
                             fontSize: base * 0.035,
                             fontWeight: FontWeight.bold,

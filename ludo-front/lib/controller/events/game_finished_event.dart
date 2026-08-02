@@ -16,36 +16,57 @@ class GameFinishedEvent implements GameEvent {
 
   @override
   void execute(GameController controller) {
+    controller.animationController?.stop();
+
     if (controller.currentGameState == null) return;
     final livePlayer = controller.currentGameState?.livePlayer;
     final isWinner = livePlayer?.userId == newPlayer.userId;
     if (controller.currentGameState!.gameStage != GameStage.boardStage) {
+      isWinner
+          ? controller.updateState(
+              controller.currentGameState!.copyWith(
+                gameStage: GameStage.joinStage,
+                livePlayer: livePlayer?.copyWith(
+                  coin:
+                      livePlayer.coin + controller.currentGameState.winPrice(),
+                  wins: livePlayer.wins + 1,
+                ),
+              ),
+            )
+          : controller.updateState(
+              controller.currentGameState!.copyWith(
+                gameStage: GameStage.joinStage,
+                livePlayer: livePlayer?.copyWith(losses: livePlayer.losses + 1),
+              ),
+            );
+      return;
+    }
+    if (isWinner) {
       controller.updateState(
         controller.currentGameState!.copyWith(
-          gameStage: GameStage.joinStage,
           livePlayer: livePlayer?.copyWith(
-            coin: isWinner
-                ? livePlayer.coin + controller.currentGameState.winPrice()
-                : livePlayer.coin,
+            coin: livePlayer.coin + controller.currentGameState.winPrice(),
+            wins: livePlayer.wins + 1,
+          ),
+          serverState: controller.currentGameState!.serverState!.copyWith(
+            winner: newPlayer,
+            gameStatus: GameStatus.finished,
+            turnStatus: null,
           ),
         ),
       );
       return;
+    } else {
+      controller.updateState(
+        controller.currentGameState!.copyWith(
+          livePlayer: livePlayer?.copyWith(losses: livePlayer.losses + 1),
+          serverState: controller.currentGameState!.serverState!.copyWith(
+            winner: newPlayer,
+            gameStatus: GameStatus.finished,
+            turnStatus: null,
+          ),
+        ),
+      );
     }
-    controller.animationController?.stop();
-    controller.updateState(
-      controller.currentGameState!.copyWith(
-        livePlayer: livePlayer?.copyWith(
-          coin: isWinner
-              ? livePlayer.coin + controller.currentGameState.winPrice()
-              : livePlayer.coin,
-        ),
-        serverState: controller.currentGameState!.serverState!.copyWith(
-          winner: newPlayer,
-          gameStatus: GameStatus.finished,
-          turnStatus: null,
-        ),
-      ),
-    );
   }
 }
