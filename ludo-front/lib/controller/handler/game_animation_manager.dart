@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
@@ -9,17 +10,30 @@ class GameAnimationManager {
 
   GameAnimationManager(this.controller);
 
-  /// متد کمکی برای پخش صدا به تعداد قدم‌ها با افکت ریتمیک
+  /// پخش ریتمیک افکت صوتی حرکت مهره به تعداد گام‌ها
   Future<void> _playStepSounds(int stepCount) async {
     if (stepCount <= 0) return;
 
-    // زمان هر قدم بر اساس فرمول انیمیشن (100 میلی‌ثانیه برای هر خانه)
+    // زمان‌بندی هر قدم هماهنگ با سرعت انیمیشن (100 میلی‌ثانیه برای هر خانه)
     const int stepDurationMs = 100;
 
     for (int i = 0; i < stepCount; i++) {
       controller.playSfx("assets/audio/sound-effect/move_token.wav");
       await Future.delayed(const Duration(milliseconds: stepDurationMs));
     }
+  }
+
+  /// اجرای امن انیمیشن پس از اتمام رندر فریم جاری برای جلوگیری از لگ و Drop Frame
+  void _safeStartAnimation() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (controller.animationController != null) {
+        if (controller.animationController!.isAnimating) {
+          controller.animationController!.stop();
+        }
+        controller.animationController!.reset();
+        controller.animationController!.forward();
+      }
+    });
   }
 
   Future<void> moveTokenStepByStep({
@@ -53,19 +67,17 @@ class GameAnimationManager {
       ),
     );
 
-    // محاسبه تعداد خانه‌هایی که مهره باید طی کند
     final isFromBase = oldPosition == -1;
     final stepCount = isFromBase ? 1 : (targetPosition - oldPosition).clamp(1, 6);
 
-    // 🔊 پخش صدا به تعداد stepCount (اگر خروج از بیس نباشد)
+    // 🔊 پخش صدا بعد از اتمام رندر فریم اول (آغاز انیمیشن visual)
     if (!isFromBase) {
-      // یک تاخیر کوتاه برای شروع هم‌زمان صدا با آغاز حرکت انیمیشن
-      Future.delayed(const Duration(milliseconds: 100), () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _playStepSounds(stepCount);
       });
     }
 
-    // ⚡ صبر دقیقاً برابر با زمان اجرای انیمیشن در ویجت (200ms + stepCount * 100ms)
+    // ⚡ زمان‌بندی کل انیمیشن (200ms پایه + stepCount * 100ms)
     await Future.delayed(Duration(milliseconds: 200 + stepCount * 100));
   }
 
@@ -107,18 +119,17 @@ class GameAnimationManager {
       final isFromBase = oldPathIndex == -1;
       final stepCount = isFromBase ? 1 : steps.clamp(1, 6);
 
-      // 🔊 پخش صدا به تعداد stepCount (اگر خروج از بیس نباشد)
+      // 🔊 پخش ریتمیک صدا
       if (!isFromBase) {
-        Future.delayed(const Duration(milliseconds: 100), () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           _playStepSounds(stepCount);
         });
       }
 
-      // ⚡ هماهنگ با زمان انیمیشن
       await Future.delayed(Duration(milliseconds: 200 + stepCount * 100));
 
-      controller.animationController?.reset();
-      controller.animationController?.forward();
+      // ⚡ استارت انیمیشن بعدی پس از اتمام رندر فریم
+      _safeStartAnimation();
     } finally {
       controller.isMovingToken = false;
     }
@@ -134,6 +145,7 @@ class GameAnimationManager {
 
     controller.animationController?.stop();
     controller.playSfx("assets/audio/sound-effect/dice_rolling.wav");
+
     controller.updateState(
       GameState(
         serverState: controller.currentGameState!.serverState!.copyWith(
@@ -144,12 +156,15 @@ class GameAnimationManager {
         gameStage: GameStage.boardStage,
       ),
     );
+
     await Future.delayed(const Duration(milliseconds: 250));
+
     final currentGameState = GameState(
       serverState: newState,
       livePlayer: newLivePlayer,
       gameStage: GameStage.boardStage,
     );
+
     final tokenIsActive = newState.tokens.any((token) {
       return TokenRules.canActiveToken(token, currentGameState);
     });
@@ -171,7 +186,8 @@ class GameAnimationManager {
       await Future.delayed(const Duration(milliseconds: 600));
       controller.updateState(currentGameState);
     }
-    controller.animationController?.reset();
-    controller.animationController?.forward();
+
+    // ⚡ شروع انیمیشن تاس بدون افت فریم
+    _safeStartAnimation();
   }
 }
