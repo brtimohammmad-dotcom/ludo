@@ -24421,7 +24421,7 @@ amC:function amC(){},
 a8W:function a8W(a){this.a=a},
 Ql(a){var s,r,q,p,o,n,m,l="player_status",k=a.i(0,"wins"),j=a.i(0,"losses"),i=a.i(0,"avatar_url"),h=a.i(0,"coin")
 if(h==null)h=0
-s=a.i(0,"numberOfAbsences")
+s=a.i(0,"number_of_absences")
 r=a.i(0,"username")
 if(r==null)r=""
 q=a.i(0,"color")==null?null:A.fH(B.d8,a.i(0,"color"))
@@ -80296,7 +80296,7 @@ A.aoA.prototype={
 $1(a){var s,r,q=J.aQe(this.a.c,new A.aoy(a),new A.aoz())
 if(q!=null){s=J.b6(q)
 r=A.fH(B.t7,A.bH(s.i(q,"playerStatus")))
-return a.afZ(A.dy(s.i(q,"numberOfAbsences")),r)}return a},
+return a.afZ(A.dy(s.i(q,"number_of_absences")),r)}return a},
 $S:69}
 A.aoy.prototype={
 $1(a){var s=J.e3(a,"color"),r=this.a.d
@@ -80846,7 +80846,7 @@ r.bO("daily_reward_claimed",new A.ams(s))
 r.bO("already_claimed_daily_reward",new A.amt())}}
 A.ami.prototype={
 $1(a){var s,r,q,p,o=null,n="last_name",m="chat_instance"
-if(A.lX().gj_()==="localhost")s=A.ag(["first_name","\u06a9\u06cc\u0645\u06cc\u0627 \u0628\u0631\u0627\u062a\u06cc","id",10],t.N,t.K)
+if(A.lX().gj_()==="localhost")s=A.ag(["first_name","rayan","id",1],t.N,t.K)
 else{if($.eC==null)$.eC=new A.iK()
 r=v.G
 if(r.Telegram.WebApp.platform.toLowerCase()!=="unknown"){r.Telegram.WebApp.ready()

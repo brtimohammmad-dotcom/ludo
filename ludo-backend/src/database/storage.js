@@ -14,7 +14,7 @@ const uploadAvatarToSupabase = async (userId, telegramFileLink) => {
 
     // ۲. آپلود مستقیم به باکت سوپابیس (با فرض اینکه اسمی باکت avatars است)
     // گزینه upsert: true باعث می‌شود اگر کاربر عکس جدید گرفت، روی قبلی جایگزین شود
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("avatars")
       .upload(fileName, buffer, {
         contentType: "image/jpeg",

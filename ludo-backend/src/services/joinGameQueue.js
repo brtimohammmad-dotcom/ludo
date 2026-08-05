@@ -5,7 +5,7 @@ const gameLocks = new Map();
  * مکانیزم عمومی اعمال قفل انحصاری
  */
 async function acquireLock(lockMap, key, callback) {
-  const currentLock = lockMap.get(key) || Promise.resolve();
+  const currentLock = lockMap.get(key) ||  Promise.resolve();
   let release;
   const nextLock = new Promise((resolve) => {
     release = resolve;
@@ -28,11 +28,11 @@ async function acquireLock(lockMap, key, callback) {
 }
 
 async function joinGameQueue(playerId, callback) {
-  return await acquireLock(userLocks, playerId, callback);
+  return  acquireLock(userLocks, playerId, callback);
 }
 
 async function acquireGameLock(gameId, callback) {
-  return await acquireLock(gameLocks, gameId, callback);
+  return  acquireLock(gameLocks, gameId, callback);
 }
 
 module.exports = {

@@ -40,7 +40,7 @@ class TimesUpEvent implements GameEvent {
         // ایجاد یک نمونه جدید از بازیکن با مقادیر آپدیت شده
         return player.copyWith(
           playerStatus: PlayerStatus.values.byName(statusUpdate['playerStatus'] as String),
-          numberOfAbsences: statusUpdate['numberOfAbsences'] as int,
+          numberOfAbsences: statusUpdate['number_of_absences'] as int,
         );
       }
       return player;

@@ -35,7 +35,7 @@ class Player {
       losses: json['losses'],
       avatarUrl: json['avatar_url'],
       coin: json['coin'] ?? 0,
-      numberOfAbsences: json['numberOfAbsences'],
+      numberOfAbsences: json['number_of_absences'],
       username: json['username'] ?? '',
       color: json['color'] == null
           ? null

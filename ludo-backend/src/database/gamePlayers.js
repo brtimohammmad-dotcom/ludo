@@ -1,57 +1,74 @@
-// خروجی جدید دیتابیس را به فایلی که ساختی وصل می‌کنیم
 const supabase = require("../../postgresql");
-const initialState = require("../models/initialState");
 
-async function addPlayerToGameOnDatabase(player, gameId, color, gameType) {
+async function addPlayerToGameOnDatabase(telegramId, gameId, color) {
   try {
-    // ۱. ابتدا دیتای فعلی ستون players را برای این بازی می‌گیریم
-
-    const { data: gameData, error: fetchError } = await supabase
-      .from(gameType == "global" ? "game" : "room")
-      .select("players")
-      .eq(gameType == "global" ? "game_id" : "room_id", gameId)
+    const { data, error } = await supabase
+      .from("game_players")
+      .insert({
+        game_id: String(gameId),
+        telegram_id: telegramId,
+        color: color,
+        player_status: "online",
+      })
+      .select()
       .single();
 
-    if (fetchError) throw fetchError;
-
-    // مطمئن می‌شویم که مچ به صورت آرایه است، اگر خالی بود یک آرایه خالی قرار می‌دهیم
-    let currentPlayers = gameData.players || [];
-
-    // اگر دیتابیس به صورت رشته فرستاده بود پارسش می‌کنیم (معمولاً در jsonb خود ابزار تبدیل آرایه می‌دهد)
-    if (typeof currentPlayers === "string") {
-      currentPlayers = JSON.parse(currentPlayers);
+    if (error) {
+      if (error.code === "23505") {
+        // جلوگیری از ارور ثبت تکراری
+        return null;
+      }
+      throw error;
     }
 
-    // ۲. ساختن آبجکت بازیکن جدید با ساختاری که مد نظرت بود
-    const newPlayerObj = {
-      ...player,
-      color: color,
-    };
-
-    // اضافه کردن بازیکن جدید به لیست فعلی بازیکنان
-    currentPlayers.push(newPlayerObj);
-
-    // ۳. آپدیت کردن دیتابیس با آرایهٔ جدید و گرفتن خروجی آپدیت شده (select)
-    const { data: updatedGame, error: updateError } = await supabase
-      .from(gameType === "global" ? "game" : "room")
-      .update({ players: currentPlayers })
-      .eq(gameType === "global" ? "game_id" : "room_id", gameId)
-      .select("players")
-      .single();
-
-    if (updateError) throw updateError;
-
-    // ۴. پیدا کردن و برگرداندن همین بازیکنی که تازه اضافه شد
-    const playersList = updatedGame.players || [];
-    const currentPlayer = playersList.find(
-      (p) => p.telegram_id === player.telegram_id,
-    );
-
-    return currentPlayer; // دقیقاً همان آبجکت بازیکن برگشت داده می‌شود
+    return data;
   } catch (error) {
-    console.error("خطا در اضافه کردن بازیکن به بازی:", error);
+    console.error("❌ خطا در ثبت بازیکن در دیتابیس:", error);
+    throw error;
+  }
+}
+/**
+ * تغییر وضعیت آنلاین/آفلاین بودن بازیکن در طول بازی
+ */
+async function updatePlayerStatusOnDatabase(telegramId, gameId, status) {
+  try {
+    const { data, error } = await supabase
+        .from("game_players")
+        .update({ player_status: status })
+        .eq("game_id", String(gameId))
+        .eq("telegram_id", telegramId)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("❌ خطا در آپدیت وضعیت بازیکن:", error);
     throw error;
   }
 }
 
-module.exports = { addPlayerToGameOnDatabase };
+/**
+ * حذف بازیکن از بازی (مخصوص زمانی که لابی هنوز شروع نشده و بازیکن لفت می‌دهد)
+ */
+async function removePlayerFromGameOnDatabase(telegramId, gameId) {
+  try {
+    const { error } = await supabase
+        .from("game_players")
+        .delete()
+        .eq("game_id", String(gameId))
+        .eq("telegram_id", telegramId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("❌ خطا در حذف بازیکن از دیتابیس:", error);
+    throw error;
+  }
+}
+
+module.exports = {
+  addPlayerToGameOnDatabase,
+  updatePlayerStatusOnDatabase,
+  removePlayerFromGameOnDatabase,
+};

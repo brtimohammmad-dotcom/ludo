@@ -1,6 +1,5 @@
 // اتصال به کلاینت جدید دیتابیس
 const supabase = require("../../postgresql");
-const initialState = require("../models/initialState");
 
 async function getOrCreatePlayer(telegramId, username) {
   try {

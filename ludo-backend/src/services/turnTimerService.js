@@ -1,6 +1,5 @@
 const { createInterval } = require("timerider");
-const { updateGameState } = require("../database/games");
-const { updateLobbyMessage } = require("../../bot");
+
 const initialState = require("../models/initialState");
 const {
   TWO_PLAYER_COLORS,
@@ -41,7 +40,7 @@ function startTimer(socket, io) {
     let delayedPlayer = null;
     let updatedPlayers = game.players.map((p) => {
       if (p.color === game.current_turn) {
-        delayedPlayer = { ...p, numberOfAbsences: p.numberOfAbsences + 1 };
+        delayedPlayer = { ...p, number_of_absences: p.number_of_absences + 1 };
         return delayedPlayer;
       }
       return p;
@@ -51,9 +50,7 @@ function startTimer(socket, io) {
     });
     game = initialState.getGameState(socket.data.gameId);
     // ⭐ اصلاح: تعداد缺席 باید === 2 باشه (چون یک بار缺席 شده، الان دفعۀ دوم)
-    if (delayedPlayer && delayedPlayer.numberOfAbsences === 3) {
-
-
+    if (delayedPlayer && delayedPlayer.number_of_absences === 3) {
       updatedPlayers = game.players.map((p) => {
         if (p.color === game.current_turn) {
           return { ...p, player_status: "offline" };
@@ -78,7 +75,6 @@ function startTimer(socket, io) {
         );
 
         if (onlinePlayer) {
-
           const { finishGame } = require("../helpers/game_helpers");
 
           // اتمام بازی
@@ -135,7 +131,7 @@ function startTimer(socket, io) {
         userId: socket.data.telegramId,
         color: p.color,
         playerStatus: p.player_status,
-        numberOfAbsences: p.numberOfAbsences,
+        number_of_absences: p.number_of_absences,
       })),
     };
     game = initialState.getGameState(socket.data.gameId);
@@ -153,7 +149,7 @@ function resetTimer(socket, io) {
   if (timer) {
     if (typeof timer.clear === "function") {
       timer.clear(); // پاک کردن تایمر قدیمی
-    } else if (typeof timer === "object" && timer !== null) {
+    } else if (typeof timer === "object") {
       // اگر تایمر قدیمی setInterval عادی بود
       clearInterval(timer);
     }
@@ -169,12 +165,7 @@ function pauseTimer(gameId) {
   }
 }
 
-function resumeTimer(gameId) {
-  const timer = activeTimers.get(gameId);
-  if (timer && typeof timer.resume === "function") {
-    timer.resume();
-  }
-}
+
 
 function stopTimer(gameId) {
 
@@ -189,15 +180,10 @@ function stopTimer(gameId) {
   }
 }
 
-function getAllActiveTimers() {
-  return Array.from(activeTimers.keys());
-}
 
 module.exports = {
   startTimer,
   resetTimer,
   pauseTimer,
-  resumeTimer,
   stopTimer,
-  getAllActiveTimers,
 };
