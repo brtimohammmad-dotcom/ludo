@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo/domain/model/token.dart';
+import 'package:ludo/game/logic/token-logic/token_logic.dart';
 import 'package:ludo/ui/screens/board/elements/token/token_widget.dart';
 
 class TokenAnimatedWidget extends StatefulWidget {
@@ -21,76 +22,145 @@ class TokenAnimatedWidget extends StatefulWidget {
 }
 
 class _TokenAnimatedWidgetState extends State<TokenAnimatedWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnimation;
+    with TickerProviderStateMixin {
+  late AnimationController _moveController;
+  late Animation<double> _moveAnimation;
 
+  List<Offset> _pathPoints = const [];
+  int? _prevPathIndex;
 
+  bool get _isInterpolating => _pathPoints.length > 1;
 
   @override
   void initState() {
     super.initState();
 
+    _moveController = AnimationController(vsync: this);
 
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
+    _moveAnimation = CurvedAnimation(
+      parent: _moveController,
+      curve: Curves.linear,
     );
 
-    // scale: 1.0 → 1.3 → 1.0
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.3)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 50,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.3, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: 50,
-      ),
-    ]).animate(_scaleController);
+    _moveController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() => _pathPoints = const []);
+        }
+      }
+    });
+
+    _prevPathIndex = widget.token.pathIndex;
   }
 
   @override
   void didUpdateWidget(TokenAnimatedWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // اگه position عوض شد → انیمیشن scale رو اجرا کن
-    final positionChanged =
-        oldWidget.left != widget.left || oldWidget.top != widget.top;
-
-    if (positionChanged) {
-
-      _scaleController.forward(from: 0);
+    final newPathIndex = widget.token.pathIndex;
+    if (newPathIndex != _prevPathIndex) {
+      _startMove(_prevPathIndex ?? newPathIndex, newPathIndex);
     }
+    _prevPathIndex = newPathIndex;
+  }
+
+  void _startMove(int from, int to) {
+    // خروج از بیس (-1) یا حرکت معکوس -> اسلاید خطی ساده
+    if (from == -1 || to <= from) {
+      setState(() => _pathPoints = const []);
+      return;
+    }
+
+    final map = movementPaths[widget.token.playerColor.index];
+    if (map == null || to >= map.length) {
+      setState(() => _pathPoints = const []);
+      return;
+    }
+
+    final points = <Offset>[];
+    for (int i = from; i <= to; i++) {
+      points.add(_toLeftTop(map[i]));
+    }
+    setState(() => _pathPoints = points);
+
+    final stepCount = to - from;
+
+    // ⚡ سرعت ۲ برابر (نصف زمان اولیه): 200ms پایه + 100ms به ازای هر گام
+    final totalDurationMs = 200 + (stepCount * 100);
+
+    _moveController.duration = Duration(milliseconds: totalDurationMs);
+    _moveController.forward(from: 0);
+  }
+
+  Offset _toLeftTop(Offset cell) {
+    return Offset(cell.dy * widget.cellSize, cell.dx * widget.cellSize);
+  }
+
+  // درون‌یابی موقعیت مکانی مهره روی مسیر
+  Offset _interpolatePosition(double t) {
+    final segments = _pathPoints.length - 1;
+    if (segments <= 0) return Offset(widget.left, widget.top);
+
+    final pos = (t * segments).clamp(0.0, segments.toDouble());
+    final idx = pos.floor().clamp(0, segments - 1);
+    final frac = pos - idx;
+    return Offset.lerp(_pathPoints[idx], _pathPoints[idx + 1], frac)!;
+  }
+
+  // درون‌یابی بزرگ/کوچک شدن مهره روی هر خانه
+  double _interpolateScale(double t) {
+    final stepCount = _pathPoints.length - 1;
+    if (stepCount <= 0) return 1.0;
+
+    final stepProgress = (t * stepCount) % 1.0;
+
+    final scaleBounce = Curves.easeInOut.transform(
+      (stepProgress < 0.5 ? stepProgress * 2 : (1.0 - stepProgress) * 2),
+    );
+
+    return 1.0 + (scaleBounce * 0.35); // اوج انیمیشن بزرگ‌نمایی: 1.35
   }
 
   @override
   void dispose() {
-    _scaleController.dispose();
+    _moveController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isInterpolating) {
+      return AnimatedBuilder(
+        animation: _moveAnimation,
+        builder: (context, child) {
+          final t = _moveAnimation.value;
+          final position = _interpolatePosition(t);
+          final scale = _interpolateScale(t);
+
+          return Positioned(
+            left: position.dx,
+            top: position.dy,
+            child: Transform.scale(
+              scale: scale,
+              child: TokenWidget(
+                token: widget.token,
+                size: widget.cellSize,
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    // حالت عادی یا جابه‌جایی مستقیم (مثل خروج از بیس)
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOutCubic,
       left: widget.left,
       top: widget.top,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, cachedTokenWidget) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: cachedTokenWidget, // 👈 اینجا به جای ساخت مجدد، از کش استفاده میکند
-          );
-        },
-        child: TokenWidget( // 👈 این بخش فقط یک بار ساخته می‌شود و حین انیمیشن فقط اسکیل می‌شود
-          token: widget.token,
-          size: widget.cellSize,
-        ),
+      child: TokenWidget(
+        token: widget.token,
+        size: widget.cellSize,
       ),
     );
   }

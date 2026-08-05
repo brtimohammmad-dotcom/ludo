@@ -9,6 +9,19 @@ class GameAnimationManager {
 
   GameAnimationManager(this.controller);
 
+  /// متد کمکی برای پخش صدا به تعداد قدم‌ها با افکت ریتمیک
+  Future<void> _playStepSounds(int stepCount) async {
+    if (stepCount <= 0) return;
+
+    // زمان هر قدم بر اساس فرمول انیمیشن (100 میلی‌ثانیه برای هر خانه)
+    const int stepDurationMs = 100;
+
+    for (int i = 0; i < stepCount; i++) {
+      controller.playSfx("assets/audio/sound-effect/move_token.wav");
+      await Future.delayed(const Duration(milliseconds: stepDurationMs));
+    }
+  }
+
   Future<void> moveTokenStepByStep({
     required int tokenId,
     required int targetPosition,
@@ -17,48 +30,43 @@ class GameAnimationManager {
 
     final serverState = controller.currentGameState!.serverState!;
 
-    // ۱. پیدا کردن ایندکس توکن حرکت‌کرده در استیت فعلی فرانت‌اند
     final movedTokenIndex = serverState.tokens.indexWhere(
-      (t) => t.id == tokenId.toString(),
+          (t) => t.id == tokenId.toString(),
     );
     if (movedTokenIndex == -1) return;
 
     final oldToken = serverState.tokens[movedTokenIndex];
+    final oldPosition = oldToken.pathIndex;
 
-    // پوزیشن فعلی توکن در فرانت‌اَند قبل از حرکت
-    final oldPosition = oldToken
-        .pathIndex; // یا هر فیلدی که نام پوزیشن شماست (مثلاً position یا pathIndex)
+    if (targetPosition <= oldPosition) return;
 
-    // ۲. اجرای انیمیشن پله‌پله به سمت جلو
-    for (int step = oldPosition; step < targetPosition; step++) {
-      if (controller.currentGameState?.serverState == null) return;
+    final updatedTokens = List<Token>.from(serverState.tokens);
+    updatedTokens[movedTokenIndex] =
+        oldToken.copyWith(pathIndex: targetPosition);
 
-      // آپدیت کردن پوزیشن توکن یک قدم به جلو
-      final updatedToken = controller
-          .currentGameState!
-          .serverState!
-          .tokens[movedTokenIndex]
-          .copyWith(pathIndex: step + 1);
-
-      final updatedTokens = List<Token>.from(
-        controller.currentGameState!.serverState!.tokens,
-      );
-      updatedTokens[movedTokenIndex] = updatedToken;
-
-      // اعمال استیت جدید برای رندر شدن تک‌قدم توکن
-      controller.updateState(
-        controller.currentGameState!.copyWith(
-          serverState: controller.currentGameState!.serverState!.copyWith(
-            turnStatus: TurnStatus.waitingForAnimate,
-            tokens: updatedTokens,
-          ),
+    controller.updateState(
+      controller.currentGameState!.copyWith(
+        serverState: serverState.copyWith(
+          turnStatus: TurnStatus.waitingForAnimate,
+          tokens: updatedTokens,
         ),
-      );
+      ),
+    );
 
-      // صدا و تاخیر برای حس حرکت مهره
-      controller.playSfx("assets/audio/sound-effect/move_token.wav");
-      await Future.delayed(const Duration(milliseconds: 300));
+    // محاسبه تعداد خانه‌هایی که مهره باید طی کند
+    final isFromBase = oldPosition == -1;
+    final stepCount = isFromBase ? 1 : (targetPosition - oldPosition).clamp(1, 6);
+
+    // 🔊 پخش صدا به تعداد stepCount (اگر خروج از بیس نباشد)
+    if (!isFromBase) {
+      // یک تاخیر کوتاه برای شروع هم‌زمان صدا با آغاز حرکت انیمیشن
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _playStepSounds(stepCount);
+      });
     }
+
+    // ⚡ صبر دقیقاً برابر با زمان اجرای انیمیشن در ویجت (200ms + stepCount * 100ms)
+    await Future.delayed(Duration(milliseconds: 200 + stepCount * 100));
   }
 
   Future<void> moveTokenStepByStepLocally(String tokenId, int steps) async {
@@ -71,70 +79,43 @@ class GameAnimationManager {
     try {
       controller.animationController?.stop();
 
-      int movedTokenIndex = controller.currentGameState!.serverState!.tokens
-          .indexWhere((t) => t.id == tokenId);
-
+      final serverState = controller.currentGameState!.serverState!;
+      final movedTokenIndex =
+      serverState.tokens.indexWhere((t) => t.id == tokenId);
       if (movedTokenIndex == -1) return;
 
-      final currentToken =
-          controller.currentGameState!.serverState!.tokens[movedTokenIndex];
+      final currentToken = serverState.tokens[movedTokenIndex];
       final oldPathIndex = currentToken.pathIndex;
 
-      // 🟢 حالت خاص: مهره داخل Base است (1-) و تاس 6 آمده است
-      if (oldPathIndex == -1 && steps == 6) {
-        final updatedToken = currentToken.copyWith(pathIndex: 0);
-        final updatedTokens = List<Token>.from(
-          controller.currentGameState!.serverState!.tokens,
-        );
-        updatedTokens[movedTokenIndex] = updatedToken;
+      if (oldPathIndex == -1 && steps != 6) return;
 
-        controller.updateState(
-          controller.currentGameState!.copyWith(
-            serverState: controller.currentGameState!.serverState!.copyWith(
-              turnStatus: TurnStatus.waitingForAnimate,
-              tokens: updatedTokens,
-            ),
+      final newPathIndex = oldPathIndex == -1 ? 0 : oldPathIndex + steps;
+
+      final updatedTokens = List<Token>.from(serverState.tokens);
+      updatedTokens[movedTokenIndex] =
+          currentToken.copyWith(pathIndex: newPathIndex);
+
+      controller.updateState(
+        controller.currentGameState!.copyWith(
+          serverState: serverState.copyWith(
+            turnStatus: TurnStatus.waitingForAnimate,
+            tokens: updatedTokens,
           ),
-        );
+        ),
+      );
 
-        // یک تاخیر کوتاه برای حس شدن حرکت ورود به زمین
-        await Future.delayed(const Duration(milliseconds: 300));
-        controller.playSfx("assets/audio/sound-effect/move_token.wav");
+      final isFromBase = oldPathIndex == -1;
+      final stepCount = isFromBase ? 1 : steps.clamp(1, 6);
 
-        controller.animationController?.reset();
-        controller.animationController?.forward();
-        return; // خروج از متد چون حرکت تمام شده است
+      // 🔊 پخش صدا به تعداد stepCount (اگر خروج از بیس نباشد)
+      if (!isFromBase) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _playStepSounds(stepCount);
+        });
       }
 
-      // 🔴 حالت عادی: مهره در زمین است و باید پله‌پله جلو برود
-      // اگر مهره در بیس باشد و تاس ۶ نباشد، اصلاً نباید حرکت کند
-      if (oldPathIndex == -1) return;
-
-      final targetPathIndex = oldPathIndex + steps;
-
-      for (int step = oldPathIndex; step < targetPathIndex; step++) {
-        if (controller.currentGameState?.serverState == null) return;
-
-        final tokenAtStep =
-            controller.currentGameState!.serverState!.tokens[movedTokenIndex];
-        final updatedToken = tokenAtStep.copyWith(pathIndex: step + 1);
-        final updatedTokens = List<Token>.from(
-          controller.currentGameState!.serverState!.tokens,
-        );
-        updatedTokens[movedTokenIndex] = updatedToken;
-
-        controller.updateState(
-          controller.currentGameState!.copyWith(
-            serverState: controller.currentGameState!.serverState!.copyWith(
-              turnStatus: TurnStatus.waitingForAnimate,
-              tokens: updatedTokens,
-            ),
-          ),
-        );
-
-        await Future.delayed(const Duration(milliseconds: 300));
-        controller.playSfx("assets/audio/sound-effect/move_token.wav");
-      }
+      // ⚡ هماهنگ با زمان انیمیشن
+      await Future.delayed(Duration(milliseconds: 200 + stepCount * 100));
 
       controller.animationController?.reset();
       controller.animationController?.forward();
@@ -147,7 +128,7 @@ class GameAnimationManager {
     if (controller.currentGameState?.livePlayer == null) return;
 
     final newLivePlayer = newState.players.firstWhere(
-      (p) => p.userId == controller.currentGameState!.livePlayer!.userId,
+          (p) => p.userId == controller.currentGameState!.livePlayer!.userId,
       orElse: () => controller.currentGameState!.livePlayer!,
     );
 
@@ -187,7 +168,7 @@ class GameAnimationManager {
         ),
       );
 
-      await Future.delayed(const Duration(milliseconds: 750));
+      await Future.delayed(const Duration(milliseconds: 600));
       controller.updateState(currentGameState);
     }
     controller.animationController?.reset();

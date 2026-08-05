@@ -109,151 +109,153 @@ function handleRollDice(socket, io, callback) {
 }
 
 function handleMoveToken(socket, token, io, callback) {
-    const validation = validateGameAndPlayer(socket, callback);
-    if (!validation.isValid) return;
+  const validation = validateGameAndPlayer(socket, callback);
+  if (!validation.isValid) return;
 
-    if (processingGames.has(socket.data.gameId)) {
-        return sendError(socket, callback, "در حال پردازش...");
+  if (processingGames.has(socket.data.gameId)) {
+    return sendError(socket, callback, "در حال پردازش...");
+  }
+
+  const gameState = validation.gameState;
+  const player = validation.player;
+
+  if (!token || !token.id) {
+    return sendError(socket, callback, "Invalid Token");
+  }
+
+  const tokenIndex = gameState.tokens.findIndex(
+    (t) => Number(t.id) === Number(token.id),
+  );
+
+  if (tokenIndex === -1) {
+    return sendError(socket, callback, "Token not found");
+  }
+
+  processingGames.add(socket.data.gameId);
+
+  try {
+    const currentToken = gameState.tokens[tokenIndex];
+    let colorIdx =
+      gameState.number_of_players === 4
+        ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
+        : TWO_PLAYER_COLORS.indexOf(gameState.current_turn);
+
+    const canMove =
+      gameState.turn_status === "waitingForMove" &&
+      canActivateToken(currentToken, gameState, gameState.last_dice_value) &&
+      player.color === currentToken.color &&
+      gameState.current_turn === player.color;
+
+    if (!canMove) {
+      return sendError(socket, callback, "Invalid Move");
     }
 
-    const gameState = validation.gameState;
-    const player = validation.player;
-
-    if (!token || !token.id) {
-        return sendError(socket, callback, "Invalid Token");
+    // تایید دریافت درخواست موفق (Ack)
+    if (typeof callback === "function") {
+      callback({ success: true });
     }
 
-    const tokenIndex = gameState.tokens.findIndex(
-        (t) => Number(t.id) === Number(token.id),
+    let updatedTokens = [...gameState.tokens];
+
+    const kickedToken = findKickToken(
+      currentToken,
+      gameState.last_dice_value,
+      gameState.tokens,
     );
-
-    if (tokenIndex === -1) {
-        return sendError(socket, callback, "Token not found");
+    let hasKick = false;
+    if (kickedToken) {
+      hasKick = true;
+      const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
+      updatedTokens[kickedIdx] = { ...kickedToken, position: -1 };
     }
 
-    processingGames.add(socket.data.gameId);
+    // حرکت توکن در آرایه سرور
+    if (currentToken.position === -1) {
+      updatedTokens[tokenIndex] = { ...currentToken, position: 0 };
+    } else {
+      updatedTokens[tokenIndex] = {
+        ...currentToken,
+        position: currentToken.position + gameState.last_dice_value,
+      };
+    }
 
-    try {
-        const currentToken = gameState.tokens[tokenIndex];
-        let colorIdx =
-            gameState.number_of_players === 4
-                ? FOUR_PLAYER_COLORS.indexOf(gameState.current_turn)
-                : TWO_PLAYER_COLORS.indexOf(gameState.current_turn);
+    const isSix = gameState.last_dice_value === 6;
 
-        const canMove =
-            gameState.turn_status === "waitingForMove" &&
-            canActivateToken(currentToken, gameState, gameState.last_dice_value) &&
-            player.color === currentToken.color &&
-            gameState.current_turn === player.color;
+    let socketUpdates = {
+      token_id: currentToken.id,
+      target_position: updatedTokens[tokenIndex].position,
+      has_kick: hasKick,
+      kicked_token_id: kickedToken ? kickedToken.id : null,
+    };
 
-        if (!canMove) {
-            return sendError(socket, callback, "Invalid Move");
-        }
+    let nextTurn = gameState.current_turn;
+    if (isSix) {
+      socketUpdates.turn_status = "waitingForRoll";
+    } else {
+      while (
+        gameState.players[(colorIdx + 1) % gameState.number_of_players]
+          .player_status === "offline"
+      ) {
+        colorIdx = colorIdx + 1;
+      }
+      nextTurn =
+        gameState.number_of_players === 4
+          ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
+          : TWO_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
+      socketUpdates.current_turn = nextTurn;
+      socketUpdates.turn_status = "waitingForRoll";
+    }
 
-        // تایید دریافت درخواست موفق (Ack)
-        if (typeof callback === "function") {
-            callback({success: true});
-        }
+    initialState.updateGameState(socket.data.gameId, {
+      tokens: updatedTokens,
+      current_turn: nextTurn,
+      turn_status: socketUpdates.turn_status,
+    });
 
-        let updatedTokens = [...gameState.tokens];
+    // پخش رویداد حرکت به کلاینت‌ها
+    io.to(socket.data.gameId).emit("token_moved", {
+      updates: socketUpdates,
+      has_kick: hasKick,
+    });
 
-        const kickedToken = findKickToken(
-            currentToken,
-            gameState.last_dice_value,
-            gameState.tokens,
+    initialState.updateGameState(socket.data.gameId, {
+      turn_status: "waitingForAnimate",
+    });
+    pauseTimer(socket.data.gameId);
+
+    // ⚡ کاهش تایمر انتظار سرور (۲ برابر): 250ms برای خروج از بیس یا (200 + تاس * 100) برای حرکت روی مسیر
+    let time =
+      currentToken.position === -1
+        ? 250
+        : 200 + gameState.last_dice_value * 100;
+
+    setTimeout(async () => {
+      const currentGameState = initialState.getGameState(socket.data.gameId);
+      if (!currentGameState) return;
+
+      const playerTokens = currentGameState.tokens.filter(
+        (t) => t.color === player.color,
+      );
+
+      initialState.updateGameState(socket.data.gameId, {
+        turn_status: "waitingForRoll",
+      });
+
+      const hasNotWon = playerTokens.some((t) => t.position !== 39);
+      if (hasNotWon) {
+        resetTimer(socket, io);
+      } else {
+        await finishGame(
+          socket.data.gameId,
+          player,
+          currentGameState.game_type,
+          io,
         );
-        let hasKick = false;
-        if (kickedToken) {
-            hasKick = true;
-            const kickedIdx = updatedTokens.findIndex((t) => t.id === kickedToken.id);
-            updatedTokens[kickedIdx] = {...kickedToken, position: -1};
-        }
-
-        // حرکت توکن در آرایه سرور
-        if (currentToken.position === -1) {
-            updatedTokens[tokenIndex] = {...currentToken, position: 0};
-        } else {
-            updatedTokens[tokenIndex] = {
-                ...currentToken,
-                position: currentToken.position + gameState.last_dice_value,
-            };
-        }
-
-        const isSix = gameState.last_dice_value === 6;
-
-        let socketUpdates = {
-            token_id: currentToken.id,
-            target_position: updatedTokens[tokenIndex].position,
-            has_kick: hasKick,
-            kicked_token_id: kickedToken ? kickedToken.id : null,
-        };
-
-        let nextTurn = gameState.current_turn;
-        if (isSix) {
-            socketUpdates.turn_status = "waitingForRoll";
-        } else {
-            while (
-                gameState.players[(colorIdx + 1) % gameState.number_of_players]
-                    .player_status === "offline"
-                ) {
-                colorIdx = colorIdx + 1;
-            }
-            nextTurn =
-                gameState.number_of_players === 4
-                    ? FOUR_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players]
-                    : TWO_PLAYER_COLORS[(colorIdx + 1) % gameState.number_of_players];
-            socketUpdates.current_turn = nextTurn;
-            socketUpdates.turn_status = "waitingForRoll";
-        }
-
-        initialState.updateGameState(socket.data.gameId, {
-            tokens: updatedTokens,
-            current_turn: nextTurn,
-            turn_status: socketUpdates.turn_status,
-        });
-
-        // پخش رویداد حرکت به کلاینت‌ها
-        io.to(socket.data.gameId).emit("token_moved", {
-            updates: socketUpdates,
-            has_kick: hasKick,
-        });
-
-        initialState.updateGameState(socket.data.gameId, {
-            turn_status: "waitingForAnimate",
-        });
-        pauseTimer(socket.data.gameId);
-
-        let time =
-            currentToken.position === -1 ? 300 : gameState.last_dice_value * 300;
-
-        setTimeout(async () => {
-            const currentGameState = initialState.getGameState(socket.data.gameId);
-            if (!currentGameState) return;
-
-            const playerTokens = currentGameState.tokens.filter(
-                (t) => t.color === player.color,
-            );
-
-            initialState.updateGameState(socket.data.gameId, {
-                turn_status: "waitingForRoll",
-            });
-
-            const hasNotWon = playerTokens.some((t) => t.position !== 39);
-            if (hasNotWon) {
-                resetTimer(socket, io);
-            } else {
-
-                await finishGame(
-                    socket.data.gameId,
-                    player,
-                    currentGameState.game_type,
-                    io,
-                );
-            }
-        }, time);
-    } finally {
-        processingGames.delete(socket.data.gameId);
-    }
+      }
+    }, time);
+  } finally {
+    processingGames.delete(socket.data.gameId);
+  }
 }
 
 async function handleExitingGame(socket, io, callback) {
