@@ -272,8 +272,10 @@ class _TimerProgressBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // بهینه‌سازی: از read استفاده می‌شود تا این ویجت فقط با tick انیمیشن بازترسیم شود،
+    // نه با هر تغییر state بازی (هر قدم مهره / هر بار تاس). ارجاع کنترلر در طول عمر بورد ثابت است.
     final controller = ref
-        .watch(gameControllerProvider.notifier)
+        .read(gameControllerProvider.notifier)
         .animationController;
 
     if (controller == null) return const SizedBox.shrink();

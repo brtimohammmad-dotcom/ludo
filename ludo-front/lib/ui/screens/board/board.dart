@@ -31,14 +31,12 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
     );
     _uiEventHandler.checkAndShowWaitingDialog();
 
+    // بهینه‌سازی: تیکر انیمیشن فقط هنگام رویدادهای بازی (شروع، تاس، حرکت مهره) اجرا می‌شود
+    // و در حالت idel متوقف می‌ماند. حذف حلقه‌ی بی‌پایان `addStatusListener` باعث می‌شود
+    // کامپوننت‌های وابسته (نوار تایمر، حلقه‌ی هایلایت مهره‌ها، تاس) به‌صورت دائمی ری‌پینت نشوند
+    // و مصرف CPU/باتری و لگ به‌طور چشمگیری کاهش یابد.
     gameController.animationController =
-    AnimationController(vsync: this, duration: const Duration(seconds: 10))
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          gameController.animationController!.reset();
-          gameController.animationController!.forward();
-        }
-      });
+        AnimationController(vsync: this, duration: const Duration(seconds: 10));
     _gameController = ref.read(gameControllerProvider.notifier);
   }
 

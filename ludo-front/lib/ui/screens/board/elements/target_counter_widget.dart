@@ -31,11 +31,22 @@ class TargetCounterWidget extends ConsumerWidget {
         (state) => state.getTargetTokensCountByColor(playerColor),
       ),
     );
-    if (targetCount > 0) {
-      ref
-          .read(audioServiceProvider.notifier)
-          .playSFX("assets/audio/sound-effect/target_token.wav");
-    }
+
+    // بهینه‌سازی: پخش افکت صدا فقط زمانی که یک مهره تازه به خانه رسیده‌ است،
+    // نه در هر rebuild (قبلاً داخل build بود و باعث پخش مکرر صدا و تخصیص Howl می‌شد).
+    ref.listen<int>(
+      gameControllerProvider.select(
+        (state) => state.getTargetTokensCountByColor(playerColor),
+      ),
+      (previous, next) {
+        if ((previous ?? 0) < next) {
+          ref
+              .read(audioServiceProvider.notifier)
+              .playSFX("assets/audio/sound-effect/target_token.wav");
+        }
+      },
+    );
+
     // انیمیشن بر اساس تعداد مهره‌ها (اگر صفر باشد غایب است)
     final double scale = targetCount > 0 ? 1.0 : 0.0;
 
