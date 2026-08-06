@@ -99,5 +99,13 @@ server.listen(port, "0.0.0.0", async () => {
   }
 });
 
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+process.once("SIGINT", () => {
+    const { stopAllBotDrivers } = require("./src/services/botService");
+    stopAllBotDrivers();
+    bot.stop("SIGINT");
+});
+process.once("SIGTERM", () => {
+    const { stopAllBotDrivers } = require("./src/services/botService");
+    stopAllBotDrivers();
+    bot.stop("SIGTERM");
+});

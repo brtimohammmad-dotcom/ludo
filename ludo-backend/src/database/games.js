@@ -44,7 +44,6 @@ async function updateGameState(id, fields) {
             return null;
         }
 
-        console.log("آپدیت با موفقیت انجام شد:", updatedGame);
 
         // دریافت لیست بازیکنان از استیت لوکال برنامه
         const players = initialState.getGameState(id)?.players || [];

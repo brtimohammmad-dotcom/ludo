@@ -12,6 +12,7 @@ const {updateGameState} = require("../database/games");
 const {startTimer} = require("../services/turnTimerService");
 const {updateLobbyMessage} = require("../../bot.js");
 const {hasExistGame} = require("./authService.js");
+const botService = require("./botService");
 
 const roomTimers = new Map();
 
@@ -100,6 +101,12 @@ async function handleJoinGame(data, socket, io, callback) {
 
             socket.data.gameId = game.game_id;
             await callFront(socket, io);
+
+            // 🎯 سیستم پشتیبان: اگر روم عمومی ظرف ۶ ثانیه پر نشد، ربات‌ها جای خالی را پر می‌کنند
+            const roomAfterJoin = initialState.getGameState(game.game_id);
+            if (roomAfterJoin && roomAfterJoin.game_status === "waitingForPlayer") {
+                botService.maybeScheduleFallback(game.game_id, io);
+            }
         }
 
         // ----------------------------------------------------
@@ -204,6 +211,9 @@ async function callFront(socket, io) {
         currentGameState.game_status === "waitingForPlayer"
     ) {
         currentGameState.game_status = "start";
+
+        // لابی با بازیکنان واقعی پر شد → زمان‌بندی پشتیبان ربات را لغو کن
+        botService.cancelFallback(gameId);
 
         if (currentGameState.game_type === "friendly") {
             const activeTimer = roomTimers.get(gameId);

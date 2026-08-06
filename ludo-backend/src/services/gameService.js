@@ -332,56 +332,72 @@ async function handleExitingGame(socket, io, callback) {
         // ==========================================
         // حالت دوم: بازی شروع شده
     // ==========================================
-    else if (currentGame.game_status === "start") {
-        const correctPlayers = currentGame.players.map((p) => {
-            if (p.telegram_id === telegramId) {
-                return {...p, player_status: "offline"};
-            }
-            return p;
-        });
+// ==========================================
+// حالت دوم: بازی شروع شده
+// ==========================================
+else if (currentGame.game_status === "start") {
+    const correctPlayers = currentGame.players.map((p) => {
+        if (p.telegram_id === telegramId) {
+            return { ...p, player_status: "offline" };
+        }
+        return p;
+    });
 
-        initialState.updateGameState(gameId, {
-            players: correctPlayers,
-        });
+    initialState.updateGameState(gameId, {
+        players: correctPlayers,
+    });
 
-        currentGame = initialState.getGameState(gameId);
+    currentGame = initialState.getGameState(gameId);
 
-        socket.emit("player_exit");
-        socket.to(gameId).emit("opponent_exit", {userId: telegramId});
-        socket.leave(gameId);
-        updatePlayerStatusOnDatabase(socket.data.telegramId, gameId, "offline");
-        const onlinesList = currentGame.players.filter(
-            (p) => p.player_status === "online",
-        );
-        const numberOfOnlines = onlinesList.length;
+    socket.emit("player_exit");
+    socket.to(gameId).emit("opponent_exit", { userId: telegramId });
+    socket.leave(gameId);
+    updatePlayerStatusOnDatabase(socket.data.telegramId, gameId, "offline");
 
-        if (numberOfOnlines === 1) {
-            const winnerPlayer = onlinesList[0];
+    // استخراج لیست بازیکنان واقعی آنلاین (غیر ربات)
+    const realOnlinePlayers = currentGame.players.filter(
+        (p) => p.player_status === "online" && !p.is_bot,
+    );
+    const numberOfRealOnlines = realOnlinePlayers.length;
 
+    // اگر هیچ بازیکن واقعی آنلاینی نمانده باشد (همه خارج شده‌اند یا فقط ربات مانده)
+    if (numberOfRealOnlines === 0) {
+        // متوقف کردن درایور ربات در صورت وجود
+        const { stopBotDriver } = require("./botService");
+        if (typeof stopBotDriver === "function") {
+            stopBotDriver(gameId);
+        }
 
+        // لغو بازی در دیتابیس
+        updateGameState(gameId, {
+            game_status: "cancel",
+            end_at: new Date(),
+        }).catch(console.error);
+
+        // متوقف کردن تایمر و پاکسازی حافظه
+        stopTimer(gameId);
+        initialState.deleteGameState(gameId);
+    } 
+    // اگر فقط ۱ بازیکن واقعی باقی مانده باشد و بقیه انسان‌ها رفته باشند (و رباتی هم در بازی نباشد)
+    else if (numberOfRealOnlines === 1) {
+        const hasBots = currentGame.players.some((p) => p.is_bot);
+        
+        // اگر رباتی در بازی نیست و فقط ۱ انسان مانده، او برنده می‌شود
+        if (!hasBots) {
+            const winnerPlayer = realOnlinePlayers[0];
             await finishGame(
                 currentGame.game_id,
                 winnerPlayer,
                 currentGame.game_type,
                 io,
             );
-        } else if (numberOfOnlines === 0) {
-
-             updateGameState(
-                gameId,
-                {
-                    game_status: "cancel",
-                    end_at: new Date(),
-                },
-            );
-
-            stopTimer(gameId);
-            initialState.deleteGameState(gameId);
         }
-
-        socket.data.gameId = null;
-        socket.data.color = null;
+        // نکته: اگر ربات در بازی هست و ۱ انسان باقی مانده، بازی ادامه می‌یابد (انسان با ربات‌ها بازی می‌کند).
     }
+
+    socket.data.gameId = null;
+    socket.data.color = null;
+}
 }
 
 module.exports = {handleRollDice, handleMoveToken, handleExitingGame};
