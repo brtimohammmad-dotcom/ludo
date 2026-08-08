@@ -55,12 +55,17 @@ function getRandomBotIdentity() {
 }
 
 // ساخت لینک آواتار متناسب با جنسیت (تصاویر پرتره با کیفیت و واقعی)
+// دریافت لینک آواتار متناسب با جنسیت از Supabase Storage
 function getRandomAvatarUrl(gender) {
-    const avatarIndex = Math.floor(Math.random() * 70) + 1;
+    // تولید عدد تصادفی بین ۱ تا ۳۵
+    const avatarIndex = Math.floor(Math.random() * 35) + 1;
+
+    const baseUrl = "https://ryuwzehynsandwnbucpk.supabase.co/storage/v1/object/public";
+
     if (gender === "female") {
-        return `https://i.pravatar.cc/300?img=${(avatarIndex % 30) + 1}`; // آواتارهای زنانه
+        return `${baseUrl}/women%20avatars%20bot/${avatarIndex}.jpg`;
     } else {
-        return `https://i.pravatar.cc/300?img=${(avatarIndex % 30) + 33}`; // آواتارهای مردانه
+        return `${baseUrl}/men%20avatars%20bot/${avatarIndex}.jpg`;
     }
 }
 
@@ -85,19 +90,13 @@ function botSocket(gameId, telegramId, color) {
 
 async function createBotInDatabase(botId, username, gameId, color) {
     try {
-        await getOrCreatePlayer(botId, username).catch((err) => {
-            console.error(
-                `[Bot] getOrCreatePlayer failed for ${botId}:`,
-                err.message,
-            );
-        });
         await addPlayerToGameOnDatabase(botId, gameId, color);
     } catch (e) {
         console.error(`[Bot] DB sync error for ${botId}:`, e.message);
     }
 }
 
-function createBotPlayerObject({ gameId, color, gameLevel }) {
+function createBotPlayerObject({  color, gameLevel }) {
     const botId = nextBotId();
     const { username, gender } = getRandomBotIdentity();
 

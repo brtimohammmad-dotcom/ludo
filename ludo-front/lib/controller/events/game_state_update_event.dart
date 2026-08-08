@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/domain/model/player.dart';
 import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 import 'dart:js_interop';
@@ -19,6 +21,9 @@ class GameStateUpdateEvent implements GameEvent {
 
   @override
   void execute(GameController controller) {
+    for (Player player in updatedState.players) {
+      debugPrint("avatar:\n${player.avatarUrl}");
+    }
     final currentLivePlayer = controller.currentGameState!.livePlayer;
     final livePlayerInGame = updatedState.players.firstWhere(
       (p) => p.userId == controller.currentGameState?.livePlayer?.userId,
@@ -32,13 +37,12 @@ class GameStateUpdateEvent implements GameEvent {
         livePlayer: currentLivePlayer?.copyWith(
           color: livePlayerInGame.color,
           playerStatus: livePlayerInGame.playerStatus,
-          numberOfAbsences: livePlayerInGame.numberOfAbsences
+          numberOfAbsences: livePlayerInGame.numberOfAbsences,
         ),
         gameStage: GameStage.boardStage,
       ),
     );
     controller.onGameReady?.call();
     onGameConnected();
-
   }
 }

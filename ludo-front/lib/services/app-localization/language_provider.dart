@@ -8,7 +8,7 @@ class Language extends _$Language {
   @override
   Locale build() {
     // زبان پیش‌فرض برنامه (مثلاً فارسی)
-    return const Locale('en', 'US');
+    return const Locale('fa', 'IR');
   }
 
   /// تغییر زبان بین فارسی و انگلیسی

@@ -306,14 +306,12 @@ async function handleExitingGame(socket, io, callback) {
 
         currentGame = initialState.getGameState(gameId);
 
-        socket.emit("player_exit");
-        socket.to(gameId).emit("opponent_exit", {userId: telegramId});
-        socket.leave(gameId);
-        removePlayerFromGameOnDatabase(telegramId, gameId).catch(console.error);
+
+      await  removePlayerFromGameOnDatabase(telegramId, gameId).catch(console.error);
         if (currentGame.players.length === 0) {
             initialState.updateGameState(gameId, {game_status: "cancel"});
             await updateLobbyMessage(gameId);
-            updateGameState(
+           await updateGameState(
                 gameId,
                 {
                     game_status: "cancel",
@@ -349,10 +347,8 @@ else if (currentGame.game_status === "start") {
 
     currentGame = initialState.getGameState(gameId);
 
-    socket.emit("player_exit");
-    socket.to(gameId).emit("opponent_exit", { userId: telegramId });
-    socket.leave(gameId);
-    updatePlayerStatusOnDatabase(socket.data.telegramId, gameId, "offline");
+
+   await updatePlayerStatusOnDatabase(socket.data.telegramId, gameId, "offline");
 
     // استخراج لیست بازیکنان واقعی آنلاین (غیر ربات)
     const realOnlinePlayers = currentGame.players.filter(
@@ -369,7 +365,7 @@ else if (currentGame.game_status === "start") {
         }
 
         // لغو بازی در دیتابیس
-        updateGameState(gameId, {
+      await  updateGameState(gameId, {
             game_status: "cancel",
             end_at: new Date(),
         }).catch(console.error);
@@ -398,6 +394,9 @@ else if (currentGame.game_status === "start") {
     socket.data.gameId = null;
     socket.data.color = null;
 }
+    socket.emit("player_exit");
+    socket.to(gameId).emit("opponent_exit", {userId: telegramId});
+    socket.leave(gameId);
 }
 
 module.exports = {handleRollDice, handleMoveToken, handleExitingGame};

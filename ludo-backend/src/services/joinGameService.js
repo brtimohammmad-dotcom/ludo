@@ -134,7 +134,7 @@ async function handleJoinGame(data, socket, io, callback) {
                     const currentRoom = initialState.getGameState(friendlyGameId);
                     // اگر اتاق هنوز در رم بود و بازی استارت نخورده بود، آن را حذف کن
                     if (currentRoom && currentRoom.game_status === "waitingForPlayer") {
-                         updateGameState(
+                        await updateGameState(
                             friendlyGameId,
                             {
                                 game_status: "cancel",
@@ -254,7 +254,7 @@ async function callFront(socket, io) {
             }
         }
 
-         updateGameState(
+      await   updateGameState(
             gameId,
             {game_status: "start"},
         );
@@ -291,7 +291,7 @@ async function addPlayerToGame(game, player, socket) {
     };
     initialState.addPlayerToGameState(correctPlayer, game.game_id);
 
-     addPlayerToGameOnDatabase(player.telegram_id, game.game_id, color);
+    await addPlayerToGameOnDatabase(player.telegram_id, game.game_id, color);
 }
 
 module.exports = {handleJoinGame, handleJoinGameFriendly};

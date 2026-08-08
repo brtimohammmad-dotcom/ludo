@@ -33,23 +33,23 @@ class UserAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(size / 2),
         child: hasValidUrl
             ? CachedNetworkImage(
-          imageUrl: url!,
-          fit: BoxFit.cover,
+                imageUrl: url!,
+                fit: BoxFit.cover,
 
-          // لودینگ در حال دریافت تصویر
-          placeholder: (context, url) => Center(
-            child: SizedBox(
-              width: size * 0.4,
-              height: size * 0.4,
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                valueColor: AlwaysStoppedAnimation<Color>(borderColor),
-              ),
-            ),
-          ),
-          // در صورت بروز خطا در دانلود
-          errorWidget: (context, url, error) => _buildDefaultAvatar(),
-        )
+                // لودینگ در حال دریافت تصویر
+                placeholder: (context, url) => Center(
+                  child: SizedBox(
+                    width: size * 0.4,
+                    height: size * 0.4,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(borderColor),
+                    ),
+                  ),
+                ),
+                // در صورت بروز خطا در دانلود
+                errorWidget: (context, url, error) => _buildDefaultAvatar(),
+              )
             : _buildDefaultAvatar(),
       ),
     );

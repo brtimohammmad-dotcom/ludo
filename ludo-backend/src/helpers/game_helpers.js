@@ -17,7 +17,7 @@ async function finishGame(gameId, winnerPlayer, gameType, io) {
      updateLobbyMessage(gameId);
      console.log("winnerPlayer:")
      console.log(winnerPlayer.telegram_id)
-     updateGameState(
+    await updateGameState(
         gameId,
         {
             game_status: "finished",
