@@ -34,10 +34,10 @@ class WaitingForPlayersAlert extends ConsumerWidget {
     final currentPlayers =
         ref.watch(
           gameControllerProvider.select(
-            (state) => state?.serverState?.players.length,
+                (state) => state?.serverState?.players.length,
           ),
         ) ??
-        0;
+            0;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -45,11 +45,15 @@ class WaitingForPlayersAlert extends ConsumerWidget {
         width: base,
         padding: EdgeInsets.all(base * 0.05),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.5),
-            width: 1.5,
+            color: const Color(0xFFFFD700),
+            width: 1.8,
           ),
           boxShadow: const [
             BoxShadow(
@@ -66,7 +70,7 @@ class WaitingForPlayersAlert extends ConsumerWidget {
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: LoadingAnimationWidget.dotsTriangle(
-                  color: Colors.amberAccent,
+                  color: const Color(0xFFFFD700),
                   size: base * 0.18,
                 ),
               ),
@@ -76,12 +80,12 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: base * 0.05,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: const Color(0xFFFFF8DC),
                 ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: base * 0.04),
-              // بخش وضعیت صندلی‌ها با تم تیره شیک
+              // صندلی‌ها با تم چوبی کدر
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: Container(
@@ -90,9 +94,11 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                     vertical: base * 0.03,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black26,
+                    color: const Color(0xFF1E120B),
                     borderRadius: BorderRadius.circular(base * 0.04),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(
+                      color: const Color(0xFF5C3613),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -108,18 +114,20 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isJoined
-                                ? Colors.green.shade600
-                                : Colors.white10,
+                                ? const Color(0xFF276A3C)
+                                : const Color(0xFF381F12),
                             border: Border.all(
-                              color: isJoined ? Colors.green : Colors.white24,
+                              color: isJoined
+                                  ? const Color(0xFF4ADE80)
+                                  : const Color(0xFF5C3613),
                               width: 1.5,
                             ),
                           ),
                           child: Icon(
                             isJoined ? Icons.person : Icons.person_outline,
                             color: isJoined
-                                ? Colors.white
-                                : Colors.grey.shade600,
+                                ? const Color(0xFFFFF8DC)
+                                : const Color(0xFF8B5A2B),
                             size: base * 0.05,
                           ),
                         ),
@@ -134,7 +142,7 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                 textDirection: TextDirection.ltr,
                 style: TextStyle(
                   fontSize: base * 0.035,
-                  color: Colors.grey.shade400,
+                  color: const Color(0xFFD4AF37),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -153,10 +161,11 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: base * 0.035),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.amber.shade600, Colors.orange.shade700],
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
                       ),
                       borderRadius: BorderRadius.circular(base * 0.03),
+                      border: Border.all(color: const Color(0xFFFFD700)),
                     ),
                     child: Center(
                       child: Row(
@@ -164,14 +173,14 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                         children: [
                           Icon(
                             Icons.share,
-                            color: Colors.white,
+                            color: const Color(0xFFFFF8DC),
                             size: base * 0.045,
                           ),
                           SizedBox(width: base * 0.02),
                           Text(
                             'Share Invite Link',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: const Color(0xFFFFF8DC),
                               fontSize: base * 0.035,
                               fontWeight: FontWeight.bold,
                             ),
@@ -189,28 +198,30 @@ class WaitingForPlayersAlert extends ConsumerWidget {
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: base * 0.035),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
+                    color: const Color(0xFF2A160C),
                     borderRadius: BorderRadius.circular(base * 0.03),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(
+                      color: const Color(0xFF5C3613),
+                    ),
                   ),
                   child: Center(
                     child: isLoading
                         ? SizedBox(
-                            width: base * 0.045,
-                            height: base * 0.045,
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
+                      width: base * 0.045,
+                      height: base * 0.045,
+                      child: const CircularProgressIndicator(
+                        color: Color(0xFFFFD700),
+                        strokeWidth: 2,
+                      ),
+                    )
                         : Text(
-                            context.tr('Cancel'),
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: base * 0.035,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      context.tr('Cancel'),
+                      style: TextStyle(
+                        color: Colors.redAccent.shade100,
+                        fontSize: base * 0.035,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),

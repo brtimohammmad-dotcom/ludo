@@ -43,7 +43,7 @@ class PlayerBarUsernameContainer extends ConsumerWidget {
 
     final totalPlayers = ref.watch(
       gameControllerProvider.select(
-        (s) => s?.serverState?.numberOfPlayers ?? 2,
+            (s) => s?.serverState?.numberOfPlayers ?? 2,
       ),
     );
     final playerColor = recognitionPlayerColor(playerIndex, totalPlayers);
@@ -114,23 +114,25 @@ class _PlayerAvatar extends ConsumerWidget {
 
     final isCurrentTurn = ref.watch(
       gameControllerProvider.select(
-        (s) =>
-            s?.serverState?.currentTurn == playerColor &&
+            (s) =>
+        s?.serverState?.currentTurn == playerColor &&
             s?.serverState?.gameStatus == GameStatus.start,
       ),
     );
 
     final activeBorderColor = switch (playerColor) {
-      PlayerColor.red => Colors.red,
-      PlayerColor.green => Colors.green,
-      PlayerColor.yellow => Colors.amber,
-      PlayerColor.blue => Colors.cyan,
+      PlayerColor.red => const Color(0xFFEF4444),
+      PlayerColor.green => const Color(0xFF22C55E),
+      PlayerColor.yellow => const Color(0xFFFFD700),
+      PlayerColor.blue => const Color(0xFF06B6D4),
     };
 
     return UserAvatar(
       url: avatarUrl,
       size: boardSize * 0.06,
-      borderColor: isCurrentTurn ? activeBorderColor : Colors.grey,
+      borderColor: isCurrentTurn
+          ? activeBorderColor
+          : const Color(0xFF8B5A2B).withValues(alpha: 0.5),
     );
   }
 }
@@ -175,19 +177,12 @@ class _PlayerCardContent extends ConsumerWidget {
 
         final currentTurn =
             myTurn &&
-            gStatus == GameStatus.start &&
-            tStatus != TurnStatus.waitingForAnimate;
+                gStatus == GameStatus.start &&
+                tStatus != TurnStatus.waitingForAnimate;
 
         return (gStatus, totalP, currentTurn);
       }),
     );
-
-    final activeBorderColor = switch (playerColor) {
-      PlayerColor.red => Colors.red,
-      PlayerColor.green => Colors.green,
-      PlayerColor.yellow => Colors.amber,
-      PlayerColor.blue => Colors.cyan,
-    };
 
     final borderRadius = BorderRadius.circular(boardSize * 0.1);
     final isPersian = Localizations.localeOf(context).languageCode == 'fa';
@@ -197,13 +192,27 @@ class _PlayerCardContent extends ConsumerWidget {
       height: boardSize * 0.06,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        color: isCurrentTurn
-            ? const Color(0xFF334155)
-            : const Color(0xFF1E293B),
-        border: Border.all(
-          color: isCurrentTurn ? activeBorderColor : const Color(0xFF475569),
-          width: 1.0,
+        gradient: LinearGradient(
+          colors: isCurrentTurn
+              ? const [Color(0xFF5A351E), Color(0xFF3B2012)]
+              : const [Color(0xFF2A160C), Color(0xFF1E0E07)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
+        border: Border.all(
+          color: isCurrentTurn
+              ? const Color(0xFFFFD700)
+              : const Color(0xFF8B5A2B).withValues(alpha: 0.4),
+          width: isCurrentTurn ? 1.5 : 1.0,
+        ),
+        boxShadow: [
+          if (isCurrentTurn)
+            const BoxShadow(
+              color: Color(0x66FFD700),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -252,7 +261,7 @@ class _PlayerCardContent extends ConsumerWidget {
 }
 
 // -----------------------------------------------------------------------------
-// ⚡ ویجت اختصاصی نوار تایمر (ایزوله از نظر Performance)
+// ⚡ ویجت اختصاصی نوار تایمر
 // -----------------------------------------------------------------------------
 class _TimerProgressBar extends ConsumerWidget {
   const _TimerProgressBar({required this.absences});
@@ -262,18 +271,16 @@ class _TimerProgressBar extends ConsumerWidget {
   Color _getTimerColor() {
     switch (absences) {
       case 1:
-        return const Color(0xFFEAB308);
+        return const Color(0xFFD97706); // نارنجی چوبی
       case 2:
-        return const Color(0xFFEF4444);
+        return const Color(0xFFDC2626); // قرمز هشداری
       default:
-        return const Color(0xFF475569);
+        return const Color(0xFFB45309); // طلایی قهوه‌ای گرم
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // بهینه‌سازی: از read استفاده می‌شود تا این ویجت فقط با tick انیمیشن بازترسیم شود،
-    // نه با هر تغییر state بازی (هر قدم مهره / هر بار تاس). ارجاع کنترلر در طول عمر بورد ثابت است.
     final controller = ref
         .read(gameControllerProvider.notifier)
         .animationController;
@@ -292,8 +299,8 @@ class _TimerProgressBar extends ConsumerWidget {
               widthFactor: (1.0 - controller.value).clamp(0.0, 1.0),
               heightFactor: 1.0,
               child: ColoredBox(
-                color: timerColor,
-              ), // 💡 ColoredBox سبک‌تر از Container است
+                color: timerColor.withValues(alpha: 0.6),
+              ),
             ),
           );
         },
@@ -319,22 +326,26 @@ class _CoinBadge extends StatelessWidget {
         vertical: boardSize * 0.005,
       ),
       decoration: BoxDecoration(
-        color: const Color(0x33000000),
+        color: const Color(0x66000000),
         borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+          width: 0.8,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.monetization_on,
-            color: Colors.amber,
+            color: const Color(0xFFFFD700),
             size: boardSize * 0.02,
           ),
           SizedBox(width: boardSize * 0.005),
           Text(
             context.num(coin),
             style: TextStyle(
-              color: Colors.amberAccent,
+              color: const Color(0xFFFFF8DC),
               fontSize: boardSize * 0.02,
               fontWeight: FontWeight.w600,
             ),

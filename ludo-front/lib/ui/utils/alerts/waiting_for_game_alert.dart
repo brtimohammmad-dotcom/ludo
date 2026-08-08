@@ -11,7 +11,7 @@ class WaitingForGameAlert extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double base = boardSize * 0.85;
-    const accentColor = Colors.amberAccent;
+    const accentColor = Color(0xFFFFD700);
 
     return Center(
       child: ClipRRect(
@@ -25,15 +25,19 @@ class WaitingForGameAlert extends StatelessWidget {
               horizontal: base * 0.06,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: accentColor.withValues(alpha: 0.3),
-                width: 1.5,
+                color: accentColor,
+                width: 1.8,
               ),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black54,
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -53,7 +57,7 @@ class WaitingForGameAlert extends StatelessWidget {
                 Text(
                   context.tr('waiting for game alert title'),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: const Color(0xFFFFF8DC),
                     fontSize: base * 0.048,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
@@ -64,7 +68,7 @@ class WaitingForGameAlert extends StatelessWidget {
                   context.tr('waiting for game alert text'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.grey.shade400,
+                    color: const Color(0xFFD4AF37),
                     fontSize: base * 0.032,
                   ),
                 ),

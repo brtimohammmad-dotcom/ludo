@@ -22,11 +22,15 @@ class ReconnectingAlert extends StatelessWidget {
           vertical: base * 0.08,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.4),
-            width: 1.5,
+            color: const Color(0xFFFFD700),
+            width: 1.8,
           ),
           boxShadow: const [
             BoxShadow(
@@ -40,7 +44,7 @@ class ReconnectingAlert extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             LoadingAnimationWidget.beat(
-              color: Colors.amberAccent,
+              color: const Color(0xFFFFD700),
               size: base * 0.15,
             ),
             SizedBox(height: base * 0.05),
@@ -49,7 +53,7 @@ class ReconnectingAlert extends StatelessWidget {
               style: TextStyle(
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFFFFF8DC),
                 letterSpacing: 0.5,
               ),
             ),
@@ -59,7 +63,7 @@ class ReconnectingAlert extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: base * 0.032,
-                color: Colors.grey.shade400,
+                color: const Color(0xFFD4AF37),
               ),
             ),
           ],

@@ -15,26 +15,26 @@ class LudoRushBox extends StatelessWidget {
       right: 0,
       child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: const LinearGradient(
-              colors: [Color(0xFF2A1B4E), Color(0xFF160D29)],
+              colors: [Color(0xFF5C3613), Color(0xFF2A160C)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
             border: Border.all(
-              color: const Color(0xFFFFD700).withValues(alpha: 0.6),
-              width: 1.5,
+              color: const Color(0xFFFFD700),
+              width: 1.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFFD700).withValues(alpha: 0.25),
-                blurRadius: 12,
+                color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                blurRadius: 10,
                 spreadRadius: 1,
               ),
               const BoxShadow(
-                color: Colors.black45,
+                color: Colors.black54,
                 offset: Offset(0, 4),
                 blurRadius: 8,
               ),
@@ -42,7 +42,7 @@ class LudoRushBox extends StatelessWidget {
           ),
           child: ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
-              colors: [Color(0xFFFFF1A8), Color(0xFFFF9800)],
+              colors: [Color(0xFFFFF1A8), Color(0xFFFFD700)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ).createShader(bounds),
@@ -50,12 +50,12 @@ class LudoRushBox extends StatelessWidget {
               'LUDO RUSH',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w900,
                 color: Colors.white,
-                letterSpacing: 1.8,
+                letterSpacing: 2.0,
                 shadows: [
                   Shadow(
-                    color: Colors.black87,
+                    color: Colors.black,
                     offset: Offset(0, 2),
                     blurRadius: 4,
                   ),

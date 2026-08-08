@@ -37,12 +37,23 @@ class FloatingBottomMenu extends StatelessWidget {
           Container(
             height: innerBarHeight,
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B), // رنگ مات فلت بجای نیمه شفاف
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
               borderRadius: BorderRadius.circular(boardSize * 0.04),
               border: Border.all(
-                color: const Color(0xFF334155),
-                width: 1.0,
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.7),
+                width: 1.8,
               ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                )
+              ],
             ),
             child: Row(
               children: [
@@ -104,14 +115,14 @@ class StandardMenuItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white70, size: boardSize * 0.055),
+          Icon(icon, color: const Color(0xFFFFF8DC), size: boardSize * 0.055),
           SizedBox(height: boardSize * 0.008),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white70,
+              color: const Color(0xFFFFF8DC),
               fontSize: boardSize * 0.026,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -151,17 +162,31 @@ class HighlightedCenterItem extends ConsumerWidget {
             height: buttonSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF0EA5E9), // رنگ فلت آبی روشن نئونی بجای تیره
-              border: Border.all(color: const Color(0xFF38BDF8), width: 2.0),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF8B5A2B), Color(0xFF5C3613)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              border: Border.all(color: const Color(0xFFFFD700), width: 2.2),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                )
+              ],
             ),
             child: isLoading
                 ? const Padding(
               padding: EdgeInsets.all(12.0),
-              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              child: CircularProgressIndicator(
+                color: Color(0xFFFFD700),
+                strokeWidth: 2,
+              ),
             )
                 : Icon(
               icon,
-              color: Colors.white,
+              color: const Color(0xFFFFD700),
               size: buttonSize * 0.5,
             ),
           ),
@@ -169,9 +194,9 @@ class HighlightedCenterItem extends ConsumerWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white,
+              color: const Color(0xFFFFF8DC),
               fontSize: boardSize * 0.028,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],

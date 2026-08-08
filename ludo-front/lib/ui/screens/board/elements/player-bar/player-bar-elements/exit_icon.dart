@@ -13,16 +13,32 @@ class ExitIcon extends ConsumerWidget {
     final buttonSize = boardSize * 0.055;
     return GestureDetector(
       onTap: () {
-        ref.read(audioServiceProvider.notifier).playSFX('assets/audio/sound-effect/exit_button_sound.wav');
+        ref
+            .read(audioServiceProvider.notifier)
+            .playSFX('assets/audio/sound-effect/exit_button_sound.wav');
         showAnimatedDialog(context: context, child: ExitButtonAlert());
       },
       child: Container(
         width: buttonSize,
         height: buttonSize,
         decoration: BoxDecoration(
-          color: const Color(0xFF2D1F24), // رنگ قرمز مات تیره بجای آلفا
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A1818), Color(0xFF2A0C0C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFFEF4444), width: 1.0),
+          border: Border.all(
+            color: const Color(0xFFEF4444).withValues(alpha: 0.8),
+            width: 1.2,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black45,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: Center(
           child: Icon(

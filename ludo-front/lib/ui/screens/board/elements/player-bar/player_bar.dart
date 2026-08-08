@@ -35,8 +35,14 @@ class PlayerBar extends ConsumerWidget {
     return Container(
       width: boardSize,
       height: barHeight,
-      // 🌌 تغییر به یک سرمه‌ای بسیار تیره و نیمه‌شفاف برای هماهنگی با تم فضا
-      color: const Color(0x990A0A12),
+      // 🪵 پس‌زمینه چوبی تیره و نیمه‌شفاف متناسب با تم اصلی
+      decoration: const BoxDecoration(
+        color: Color(0xCC1E120B),
+        border: Border(
+          bottom: BorderSide(color: Color(0x33FFD700), width: 1.0),
+          top: BorderSide(color: Color(0x33FFD700), width: 1.0),
+        ),
+      ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: boardSize * 0.037),
         child: Row(

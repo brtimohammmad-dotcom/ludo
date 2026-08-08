@@ -21,11 +21,15 @@ class InsufficientCoinsAlert extends StatelessWidget {
         width: base,
         padding: EdgeInsets.all(base * 0.06),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.5),
-            width: 1.5,
+            color: const Color(0xFFFFD700),
+            width: 1.8,
           ),
           boxShadow: const [
             BoxShadow(
@@ -47,13 +51,13 @@ class InsufficientCoinsAlert extends StatelessWidget {
                   height: base * 0.16,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.amber.withValues(alpha: 0.1),
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.15),
                   ),
                 ),
-                Icon(
+                 Icon(
                   Icons.monetization_on,
                   size: base * 0.12,
-                  color: Colors.amberAccent,
+                  color: Color(0xFFFFD700),
                 ),
                 Positioned(
                   right: 0,
@@ -70,7 +74,7 @@ class InsufficientCoinsAlert extends StatelessWidget {
             Text(
               context.tr('insufficient coins title'),
               style: TextStyle(
-                color: Colors.amberAccent,
+                color: const Color(0xFFFFD700),
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
               ),
@@ -80,7 +84,7 @@ class InsufficientCoinsAlert extends StatelessWidget {
               "${context.tr('You need')} ${context.num(requiredCoins)} ${context.tr('insufficient coins text')} ${context.num(currentCoins)}",
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey.shade400,
+                color: const Color(0xFFD4AF37),
                 fontSize: base * 0.035,
                 height: 1.4,
               ),
@@ -92,15 +96,19 @@ class InsufficientCoinsAlert extends StatelessWidget {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: base * 0.035),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.amber.shade600, Colors.orange.shade700],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
                   ),
                   borderRadius: BorderRadius.circular(base * 0.03),
-                  boxShadow: [
+                  border: Border.all(
+                    color: const Color(0xFFFFD700),
+                    width: 1.2,
+                  ),
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.orange.withValues(alpha: 0.3),
+                      color: Colors.black38,
                       blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
@@ -108,7 +116,7 @@ class InsufficientCoinsAlert extends StatelessWidget {
                   child: Text(
                     context.tr('OK'),
                     style: TextStyle(
-                      color: Colors.white,
+                      color: const Color(0xFFFFF8DC),
                       fontSize: base * 0.038,
                       fontWeight: FontWeight.bold,
                     ),

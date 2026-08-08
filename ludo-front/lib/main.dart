@@ -67,7 +67,7 @@ class MyApp extends ConsumerWidget {
     // 🎯 دریافت هم‌زمان Locale فعلی از پرووایدر
     final currentLocale = ref.watch(languageProvider);
     final isPersian = currentLocale.languageCode == 'fa';
-    final selectedFont = isPersian ? 'Vazirmatn' : 'Fredoka';
+    final selectedFont = isPersian ? 'Vazirmatn' : 'Nunito';
 
     // 🎯 ساخت تم و فونت هم‌گام با Locale بدون نیاز به builder متناقض
     final appTheme = ThemeData(

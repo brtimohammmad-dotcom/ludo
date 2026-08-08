@@ -25,11 +25,15 @@ class SettingsAlert extends ConsumerWidget {
           width: base,
           padding: EdgeInsets.all(base * 0.06),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
             borderRadius: BorderRadius.circular(base * 0.06),
             border: Border.all(
-              color: Colors.amber.withValues(alpha: 0.5),
-              width: 1.5,
+              color: const Color(0xFFFFD700),
+              width: 1.8,
             ),
             boxShadow: [
               BoxShadow(
@@ -48,14 +52,14 @@ class SettingsAlert extends ConsumerWidget {
                 children: [
                   Icon(
                     Icons.settings_rounded,
-                    color: Colors.amberAccent,
+                    color: const Color(0xFFFFD700),
                     size: base * 0.07,
                   ),
                   SizedBox(width: base * 0.025),
                   Text(
                     context.tr('Settings'),
                     style: TextStyle(
-                      color: Colors.white,
+                      color: const Color(0xFFFFF8DC),
                       fontSize: base * 0.055,
                       fontWeight: FontWeight.bold,
                     ),
@@ -64,7 +68,7 @@ class SettingsAlert extends ConsumerWidget {
               ),
               SizedBox(height: base * 0.06),
 
-              // سوییچ ۱: تغییر زبان
+              // سوییچ ۱: زبان
               _buildSettingTile(
                 base: base,
                 icon: Icons.language_rounded,
@@ -94,7 +98,7 @@ class SettingsAlert extends ConsumerWidget {
                 child: _buildCustomToggle(
                   base: base,
                   value: isSoundOn,
-                  activeColor: const Color(0xFF10B981),
+                  activeColor: const Color(0xFF4ADE80),
                   onChanged: (val) {
                     HapticFeedback.lightImpact();
                     ref.read(audioServiceProvider.notifier).toggleMute();
@@ -110,15 +114,16 @@ class SettingsAlert extends ConsumerWidget {
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: base * 0.035),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.amber.shade600, Colors.orange.shade700],
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
                     ),
                     borderRadius: BorderRadius.circular(base * 0.03),
-                    boxShadow: [
+                    border: Border.all(color: const Color(0xFFFFD700)),
+                    boxShadow: const [
                       BoxShadow(
-                        color: Colors.orange.withValues(alpha: 0.3),
+                        color: Colors.black26,
                         blurRadius: 8,
-                        offset: const Offset(0, 3),
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
@@ -126,7 +131,7 @@ class SettingsAlert extends ConsumerWidget {
                     child: Text(
                       context.tr('OK'),
                       style: TextStyle(
-                        color: Colors.white,
+                        color: const Color(0xFFFFF8DC),
                         fontSize: base * 0.04,
                         fontWeight: FontWeight.bold,
                       ),
@@ -154,19 +159,19 @@ class SettingsAlert extends ConsumerWidget {
         vertical: base * 0.03,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.6),
+        color: const Color(0xFF1E120B),
         borderRadius: BorderRadius.circular(base * 0.04),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: const Color(0xFF5C3613)),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(base * 0.025),
             decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.1),
+              color: const Color(0xFFFFD700).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.amberAccent, size: base * 0.05),
+            child: Icon(icon, color: const Color(0xFFFFD700), size: base * 0.05),
           ),
           SizedBox(width: base * 0.03),
           Expanded(
@@ -176,7 +181,7 @@ class SettingsAlert extends ConsumerWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: const Color(0xFFFFF8DC),
                     fontSize: base * 0.038,
                     fontWeight: FontWeight.w600,
                   ),
@@ -185,7 +190,7 @@ class SettingsAlert extends ConsumerWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white54,
+                    color: const Color(0xFFD4AF37),
                     fontSize: base * 0.03,
                   ),
                 ),
@@ -198,7 +203,6 @@ class SettingsAlert extends ConsumerWidget {
     );
   }
 
-  // 🛠️ ویجت اصلاح‌شده سوییچ با هایلایت شناور کپسولی
   Widget _buildCustomToggle({
     required double base,
     required bool value,
@@ -211,7 +215,7 @@ class SettingsAlert extends ConsumerWidget {
     final double toggleHeight = base * 0.085;
 
     final bool isSoundToggle = activeColor != null;
-    final Color defaultActiveBg = const Color(0xFFF59E0B); // طلایی مدرن
+    final Color defaultActiveBg = const Color(0xFF8B5A2B);
 
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -226,24 +230,14 @@ class SettingsAlert extends ConsumerWidget {
           padding: EdgeInsets.all(base * 0.006),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(toggleHeight / 2),
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF1E120B),
             border: Border.all(
-              color: isSoundToggle && value
-                  ? activeColor.withValues(alpha: 0.6)
-                  : Colors.amberAccent.withValues(alpha: 0.3),
+              color: const Color(0xFFFFD700).withValues(alpha: 0.5),
               width: 1.2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Stack(
             children: [
-              // 1️⃣ دکمه/کپسول هایلایت متحرک (پس‌زمینه گزینه فعال)
               AnimatedAlign(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
@@ -265,28 +259,20 @@ class SettingsAlert extends ConsumerWidget {
                         ])
                             : [
                           defaultActiveBg,
-                          defaultActiveBg.withValues(alpha: 0.85),
+                          const Color(0xFF6F431A),
                         ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (isSoundToggle && value
-                              ? activeColor
-                              : defaultActiveBg)
-                              .withValues(alpha: 0.4),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
+                      border: Border.all(
+                        color: const Color(0xFFFFD700).withValues(alpha: 0.6),
+                        width: 1,
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              // 2️⃣ متون/آیکون‌های لایه رو (برای اینکه کپسول بیاد زیرشون و کاملاً خوانا بشن)
               Row(
                 children: [
-                  // سمت چپ (FA یا آیکون قطع صدا)
                   Expanded(
                     child: Center(
                       child: leftText != null
@@ -294,8 +280,8 @@ class SettingsAlert extends ConsumerWidget {
                         duration: const Duration(milliseconds: 200),
                         style: TextStyle(
                           color: !value
-                              ? const Color(0xFF0F172A) // مشکی سرمه‌ای شیک روی کپسول طلایی
-                              : Colors.white.withValues(alpha: 0.4),
+                              ? const Color(0xFFFFF8DC)
+                              : Colors.white.withValues(alpha: 0.3),
                           fontSize: base * 0.028,
                           fontWeight: FontWeight.w900,
                         ),
@@ -310,7 +296,6 @@ class SettingsAlert extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  // سمت راست (EN یا آیکون وصل صدا)
                   Expanded(
                     child: Center(
                       child: rightText != null
@@ -318,8 +303,8 @@ class SettingsAlert extends ConsumerWidget {
                         duration: const Duration(milliseconds: 200),
                         style: TextStyle(
                           color: value
-                              ? const Color(0xFF0F172A) // مشکی سرمه‌ای شیک روی کپسول طلایی
-                              : Colors.white.withValues(alpha: 0.4),
+                              ? const Color(0xFFFFF8DC)
+                              : Colors.white.withValues(alpha: 0.3),
                           fontSize: base * 0.028,
                           fontWeight: FontWeight.w900,
                         ),

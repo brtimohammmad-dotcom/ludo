@@ -11,33 +11,33 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         (function() {
-          if (window.Telegram && window.Telegram.WebApp) {
-            var webapp = window.Telegram.WebApp;
+            if (window.Telegram && window.Telegram.WebApp) {
+                var webapp = window.Telegram.WebApp;
 
-            webapp.ready();
-            webapp.expand();
+                webapp.ready();
+                webapp.expand();
 
-            if (webapp.disableVerticalSwipe) {
-              webapp.disableVerticalSwipe();
+                if (webapp.disableVerticalSwipe) {
+                    webapp.disableVerticalSwipe();
+                }
+                webapp.enableClosingConfirmation();
+
+                webapp.setHeaderColor('#1a0f0a');
+                webapp.setBackgroundColor('#1a0f0a');
+
+                function applySafeArea() {
+                    var topInset = (webapp.safeAreaInset && webapp.safeAreaInset.top)
+                        ? webapp.safeAreaInset.top
+                        : (webapp.contentSafeAreaInset && webapp.contentSafeAreaInset.top)
+                            ? webapp.contentSafeAreaInset.top
+                            : 0;
+
+                    document.documentElement.style.setProperty('--tg-safe-top', topInset + 'px');
+                }
+
+                applySafeArea();
+                webapp.onEvent('safeAreaChanged', applySafeArea);
             }
-            webapp.enableClosingConfirmation();
-
-            webapp.setHeaderColor('#0b121e');
-            webapp.setBackgroundColor('#0b121e');
-
-            function applySafeArea() {
-              var topInset = (webapp.safeAreaInset && webapp.safeAreaInset.top)
-                ? webapp.safeAreaInset.top
-                : (webapp.contentSafeAreaInset && webapp.contentSafeAreaInset.top)
-                  ? webapp.contentSafeAreaInset.top
-                  : 0;
-
-              document.documentElement.style.setProperty('--tg-safe-top', topInset + 'px');
-            }
-
-            applySafeArea();
-            webapp.onEvent('safeAreaChanged', applySafeArea);
-          }
         })();
 
         document.addEventListener('touchmove', function(e) {
@@ -72,7 +72,7 @@
             overflow: hidden;
             font-family: sans-serif;
             color: white;
-            background-color: #0b121e;
+            background-color: #1a0f0a;
             position: fixed;
             width: 100%;
             padding-top: var(--tg-safe-top);
@@ -89,7 +89,7 @@
             background-color: transparent !important;
         }
 
-        /* 🟢 کانتینر اصلی لودر */
+        /* 🪵 کانتینر اصلی لودر با پس‌زمینه چوبی ایمن و استاندارد */
         #loader {
             position: fixed;
             inset: 0;
@@ -98,27 +98,28 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at center, #182538, #0b121e);
+            background-color: #2a160c;
+            background-image: radial-gradient(circle at center, #3d2012 0%, #1a0f0a 85%);
             transition: opacity 0.5s ease;
             pointer-events: none;
         }
 
-        /* 🌌 هاله نور پشت تاس */
+        /* 🌟 هاله نور طلایی-گرم */
         .center-glow {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 70vmin;
-            height: 70vmin;
+            width: 75vmin;
+            height: 75vmin;
             transform: translate(-50%, -50%);
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 200, 0, 0.12), transparent 70%);
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.18) 0%, rgba(212, 175, 55, 0.05) 50%, transparent 70%);
             animation: pulse 3s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.85; }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.9; }
         }
 
         /* 🎲 کانتینر SVG تاس */
@@ -131,7 +132,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.15));
             opacity: 0;
             animation: fadeInSvg 0.3s ease-out forwards;
             animation-delay: 0.15s;
@@ -148,7 +148,7 @@
             object-fit: contain;
         }
 
-        /* 📝 استایل متون لودینگ */
+        /* 📝 استایل متون لودینگ با تم چوبی و طلایی */
         .text-container {
             position: relative;
             height: 24px;
@@ -163,12 +163,14 @@
             position: absolute;
             font-size: 15px;
             letter-spacing: 0.8px;
+            font-weight: 600;
             opacity: 0;
             transition: opacity 0.4s ease;
             display: flex;
             align-items: center;
             white-space: nowrap;
-            color: #e2e8f0;
+            color: #fff8dc;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         .text-status.active {
@@ -179,6 +181,7 @@
             animation: blink 1.4s infinite both;
             margin-left: 2px;
             font-weight: bold;
+            color: #ffd700;
         }
 
         .dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -218,43 +221,40 @@
                 <g id="_R_G_L_0_G">
                     <g id="_R_G_L_0_G_L_7_G" transform=" translate(540, 540) translate(-13.333, 10.667)">
                         <g id="_R_G_L_0_G_L_7_G_D_0_P_0_G_0_T_0" transform=" translate(13.333, -10.667) translate(0, 0)">
-                            <rect id="_R_G_L_0_G_L_7_G_D_0_P_0" fill="#ffffff" fill-opacity="1" fill-rule="nonzero" width="578.667" height="578.667" transform="translate(-289.3335 -289.3335)" x="0" y="0"/>
+                            <!-- بدنه تاس: چوب صیقلی کرم-طلایی روشن -->
+                            <rect id="_R_G_L_0_G_L_7_G_D_0_P_0" fill="#f5e6ca" fill-opacity="1" fill-rule="nonzero" width="578.667" height="578.667" transform="translate(-289.3335 -289.3335)" x="0" y="0"/>
                         </g>
                         <g id="_R_G_L_0_G_L_7_G_D_1_P_0_G_0_T_0" transform=" translate(13.333, -10.667) translate(0, 0)">
-                            <rect id="_R_G_L_0_G_L_7_G_D_1_P_0" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="0" stroke-opacity="1" width="578.667" height="578.667" transform="translate(-289.3335 -289.3335)" x="0" y="0"/>
+                            <rect id="_R_G_L_0_G_L_7_G_D_1_P_0" stroke="#8b5a2b" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="8" stroke-opacity="1" width="578.667" height="578.667" transform="translate(-289.3335 -289.3335)" x="0" y="0"/>
                         </g>
                     </g>
+                    <!-- نقطه‌های تاس: قهوه‌ای سوخته لوکس -->
                     <g id="_R_G_L_0_G_L_6_G" transform=" translate(403.714, 414) scale(0.64, 0.64) translate(158, 126)">
-                        <path id="_R_G_L_0_G_L_6_G_D_0_P_0" fill="#000000" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
-                        <path id="_R_G_L_0_G_L_6_G_D_1_P_0" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="0" stroke-opacity="1" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
+                        <path id="_R_G_L_0_G_L_6_G_D_0_P_0" fill="#3b2012" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
                     </g>
                     <g id="_R_G_L_0_G_L_5_G_M">
                         <g id="_R_G_L_0_G_L_5_G" transform=" translate(674.444, 414) scale(0.62, 0.62) translate(158, 126)">
-                            <path id="_R_G_L_0_G_L_5_G_D_0_P_0" fill="#000000" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
-                            <path id="_R_G_L_0_G_L_5_G_D_1_P_0" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="0" stroke-opacity="1" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
+                            <path id="_R_G_L_0_G_L_5_G_D_0_P_0" fill="#3b2012" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
                         </g>
                     </g>
                     <g id="_R_G_L_0_G_L_4_G_M">
                         <g id="_R_G_L_0_G_L_4_G" transform=" translate(674.444, 414)">
-                            <path id="_R_G_L_0_G_L_4_G_D_0_P_0" fill="#000000" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
-                            <path id="_R_G_L_0_G_L_4_G_D_1_P_0" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="0" stroke-opacity="1" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
+                            <path id="_R_G_L_0_G_L_4_G_D_0_P_0" fill="#3b2012" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
                         </g>
                     </g>
                     <g id="_R_G_L_0_G_L_3_G_M">
                         <g id="_R_G_L_0_G_L_3_G" transform=" translate(835.557, 540) translate(0, 0)">
-                            <path id="_R_G_L_0_G_L_3_G_D_0_P_0" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="24" stroke-opacity="1" d=" M-144.83 -160.96 C-144.83,-160.96 -200.99,-122.99 -200.99,-122.99 C-200.99,-122.99 -145.25,-88.12 -145.25,-88.12 "/>
+                            <path id="_R_G_L_0_G_L_3_G_D_0_P_0" stroke="#3b2012" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="24" stroke-opacity="1" d=" M-144.83 -160.96 C-144.83,-160.96 -200.99,-122.99 -200.99,-122.99 C-200.99,-122.99 -145.25,-88.12 -145.25,-88.12 "/>
                         </g>
                     </g>
                     <g id="_R_G_L_0_G_L_2_G" transform=" translate(403.714, 656) scale(0.62, 0.62) translate(158, 126)">
-                        <path id="_R_G_L_0_G_L_2_G_D_0_P_0" fill="#000000" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
-                        <path id="_R_G_L_0_G_L_2_G_D_1_P_0" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="0" stroke-opacity="1" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
+                        <path id="_R_G_L_0_G_L_2_G_D_0_P_0" fill="#3b2012" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
                     </g>
                     <g id="_R_G_L_0_G_L_1_G" transform=" translate(674.444, 656) scale(0.64, 0.64) translate(158, 126)">
-                        <path id="_R_G_L_0_G_L_1_G_D_0_P_0" fill="#000000" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
-                        <path id="_R_G_L_0_G_L_1_G_D_1_P_0" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="0" stroke-opacity="1" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
+                        <path id="_R_G_L_0_G_L_1_G_D_0_P_0" fill="#3b2012" fill-opacity="1" fill-rule="nonzero" d=" M-158 -174 C-131.51,-174 -110,-152.49 -110,-126 C-110,-99.51 -131.51,-78 -158,-78 C-184.49,-78 -206,-99.51 -206,-126 C-206,-152.49 -184.49,-174 -158,-174z "/>
                     </g>
                     <g id="_R_G_L_0_G_L_0_G" transform=" translate(542.829, 540) scale(0.9867, 0.97316) translate(0, 0)">
-                        <path id="_R_G_L_0_G_L_0_G_D_0_P_0" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="59" stroke-opacity="1" d=" M133.28 117.96 C133.28,170.06 72.57,210.26 -2.83,210.26 C-78.22,210.26 -140.93,170.2 -140.93,118.1 "/>
+                        <path id="_R_G_L_0_G_L_0_G_D_0_P_0" stroke="#3b2012" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="59" stroke-opacity="1" d=" M133.28 117.96 C133.28,170.06 72.57,210.26 -2.83,210.26 C-78.22,210.26 -140.93,170.2 -140.93,118.1 "/>
                     </g>
                 </g>
             </g>

@@ -16,7 +16,7 @@ class ReconnectingFailedAlert extends StatelessWidget {
         ? maxAvailableWidth
         : maxAvailableHeight * 0.86);
 
-    final double base = boardSize * 0.85; // پایه مقیاس‌دهی منسجم با سایر دیالوگ‌ها
+    final double base = boardSize * 0.85;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -24,11 +24,15 @@ class ReconnectingFailedAlert extends StatelessWidget {
         width: base,
         padding: EdgeInsets.all(base * 0.06),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B), // تم تاریک منسجم بازی
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.redAccent.withValues(alpha: 0.5), // مرز قرمز نئونی به نشانه خطا
-            width: 1.5,
+            color: Colors.redAccent.withValues(alpha: 0.8),
+            width: 1.8,
           ),
           boxShadow: const [
             BoxShadow(
@@ -39,9 +43,8 @@ class ReconnectingFailedAlert extends StatelessWidget {
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // جمع شدن کارت متناسب با محتوا
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // آیکون خطا با رنگ قرمز نئونی ملایم
             Icon(
               Icons.signal_wifi_connected_no_internet_4_outlined,
               size: base * 0.15,
@@ -49,43 +52,38 @@ class ReconnectingFailedAlert extends StatelessWidget {
             ),
             SizedBox(height: base * 0.04),
 
-            // عنوان خطا
             Text(
               context.tr('reconnecting failed alert title'),
               style: TextStyle(
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFFFFF8DC),
               ),
             ),
             SizedBox(height: base * 0.02),
 
-            // توضیحات خطا
             Text(
               context.tr('reconnecting failed alert text'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: base * 0.032,
-                color: Colors.grey.shade400,
+                color: const Color(0xFFD4AF37),
                 height: 1.4,
               ),
             ),
             SizedBox(height: base * 0.06),
 
-            // دکمه شیک و مدرن تلاش مجدد (تغییر ElevatedButton به GestureDetector با استایل اختصاصی)
             GestureDetector(
               onTap: onReconnectPressed,
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: base * 0.035),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.blueGrey.shade700,
-                      Colors.blueGrey.shade900,
-                    ],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
                   ),
                   borderRadius: BorderRadius.circular(base * 0.03),
+                  border: Border.all(color: const Color(0xFFFFD700)),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
@@ -100,14 +98,14 @@ class ReconnectingFailedAlert extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.refresh_rounded,
-                        color: Colors.white,
+                        color: const Color(0xFFFFF8DC),
                         size: base * 0.045,
                       ),
                       SizedBox(width: base * 0.02),
                       Text(
                         context.tr('Reconnect'),
                         style: TextStyle(
-                          color: Colors.white,
+                          color: const Color(0xFFFFF8DC),
                           fontSize: base * 0.035,
                           fontWeight: FontWeight.bold,
                         ),

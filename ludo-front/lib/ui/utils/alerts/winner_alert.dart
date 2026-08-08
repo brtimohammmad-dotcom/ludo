@@ -33,7 +33,6 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
   void initState() {
     super.initState();
 
-    // تشخیص اینکه بازیکن محلی برنده شده است یا خیر
     final livePlayer = widget.gameController.currentGameState?.livePlayer;
     _isMeWinner = livePlayer?.userId == widget.winner.userId;
 
@@ -44,7 +43,6 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
 
     _confetti = ConfettiController(duration: const Duration(seconds: 3));
 
-    // پخش افکت صوتی داینامیک بر اساس برد یا باخت
     if (_isMeWinner) {
       ref
           .read(audioServiceProvider.notifier)
@@ -83,7 +81,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          /// 🎉 CONFETTI (فقط برای برنده اصلی افکت پخش می‌شود)
+          /// 🎉 CONFETTI
           if (_isMeWinner)
             Align(
               alignment: Alignment.topCenter,
@@ -105,13 +103,17 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                 width: base,
                 padding: EdgeInsets.all(base * 0.06),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
                     color: _isMeWinner
-                        ? Colors.amber.withValues(alpha: 0.5)
-                        : Colors.redAccent.withValues(alpha: 0.5),
-                    width: 1.5,
+                        ? const Color(0xFFFFD700)
+                        : Colors.redAccent.withValues(alpha: 0.8),
+                    width: 1.8,
                   ),
                   boxShadow: const [
                     BoxShadow(
@@ -124,14 +126,14 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// 👑 / ❌ ICON
+                    /// ICON
                     Container(
                       padding: EdgeInsets.all(base * 0.02),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: _isMeWinner
-                            ? Colors.amber.withValues(alpha: 0.1)
-                            : Colors.redAccent.withValues(alpha: 0.1),
+                            ? const Color(0xFFFFD700).withValues(alpha: 0.15)
+                            : Colors.redAccent.withValues(alpha: 0.15),
                       ),
                       child: Icon(
                         _isMeWinner
@@ -139,13 +141,13 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                             : Icons.sentiment_very_dissatisfied,
                         size: base * 0.2,
                         color: _isMeWinner
-                            ? Colors.amberAccent
+                            ? const Color(0xFFFFD700)
                             : Colors.redAccent,
                       ),
                     ),
                     SizedBox(height: base * 0.04),
 
-                    /// TITLE (تغییر عنوان بر اساس وضعیت بازیکن)
+                    /// TITLE
                     Text(
                       _isMeWinner
                           ? context.tr("You Win")
@@ -153,7 +155,9 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                       style: TextStyle(
                         fontSize: base * 0.07,
                         fontWeight: FontWeight.w900,
-                        color: _isMeWinner ? Colors.white : Colors.redAccent,
+                        color: _isMeWinner
+                            ? const Color(0xFFFFD700)
+                            : Colors.redAccent,
                         letterSpacing: 2,
                       ),
                     ),
@@ -165,7 +169,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                           ? context.tr("Congratulations")
                           : context.tr("Winner of this match"),
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: const Color(0xFFD4AF37),
                         fontSize: base * 0.032,
                       ),
                     ),
@@ -176,18 +180,19 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                         vertical: base * 0.025,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: const Color(0xFF1E120B),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white12),
+                        border: Border.all(
+                          color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                        ),
                       ),
                       child: Text(
                         widget.winner.username,
                         style: TextStyle(
                           fontSize: base * 0.04,
                           fontWeight: FontWeight.bold,
-                          color:
-                          widget.winner.color?.name.toColor() ??
-                              Colors.white,
+                          color: widget.winner.color?.name.toColor() ??
+                              const Color(0xFFFFF8DC),
                         ),
                       ),
                     ),
@@ -206,14 +211,12 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                           vertical: base * 0.025,
                         ),
                         decoration: BoxDecoration(
-                          color: _isMeWinner
-                              ? Colors.amber.withValues(alpha: 0.15)
-                              : Colors.red.withValues(alpha: 0.15),
+                          color: const Color(0xFF1E120B),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _isMeWinner
-                                ? Colors.amber.withValues(alpha: 0.4)
-                                : Colors.redAccent.withValues(alpha: 0.4),
+                                ? const Color(0xFFFFD700).withValues(alpha: 0.6)
+                                : Colors.redAccent.withValues(alpha: 0.6),
                             width: 1.5,
                           ),
                         ),
@@ -223,13 +226,12 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                             Icon(
                               Icons.monetization_on,
                               color: _isMeWinner
-                                  ? Colors.amber
+                                  ? const Color(0xFFFFD700)
                                   : Colors.redAccent,
                               size: base * 0.05,
                             ),
                             const SizedBox(width: 8),
 
-                            /// انیمیشن شمارش سکه همراه با تبدیل اعداد به زبان جاری
                             TweenAnimationBuilder<double>(
                               tween: Tween<double>(
                                 begin: 0.0,
@@ -251,10 +253,9 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                                     ? value / targetValue
                                     : 1.0;
 
-                                double scaleFactor =
-                                    1.0 + (progress * (1.0 - progress) * 1.0);
+                                double scaleFactor = 1.0 +
+                                    (progress * (1.0 - progress) * 1.0);
 
-                                // تبدیل عدد به عدد فارسی یا انگلیسی بر اساس زبان برنامه
                                 final formattedNumber =
                                 context.num(animatedValue);
 
@@ -269,13 +270,12 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                                       fontSize: base * 0.04,
                                       fontWeight: FontWeight.bold,
                                       color: _isMeWinner
-                                          ? Colors.amberAccent
-                                          : Colors.white,
+                                          ? const Color(0xFFFFD700)
+                                          : const Color(0xFFFFF8DC),
                                       shadows: [
                                         if (_isMeWinner)
-                                          Shadow(
-                                            color: Colors.amber
-                                                .withValues(alpha: 0.5),
+                                          const Shadow(
+                                            color: Color(0xFFFFD700),
                                             blurRadius: 10,
                                           ),
                                       ],
@@ -300,17 +300,17 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                         ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFF22C55E),
-                              Color(0xFF15803D),
-                            ],
+                            colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
                           ),
                           borderRadius: BorderRadius.circular(base * 0.03),
-                          boxShadow: [
+                          border: Border.all(
+                            color: const Color(0xFFFFD700),
+                          ),
+                          boxShadow: const [
                             BoxShadow(
-                              color: Colors.green.withValues(alpha: 0.3),
+                              color: Colors.black26,
                               blurRadius: 8,
-                              offset: const Offset(0, 3),
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
@@ -318,7 +318,7 @@ class _WinnerAlertState extends ConsumerState<WinnerAlert>
                           child: Text(
                             context.tr("Back to Home"),
                             style: TextStyle(
-                              color: Colors.white,
+                              color: const Color(0xFFFFF8DC),
                               fontSize: base * 0.038,
                               fontWeight: FontWeight.bold,
                             ),

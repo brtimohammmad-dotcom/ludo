@@ -27,12 +27,15 @@ class UserProfileBox extends StatelessWidget {
         padding: const EdgeInsets.only(left: 4, right: 12),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           borderRadius: BorderRadius.circular(19),
-          border: Border.all(color: const Color(0xFF334155), width: 1.5),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.8),
+            width: 1.5,
+          ),
           boxShadow: const [
             BoxShadow(
               color: Colors.black38,
@@ -47,7 +50,7 @@ class UserProfileBox extends StatelessWidget {
             UserAvatar(
               url: avatarUrl,
               size: 28,
-              borderColor: const Color(0xFFFFB703),
+              borderColor: const Color(0xFFFFD700),
               borderWidth: 1.5,
             ),
             const SizedBox(width: 8),
@@ -58,8 +61,8 @@ class UserProfileBox extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFFFF8DC),
+                  fontWeight: FontWeight.w800,
                   fontSize: 12,
                 ),
               ),

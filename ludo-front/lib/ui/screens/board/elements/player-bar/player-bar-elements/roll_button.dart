@@ -25,26 +25,54 @@ class RollButton extends ConsumerWidget {
       child: GestureDetector(
         onTap: myTurnToRoll ? () => gameControllerNotifier.rollDice() : null,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 150),
           padding: EdgeInsets.symmetric(
             horizontal: boardSize * 0.05,
             vertical: boardSize * 0.012,
           ),
           decoration: BoxDecoration(
-            color: myTurnToRoll ? const Color(0xFF22C55E) : const Color(0xFF334155), // سبز فلت یا خاکستری مات بدون گرادینت و سایه
             borderRadius: borderRadius,
-            border: Border.all(
-              color: myTurnToRoll ? const Color(0xFF4ADE80) : const Color(0xFF475569),
-              width: 1.0,
+            // 🪵 گرادیانت طلایی/سبز زیتونی لوکس هنگام فعال بودن و چوب تیره هنگام غیرفعال بودن
+            gradient: LinearGradient(
+              colors: myTurnToRoll
+                  ? const [Color(0xFF2E7D32), Color(0xFF1B5E20)]
+                  : const [Color(0xFF2A160C), Color(0xFF1E0E07)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
+            border: Border.all(
+              color: myTurnToRoll
+                  ? const Color(0xFFFFD700)
+                  : const Color(0xFF8B5A2B).withValues(alpha: 0.4),
+              width: myTurnToRoll ? 1.5 : 1.0,
+            ),
+            boxShadow: [
+              if (myTurnToRoll)
+                const BoxShadow(
+                  color: Color(0x66FFD700),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+            ],
           ),
           child: Text(
             context.tr('ROLL'),
             style: TextStyle(
-              color: myTurnToRoll ? Colors.white : Colors.white30,
+              color: myTurnToRoll
+                  ? const Color(0xFFFFF8DC)
+                  : Colors.white.withValues(alpha: 0.3),
               fontSize: boardSize * 0.024,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
+              shadows: myTurnToRoll
+                  ? const [
+                Shadow(
+                  color: Colors.black54,
+                  offset: Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ]
+                  : null,
             ),
           ),
         ),

@@ -39,6 +39,12 @@ class TargetCounterWidget extends ConsumerWidget {
         (state) => state.getTargetTokensCountByColor(playerColor),
       ),
       (previous, next) {
+        final gameStage = ref.read(
+          gameControllerProvider.select((s) => s?.gameStage),
+        );
+        if (gameStage != GameStage.boardStage) {
+          return;
+        }
         if ((previous ?? 0) < next) {
           ref
               .read(audioServiceProvider.notifier)

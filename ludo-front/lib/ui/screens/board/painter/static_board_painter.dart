@@ -9,10 +9,11 @@ class BoardBackground extends StatelessWidget {
       aspectRatio: 1,
       child: Container(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(80),
-              blurRadius: 25,
+              color: Colors.black.withValues(alpha: 0.6),
+              blurRadius: 20,
               offset: const Offset(0, 8),
             ),
           ],
@@ -30,21 +31,28 @@ class BoardBackground extends StatelessWidget {
 class LudoOptimizedPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final double step = size.width / 11; // ابعاد ماتریس ۱۱ در ۱۱ شما
+    final double step = size.width / 11;
 
-    const Color baseBgColor = Color(0xffD5B195);
-    const Color borderColor = Colors.black12;
+    // 🪵 پالت رنگی چوب و فلزات لوکس
+    const Color woodBaseColor = Color(0xFFD5B195); // چوب روشن برای مسیر
+    const Color woodDarkBorder = Color(0xFF5C3A21); // قهوه‌ای چوبی برای مرزها
+
+    // رنگ‌های ۴ خانه (قرمز چوبی، سبز زیتونی/چوبی، قهوه‌ای/برنز، طلایی چرمی)
+    final List<Color> redWood = [const Color(0xFFA63A2A), const Color(0xFF6E1D13)];
+    final List<Color> greenWood = [const Color(0xFF3B6E4C), const Color(0xFF1E3F29)];
+    final List<Color> blueWood = [const Color(0xFF4A6B82), const Color(0xFF233948)]; // آبی سرمه‌ای کلاسیک
+    final List<Color> yellowWood = [const Color(0xFFD4A359), const Color(0xFF8C6226)]; // طلایی-چوبی
 
     final Paint borderPaint = Paint()
-      ..color = borderColor
+      ..color = woodDarkBorder.withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 1.2;
 
-    // ۱. رسم بک‌گراند کلی خانه‌های عادی مسیر با رنگ کرم مبنا
-    final Paint defaultCellPaint = Paint()..color = baseBgColor;
+    // ۱. رسم بک‌گراند کلی با تم چوب روشن
+    final Paint defaultCellPaint = Paint()..color = woodBaseColor;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), defaultCellPaint);
 
-    // ۲. رسم خانه‌های مسیر ۱۱ در ۱۱ با افکت شعاعی زیبا
+    // ۲. رسم خانه‌های مسیر ۱۱ در ۱۱
     for (int r = 0; r < 11; r++) {
       for (int c = 0; c < 11; c++) {
         if ((r < 4 && c < 4) || (r < 4 && c > 6) ||
@@ -56,38 +64,38 @@ class LudoOptimizedPainter extends CustomPainter {
         final Rect cellRect = Rect.fromLTWH(c * step, r * step, step, step);
 
         if (r > 6 && c == 5 || r == 10 && c == 4) {
-          _drawRadialCell(canvas, cellRect, [Colors.red.shade400, Colors.red.shade700]);
+          _drawRadialCell(canvas, cellRect, redWood);
         } else if (r == 5 && c > 6 || r == 6 && c == 10) {
-          _drawRadialCell(canvas, cellRect, [Colors.green.shade400, Colors.green.shade700]);
+          _drawRadialCell(canvas, cellRect, greenWood);
         } else if (r == 5 && c < 4 || r == 4 && c == 0) {
-          _drawRadialCell(canvas, cellRect, [Colors.blue.shade400, Colors.blue.shade700]);
+          _drawRadialCell(canvas, cellRect, blueWood);
         } else if (r < 4 && c == 5 || r == 0 && c == 6) {
-          _drawRadialCell(canvas, cellRect, [Colors.yellow.shade400, Colors.yellow.shade600]);
+          _drawRadialCell(canvas, cellRect, yellowWood);
         } else {
-          _drawRadialCell(canvas, cellRect, [baseBgColor.withAlpha(220), baseBgColor]);
+          _drawRadialCell(canvas, cellRect, [woodBaseColor, const Color(0xFFC49A78)]);
         }
 
         canvas.drawRect(cellRect, borderPaint);
       }
     }
 
-    // ۳. رسم بیس‌های بزرگ گوشه (کاملاً مربع و چهارگوش - بدون لبه گرد)
-    _drawBaseHome(canvas, Rect.fromLTWH(0, 0, step * 4, step * 4), [Colors.blueAccent, Colors.blue.shade700], step);
-    _drawBaseHome(canvas, Rect.fromLTWH(step * 7, 0, step * 4, step * 4), [Colors.yellowAccent.shade100, Colors.yellow.shade600], step);
-    _drawBaseHome(canvas, Rect.fromLTWH(0, step * 7, step * 4, step * 4), [Colors.redAccent, Colors.red.shade700], step);
-    _drawBaseHome(canvas, Rect.fromLTWH(step * 7, step * 7, step * 4, step * 4), [Colors.greenAccent.shade400, Colors.green.shade700], step);
+    // ۳. رسم بیس‌های بزرگ گوشه (تم چوبی تیره و طلایی)
+    _drawBaseHome(canvas, Rect.fromLTWH(0, 0, step * 4, step * 4), blueWood, step);
+    _drawBaseHome(canvas, Rect.fromLTWH(step * 7, 0, step * 4, step * 4), yellowWood, step);
+    _drawBaseHome(canvas, Rect.fromLTWH(0, step * 7, step * 4, step * 4), redWood, step);
+    _drawBaseHome(canvas, Rect.fromLTWH(step * 7, step * 7, step * 4, step * 4), greenWood, step);
 
-    // ۴. رسم مثلث‌های متلاقی در مرکز بازی (محدوده ۴ تا ۶)
+    // ۴. رسم مثلث‌های متلاقی مرکز با گرادیانت چوب/فلز
     final double cStart = step * 4;
     final double cEnd = step * 7;
     final Offset center = Offset(size.width / 2, size.height / 2);
 
-    _drawTriangle(canvas, [Colors.yellow.shade400, Colors.yellow.shade600], Offset(cStart, cStart), Offset(cEnd, cStart), center);
-    _drawTriangle(canvas, [Colors.green.shade400, Colors.green.shade600], Offset(cEnd, cStart), Offset(cEnd, cEnd), center);
-    _drawTriangle(canvas, [Colors.red.shade400, Colors.red.shade600], Offset(cStart, cEnd), Offset(cEnd, cEnd), center);
-    _drawTriangle(canvas, [Colors.blue.shade400, Colors.blue.shade600], Offset(cStart, cStart), Offset(cStart, cEnd), center);
+    _drawTriangle(canvas, yellowWood, Offset(cStart, cStart), Offset(cEnd, cStart), center);
+    _drawTriangle(canvas, greenWood, Offset(cEnd, cStart), Offset(cEnd, cEnd), center);
+    _drawTriangle(canvas, redWood, Offset(cStart, cEnd), Offset(cEnd, cEnd), center);
+    _drawTriangle(canvas, blueWood, Offset(cStart, cStart), Offset(cStart, cEnd), center);
 
-    // رسم خطوط مرزی وسط
+    // خطوط مرزی مرکز
     canvas.drawPath(Path()..moveTo(cStart, cStart)..lineTo(cEnd, cEnd), borderPaint);
     canvas.drawPath(Path()..moveTo(cEnd, cStart)..lineTo(cStart, cEnd), borderPaint);
     canvas.drawRect(Rect.fromLTWH(cStart, cStart, step * 3, step * 3), borderPaint);
@@ -95,21 +103,21 @@ class LudoOptimizedPainter extends CustomPainter {
 
   void _drawRadialCell(Canvas canvas, Rect rect, List<Color> colors) {
     final paint = Paint()
-      ..shader = RadialGradient(colors: colors, radius: 0.7).createShader(rect);
+      ..shader = RadialGradient(colors: colors, radius: 0.75).createShader(rect);
     canvas.drawRect(rect, paint);
   }
 
   void _drawBaseHome(Canvas canvas, Rect rect, List<Color> colors, double cellSize) {
-    // 🟢 تغییر به drawRect برای داشتن لبه‌های کاملاً تیز و مربعی در بیس‌های بزرگ گوشه
     final Paint basePaint = Paint()
-      ..shader = RadialGradient(colors: colors, radius: 0.8).createShader(rect);
+      ..shader = RadialGradient(colors: colors, radius: 0.85).createShader(rect);
     canvas.drawRect(rect, basePaint);
 
-    // رسم کانتینر داخلی شفاف (محل دایره مهره‌ها) با حاشیه سفید محو و لبه گرد (مانند تصویر شما)
     final double margin = cellSize / 2.5;
     final Rect innerRect = rect.deflate(margin);
+
+    // کانتینر داخلی با افکت چوب سوخته/تیره
     final Paint innerPaint = Paint()
-      ..color = const Color(0xffD5B195).withAlpha(45);
+      ..color = const Color(0xFF2A160C).withValues(alpha: 0.4);
 
     canvas.drawRRect(RRect.fromRectAndRadius(innerRect, Radius.circular(cellSize / 2)), innerPaint);
   }

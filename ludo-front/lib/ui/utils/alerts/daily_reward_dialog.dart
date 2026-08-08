@@ -18,8 +18,7 @@ class DailyRewardDialog extends ConsumerWidget {
     final canClaim = livePlayer?.canClaimDailyReward;
     final List<int> rewards = [100, 150, 200, 250, 300, 350, 500];
 
-    final double base =
-        boardSize * 0.85; // محدود کردن عرض دیالوگ متناسب با برد بازی
+    final double base = boardSize * 0.85;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -27,11 +26,15 @@ class DailyRewardDialog extends ConsumerWidget {
         width: base,
         padding: EdgeInsets.all(base * 0.05),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B), // تم تاریک بازی
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.5),
-            width: 1.5,
+            color: const Color(0xFFFFD700),
+            width: 1.8,
           ),
           boxShadow: const [
             BoxShadow(
@@ -48,7 +51,7 @@ class DailyRewardDialog extends ConsumerWidget {
             Icon(
               Icons.card_giftcard,
               size: base * 0.12,
-              color: Colors.amberAccent,
+              color: const Color(0xFFFFD700),
             ),
             SizedBox(height: base * 0.02),
 
@@ -56,9 +59,9 @@ class DailyRewardDialog extends ConsumerWidget {
             Text(
               context.tr('Daily Rewards'),
               style: TextStyle(
-                color: Colors.white,
+                color: const Color(0xFFFFF8DC),
                 fontSize: base * 0.055,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w900,
               ),
             ),
             SizedBox(height: base * 0.015),
@@ -68,7 +71,7 @@ class DailyRewardDialog extends ConsumerWidget {
               context.tr('Daily Reward Text'),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey.shade400,
+                color: const Color(0xFFD4AF37),
                 fontSize: base * 0.032,
               ),
             ),
@@ -77,31 +80,30 @@ class DailyRewardDialog extends ConsumerWidget {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              // کاملاً ثابت
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4, // ۴ ستون در هر ردیف
+                crossAxisCount: 4,
                 crossAxisSpacing: base * 0.02,
                 mainAxisSpacing: base * 0.02,
-                childAspectRatio: 0.85, // تناسب ابعاد کارت‌ها
+                childAspectRatio: 0.85,
               ),
               itemCount: 7,
               itemBuilder: (context, index) {
                 final int dayNumber = index + 1;
 
-                final isClaimed = dayNumber < livePlayer!.rewardStreak;
+                final isClaimed = dayNumber < (livePlayer?.rewardStreak ?? 1);
                 final isCurrent =
-                    dayNumber == livePlayer.rewardStreak && canClaim!;
+                    dayNumber == livePlayer?.rewardStreak && (canClaim ?? false);
 
                 return Container(
                   decoration: BoxDecoration(
                     color: isCurrent
-                        ? Colors.amber.withValues(alpha: 0.15)
-                        : (isClaimed ? Colors.black38 : Colors.white10),
+                        ? const Color(0xFF8B5A2B)
+                        : (isClaimed ? Colors.black38 : const Color(0xFF1E120B)),
                     borderRadius: BorderRadius.circular(base * 0.03),
                     border: Border.all(
                       color: isCurrent
-                          ? Colors.amber
-                          : (isClaimed ? Colors.green : Colors.white12),
+                          ? const Color(0xFFFFD700)
+                          : (isClaimed ? Colors.greenAccent : const Color(0xFF5C3613)),
                       width: 1.5,
                     ),
                   ),
@@ -111,14 +113,14 @@ class DailyRewardDialog extends ConsumerWidget {
                       Text(
                         '${context.tr('Day')} ${context.num(dayNumber)}',
                         style: TextStyle(
-                          color: Colors.grey.shade400,
+                          color: const Color(0xFFFFF8DC),
                           fontSize: base * 0.028,
                         ),
                       ),
                       SizedBox(height: base * 0.01),
                       Icon(
                         isClaimed ? Icons.check_circle : Icons.monetization_on,
-                        color: isClaimed ? Colors.green : Colors.amber,
+                        color: isClaimed ? Colors.greenAccent : const Color(0xFFFFD700),
                         size: base * 0.045,
                       ),
                       SizedBox(height: base * 0.01),
@@ -126,7 +128,7 @@ class DailyRewardDialog extends ConsumerWidget {
                         "+${context.num(rewards[index])}",
                         textDirection: TextDirection.ltr,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: const Color(0xFFFFF8DC),
                           fontSize: base * 0.028,
                           fontWeight: FontWeight.bold,
                         ),
@@ -140,52 +142,60 @@ class DailyRewardDialog extends ConsumerWidget {
 
             // دکمه کلیم جایزه
             GestureDetector(
-              onTap: (canClaim! && !isLoading)
+              onTap: ((canClaim ?? false) && !isLoading)
                   ? () {
-                      ref
-                          .read(globalLoadingProvider.notifier)
-                          .start('daily_reward');
-                      ref
-                          .read(gameControllerProvider.notifier)
-                          .claimDailyReward();
-                    }
+                ref
+                    .read(globalLoadingProvider.notifier)
+                    .start('daily_reward');
+                ref
+                    .read(gameControllerProvider.notifier)
+                    .claimDailyReward();
+              }
                   : null,
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: base * 0.035),
                 decoration: BoxDecoration(
-                  gradient: (canClaim && !isLoading)
-                      ? LinearGradient(
-                          colors: [
-                            Colors.amber.shade600,
-                            Colors.orange.shade700,
-                          ],
-                        )
+                  gradient: ((canClaim ?? false) && !isLoading)
+                      ? const LinearGradient(
+                    colors: [
+                      Color(0xFF8B5A2B),
+                      Color(0xFF6F431A),
+                    ],
+                  )
                       : const LinearGradient(
-                          colors: [Colors.grey, Colors.blueGrey],
-                        ),
+                    colors: [Color(0xFF381F12), Color(0xFF2A160C)],
+                  ),
                   borderRadius: BorderRadius.circular(base * 0.035),
+                  border: Border.all(
+                    color: (canClaim ?? false)
+                        ? const Color(0xFFFFD700)
+                        : Colors.transparent,
+                    width: 1.5,
+                  ),
                 ),
                 child: Center(
                   child: isLoading
                       ? SizedBox(
-                          width: base * 0.05,
-                          height: base * 0.05,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                    width: base * 0.05,
+                    height: base * 0.05,
+                    child: const CircularProgressIndicator(
+                      color: Color(0xFFFFD700),
+                      strokeWidth: 2,
+                    ),
+                  )
                       : Text(
-                          canClaim
-                              ? context.tr('Claim Reward')
-                              : context.tr('Already Claimed'),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: base * 0.04,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    (canClaim ?? false)
+                        ? context.tr('Claim Reward')
+                        : context.tr('Already Claimed'),
+                    style: TextStyle(
+                      color: (canClaim ?? false)
+                          ? const Color(0xFFFFF8DC)
+                          : Colors.grey.shade500,
+                      fontSize: base * 0.04,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -197,7 +207,7 @@ class DailyRewardDialog extends ConsumerWidget {
               child: Text(
                 context.tr('Close'),
                 style: TextStyle(
-                  color: Colors.grey.shade400,
+                  color: const Color(0xFFD4AF37),
                   fontSize: base * 0.035,
                 ),
               ),

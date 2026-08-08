@@ -31,10 +31,7 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
     );
     _uiEventHandler.checkAndShowWaitingDialog();
 
-    // بهینه‌سازی: تیکر انیمیشن فقط هنگام رویدادهای بازی (شروع، تاس، حرکت مهره) اجرا می‌شود
-    // و در حالت idel متوقف می‌ماند. حذف حلقه‌ی بی‌پایان `addStatusListener` باعث می‌شود
-    // کامپوننت‌های وابسته (نوار تایمر، حلقه‌ی هایلایت مهره‌ها، تاس) به‌صورت دائمی ری‌پینت نشوند
-    // و مصرف CPU/باتری و لگ به‌طور چشمگیری کاهش یابد.
+
     gameController.animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 10));
     _gameController = ref.read(gameControllerProvider.notifier);
@@ -86,7 +83,7 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
     final barHeight = boardSize * 0.1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // رنگ تیره فلت و بهینه
+      backgroundColor: const Color(0xFF1A0F0A), // تم چوبی تیره و لوکس
       body: Stack(
         children: [
           Positioned.fill(
@@ -100,14 +97,21 @@ class _BoardState extends ConsumerState<Board> with SingleTickerProviderStateMix
             child: FittedBox(
               fit: BoxFit.contain,
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF2A160C), // قهوه‌ای سوخته چوبی ملایم
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF334155),
-                    width: 1.0,
+                    color: const Color(0xFF8B5A2B), // حاشیه طلایی-قهوه‌ای چوبی
+                    width: 1.5,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: Directionality(
                   textDirection: TextDirection.ltr,

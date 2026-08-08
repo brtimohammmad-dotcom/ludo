@@ -12,15 +12,12 @@ class PlayerProfileAlert extends ConsumerWidget {
     final player = ref.watch(
       gameControllerProvider.select((s) => s?.livePlayer),
     );
-    // محاسبه عرض صفحه برای ریسپانسیو‌سازی کامل
     final double screenWidth = MediaQuery.of(context).size.width;
-      final double base = (screenWidth * 0.85).clamp(0, 600);
+    final double base = (screenWidth * 0.85).clamp(0, 600);
 
-    // رنگ زمردی اختصاصی
-    const Color emeraldColor = Color(0xFF10B981);
+    const Color emeraldColor = Color(0xFF4ADE80);
 
-    // استخراج اطلاعات کاربر با مقادیر پیش‌فرض
-    final String name = player?.username ?? player?.username ?? "Player";
+    final String name = player?.username ?? "Player";
     final String? avatarUrl = player?.avatarUrl;
     final int coins = player?.coin ?? 0;
     final int wins = player?.wins ?? 0;
@@ -33,11 +30,15 @@ class PlayerProfileAlert extends ConsumerWidget {
         width: base,
         padding: EdgeInsets.all(base * 0.06),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(base * 0.06),
           border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.5),
-            width: 1.5,
+            color: const Color(0xFFFFD700),
+            width: 1.8,
           ),
           boxShadow: [
             BoxShadow(
@@ -50,38 +51,36 @@ class PlayerProfileAlert extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // آواتار ریسپانسیو
             UserAvatar(
               url: avatarUrl,
               size: base * 0.22,
-              borderColor: Colors.amberAccent,
+              borderColor: const Color(0xFFFFD700),
               borderWidth: 2,
             ),
             SizedBox(height: base * 0.03),
 
-            // نام کاربر
             Text(
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: Colors.white,
+                color: const Color(0xFFFFF8DC),
                 fontSize: base * 0.05,
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: base * 0.025),
 
-            // نمایش سکه‌ها
+            // سکه‌ها
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: base * 0.04,
                 vertical: base * 0.018,
               ),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.1),
+                color: const Color(0xFF1E120B),
                 borderRadius: BorderRadius.circular(base * 0.05),
-                border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.5)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -89,13 +88,13 @@ class PlayerProfileAlert extends ConsumerWidget {
                   Icon(
                     Icons.monetization_on,
                     size: base * 0.05,
-                    color: Colors.amberAccent,
+                    color: const Color(0xFFFFD700),
                   ),
                   SizedBox(width: base * 0.015),
                   Text(
                     context.num(coins),
                     style: TextStyle(
-                      color: Colors.amberAccent,
+                      color: const Color(0xFFFFD700),
                       fontSize: base * 0.04,
                       fontWeight: FontWeight.bold,
                     ),
@@ -105,18 +104,17 @@ class PlayerProfileAlert extends ConsumerWidget {
             ),
             SizedBox(height: base * 0.05),
 
-            // آمار برد و باخت در دو باکس مجزا (کاملاً ریسپانسیو)
+            // آمار برد و باخت
             Row(
               children: [
-                // باکس بردها
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: base * 0.035),
                     decoration: BoxDecoration(
-                      color: emeraldColor.withValues(alpha: 0.1),
+                      color: const Color(0xFF1E120B),
                       borderRadius: BorderRadius.circular(base * 0.03),
                       border: Border.all(
-                        color: emeraldColor.withValues(alpha: 0.4),
+                        color: emeraldColor.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Column(
@@ -142,15 +140,14 @@ class PlayerProfileAlert extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(width: base * 0.03),
-                // باکس باخت‌ها
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: base * 0.035),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withValues(alpha: 0.1),
+                      color: const Color(0xFF1E120B),
                       borderRadius: BorderRadius.circular(base * 0.03),
                       border: Border.all(
-                        color: Colors.redAccent.withValues(alpha: 0.4),
+                        color: Colors.redAccent.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Column(
@@ -179,22 +176,22 @@ class PlayerProfileAlert extends ConsumerWidget {
             ),
             SizedBox(height: base * 0.06),
 
-            // دکمه بستن
             GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: base * 0.035),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.amber.shade600, Colors.orange.shade700],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
                   ),
                   borderRadius: BorderRadius.circular(base * 0.03),
-                  boxShadow: [
+                  border: Border.all(color: const Color(0xFFFFD700)),
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.orange.withValues(alpha: 0.3),
+                      color: Colors.black38,
                       blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
@@ -202,7 +199,7 @@ class PlayerProfileAlert extends ConsumerWidget {
                   child: Text(
                     context.tr('OK'),
                     style: TextStyle(
-                      color: Colors.white,
+                      color: const Color(0xFFFFF8DC),
                       fontSize: base * 0.04,
                       fontWeight: FontWeight.bold,
                     ),

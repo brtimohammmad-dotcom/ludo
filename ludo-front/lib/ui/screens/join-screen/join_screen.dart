@@ -98,7 +98,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                     child: const Text(
                       'LUDO RUSH',
                       style: TextStyle(
-                        fontFamily: 'Fredoka',
+                        fontFamily: 'Nunito',
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,

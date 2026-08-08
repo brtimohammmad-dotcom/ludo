@@ -66,33 +66,16 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   fonts:
-    - family: Fredoka
+    - family: Nunito
       fonts:
-        - asset: assets/fonts/Fredoka/Fredoka-Bold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka-Light.ttf
-        - asset: assets/fonts/Fredoka/Fredoka-Medium.ttf
-        - asset: assets/fonts/Fredoka/Fredoka-Regular.ttf
-        - asset: assets/fonts/Fredoka/Fredoka-SemiBold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Condensed-Bold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Condensed-Light.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Condensed-Medium.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Condensed-Regular.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Condensed-SemiBold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Expanded-Bold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Expanded-Light.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Expanded-Medium.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Expanded-Regular.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_Expanded-SemiBold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiCondensed-Bold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiCondensed-Light.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiCondensed-Medium.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiCondensed-Regular.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiCondensed-SemiBold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiExpanded-Bold.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiExpanded-Light.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiExpanded-Medium.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiExpanded-Regular.ttf
-        - asset: assets/fonts/Fredoka/Fredoka_SemiExpanded-SemiBold.ttf
+        - asset: assets/fonts/Nunito/Nunito-Black.ttf
+        - asset: assets/fonts/Nunito/Nunito-Bold.ttf
+        - asset: assets/fonts/Nunito/Nunito-ExtraBold.ttf
+        - asset: assets/fonts/Nunito/Nunito-ExtraLight.ttf
+        - asset: assets/fonts/Nunito/Nunito-Light.ttf
+        - asset: assets/fonts/Nunito/Nunito-Medium.ttf
+        - asset: assets/fonts/Nunito/Nunito-Regular.ttf
+        - asset: assets/fonts/Nunito/Nunito-SemiBold.ttf
     - family: Vazirmatn
       fonts:
         - asset: assets/fonts/Vazimatn/Vazirmatn-Black.ttf

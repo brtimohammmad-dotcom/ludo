@@ -20,24 +20,24 @@ class CoinBox extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 🪙 کپسول نمایش سکه
+        // 🪙 کپسول چوبی سکه
         Container(
           height: 38,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+              colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
             borderRadius: BorderRadius.circular(19),
             border: Border.all(
-              color: const Color(0xFF334155),
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.8),
               width: 1.5,
             ),
             boxShadow: const [
               BoxShadow(
-                color: Colors.black38,
+                color: Colors.black45,
                 offset: Offset(0, 3),
                 blurRadius: 6,
               ),
@@ -50,10 +50,10 @@ class CoinBox extends ConsumerWidget {
                 padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFFFB703),
+                  color: Color(0xFFFFD700),
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0xFFFFB703),
+                      color: Color(0xFFFFD700),
                       blurRadius: 6,
                       spreadRadius: -1,
                     )
@@ -69,8 +69,8 @@ class CoinBox extends ConsumerWidget {
               Text(
                 context.num(coins),
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFFFF8DC),
+                  fontWeight: FontWeight.w900,
                   fontSize: 13,
                   letterSpacing: 0.5,
                 ),
@@ -79,7 +79,7 @@ class CoinBox extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 6),
-        // 🎁 دکمه پاداش روزانه
+        // 🎁 دکمه چوبی پاداش روزانه
         GestureDetector(
           onTap: () {
             showDialog(
@@ -98,7 +98,7 @@ class CoinBox extends ConsumerWidget {
               gradient: LinearGradient(
                 colors: canClaim
                     ? [const Color(0xFFFFD700), const Color(0xFFFF8C00)]
-                    : [const Color(0xFF1E293B), const Color(0xFF0F172A)],
+                    : [const Color(0xFF4A2A18), const Color(0xFF2A160C)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -106,14 +106,14 @@ class CoinBox extends ConsumerWidget {
               border: Border.all(
                 color: canClaim
                     ? Colors.white
-                    : const Color(0xFF334155),
+                    : const Color(0xFFD4AF37).withValues(alpha: 0.6),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
                   color: canClaim
-                      ? const Color(0xFFFF8C00).withValues(alpha: 0.5)
-                      : Colors.black26,
+                      ? const Color(0xFFFF8C00).withValues(alpha: 0.6)
+                      : Colors.black38,
                   blurRadius: canClaim ? 8 : 4,
                   offset: const Offset(0, 2),
                 ),
@@ -121,7 +121,7 @@ class CoinBox extends ConsumerWidget {
             ),
             child: Icon(
               Icons.card_giftcard_rounded,
-              color: canClaim ? Colors.white : Colors.grey.shade400,
+              color: canClaim ? Colors.white : const Color(0xFFD4AF37),
               size: 18,
             ),
           ),

@@ -28,11 +28,15 @@ class ExitButtonAlert extends ConsumerWidget {
         width: base,
         padding: EdgeInsets.all(base * 0.06),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B), // تم تاریک بازی
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.5),
-            width: 1.5,
+            color: const Color(0xFFFFD700),
+            width: 1.8,
           ),
           boxShadow: const [
             BoxShadow(
@@ -48,7 +52,7 @@ class ExitButtonAlert extends ConsumerWidget {
             Icon(
               Icons.sentiment_dissatisfied_rounded,
               size: base * 0.15,
-              color: Colors.amberAccent,
+              color: const Color(0xFFFFD700),
             ),
             SizedBox(height: base * 0.03),
             Text(
@@ -56,7 +60,7 @@ class ExitButtonAlert extends ConsumerWidget {
               style: TextStyle(
                 fontSize: base * 0.045,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFFFFF8DC),
               ),
             ),
             SizedBox(height: base * 0.06),
@@ -69,9 +73,13 @@ class ExitButtonAlert extends ConsumerWidget {
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: base * 0.03),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF334155), // خاکستری تیره ملایم
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8B5A2B), Color(0xFF6F431A)],
+                        ),
                         borderRadius: BorderRadius.circular(base * 0.03),
-                        border: Border.all(color: Colors.white10),
+                        border: Border.all(
+                          color: const Color(0xFFFFD700).withValues(alpha: 0.6),
+                        ),
                       ),
                       child: Center(
                         child: Text(
@@ -79,7 +87,7 @@ class ExitButtonAlert extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: base * 0.035,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: const Color(0xFFFFF8DC),
                           ),
                         ),
                       ),
@@ -99,18 +107,21 @@ class ExitButtonAlert extends ConsumerWidget {
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: base * 0.03),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [
-                            Colors.redAccent.shade700,
-                            Colors.red.shade900,
+                            Color(0xFFB91C1C),
+                            Color(0xFF7F1D1D),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(base * 0.03),
-                        boxShadow: [
+                        border: Border.all(
+                          color: Colors.redAccent.withValues(alpha: 0.8),
+                        ),
+                        boxShadow: const [
                           BoxShadow(
-                            color: Colors.red.withValues(alpha: 0.3),
+                            color: Colors.black38,
                             blurRadius: 8,
-                            offset: const Offset(0, 3),
+                            offset: Offset(0, 3),
                           )
                         ],
                       ),

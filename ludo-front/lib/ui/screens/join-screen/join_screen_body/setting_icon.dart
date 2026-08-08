@@ -12,41 +12,33 @@ class SettingIcon extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         showAnimatedDialog(context: context, child: SettingsAlert());
-
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         height: 38,
         width: 38,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors:
-
-            [
-              const Color(0xFF1E293B),
-              const Color(0xFF0F172A),
-            ],
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4A2A18), Color(0xFF2A160C)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           shape: BoxShape.circle,
           border: Border.all(
-            color:
-            const Color(0xFF334155),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.8),
             width: 1.5,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color:
-              Colors.black26,
-              blurRadius:  4,
-              offset: const Offset(0, 2),
+              color: Colors.black38,
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
           ],
         ),
-        child: Icon(
+        child: const Icon(
           Icons.settings,
-          color:  Colors.grey.shade400,
+          color: Color(0xFFD4AF37),
           size: 18,
         ),
       ),
