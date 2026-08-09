@@ -13,10 +13,10 @@ const PHOTO_FILE_ID =
 // دستور استارت ربات در چت خصوصی
 bot.start((ctx) => {
   return ctx.replyWithPhoto(PHOTO_FILE_ID, {
-    caption: "🎮 Welcome to Ludo",
+    caption: "🎮 به منچ آنلاین خوش آمدید",
     ...Markup.inlineKeyboard([
-      [Markup.button.webApp("🎲 Play Now", WEB_APP_URL)],
-      [Markup.button.switchToChat("📢 Share with Friends", "share_bot")],
+      [Markup.button.webApp("🎲 شروع بازی", WEB_APP_URL)],
+      [Markup.button.switchToChat("📢 اشتراک‌گذاری با دوستان", "share_bot")],
     ]),
   });
 });
@@ -33,10 +33,10 @@ bot.on("inline_query", async (ctx) => {
           {
             type: "article",
             id: "share_main_bot",
-            title: "🎮 Play Ludo Mini App",
-            description: "Invite your friends to play Ludo together!",
+            title: "🎮 بازی مینی‌اپ منچ",
+            description: "دوستان خود را به بازی منچ دعوت کنید!",
             input_message_content: {
-              message_text: `🎲 *Let's Play Ludo!*\n\nHey! I'm playing Ludo right inside Telegram.\nClick the button below to join the game and challenge me! 🚀`,
+              message_text: `🎲 *بیا منچ بازی کنیم!*\n\nسلام! من دارم داخل تلگرام منچ بازی می‌کنم.\nرو دکمه زیر کلیک کن تا وارد بازی بشی و با هم رقابت کنیم! 🚀`,
               parse_mode: "Markdown",
               disable_web_page_preview: true,
             },
@@ -44,7 +44,7 @@ bot.on("inline_query", async (ctx) => {
               inline_keyboard: [
                 [
                   {
-                    text: "🎲 Play Now",
+                    text: "🎲 شروع بازی",
                     url: "https://t.me/LudoRushBot?startapp=main",
                   },
                 ],
@@ -78,17 +78,17 @@ bot.on("inline_query", async (ctx) => {
         {
           type: "article",
           id: gameId,
-          title: "🎲 Invite Friends to Ludo",
-          description: `Click to send invitation (${joinedCount}/${maxPlayers} joined)`,
+          title: "🎲 دعوت دوستان به بازی منچ",
+          description: `برای ارسال دعوت‌نامه کلیک کنید (${joinedCount}/${maxPlayers} نفر وارد شدند)`,
           input_message_content: {
-            message_text: `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${joinedCount}/${maxPlayers}\n\n🟢 ${ctx.from.first_name}\n\n⏳ Waiting for ${remaining} more player${remaining > 1 ? "s" : ""}...`,
+            message_text: `🎲 *بازی دوستانه منچ*\n\n👥 *بازیکنان:* ${joinedCount}/${maxPlayers}\n\n🟢 ${ctx.from.first_name}\n\n⏳ در انتظار ${remaining} بازیکن دیگر...`,
             parse_mode: "Markdown",
           },
           reply_markup: {
             inline_keyboard: [
               [
                 {
-                  text: `▶️ Play Game (${joinedCount}/${maxPlayers} joined)`,
+                  text: `▶️ ورود به بازی (${joinedCount}/${maxPlayers})`,
                   url: joinUrl,
                 },
               ],
@@ -121,7 +121,7 @@ bot.on("chosen_inline_result", async (ctx) => {
     inline_message_id: inlineMessageId,
   });
 
-  // 🔴 اصلاح کلیدی: اجرای بلافاصله به‌روزرسانی متن پیام در چت
+  // اجرای بلافاصله به‌روزرسانی متن پیام در چت
   await updateLobbyMessage(gameId);
 });
 
@@ -138,7 +138,7 @@ const updateLobbyMessage = async (gameId) => {
     }
 
     const playersList = game.players
-      .map((player) => `🟢 ${player.username || player.first_name || "Player"}`)
+      .map((player) => `🟢 ${player.username || player.first_name || "بازیکن"}`)
       .join("\n");
 
     const playersCount = game.players.length;
@@ -146,12 +146,12 @@ const updateLobbyMessage = async (gameId) => {
 
     const text =
       game.game_status === "start"
-        ? `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🔥 *All players are ready!*\n\n🚀 The match is now in progress.`
+        ? `🎲 *بازی دوستانه منچ*\n\n👥 *بازیکنان:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🔥 *همه بازیکنان آماده هستند!*\n\n🚀 بازی در حال برگزاری است.`
         : game.game_status === "finished"
-          ? `🏆 *Match Complete*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 *${game.winner ? game.winner.username || game.winner.first_name : "Someone"}* is the winner!\n\nThanks for joining the game.`
+          ? `🏆 *پایان مسابقه*\n\n👥 *بازیکنان:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎉 *${game.winner ? game.winner.username || game.winner.first_name : "یک نفر"}* برنده شد!\n\nممنون از مشارکتمان در بازی.`
           : game.game_status === "cancel"
-            ? `⚠️ *Match Cancelled*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\nThe lobby has been closed.`
-            : `🎲 *Ludo Friendly Match*\n\n👥 *Players:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎯 Waiting for ${maxPlayers - playersCount} more player${maxPlayers - playersCount > 1 ? "s" : ""} to join...`;
+            ? `⚠️ *بازی لغو شد*\n\n👥 *بازیکنان:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\nلابی بازی بسته شد.`
+            : `🎲 *بازی دوستانه منچ*\n\n👥 *بازیکنان:* ${playersCount}/${maxPlayers}\n\n${playersList}\n\n🎯 در انتظار ${maxPlayers - playersCount} بازیکن دیگر...`;
 
     const joinUrl = `https://t.me/LudoRushBot?startapp=game_${gameId}`;
 
@@ -163,7 +163,7 @@ const updateLobbyMessage = async (gameId) => {
             inline_keyboard: [
               [
                 {
-                  text: `Play Ludo`,
+                  text: `ورود به منچ`,
                   url: "https://t.me/LudoRushBot?startapp",
                 },
               ],
@@ -173,7 +173,7 @@ const updateLobbyMessage = async (gameId) => {
             inline_keyboard: [
               [
                 {
-                  text: `▶️ Join Game (${playersCount}/${maxPlayers})`,
+                  text: `▶️ پیوستن به بازی (${playersCount}/${maxPlayers})`,
                   url: joinUrl,
                 },
               ],

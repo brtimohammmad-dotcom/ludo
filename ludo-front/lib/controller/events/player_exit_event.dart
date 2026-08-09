@@ -1,5 +1,6 @@
 import 'package:ludo/controller/events/game_event.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
+import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/domain/model/state/server_game_state.dart';
 
 class PlayerExitEvent implements GameEvent {
@@ -16,6 +17,7 @@ class PlayerExitEvent implements GameEvent {
               : livePlayer.losses,
         ),
         serverState: serverState?.copyWith(gameStatus: GameStatus.exit),
+        gameStage: GameStage.joinStage
       ),
     );
     controller.stopLoading('cancel_game');
