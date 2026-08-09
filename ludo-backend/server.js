@@ -18,6 +18,23 @@ const backendUrl = process.env.BACKEND_URL;
 // 🟢 ساخت میدل‌ور استاندارد وبهوک تلگرام
 const handleTelegramWebhook = bot.webhookCallback("/webhook");
 
+// 🟢 تابع کمکی برای خواندن Body درخواست‌های POST در HTTP خام
+const parseJsonBody = (req) => {
+  return new Promise((resolve) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    req.on("end", () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (e) {
+        resolve({});
+      }
+    });
+  });
+};
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
@@ -45,9 +62,10 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ status: "ok" }));
   }
 
-  // 5️⃣ روت وبهوک تلگرام (اصلاح شده و تمیز)
+  // 5️⃣ روت وبهوک تلگرام
   if (pathname === "/webhook" && req.method === "POST") {
-    // سپردن کامل مدیریت ریسپانس و async به خود Telegraf
+    // خواندن Body و attach کردن آن به req برای Telegraf
+    req.body = await parseJsonBody(req);
     return handleTelegramWebhook(req, res);
   }
 
@@ -100,12 +118,13 @@ server.listen(port, "0.0.0.0", async () => {
 });
 
 process.once("SIGINT", () => {
-    const { stopAllBotDrivers } = require("./src/services/botService");
-    stopAllBotDrivers();
-    bot.stop("SIGINT");
+  const { stopAllBotDrivers } = require("./src/services/botService");
+  if (typeof stopAllBotDrivers === "function") stopAllBotDrivers();
+  bot.stop("SIGINT");
 });
+
 process.once("SIGTERM", () => {
-    const { stopAllBotDrivers } = require("./src/services/botService");
-    stopAllBotDrivers();
-    bot.stop("SIGTERM");
+  const { stopAllBotDrivers } = require("./src/services/botService");
+  if (typeof stopAllBotDrivers === "function") stopAllBotDrivers();
+  bot.stop("SIGTERM");
 });
