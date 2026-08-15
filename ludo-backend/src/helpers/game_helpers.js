@@ -14,9 +14,9 @@ async function finishGame(gameId, winnerPlayer, gameType, io) {
         winner: winnerPlayer,
     });
 
-     updateLobbyMessage(gameId);
-     console.log("winnerPlayer:")
-     console.log(winnerPlayer.telegram_id)
+    updateLobbyMessage(gameId);
+    console.log("winnerPlayer:")
+    console.log(winnerPlayer.telegram_id)
     await updateGameState(
         gameId,
         {
@@ -60,7 +60,10 @@ const sendError = (socket, callback, message) => {
 function validateGameAndPlayer(socket, callback) {
     const gameId = socket.data?.gameId;
     const telegramId = socket.data?.telegramId;
-
+    if (!telegramId) {
+        sendError(socket, callback, "No telegram ID!");
+        return {isValid: false};
+    }
     if (!gameId) {
         sendError(socket, callback, "No game found!");
         return {isValid: false};

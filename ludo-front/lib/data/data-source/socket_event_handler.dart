@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:telegram_web_app/telegram_web_app.dart';
 import 'socket_data_source.dart';
@@ -14,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-          initData = {"first_name": "rayan", "id": 7};
+        initData = {"first_name": "rayan", "id": 10};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -108,6 +109,19 @@ class SocketEventHandler {
       // اسم ایونت اصلاح شد به token_moved
       dataSource.onGameEventReceived?.call("token_moved", cleanData);
     });
+    socket.on("vpn_redeemed", (data) {
+      final cleanData = SocketUtils.convertToJSData(data);
+      debugPrint(cleanData.toString());
+
+      if (data != null &&
+          cleanData['success'] == true &&
+          cleanData['newConfig'] != null) {
+
+        dataSource.onGameEventReceived?.call("vpn_redeemed", cleanData);
+      } else {
+        debugPrint('Error: ${data?['message']}');
+      }
+    });
 
     socket.on("opponent_exit", (data) {
       final cleanData = SocketUtils.convertToJSData(data);
@@ -139,6 +153,4 @@ class SocketEventHandler {
       }
     });
   }
-
-
 }

@@ -37,6 +37,10 @@ class GameRepository {
     dataSource.rollDice(onAck: onAck);
   }
 
+  void redeemVpn(int gb, Function(dynamic response)? onAck) {
+    dataSource.redeemVpn(gb, onAck: onAck);
+  }
+
   void moveToken(Token liveToken, Function(dynamic response)? onAck) {
     dataSource.moveToken(liveToken, onAck: onAck);
   }

@@ -20,6 +20,7 @@ import 'package:ludo/controller/events/player_update_event.dart';
 import 'package:ludo/controller/events/player_joined_event.dart';
 import 'package:ludo/controller/events/reconnection_failed_event.dart';
 import 'package:ludo/controller/events/times_up_event.dart';
+import 'package:ludo/controller/events/vpn_redeemed.dart';
 
 class GameEventFactory {
   static GameEvent? create(String eventName, Map<String, dynamic> data) {
@@ -66,6 +67,8 @@ class GameEventFactory {
         return LeaderBoardListGetsEvent(data: data);
       case 'emoji_received':
         return EmojiReceivedEvent.fromJson(data);
+      case 'vpn_redeemed':
+        return VpnRedeemed.fromJson(data);
       default:
         return null;
     }

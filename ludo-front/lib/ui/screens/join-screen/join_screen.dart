@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
+import 'package:ludo/domain/model/state/game_state.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/floating_bottom_menu.dart';
-import 'package:ludo/ui/screens/join-screen/join_screen_body/coin_box.dart';
+import 'package:ludo/ui/screens/join-screen/join_screen_body/daily_reward_and_coin_box.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/game_selection_buttons.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/setting_icon.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen_body/user_profile_box.dart';
@@ -52,7 +53,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
   @override
   Widget build(BuildContext context) {
     final layout = JoinScreenLayout(context);
-    final gameState = ref.watch(gameControllerProvider);
+    final gameState = ref.read(gameControllerProvider);
     final currentPlayer = gameState?.livePlayer;
 
     ref.listen<bool>(
@@ -139,7 +140,7 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                       children: [
                         // سکه‌باکس
                         RepaintBoundary(
-                          child: CoinBox(boardSize: layout.boardSize),
+                          child: DailyRewardAndCoinBox(boardSize: layout.boardSize),
                         ),
 
                         // پروفایل
@@ -196,7 +197,13 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                         .read(globalLoadingProvider.notifier)
                         .start('leader_board_loading');
                   },
-                  onShopTap: () {},
+                  onShopTap: () {
+                    ref
+                        .read(gameControllerProvider.notifier)
+                        .updateState(
+                          gameState?.copyWith(gameStage: GameStage.shopScreen),
+                        );
+                  },
                 ),
               ),
             ),
@@ -206,4 +213,3 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     );
   }
 }
-

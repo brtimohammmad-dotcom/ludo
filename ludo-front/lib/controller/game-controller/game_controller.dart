@@ -3,6 +3,7 @@ import 'package:ludo/controller/active_emoji_notifier/active_emoji_notifier.dart
 import 'package:ludo/controller/events/game_event_factory.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/controller/leader_board/leader_board.dart';
+import 'package:ludo/domain/model/state/vpn_config.dart';
 import 'package:ludo/services/audio_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ludo/controller/handler/game_animation_manager.dart';
@@ -28,13 +29,13 @@ class GameController extends _$GameController {
   // Flags & Internal States
   bool isGameFinishedHandled = false;
   bool isMovingToken = false;
-
   VoidCallback? onFastPingGets;
   VoidCallback? onGameReady;
   VoidCallback? onGameStarted;
   VoidCallback? onInsufficientCoin;
   VoidCallback? onReconnectionFailed;
   VoidCallback? onConnect;
+  Function(VpnConfig subsribtionLink)? onVpnRedeemed;
 
   @override
   GameState? build() {
@@ -233,6 +234,17 @@ class GameController extends _$GameController {
 
   void playSfx(String assetName) {
     ref.read(audioServiceProvider.notifier).playSFX(assetName);
+  }
+
+  // -------------------------------------------------
+  // VPN / COIN
+  // -------------------------------------------------
+  void redeemVpn({required int gb}) {
+    _gameRepository.redeemVpn(gb, (response) {
+      if (response['success'] == false) {
+        stopLoading("redeem_vpn");
+      }
+    });
   }
 
   // -------------------------------------------------

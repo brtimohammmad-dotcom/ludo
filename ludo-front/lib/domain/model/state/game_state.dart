@@ -42,14 +42,20 @@ extension GameStateX on GameState? {
     return s.level.entryFee;
   }
 
-  int  winPrice() {
+  int winPrice() {
     final s = this!.serverState;
     if (s == null) return 0;
     return s.numberOfPlayers == 2 ? s.level.prize2P : s.level.prize4P;
   }
 }
 
-enum GameStage { connectionStage, joinStage, boardStage, leaderBoard }
+enum GameStage {
+  connectionStage,
+  joinStage,
+  boardStage,
+  leaderBoard,
+  shopScreen,
+}
 
 enum ConnectionStatus { disconnected, connecting, connected, reconnecting }
 

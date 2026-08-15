@@ -7,6 +7,7 @@ import 'package:ludo/services/asset_loader_service.dart';
 import 'package:ludo/ui/screens/board/board.dart';
 import 'package:ludo/ui/screens/join-screen/join_screen.dart';
 import 'package:ludo/ui/screens/leader_board_screen.dart';
+import 'package:ludo/ui/screens/shop/shop_screen.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_alert.dart';
 import 'package:ludo/ui/utils/alerts/reconnecting_failed_alert.dart';
 import 'package:ludo/ui/utils/alerts/show_animated_dialog.dart';
@@ -121,76 +122,78 @@ class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     // 🟢 ۱. ثبت همه Listenerها در بالاترین سطح build (بدون هیچ Return قبل از آن‌ها)
-    ref.listen<ConnectionStatus>(
-      gameControllerProvider.select((state) => state!.connectionStatus),
-          (previous, next) {
-        debugPrint(
-          "🔄 [Connection Event] Connection Status Changed: From $previous To $next",
+    ref.listen<
+      ConnectionStatus
+    >(gameControllerProvider.select((state) => state!.connectionStatus), (
+      previous,
+      next,
+    ) {
+      debugPrint(
+        "🔄 [Connection Event] Connection Status Changed: From $previous To $next",
+      );
+
+      // ۱. ورود به وضعیت تلاش برای اتصال مجدد (Reconnecting)
+      if (next == ConnectionStatus.reconnecting) {
+        if (!mounted) return;
+
+        if (_isAlertOpen && Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+          _isAlertOpen = false;
+        }
+        _isAlertOpen = true;
+
+        showAnimatedDialog(
+          context: context,
+          barrierDismissible: false,
+          child: const ReconnectingAlert(),
         );
+      }
+      // ۲. شکست قطعی تمام تلاش‌ها و رفتن به وضعیت Disconnected
+      else if (next == ConnectionStatus.disconnected) {
+        if (!mounted) return;
 
-        // ۱. ورود به وضعیت تلاش برای اتصال مجدد (Reconnecting)
-        if (next == ConnectionStatus.reconnecting) {
-          if (!mounted) return;
-
-          if (_isAlertOpen && Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-            _isAlertOpen = false;
-          }
-          _isAlertOpen = true;
-
-          showAnimatedDialog(
-            context: context,
-            barrierDismissible: false,
-            child: const ReconnectingAlert(),
-          );
+        if (_isAlertOpen && Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+          _isAlertOpen = false;
         }
-        // ۲. شکست قطعی تمام تلاش‌ها و رفتن به وضعیت Disconnected
-        else if (next == ConnectionStatus.disconnected) {
-          if (!mounted) return;
+        _isAlertOpen = true;
 
-          if (_isAlertOpen && Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-            _isAlertOpen = false;
-          }
-          _isAlertOpen = true;
+        showAnimatedDialog(
+          context: context,
+          barrierDismissible: false,
+          child: ReconnectingFailedAlert(
+            onReconnectPressed: () async {
+              if (!mounted) return;
 
-          showAnimatedDialog(
-            context: context,
-            barrierDismissible: false,
-            child: ReconnectingFailedAlert(
-              onReconnectPressed: () async {
-                if (!mounted) return;
+              if (_isAlertOpen && Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+                _isAlertOpen = false;
+              }
 
-                if (_isAlertOpen && Navigator.canPop(context)) {
-                  Navigator.of(context).pop();
-                  _isAlertOpen = false;
-                }
-
-                final controller = ref.read(gameControllerProvider.notifier);
-                controller.updateState(
-                  controller.currentGameState?.copyWith(
-                    connectionStatus: ConnectionStatus.reconnecting,
-                  ),
-                );
-                controller.resumeReconnection();
-              },
-            ),
-          );
+              final controller = ref.read(gameControllerProvider.notifier);
+              controller.updateState(
+                controller.currentGameState?.copyWith(
+                  connectionStatus: ConnectionStatus.reconnecting,
+                ),
+              );
+              controller.resumeReconnection();
+            },
+          ),
+        );
+      }
+      // ۳. اتصال با موفقیت برقرار یا بازیابی شد
+      else if (next == ConnectionStatus.connected) {
+        if (_isAlertOpen && Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+          _isAlertOpen = false;
         }
-        // ۳. اتصال با موفقیت برقرار یا بازیابی شد
-        else if (next == ConnectionStatus.connected) {
-          if (_isAlertOpen && Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-            _isAlertOpen = false;
-          }
-        }
-      },
-    );
+      }
+    });
 
     // مدیریت موزیک منو
     ref.listen<GameStage?>(
       gameControllerProvider.select((state) => state?.gameStage),
-          (previous, next) {
+      (previous, next) {
         if (next != null &&
             next != GameStage.joinStage &&
             next != GameStage.leaderBoard) {
@@ -251,6 +254,8 @@ class _HomeState extends ConsumerState<Home> {
         return const JoinScreen(key: ValueKey('join_stage'));
       case GameStage.leaderBoard:
         return const LeaderboardScreen(key: ValueKey('leaderboard_stage'));
+      case GameStage.shopScreen:
+        return const ShopScreen();
       default:
         return const Board(key: ValueKey('board_stage'));
     }

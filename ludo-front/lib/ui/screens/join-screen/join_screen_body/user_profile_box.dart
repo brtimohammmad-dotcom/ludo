@@ -20,7 +20,11 @@ class UserProfileBox extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        showAnimatedDialog(context: context, child: PlayerProfileAlert());
+        showAnimatedDialog(
+          context: context,
+          child: PlayerProfileAlert(),
+          barrierDismissible: true,
+        );
       },
       child: Container(
         height: 38,

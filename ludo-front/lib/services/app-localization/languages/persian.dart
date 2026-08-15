@@ -46,11 +46,36 @@ const Map<String, String> faIR = {
   'Back to Home': 'بازگشت به خانه',
   'Wins': 'برد',
   'Losses': 'باخت',
-  'Settings':'تنظیمات',
-  'Language':'زبان',
-  'Sound Effects':'صدا ها',
-  'On':'روشن',
-  'Off':'خاموش',
+  'Settings': 'تنظیمات',
+  'Language': 'زبان',
+  'Sound Effects': 'صدا ها',
+  'On': 'روشن',
+  'Off': 'خاموش',
+  'Your Subscriptions': 'سابسکریپشن های شما',
+  'No active subscription found': 'سابسکریپشن فعالی پیدا نشد',
+  'Days Availability': ' روز قابل استفاده',
+  'Days': 'روزه',
+  'Link copied to clipboard!': 'لینک در کلیپ بورد کپی شد!',
+  'Redeem Now': 'همین الان خرید کنید',
+  'Are you sure you want to exchange coins for this VPN plan?':
+      'آیا مطمئنید میخواهید سکه هایتان را با VPN معامله کنید؟',
+  'Confirm': 'تأیید',
+  'Not Enough Coins': 'سکه ناکافی',
+  'Buy Coins': 'خرید سکه',
+  'Redeem VPN': 'خرید VPN',
+  'GB': 'گیگ',
+  'Coins': 'سکه',
+  'Toman': 'تومان',
+  'Exchange your game coins for high-speed VPN subscription links':
+      'سکه هایتان را با لینک سابسکریپشن VPN پرسرعت معامله کنید',
+  'Your VPN subscription link is ready. Copy it and paste into your VPN client.':
+      'لینک سابسکریپشن vpn شما آماده است. آن را کپی کنید و در برنامه‌ی مدنظر خود بچسبانید.',
+  'VPN Purchased Successfully!': 'VPN با موفقیت خریداری شد!',
+  'Got it': 'گرفتم',
+  'Total Traffic:': 'میزان ترافیک:',
+  'Subscription URL:':'لینک سابسکریپشن',
+
+
   //------------------------------------
   // UNUSED
   //------------------------------------
@@ -66,4 +91,5 @@ const Map<String, String> faIR = {
   'pkg500MB': 'بسته ۵۰۰ مگابایت (۵,۰۰۰ سکه)',
   'pkg1GB': 'بسته ۱ گیگابایت (۱۰,۰۰۰ سکه)',
   'notEnoughCoins': 'سکه کافی نداری! بیشتر منچ بازی کن.',
+  'Confirm Exchange': 'تأیید معامله',
 };

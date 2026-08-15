@@ -97,7 +97,6 @@ class SocketDataSource {
         "gameLevel": gameLevel.name,
       },
       ack: (dynamic err, [dynamic response]) {
-
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -115,7 +114,6 @@ class SocketDataSource {
       "roll_dice",
       {},
       ack: (dynamic err, [dynamic response]) {
-
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -133,8 +131,7 @@ class SocketDataSource {
       "move_token",
       t.toJson(),
       ack: (dynamic err, [dynamic response]) {
-
-        if (response == null&&err==null) {
+        if (response == null && err == null) {
           onAck?.call({'success': false});
         } else {
           final cleanData = SocketUtils.convertToJSData(response);
@@ -151,7 +148,6 @@ class SocketDataSource {
       "exit_game",
       {},
       ack: (dynamic err, [dynamic response]) {
-
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -169,7 +165,23 @@ class SocketDataSource {
       "claim_daily_reward",
       {},
       ack: (dynamic err, [dynamic response]) {
+        if (response == null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
 
+  /// خرید vpn
+  void redeemVpn(int gb, {Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "redeem_vpn",
+      gb,
+      ack: (dynamic err, [dynamic response]) {
         if (response == null) {
           onAck?.call({'success': false});
         } else {
@@ -186,7 +198,6 @@ class SocketDataSource {
       "get_leader_board_list",
       {},
       ack: (dynamic err, [dynamic response]) {
-
         if (response == null) {
           // تایم‌اوت شد (سرور جواب نداد)
           onAck?.call({'success': false});

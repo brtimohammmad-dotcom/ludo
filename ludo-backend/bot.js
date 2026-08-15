@@ -5,7 +5,7 @@ const {
   getGameMessage,
 } = require("./src/models/gameMessageStore");
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const WEB_APP_URL = "https://ludo-tecb.onrender.com";
 const PHOTO_FILE_ID =
   "AgACAgIAAxkBAAMJamTPuwINIBC30twypUjsgBSFbDgAAmkgaxvCqylL-GzRmOLntngBAAMCAANzAAM9BA";

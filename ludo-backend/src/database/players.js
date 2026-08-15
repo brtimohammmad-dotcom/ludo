@@ -23,7 +23,25 @@ async function getOrCreatePlayer(telegramId, username) {
     throw error;
   }
 }
+async function updatePlayerFullInfo(telegramId, updateFields) {
+  const { data, error } = await supabase
+      .from("players")
+      .update(updateFields)
+      .eq("telegram_id", telegramId) // یا eq("id", telegramId) بر اساس ساختار جدول شما
+      .select()
+      .single();
 
+  if (error) {
+    console.error("[Database Full Update Error]:", error.message);
+    return null;
+  }
+  return data;
+}
+
+module.exports = {
+  getOrCreatePlayer,
+  updatePlayerFullInfo,
+};
 // تابع جدید: برای مواقعی که عکس کاربر منقضی شده و لینک جدید را در دیتابیس ذخیره می‌کنیم
 async function updatePlayerAvatar(telegramId, avatarUrl, lastUpdate) {
   try {
@@ -139,6 +157,26 @@ async function getPlayerRank(telegramId) {
     throw error;
   }
 }
+async function updatePlayerVpnInfo(telegramId, subscriptionUrl, remainingGb) {
+  const { data, error } = await supabase
+    .from("players")
+    .update({
+      subscription_url: subscriptionUrl,
+      remaining_gb: remainingGb,
+      vpn_updated_at: new Date().toISOString(),
+    })
+    .eq("telegram_id", telegramId) // یا هر ستونی که شناسه تلگرام در آن ذخیره می‌شود (مثلاً id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("[Database VPN Sync Error]:", error.message);
+    return null;
+  }
+  return data;
+}
+
+
 module.exports = {
   updatePlayerAvatar,
   getTopTenPlayers,
@@ -147,4 +185,6 @@ module.exports = {
   updateCoin,
   reduceMultiplePlayersCoin,
   getDailyRewardStreak,
+  updatePlayerVpnInfo,
+  updatePlayerFullInfo
 };

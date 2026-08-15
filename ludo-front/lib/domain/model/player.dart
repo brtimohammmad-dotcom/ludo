@@ -1,3 +1,4 @@
+import 'package:ludo/domain/model/state/vpn_config.dart';
 import 'package:ludo/domain/model/token.dart';
 
 enum PlayerStatus { online, offline }
@@ -15,6 +16,11 @@ class Player {
   final int wins;
   final int losses;
 
+  // 👈 فیلدهای جدید مربوط به VPN
+  final List<VpnConfig> vpnConfigs;
+  final int configCount;
+  final int maxAllowedConfigs;
+
   Player({
     required this.coin,
     required this.numberOfAbsences,
@@ -27,12 +33,19 @@ class Player {
     this.rewardStreak = 1,
     this.canClaimDailyReward = false,
     this.avatarUrl,
+    this.vpnConfigs = const [],
+    this.configCount = 0,
+    this.maxAllowedConfigs = 3,
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
+    var vpnList = json['vpn_configs'] as List? ?? [];
+    List<VpnConfig> parsedVpnConfigs =
+    vpnList.map((configJson) => VpnConfig.fromJson(configJson)).toList();
+
     return Player(
-      wins: json['wins'],
-      losses: json['losses'],
+      wins: json['wins'] ?? 0,
+      losses: json['losses'] ?? 0,
       avatarUrl: json['avatar_url'],
       coin: json['coin'] ?? 0,
       numberOfAbsences: json['number_of_absences'],
@@ -44,9 +57,13 @@ class Player {
       playerStatus: json['player_status'] == null
           ? null
           : PlayerStatus.values.byName(json['player_status']),
-
       rewardStreak: json['reward_streak'] ?? 1,
       canClaimDailyReward: json['can_claim_daily_reward'] ?? false,
+
+      // 👈 مقداردهی فیلدهای VPN
+      vpnConfigs: parsedVpnConfigs,
+      configCount: json['config_count'] ?? parsedVpnConfigs.length,
+      maxAllowedConfigs: json['max_allowed_configs'] ?? 3,
     );
   }
 
@@ -57,6 +74,9 @@ class Player {
     'reward_streak': rewardStreak,
     'can_claim_daily_reward': canClaimDailyReward,
     'avatar_url': avatarUrl,
+    'vpn_configs': vpnConfigs.map((v) => v.toJson()).toList(),
+    'config_count': configCount,
+    'max_allowed_configs': maxAllowedConfigs,
   };
 
   Player copyWith({
@@ -71,6 +91,9 @@ class Player {
     String? avatarUrl,
     int? wins,
     int? losses,
+    List<VpnConfig>? vpnConfigs,
+    int? configCount,
+    int? maxAllowedConfigs,
   }) {
     return Player(
       wins: wins ?? this.wins,
@@ -84,6 +107,9 @@ class Player {
       color: color ?? this.color,
       rewardStreak: rewardStreak ?? this.rewardStreak,
       canClaimDailyReward: canClaimDailyReward ?? this.canClaimDailyReward,
+      vpnConfigs: vpnConfigs ?? this.vpnConfigs,
+      configCount: configCount ?? this.configCount,
+      maxAllowedConfigs: maxAllowedConfigs ?? this.maxAllowedConfigs,
     );
   }
 }

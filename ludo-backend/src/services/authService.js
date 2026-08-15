@@ -1,8 +1,11 @@
-const { getOrCreatePlayer } = require("../database/players");
+const {
+  getOrCreatePlayer,
+  updatePlayerFullInfo,
+} = require("../database/players");
 const initialState = require("../models/initialState");
 const { getUserAvatarUrl } = require("../../bot");
-const { updatePlayerAvatar } = require("../database/players");
 const { uploadAvatarToSupabase } = require("../database/storage");
+const { getUserVpnConfigs } = require("../services/vpnService");
 
 async function handleAuth(initData, socket) {
   const isLocal = process.env.RENDER !== "true";
@@ -25,7 +28,7 @@ async function handleAuth(initData, socket) {
       user = initData;
     }
 
-    // ۱. گرفتن یا ساخت بازیکن در دیتابیس
+    // ۱. گرفتن یا ساخت اولیه بازیکن در دیتابیس
     let player = await getOrCreatePlayer(user.id, user.first_name);
     if (!player) {
       console.log("Player not found or database lag!");
@@ -34,48 +37,67 @@ async function handleAuth(initData, socket) {
       });
     }
 
-    // ۲. مدیریت و هماهنگ‌سازی عکس پروفایل (آواتار)
-    let avatarUrl = player.avatar_url;
     const now = new Date();
 
+    // -------------------------------------------------------------
+    // ۲. بررسی و به‌روزرسانی آواتار کاربر
+    // -------------------------------------------------------------
+    let avatarUrl = player.avatar_url;
     if (!isLocal) {
       const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
 
-      // اگر آواتار ندارد یا بیشتر از ۲۴ ساعت از آخرین آپدیت گذشته است
       if (
-        !player.avatar_url ||
-        !player.last_avatar_update ||
-        new Date(player.last_avatar_update) < oneDayAgo
+          !player.avatar_url ||
+          !player.last_avatar_update ||
+          new Date(player.last_avatar_update) < oneDayAgo
       ) {
         const telegramFileLink = await getUserAvatarUrl(user.id);
 
         if (telegramFileLink) {
           const supabaseAvatarUrl = await uploadAvatarToSupabase(
-            user.id,
-            telegramFileLink,
+              user.id,
+              telegramFileLink,
           );
           if (supabaseAvatarUrl) {
             avatarUrl = supabaseAvatarUrl;
-            player.avatar_url = avatarUrl;
-            player.last_avatar_update = now;
-
-            // آپدیت دیتابیس با لینک دائمی استوریج خودت
-            await updatePlayerAvatar(user.id, avatarUrl, now).catch((err) => {
-              console.error("[Database Avatar Sync Error]:", err.message);
+            await updatePlayerFullInfo(user.id, {
+              avatar_url: avatarUrl,
+              last_avatar_update: now,
             });
           }
-
-          // آپدیت آنی دیتابیس سوپابیس با لینک زنده تلگرام
-          await updatePlayerAvatar(user.id, avatarUrl, now).catch((err) => {
-            console.error("[Database Avatar Sync Error]:", err.message);
-          });
         }
       }
     } else {
       avatarUrl = player.avatar_url || "https://placeholder.com/avatar.png";
     }
 
-    // ذخیره در دیتای سوکت
+    // -------------------------------------------------------------
+    // ۳. دریافت لیست کامل کانفیگ‌های VPN مستقیماً از API
+    // -------------------------------------------------------------
+    const vpnData = await getUserVpnConfigs(user.id);
+
+    // -------------------------------------------------------------
+    // ۴. بررسی منطق جایزه روزانه
+    // -------------------------------------------------------------
+    const lastClaim = player.last_claim_date
+        ? new Date(player.last_claim_date)
+        : null;
+    let canClaimDailyReward = false;
+
+    if (!lastClaim) {
+      canClaimDailyReward = true;
+    } else {
+      const isSameDay =
+          now.getDate() === lastClaim.getDate() &&
+          now.getMonth() === lastClaim.getMonth() &&
+          now.getFullYear() === lastClaim.getFullYear();
+
+      canClaimDailyReward = !isSameDay;
+    }
+
+    // -------------------------------------------------------------
+    // ۵. ذخیره اطلاعات در حافظه سوکت
+    // -------------------------------------------------------------
     socket.data.telegramId = player.telegram_id;
     socket.data.firstName = player.username;
     socket.data.coin = player.coin;
@@ -84,35 +106,23 @@ async function handleAuth(initData, socket) {
     socket.data.avatarUrl = avatarUrl;
     socket.data.wins = player.wins;
     socket.data.losses = player.losses;
+    socket.data.canClaimDailyReward = canClaimDailyReward;
 
-    // ۳. بررسی منطق دیلی ریوارد
-    const lastClaim = socket.data.lastClaimDate
-      ? new Date(socket.data.lastClaimDate)
-      : null;
-    let canClaimDailyReward = false;
+    // ذخیره کامل دیتای VPN در سوکت
+    socket.data.vpnConfigs = vpnData.configs || [];
 
-    if (!lastClaim) {
-      canClaimDailyReward = true;
-    } else {
-      const isSameDay =
-        now.getDate() === lastClaim.getDate() &&
-        now.getMonth() === lastClaim.getMonth() &&
-        now.getFullYear() === lastClaim.getFullYear();
-
-      canClaimDailyReward = !isSameDay;
-    }
-
-    // الحاق آواتار و وضعیت جایزه روزانه به شیء نهایی پلیر جهت ارسال به فرانت
-    player = {
+    // -------------------------------------------------------------
+    // ۶. ارسال شیء نهایی یکپارچه به فلاتر
+    // -------------------------------------------------------------
+    const initialPayload = {
       ...player,
       avatar_url: avatarUrl,
       can_claim_daily_reward: canClaimDailyReward,
+      // لیست کامل همه کانفیگ‌ها و اطلاعات کلی برای فرانت‌‌اند
+      vpn_configs: vpnData.configs || [],
     };
 
-    socket.data.canClaimDailyReward = canClaimDailyReward;
-
-    // ارسال اطلاعات کامل (شامل لینک عکس جدید) به فلاتر
-    socket.emit("initial_player", player);
+    socket.emit("initial_player", initialPayload);
   } catch (err) {
     console.error("Auth error:", err.message || err);
   }
@@ -123,8 +133,8 @@ async function hasExistGame(player, socketId) {
 
   if (existingGame) {
     const currentPlayer = initialState.findPlayerInfoInGame(
-      existingGame.game_id,
-      player.telegram_id,
+        existingGame.game_id,
+        player.telegram_id,
     );
     if (currentPlayer && currentPlayer.player_status === "online") {
       currentPlayer.socketId = socketId;
