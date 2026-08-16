@@ -192,6 +192,22 @@ class SocketDataSource {
     );
   }
 
+  void claimWelcomeGift({Function(dynamic response)? onAck}) {
+    if (!isConnected) return;
+    _socket!.emitWithAck(
+      "claim_welcome_gift",
+      {},
+      ack: (dynamic err, [dynamic response]) {
+        if (response == null) {
+          onAck?.call({'success': false});
+        } else {
+          final cleanData = SocketUtils.convertToJSData(response);
+          onAck?.call(cleanData);
+        }
+      },
+    );
+  }
+
   void getLeaderBoardList({Function(dynamic response)? onAck}) {
     if (!isConnected) return;
     _socket!.emitWithAck(

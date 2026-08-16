@@ -12,6 +12,7 @@ const {
 } = require("../services/gameService");
 const {handleSendingEmoji} = require("../services/sendEmojiService.js");
 const {handleRedeemVpn} = require("../services/handle_redeem_vpn.js");
+const {handleClaimWelcomeGift} = require("../services/claim_welcome_gift");
 
 module.exports = (io) => {
     return async (socket) => {
@@ -49,6 +50,12 @@ module.exports = (io) => {
         });
         socket.on("redeem_vpn", (gb, callback) => {
             handleRedeemVpn(socket, gb, callback);
+        });
+        socket.on("redeem_vpn", (gb, callback) => {
+            handleRedeemVpn(socket, gb, callback);
+        });
+        socket.on("claim_welcome_gift", (gb, callback) => {
+            handleClaimWelcomeGift(socket, callback);
         });
 
         socket.on("exit_game", async (data, callback) => {

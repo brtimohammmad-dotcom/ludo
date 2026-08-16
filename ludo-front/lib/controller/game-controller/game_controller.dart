@@ -36,6 +36,7 @@ class GameController extends _$GameController {
   VoidCallback? onReconnectionFailed;
   VoidCallback? onConnect;
   Function(VpnConfig subsribtionLink)? onVpnRedeemed;
+  Function(VpnConfig subsribtionLink)? onWelcomeGiftClaimed;
 
   @override
   GameState? build() {
@@ -243,6 +244,13 @@ class GameController extends _$GameController {
     _gameRepository.redeemVpn(gb, (response) {
       if (response['success'] == false) {
         stopLoading("redeem_vpn");
+      }
+    });
+  }
+  void claimWelcomeGift(){
+    _gameRepository.claimWelcomeGift( (response) {
+      if (response['success'] == false) {
+        stopLoading("claim_welcome_gift");
       }
     });
   }

@@ -510,9 +510,12 @@ class CompiledApp {
       _1664: (ms, c) =>
       setTimeout(() => dartInstance.exports.$invokeCallback(c),ms),
       _1665: (handle) => clearTimeout(handle),
+      _1666: (ms, c) =>
+      setInterval(() => dartInstance.exports.$invokeCallback(c), ms),
       _1667: (handle) => clearInterval(handle),
       _1668: (c) =>
       queueMicrotask(() => dartInstance.exports.$invokeCallback(c)),
+      _1669: () => Date.now(),
       _1670: () => new Error().stack,
       _1671: (exn) => {
         let stackString = exn.toString();

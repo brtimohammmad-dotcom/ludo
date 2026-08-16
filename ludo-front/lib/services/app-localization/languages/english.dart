@@ -73,6 +73,15 @@ const Map<String, String> enUS = {
   'Got it':'Got it',
   'Total Traffic:':'Total Traffic:',
   'Subscription URL:':'Subscription URL:',
+  "Welcome Gift!": "Welcome Gift!",
+  "Free High-Speed Traffic": "Free High-Speed Traffic",
+  "Enjoy 1GB free VPN traffic as a welcome gift.": "Enjoy 1GB free VPN traffic as a welcome gift.",
+  "Claim 1GB Free": "Claim 1GB Free",
+  "Maybe Later": "Maybe Later",
+  "Congratulations!": "Congratulations!",
+  "Your 1GB free config is ready!": "Your 1GB free config is ready!",
+  "Copy Config": "Copy Config",
+  "Copied!": "Copied!",
 
   //----------------------------------------------------
   // UNUSED

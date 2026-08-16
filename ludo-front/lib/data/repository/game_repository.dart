@@ -41,6 +41,10 @@ class GameRepository {
     dataSource.redeemVpn(gb, onAck: onAck);
   }
 
+  void claimWelcomeGift(Function(dynamic response)? onAck) {
+    dataSource.claimWelcomeGift( onAck: onAck);
+  }
+
   void moveToken(Token liveToken, Function(dynamic response)? onAck) {
     dataSource.moveToken(liveToken, onAck: onAck);
   }

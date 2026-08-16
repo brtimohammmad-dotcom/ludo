@@ -74,6 +74,15 @@ const Map<String, String> faIR = {
   'Got it': 'گرفتم',
   'Total Traffic:': 'میزان ترافیک:',
   'Subscription URL:':'لینک سابسکریپشن',
+  "Welcome Gift!": "هدیه خوش‌آمدگویی!",
+  "Free High-Speed Traffic": "ترافیک پرسرعت رایگان",
+  "Enjoy 1GB free VPN traffic as a welcome gift.": "از ۱ گیگابایت ترافیک رایگان به عنوان هدیه ورود لذت ببرید.",
+  "Claim 1GB Free": "دریافت ۱ گیگابایت رایگان",
+  "Maybe Later": "شاید بعداً",
+  "Congratulations!": "تبریک!",
+  "Your 1GB free config is ready!": "کانفیگ ۱ گیگابایت رایگان شما آماده است!",
+  "Copy Config": "کپی کانفیگ",
+  "Copied!": "کپی شد!",
 
 
   //------------------------------------

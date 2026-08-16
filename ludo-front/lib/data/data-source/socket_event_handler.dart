@@ -15,7 +15,7 @@ class SocketEventHandler {
     socket.on("player_not_authorized", (_) {
       dynamic initData;
       if (Uri.base.host == "localhost") {
-        initData = {"first_name": "rayan", "id": 10};
+        initData = {"first_name": "rayan", "id": 266};
       } else {
         if (TelegramWebApp.instance.isSupported) {
           TelegramWebApp.instance.ready();
@@ -111,13 +111,22 @@ class SocketEventHandler {
     });
     socket.on("vpn_redeemed", (data) {
       final cleanData = SocketUtils.convertToJSData(data);
-      debugPrint(cleanData.toString());
 
       if (data != null &&
           cleanData['success'] == true &&
           cleanData['newConfig'] != null) {
-
         dataSource.onGameEventReceived?.call("vpn_redeemed", cleanData);
+      } else {
+        debugPrint('Error: ${data?['message']}');
+      }
+    });
+    socket.on("welcome_gift_claimed", (data) {
+      final cleanData = SocketUtils.convertToJSData(data);
+
+      if (data != null &&
+          cleanData['success'] == true &&
+          cleanData['newConfig'] != null) {
+        dataSource.onGameEventReceived?.call("welcome_gift_claimed", cleanData);
       } else {
         debugPrint('Error: ${data?['message']}');
       }

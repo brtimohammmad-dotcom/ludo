@@ -1,24 +1,96 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo/controller/game-controller/game_controller.dart';
 import 'package:ludo/controller/global-loading/global_loading_provider.dart';
 import 'package:ludo/services/app-localization/app_localizations_service.dart';
 
-class DailyRewardDialog extends ConsumerWidget {
+class DailyRewardDialog extends ConsumerStatefulWidget {
   final double boardSize;
 
   const DailyRewardDialog({super.key, required this.boardSize});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DailyRewardDialog> createState() => _DailyRewardDialogState();
+}
+
+class _DailyRewardDialogState extends ConsumerState<DailyRewardDialog> {
+  Timer? _timer;
+  Duration _timeUntilReset = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    _updateRemainingTime();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        _updateRemainingTime();
+      }
+    });
+  }
+
+  void _updateRemainingTime() {
+    final now = DateTime.now().toUtc();
+    final nextResetUtc = DateTime.utc(now.year, now.month, now.day + 1);
+    setState(() {
+      _timeUntilReset = nextResetUtc.difference(now);
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final livePlayer = ref.watch(
       gameControllerProvider.select((state) => state?.livePlayer),
     );
     final isLoading = ref.watch(globalLoadingProvider).contains('daily_reward');
-    final canClaim = livePlayer?.canClaimDailyReward;
-    final List<int> rewards = [100, 150, 200, 250, 300, 350, 500];
 
-    final double base = boardSize * 0.85;
+    // ۱. بررسی امکان دریافت بر اساس تاریخ UTC
+    final nowUtc = DateTime.now().toUtc();
+    final todayUtcStr = nowUtc.toIso8601String().split('T')[0];
+
+    String? lastClaimUtcStr;
+    if (livePlayer?.lastClaimDate != null) {
+      lastClaimUtcStr = DateTime.parse(livePlayer!.lastClaimDate!)
+          .toUtc()
+          .toIso8601String()
+          .split('T')[0];
+    }
+
+    final bool canClaim = lastClaimUtcStr != todayUtcStr;
+
+    // ۲. محاسبه استریک فعلی با لحاظ نمودن احتمال سوختن استریک در کلاینت
+    int currentStreak = livePlayer?.rewardStreak ?? 1;
+    if (lastClaimUtcStr != null) {
+      final lastClaimDate = DateTime.parse(lastClaimUtcStr);
+      final todayDate = DateTime.parse(todayUtcStr);
+      final diffInDays = todayDate.difference(lastClaimDate).inDays;
+
+      // اگر بیش از ۱ روز تقویمی UTC گذشته باشد، استریک سوخته است
+      if (diffInDays > 1) {
+        currentStreak = 1;
+      }
+    }
+
+    final List<int> rewards = [100, 150, 200, 250, 300, 350, 500];
+    final double base = widget.boardSize * 0.85;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -77,6 +149,7 @@ class DailyRewardDialog extends ConsumerWidget {
             ),
             SizedBox(height: base * 0.05),
 
+            // شبکه روزها (GridView)
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -90,9 +163,8 @@ class DailyRewardDialog extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final int dayNumber = index + 1;
 
-                final isClaimed = dayNumber < (livePlayer?.rewardStreak ?? 1);
-                final isCurrent =
-                    dayNumber == livePlayer?.rewardStreak && (canClaim ?? false);
+                final isClaimed = dayNumber < currentStreak;
+                final isCurrent = dayNumber == currentStreak && canClaim;
 
                 return Container(
                   decoration: BoxDecoration(
@@ -140,9 +212,9 @@ class DailyRewardDialog extends ConsumerWidget {
             ),
             SizedBox(height: base * 0.06),
 
-            // دکمه کلیم جایزه
+            // دکمه کلیم جایزه یا تایمر
             GestureDetector(
-              onTap: ((canClaim ?? false) && !isLoading)
+              onTap: (canClaim && !isLoading)
                   ? () {
                 ref
                     .read(globalLoadingProvider.notifier)
@@ -156,7 +228,7 @@ class DailyRewardDialog extends ConsumerWidget {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: base * 0.035),
                 decoration: BoxDecoration(
-                  gradient: ((canClaim ?? false) && !isLoading)
+                  gradient: (canClaim && !isLoading)
                       ? const LinearGradient(
                     colors: [
                       Color(0xFF8B5A2B),
@@ -168,7 +240,7 @@ class DailyRewardDialog extends ConsumerWidget {
                   ),
                   borderRadius: BorderRadius.circular(base * 0.035),
                   border: Border.all(
-                    color: (canClaim ?? false)
+                    color: canClaim
                         ? const Color(0xFFFFD700)
                         : Colors.transparent,
                     width: 1.5,
@@ -185,14 +257,14 @@ class DailyRewardDialog extends ConsumerWidget {
                     ),
                   )
                       : Text(
-                    (canClaim ?? false)
+                    canClaim
                         ? context.tr('Claim Reward')
-                        : context.tr('Already Claimed'),
+                        : '${context.tr('Next Reward In')} ${_formatDuration(_timeUntilReset)}',
                     style: TextStyle(
-                      color: (canClaim ?? false)
+                      color: canClaim
                           ? const Color(0xFFFFF8DC)
-                          : Colors.grey.shade500,
-                      fontSize: base * 0.04,
+                          : Colors.grey.shade400,
+                      fontSize: base * 0.038,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

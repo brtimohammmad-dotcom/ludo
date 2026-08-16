@@ -12,11 +12,13 @@ class Player {
   final int? numberOfAbsences;
   final int rewardStreak;
   final bool canClaimDailyReward;
+  final String? lastClaimDate;
+  final bool welcomeGift;
   String? avatarUrl;
   final int wins;
   final int losses;
 
-  // 👈 فیلدهای جدید مربوط به VPN
+  // فیلدهای VPN
   final List<VpnConfig> vpnConfigs;
   final int configCount;
   final int maxAllowedConfigs;
@@ -32,6 +34,8 @@ class Player {
     required this.losses,
     this.rewardStreak = 1,
     this.canClaimDailyReward = false,
+    this.lastClaimDate,
+    this.welcomeGift = false, // 👈 مقداردهی اولیه
     this.avatarUrl,
     this.vpnConfigs = const [],
     this.configCount = 0,
@@ -59,8 +63,10 @@ class Player {
           : PlayerStatus.values.byName(json['player_status']),
       rewardStreak: json['reward_streak'] ?? 1,
       canClaimDailyReward: json['can_claim_daily_reward'] ?? false,
+      lastClaimDate: json['last_claim_date'],
+      welcomeGift: json['welcome_gift'] ?? false, // 👈 دریافت از JSON
 
-      // 👈 مقداردهی فیلدهای VPN
+      // مقداردهی فیلدهای VPN
       vpnConfigs: parsedVpnConfigs,
       configCount: json['config_count'] ?? parsedVpnConfigs.length,
       maxAllowedConfigs: json['max_allowed_configs'] ?? 3,
@@ -73,6 +79,8 @@ class Player {
     'coin': coin,
     'reward_streak': rewardStreak,
     'can_claim_daily_reward': canClaimDailyReward,
+    'last_claim_date': lastClaimDate,
+    'welcome_gift': welcomeGift, // 👈 تبدیل به JSON
     'avatar_url': avatarUrl,
     'vpn_configs': vpnConfigs.map((v) => v.toJson()).toList(),
     'config_count': configCount,
@@ -88,6 +96,8 @@ class Player {
     int? numberOfAbsences,
     int? rewardStreak,
     bool? canClaimDailyReward,
+    String? lastClaimDate,
+    bool? welcomeGift, // 👈 اضافه شد به copyWith
     String? avatarUrl,
     int? wins,
     int? losses,
@@ -107,6 +117,8 @@ class Player {
       color: color ?? this.color,
       rewardStreak: rewardStreak ?? this.rewardStreak,
       canClaimDailyReward: canClaimDailyReward ?? this.canClaimDailyReward,
+      lastClaimDate: lastClaimDate ?? this.lastClaimDate,
+      welcomeGift: welcomeGift ?? this.welcomeGift, // 👈 پشتیبانی در copyWith
       vpnConfigs: vpnConfigs ?? this.vpnConfigs,
       configCount: configCount ?? this.configCount,
       maxAllowedConfigs: maxAllowedConfigs ?? this.maxAllowedConfigs,
