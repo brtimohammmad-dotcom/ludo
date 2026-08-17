@@ -24,6 +24,7 @@ class WelcomeGiftClaimedEvent extends GameEvent {
     controller.updateState(
       gameState?.copyWith(
         livePlayer: livePlayer?.copyWith(
+          welcomeGift: true,
           vpnConfigs: [...currentConfigs, vpnConfig],
         ),
       ),

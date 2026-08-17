@@ -33425,7 +33425,7 @@ if((r.a&32)!==0!==a){q.c=s.Gl(r.ajK(a))
 A.iv(null,null)
 A.iv(q.go,q.id)}},
 ahn(a){var s=this,r=s.c,q=r.a
-if((q.a&16)!==0!==a){s.c=r.Gl(q.akh(a,a))
+if((q.a&16)!==0!==a){s.c=r.Gl(q.akg(a,a))
 A.iv(null,null)
 A.iv(s.go,s.id)}},
 qE(a,b,c,d){var s=new A.a9I(this,c,b,a,d),r=$.lB
@@ -35476,7 +35476,7 @@ if(d!=null)s=d?s|16:s&4294967279
 if(c!=null)s=c?s|32:s&4294967263
 return new A.zy(s)},
 ajK(a){return this.Gt(null,null,a,null)},
-akh(a,b){return this.Gt(null,a,null,b)},
+akg(a,b){return this.Gt(null,a,null,b)},
 ajF(a){return this.Gt(a,null,null,null)}}
 A.TT.prototype={$iaHc:1}
 A.TQ.prototype={}
@@ -36981,7 +36981,7 @@ if(r==null)return a
 s=this.e$
 if(s==null)s=this.e$=a.c-r.length
 if(s<0)return a
-return a.akg(s,s+r.length)}}
+return a.akf(s,s+r.length)}}
 A.a9w.prototype={
 ajw(a){var s
 if(this.gkn()==null)return
@@ -37127,8 +37127,8 @@ A.vH.prototype={}
 A.jp.prototype={
 UV(a,b,c,d){var s=this,r=a==null?s.b:a,q=d==null?s.c:d,p=b==null?s.d:b,o=c==null?s.e:c
 return new A.jp(s.a,Math.max(0,r),Math.max(0,q),p,o)},
-akg(a,b){return this.UV(null,a,b,null)},
-akd(a,b){return this.UV(a,null,null,b)},
+akf(a,b){return this.UV(null,a,b,null)},
+akc(a,b){return this.UV(a,null,null,b)},
 Zr(){var s=this
 return A.aa(["text",s.a,"selectionBase",s.b,"selectionExtent",s.c,"composingBase",s.d,"composingExtent",s.e],t.N,t.z)},
 gq(a){var s=this
@@ -37381,7 +37381,7 @@ r===$&&A.a()
 if(r.z)return a
 r=a.c
 if(a.b===r)return a
-s=a.akd(r,r)
+s=a.akc(r,r)
 r=this.c
 r.toString
 s.eY(r)
@@ -44423,7 +44423,7 @@ $2$isRefresh(a,b){return this.B(this,A.A("call","$2$isRefresh",0,[a,b],["isRefre
 $1$override(a){return this.B(this,A.A("call","$1$override",0,[a],["override"],0))},
 $1$connectionStatus(a){return this.B(this,A.A("call","$1$connectionStatus",0,[a],["connectionStatus"],0))},
 $1$type(a){return this.B(this,A.A("call","$1$type",0,[a],["type"],0))},
-$1$vpnConfigs(a){return this.B(this,A.A("call","$1$vpnConfigs",0,[a],["vpnConfigs"],0))},
+$2$vpnConfigs$welcomeGift(a,b){return this.B(this,A.A("call","$2$vpnConfigs$welcomeGift",0,[a,b],["vpnConfigs","welcomeGift"],0))},
 $1$livePlayer(a){return this.B(this,A.A("call","$1$livePlayer",0,[a],["livePlayer"],0))},
 $2$coin$vpnConfigs(a,b){return this.B(this,A.A("call","$2$coin$vpnConfigs",0,[a,b],["coin","vpnConfigs"],0))},
 $1$red(a){return this.B(this,A.A("call","$1$red",0,[a],["red"],0))},
@@ -51807,9 +51807,9 @@ q=k.b
 a6=d.alo(new A.av(c2,i.a,q,i.b))
 if(j!=null){a7=a6.b9(j)
 c2=a7.a
-if(isFinite(c2))a6=a6.akk(c2,c2)
+if(isFinite(c2))a6=a6.akj(c2,c2)
 c2=a7.b
-if(isFinite(c2))a6=a6.akj(c2,c2)}a8=a1.b
+if(isFinite(c2))a6=a6.aki(c2,c2)}a8=a1.b
 c2=a1.a
 a9=Math.max(0,c2)
 b0=l.u(0,new A.W(a9,a8,a9,a8)).cl(0,B.at,B.I7)
@@ -55118,12 +55118,12 @@ A.H4.prototype={
 bZ(a){return this.f!==a.f}}
 A.amB.prototype={}
 A.Tl.prototype={
-ake(a,b){var s=a==null?this.a:a
+akd(a,b){var s=a==null?this.a:a
 return new A.Tl(s,b==null?this.b:b)}}
 A.a1A.prototype={
 T8(a,b,c){var s=this
 s.b=c==null?s.b:c
-s.c=s.c.ake(a,b)
+s.c=s.c.akd(a,b)
 s.aJ()},
 T7(a){return this.T8(null,null,a)},
 ahG(a,b){return this.T8(a,b,null)}}
@@ -56983,7 +56983,7 @@ k=d==null?h.aE:d
 j=g==null?h.cF:g
 i=a1==null?h.aA:a1
 return A.aHq(h.p2,h.d,n,h.a,h.p4,h.R8,h.RG,h.rx,h.ry,h.bK,h.to,h.as,h.at,h.x1,h.x2,h.xr,h.y1,r,h.b,h.y2,h.aZ,h.bP,h.ba,h.ay,h.ch,h.E,h.Y,h.W,m,h.a2,h.c,l,k,h.CW,h.cx,h.cy,h.db,h.O,q,h.br,s,h.Z,h.f,h.ae,h.aa,h.cP,h.dm,h.ca,h.cb,j,h.r,h.w,h.cs,h.dx,h.dy,h.fr,h.k3,p,h.cG,h.cQ,h.fx,h.x,h.e0,h.dA,h.fy,h.aB,h.go,h.F,h.lp,h.id,h.y,h.lq,h.kq,i,h.hj,o,h.D,h.a1,h.am,h.p1,h.k1,!0,h.Q)},
-akn(a,b){var s=null
+akm(a,b){var s=null
 return this.UN(s,s,s,s,s,s,s,a,s,b)},
 ajM(a){var s=null
 return this.UN(s,s,s,s,a,s,s,s,s,s)},
@@ -57083,7 +57083,7 @@ $0(){return this.a.p3},
 $S:256}
 A.arG.prototype={
 $0(){var s=this.a,r=this.b
-return s.akn(r.bA(s.k4),r.bA(s.ok))},
+return s.akm(r.bA(s.k4),r.bA(s.ok))},
 $S:257}
 A.arD.prototype={
 $2(a,b){return new A.bE(a,b.asA(this.a.c.i(0,a),this.b),t.sw)},
@@ -57114,7 +57114,7 @@ r.m(0,a,s)
 return s}}
 A.mg.prototype={
 alo(a){var s=this.a,r=this.b,q=A.D(a.a+new A.j(s,r).a8(0,4).a,0,a.b)
-return a.akl(A.D(a.c+new A.j(s,r).a8(0,4).b,0,a.d),q)},
+return a.akk(A.D(a.c+new A.j(s,r).a8(0,4).b,0,a.d),q)},
 k(a,b){if(b==null)return!1
 if(J.X(b)!==A.t(this))return!1
 return b instanceof A.mg&&b.a===this.a&&b.b===this.b},
@@ -58010,7 +58010,7 @@ a4(a){return this},
 lh(a,b,c,d){var s=this,r=b==null?s.a:b,q=d==null?s.b:d,p=c==null?s.c:c
 return new A.W(r,q,p,a==null?s.d:a)},
 UO(a,b){return this.lh(a,null,null,b)},
-aki(a,b){return this.lh(null,a,b,null)},
+akh(a,b){return this.lh(null,a,b,null)},
 Gm(a){return this.lh(a,null,null,null)}}
 A.hn.prototype={
 gha(){return this.a},
@@ -59800,9 +59800,9 @@ l(){this.sb3(null)}}
 A.av.prototype={
 Gu(a,b,c,d){var s=this,r=d==null?s.a:d,q=b==null?s.b:b,p=c==null?s.c:c
 return new A.av(r,q,p,a==null?s.d:a)},
-akk(a,b){return this.Gu(null,a,null,b)},
-akj(a,b){return this.Gu(a,null,b,null)},
-akl(a,b){return this.Gu(null,null,a,b)},
+akj(a,b){return this.Gu(null,a,null,b)},
+aki(a,b){return this.Gu(a,null,b,null)},
+akk(a,b){return this.Gu(null,null,a,b)},
 GK(a){var s=this,r=a.gf3(),q=a.gci()+a.gcv(),p=Math.max(0,s.a-r),o=Math.max(0,s.c-q)
 return new A.av(p,Math.max(p,s.b-r),o,Math.max(o,s.d-q))},
 ob(a){var s=this,r=a.a,q=a.b,p=a.c,o=a.d
@@ -74025,7 +74025,7 @@ p=a==null?o.cy:a
 return new A.Bi(o.a,o.b,n,o.e,q,s,r,o.x,!1,o.z,o.Q,o.as,o.at,o.ax,o.ay,o.ch,o.CW,o.cx,p,!1,o.dx,o.dy,o.fr,o.fx,o.fy)},
 yw(a){var s=null
 return this.qe(s,a,s,s,s)},
-ako(a,b){return this.qe(null,null,null,a,b)},
+akn(a,b){return this.qe(null,null,null,a,b)},
 US(a,b){return this.qe(null,a,null,null,b)},
 akz(a,b,c,d){return this.qe(a,b,null,c,d)},
 aky(a,b,c){return this.qe(null,a,null,b,c)},
@@ -74048,7 +74048,7 @@ q=q.lh(l,p,n,o)
 p=b?0:r
 o=d?0:r
 n=c?0:r
-return s.ako(m.lh(0,p,n,o),q)},
+return s.akn(m.lh(0,p,n,o),q)},
 aqD(a){return this.Z1(a,!1,!1,!1)},
 aqE(a,b,c,d){var s=this,r=s.r.lh(0,0,0,0)
 return s.US(r,s.w.lh(0,0,0,0))},
@@ -78894,7 +78894,7 @@ K(a){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f=h.U0(a),e=h.dx
 if(e==null){s=A.dd(a,g)
 if(s!=null){r=s.r
 q=r.UO(0,0)
-p=r.aki(0,0)
+p=r.akh(0,0)
 r=h.c===B.aP
 e=r?p:q
 f=A.nv(f,s.yw(r?q:p))}}o=A.b([e!=null?new A.Uk(e,f,g):f],t.p)
@@ -85941,7 +85941,7 @@ A.arN.prototype={
 $1(a){var s,r,q=J.aVJ(this.a.c,new A.arL(a),new A.arM())
 if(q!=null){s=J.b9(q)
 r=A.fV(B.tR,A.bP(s.i(q,"playerStatus")))
-return a.akm(A.dq(s.i(q,"number_of_absences")),r)}return a},
+return a.akl(A.dq(s.i(q,"number_of_absences")),r)}return a},
 $S:72}
 A.arL.prototype={
 $1(a){var s=J.dP(a,"color"),r=this.a.d
@@ -85961,7 +85961,7 @@ p.push(n)
 s=o.c
 n=this.b.i(0,n.b)
 n.toString
-p=o.akf(s-n,p)}p=q.Go(p)}a.sI(p)
+p=o.ake(s-n,p)}p=q.Go(p)}a.sI(p)
 A.c0(a).aC($.di().gaP(),t.a).hB("redeem_vpn")
 p=a.dx
 if(p!=null)p.$1(this.a)}}
@@ -85972,7 +85972,7 @@ if(q)q=s
 else{if(o)q=s
 else{q=A.Y(n,t.XU)
 q.push(this.a)
-q=p.akc(q)}q=r.Go(q)}a.sI(q)
+q=p.ako(q,!0)}q=r.Go(q)}a.sI(q)
 A.c0(a).aC($.eV().gaP(),t.B).fZ(u.r)
 A.c0(a).aC($.di().gaP(),t.a).hB("welcome_gift")
 q=a.dy
@@ -86654,28 +86654,28 @@ A.dY.prototype={
 kK(){var s=this,r=s.at,q=A.a1(r).h("a8<1,b2<n,@>>")
 r=A.Y(new A.a8(r,new A.ajD(),q),q.h("aC.E"))
 return A.aa(["username",s.b,"telegram_id",s.a,"coin",s.c,"reward_streak",s.r,"can_claim_daily_reward",s.w,"last_claim_date",s.x,"welcome_gift",s.y,"avatar_url",s.z,"vpn_configs",r,"config_count",s.ax,"max_allowed_configs",s.ay],t.N,t.z)},
-kk(a,b,c,d,e,f,g,h,a0,a1){var s=this,r=a1==null?s.Q:a1,q=d==null?s.as:d,p=b==null?s.c:b,o=e==null?s.f:e,n=f==null?s.e:f,m=h==null?s.a:h,l=c==null?s.d:c,k=g==null?s.r:g,j=a==null?s.w:a,i=a0==null?s.at:a0
-return A.aGV(s.z,j,p,l,s.ax,s.x,q,s.ay,o,n,k,m,s.b,i,s.y,r)},
-akc(a){var s=null
-return this.kk(s,s,s,s,s,s,s,s,a,s)},
-akf(a,b){var s=null
-return this.kk(s,a,s,s,s,s,s,s,b,s)},
+kk(a,b,c,d,e,f,g,a0,a1,a2,a3){var s=this,r=a3==null?s.Q:a3,q=d==null?s.as:d,p=b==null?s.c:b,o=e==null?s.f:e,n=f==null?s.e:f,m=a0==null?s.a:a0,l=c==null?s.d:c,k=g==null?s.r:g,j=a==null?s.w:a,i=a2==null?s.y:a2,h=a1==null?s.at:a1
+return A.aGV(s.z,j,p,l,s.ax,s.x,q,s.ay,o,n,k,m,s.b,h,i,r)},
+ako(a,b){var s=null
+return this.kk(s,s,s,s,s,s,s,s,a,b,s)},
+ake(a,b){var s=null
+return this.kk(s,a,s,s,s,s,s,s,b,s,s)},
 akq(a,b,c){var s=null
-return this.kk(a,b,s,s,s,s,c,s,s,s)},
+return this.kk(a,b,s,s,s,s,c,s,s,s,s)},
 Gp(a){var s=null
-return this.kk(s,s,s,a,s,s,s,s,s,s)},
-akm(a,b){var s=null
-return this.kk(s,s,s,s,a,b,s,s,s,s)},
+return this.kk(s,s,s,a,s,s,s,s,s,s,s)},
+akl(a,b){var s=null
+return this.kk(s,s,s,s,a,b,s,s,s,s,s)},
 UH(a){var s=null
-return this.kk(s,s,s,s,s,a,s,s,s,s)},
+return this.kk(s,s,s,s,s,a,s,s,s,s,s)},
 UP(a,b){var s=null
-return this.kk(s,a,s,s,s,s,s,s,s,b)},
+return this.kk(s,a,s,s,s,s,s,s,s,s,b)},
 aks(a,b,c){var s=null
-return this.kk(s,s,a,s,b,c,s,s,s,s)},
+return this.kk(s,s,a,s,b,c,s,s,s,s,s)},
 akr(a,b,c){var s=null
-return this.kk(a,s,s,s,s,s,b,c,s,s)},
+return this.kk(a,s,s,s,s,s,b,c,s,s,s)},
 UB(a){var s=null
-return this.kk(s,a,s,s,s,s,s,s,s,s)}}
+return this.kk(s,a,s,s,s,s,s,s,s,s,s)}}
 A.ajC.prototype={
 $1(a){return A.aHx(a)},
 $S:535}
