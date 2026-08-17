@@ -79,8 +79,8 @@ const Map<String, String> enUS = {
   "Claim 1GB Free": "Claim 1GB Free",
   "Maybe Later": "Maybe Later",
   "Congratulations!": "Congratulations!",
-  "Your 1GB free config is ready!": "Your 1GB free config is ready!",
-  "Copy Config": "Copy Config",
+  "Your 1GB free subscription link is ready!": "Your 1GB free subscription link is ready!",
+  "Copy subscription link": "Copy subscription link",
   "Copied!": "Copied!",
 
   //----------------------------------------------------

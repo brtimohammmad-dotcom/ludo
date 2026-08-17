@@ -80,8 +80,8 @@ const Map<String, String> faIR = {
   "Claim 1GB Free": "دریافت ۱ گیگابایت رایگان",
   "Maybe Later": "شاید بعداً",
   "Congratulations!": "تبریک!",
-  "Your 1GB free config is ready!": "کانفیگ ۱ گیگابایت رایگان شما آماده است!",
-  "Copy Config": "کپی کانفیگ",
+  "Your 1GB free subscription link is ready!": "سابسکریپشن لینک ۱ گیگابایت رایگان شما آماده است!",
+  "Copy subscription link": "کپی سابسکریپشن لینک",
   "Copied!": "کپی شد!",
 
 

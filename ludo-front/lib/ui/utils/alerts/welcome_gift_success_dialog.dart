@@ -120,7 +120,7 @@ class _WelcomeGiftSuccessDialogState
 
                 // توضیحات
                 Text(
-                  context.tr('Your 1GB free config is ready!'),
+                  context.tr('Your 1GB free subscription link is ready!'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: const Color(0xFFD4AF37),
@@ -206,7 +206,7 @@ class _WelcomeGiftSuccessDialogState
                       child: Text(
                         _isCopied
                             ? context.tr('Copied!')
-                            : context.tr('Copy Config'),
+                            : context.tr('Copy subscription link'),
                         style: TextStyle(
                           color: const Color(0xFFFFF8DC),
                           fontSize: base * 0.04,
