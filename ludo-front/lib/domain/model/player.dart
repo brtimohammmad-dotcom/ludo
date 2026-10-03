@@ -35,7 +35,7 @@ class Player {
     this.rewardStreak = 1,
     this.canClaimDailyReward = false,
     this.lastClaimDate,
-    this.welcomeGift = false, // 👈 مقداردهی اولیه
+    this.welcomeGift = true, // 👈 مقداردهی اولیه
     this.avatarUrl,
     this.vpnConfigs = const [],
     this.configCount = 0,
@@ -64,7 +64,7 @@ class Player {
       rewardStreak: json['reward_streak'] ?? 1,
       canClaimDailyReward: json['can_claim_daily_reward'] ?? false,
       lastClaimDate: json['last_claim_date'],
-      welcomeGift: json['welcome_gift'] ?? false, // 👈 دریافت از JSON
+      welcomeGift: json['welcome_gift'] ?? true, // 👈 دریافت از JSON
 
       // مقداردهی فیلدهای VPN
       vpnConfigs: parsedVpnConfigs,

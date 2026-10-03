@@ -66,26 +66,6 @@ class JoinScreenHandler {
         ),
       );
     };
-    //
-    //   if (gameController.currentGameState?.livePlayer?.canClaimDailyReward ==
-    //       true) {
-    //     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //       if (!isMounted()) return;
-    //
-    //       final livePlayer = gameController.currentGameState?.livePlayer;
-    //       if (livePlayer == null) return;
-    //
-    //       final screenWidth = MediaQuery.of(context).size.width;
-    //       final screenHeight = MediaQuery.of(context).size.height;
-    //       final double boardSize = (screenWidth < screenHeight
-    //           ? screenWidth
-    //           : screenHeight * 0.86);
-    //       showDialog(
-    //         context: context,
-    //         barrierDismissible: false,
-    //         builder: (context) => DailyRewardDialog(boardSize: boardSize),
-    //       );
-    //     });
 
     if (gameController.currentGameState?.livePlayer?.welcomeGift == false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
