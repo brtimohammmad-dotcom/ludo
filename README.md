@@ -104,4 +104,15 @@ Ludo Rush is built as a Telegram Mini App, allowing players to launch and play t
 
 **Bot:** [@LudoRushBot](https://t.me/LudoRushBot)
 
+## 🚀 Project Highlights
+
+- Real-time multiplayer gameplay using Socket.IO and WebSocket communication
+- Server-side game logic and game state management
+- Real-time matchmaking for global and private games
+- Automatic bot players for filling empty slots in global matches
+- Telegram Mini App integration and Telegram user authentication
+- Persistent player and game data using Supabase
+- Game state recovery after temporary connection loss
+- Cross-platform Flutter application
+
 
