@@ -4,6 +4,7 @@
   <img width="30%" alt="game over" src="https://github.com/user-attachments/assets/e332674e-f5f2-4bef-96b7-ce4543e13eac" />
   <img width="30%" alt="waiting for player" src="https://github.com/user-attachments/assets/9ca61ca4-c6b8-45cf-83b1-304cdc4b6b9f" />
 </p>
+
 ## ✨ Features
 
 ### 🌍 Global Multiplayer
@@ -65,5 +66,42 @@ Recover the current game state when a player reconnects after a temporary connec
 
 </p>
 
+## 🏗️ Architecture
+
+Ludo Rush uses a client-server architecture designed for real-time multiplayer gameplay.
+
+```text
+┌─────────────────────────┐
+│    Flutter Frontend     │
+│      Telegram Mini App  │
+└────────────┬────────────┘
+             │
+             │ Socket.IO
+             │ WebSocket
+             ▼
+┌─────────────────────────┐
+│      Node.js Backend    │
+│                         │
+│  • Game Logic           │
+│  • Matchmaking          │
+│  • Bot Players          │
+│  • Authentication       │
+│  • Game State Management│
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│         Supabase        │
+│                         │
+│  • Player Data          │
+│  • Game Data            │
+│  • Persistent Data      │
+└─────────────────────────┘
+```
+## 📱 Telegram Mini App
+Ludo Rush is built as a Telegram Mini App, allowing players to launch and play the game directly inside Telegram without installing a separate application.
+### 🤖 Telegram Bot
+
+**Bot:** [@LudoRushBot](https://t.me/LudoRushBot)
 
 
