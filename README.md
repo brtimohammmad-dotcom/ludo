@@ -20,8 +20,8 @@ Choose from different game tables and join an available match based on the selec
 ### 👥 Play with Friends
 Create a private game and invite friends to play together through Telegram.
 <p align="center">
-  <img width="30%" alt="play with friend mode" src="https://github.com/user-attachments/assets/664fdf92-9d66-4e39-a8a2-43c07227105c"/>
-    <img width="30%" alt="waiting for friends" src="https://github.com/user-attachments/assets/e83f6522-84ed-4b84-83bb-e446b742ab4b"/>
+  <img width="30%" alt="play with friend mode" src="https://github.com/user-attachments/assets/664fdf92-9d66-4e39-a8a2-43c07227105c" />
+  <img width="30%" alt="waiting for friends" src="https://github.com/user-attachments/assets/e83f6522-84ed-4b84-83bb-e446b742ab4b" />
 </p>
 
 ### 🤖 Automatic Bot Players
@@ -41,30 +41,38 @@ Send stickers during gameplay to interact and communicate with other players.
 Players can claim daily rewards and earn coins for their account.
 
 <p align="center">
-  <img width="30%" alt="daily rewards" src="https://github.com/user-attachments/assets/b40e89bb-cd51-4ae0-8a9a-509fef0f0061"/>
+  <img width="30%" alt="daily rewards" src="https://github.com/user-attachments/assets/b40e89bb-cd51-4ae0-8a9a-509fef0f0061" />
 </p>
 
 ### 🏆 Leaderboard
 Compete with other players and track rankings based on collected coins.
 
 <p align="center">
-  <img width="30%" alt="leader board" src="https://github.com/user-attachments/assets/a823a22f-1fd1-4b86-af0a-94f1cde13c0a"/>
+  <img width="30%" alt="leader board" src="https://github.com/user-attachments/assets/a823a22f-1fd1-4b86-af0a-94f1cde13c0a" />
 </p>
 
 ### 👤 Telegram Profile Integration
 Display Telegram profile information, including the player's profile picture and username, directly in the game.
 <p align="center">
-  <img width="30%" alt="profile" src="https://github.com/user-attachments/assets/68ba730a-d498-4adb-b2a1-6077457c05d7"/>
+  <img width="30%" alt="profile" src="https://github.com/user-attachments/assets/68ba730a-d498-4adb-b2a1-6077457c05d7" />
 </p>
 
 ### 🔄 Game State Recovery
 Recover the current game state when a player reconnects after a temporary connection loss.
 
 <p align="center">
-  <img width="30%" alt="reconnecting" src="https://github.com/user-attachments/assets/05d6cb9f-578d-4a29-aec4-5b708a8e7077"/>
-    <img width="30%" alt="disconnected" src="https://github.com/user-attachments/assets/00e81989-b0fe-4245-bd46-7eac2606ccfb"/>
-
+  <img width="30%" alt="reconnecting" src="https://github.com/user-attachments/assets/05d6cb9f-578d-4a29-aec4-5b708a8e7077" />
+  <img width="30%" alt="disconnected" src="https://github.com/user-attachments/assets/00e81989-b0fe-4245-bd46-7eac2606ccfb" />
 </p>
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Flutter, Dart, Flutter Web, Telegram Mini Apps
+- **State Management:** Riverpod
+- **Backend:** Node.js, Socket.IO, WebSocket
+- **Database:** Supabase
+- **Deployment:** Render
+- **Architecture:** Clean Architecture, Object-Oriented Programming (OOP)
 
 ## 🏗️ Architecture
 
@@ -98,8 +106,10 @@ Ludo Rush uses a client-server architecture designed for real-time multiplayer g
 │  • Persistent Data      │
 └─────────────────────────┘
 ```
+
 ## 📱 Telegram Mini App
 Ludo Rush is built as a Telegram Mini App, allowing players to launch and play the game directly inside Telegram without installing a separate application.
+
 ### 🤖 Telegram Bot
 
 **Bot:** [@LudoRushBot](https://t.me/LudoRushBot)
@@ -113,6 +123,5 @@ Ludo Rush is built as a Telegram Mini App, allowing players to launch and play t
 - Telegram Mini App integration and Telegram user authentication
 - Persistent player and game data using Supabase
 - Game state recovery after temporary connection loss
+- State management using Riverpod
 - Cross-platform Flutter application
-
-
